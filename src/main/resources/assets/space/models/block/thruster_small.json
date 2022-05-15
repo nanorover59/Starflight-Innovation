@@ -1,0 +1,110 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "hopper_inside": "minecraft:block/hopper_inside",
+        "anvil": "minecraft:block/anvil",
+        "iron_block": "minecraft:block/iron_block",
+        "particle": "#iron_block"
+    },
+    "display": {
+        "gui": {
+            "rotation": [ 30, 45, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 0.625, 0.625, 0.625 ]
+        },
+        "ground": {
+            "rotation": [ 0, 0, 0 ],
+            "translation": [ 0, 3, 0 ],
+            "scale": [ 0.25, 0.25, 0.25 ]
+        },
+        "fixed": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1, 1, 1 ]
+        },
+        "head": {
+            "rotation": [ 0, 180, 0 ],
+            "translation": [ 0, 0, 0 ],
+            "scale": [ 1, 1, 1 ]
+        },
+        "firstperson_righthand": {
+            "rotation": [ 0, 315, 0 ],
+            "translation": [ 0, 2.5, 0 ],
+            "scale": [ 0.4, 0.4, 0.4 ]
+        },
+        "thirdperson_righthand": {
+            "rotation": [ 75, 315, 0 ],
+            "translation": [ 0, 2.5, 0 ],
+            "scale": [ 0.375, 0.375, 0.375 ]
+        }
+    },
+    "elements": [
+        {
+            "from": [ 1, 0, 1 ], 
+            "to": [ 15, 4, 15 ], 
+            "faces": {
+                "north": { "texture": "#iron_block", "uv": [ 0, 0, 14, 4 ] },
+                "east": { "texture": "#iron_block", "uv": [ 0, 0, 14, 4 ] },
+                "south": { "texture": "#iron_block", "uv": [ 0, 0, 14, 4 ] },
+                "west": { "texture": "#iron_block", "uv": [ 0, 0, 14, 4 ] },
+                "up": { "texture": "#iron_block", "uv": [ 0, 0, 14, 14 ] },
+                "down": { "texture": "#hopper_inside", "uv": [ 1, 1, 15, 15 ] }
+            }
+        },
+        {
+            "from": [ 2, 4, 2 ], 
+            "to": [ 14, 7, 14 ], 
+            "faces": {
+                "north": { "texture": "#iron_block", "uv": [ 0, 0, 12, 3 ] },
+                "east": { "texture": "#iron_block", "uv": [ 0, 0, 12, 3 ] },
+                "south": { "texture": "#iron_block", "uv": [ 0, 0, 12, 3 ] },
+                "west": { "texture": "#iron_block", "uv": [ 0, 0, 12, 3 ] },
+                "up": { "texture": "#iron_block", "uv": [ 0, 0, 12, 12 ] }
+            }
+        },
+        {
+            "from": [ 3, 7, 3 ], 
+            "to": [ 13, 9, 13 ], 
+            "faces": {
+                "north": { "texture": "#iron_block", "uv": [ 0, 0, 10, 2 ] },
+                "east": { "texture": "#iron_block", "uv": [ 0, 0, 10, 2 ] },
+                "south": { "texture": "#iron_block", "uv": [ 0, 0, 10, 2 ] },
+                "west": { "texture": "#iron_block", "uv": [ 0, 0, 10, 2 ] },
+                "up": { "texture": "#iron_block", "uv": [ 0, 0, 10, 10 ] }
+            }
+        },
+        {
+            "from": [ 4, 9, 4 ], 
+            "to": [ 12, 11, 12 ], 
+            "faces": {
+                "north": { "texture": "#iron_block", "uv": [ 0, 0, 8, 2 ] },
+                "east": { "texture": "#iron_block", "uv": [ 0, 0, 8, 2 ] },
+                "south": { "texture": "#iron_block", "uv": [ 0, 0, 8, 2 ] },
+                "west": { "texture": "#iron_block", "uv": [ 0, 0, 8, 2 ] },
+                "up": { "texture": "#iron_block", "uv": [ 0, 0, 8, 8 ] }
+            }
+        },
+        {
+            "from": [ 5, 11, 5 ], 
+            "to": [ 11, 12, 11 ], 
+            "faces": {
+                "north": { "texture": "#iron_block", "uv": [ 0, 0, 6, 1 ] },
+                "east": { "texture": "#iron_block", "uv": [ 0, 0, 6, 1 ] },
+                "south": { "texture": "#iron_block", "uv": [ 0, 0, 6, 1 ] },
+                "west": { "texture": "#iron_block", "uv": [ 0, 0, 6, 1 ] }
+            }
+        },
+        {
+            "from": [ 3, 12, 3 ], 
+            "to": [ 13, 16, 13 ], 
+            "faces": {
+                "north": { "texture": "#anvil", "uv": [ 0, 0, 10, 4 ] },
+                "east": { "texture": "#anvil", "uv": [ 0, 0, 10, 4 ] },
+                "south": { "texture": "#anvil", "uv": [ 0, 0, 10, 4 ] },
+                "west": { "texture": "#anvil", "uv": [ 0, 0, 10, 4 ] },
+                "up": { "texture": "#anvil", "uv": [ 0, 0, 10, 10 ] },
+                "down": { "texture": "#anvil", "uv": [ 0, 0, 10, 10 ] }
+            }
+        }
+    ]
+}

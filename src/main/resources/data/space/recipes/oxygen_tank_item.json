@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ba ",
+        "a a",
+        " a "
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "minecraft:stone_button"
+        }
+    },
+    "result": {
+        "item": "space:oxygen_tank_item",
+        "count": 1
+    }
+}

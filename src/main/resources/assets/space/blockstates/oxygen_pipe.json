@@ -1,0 +1,64 @@
+{
+  "multipart": [
+	{
+      "apply": {
+        "model": "space:block/oxygen_pipe_center",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_north",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_east",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_south",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_west",
+        "uvlock": true
+      }
+    },
+	{
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_up",
+        "uvlock": true
+      }
+    },
+	{
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "space:block/oxygen_pipe_down",
+        "uvlock": true
+      }
+    }
+  ]
+}

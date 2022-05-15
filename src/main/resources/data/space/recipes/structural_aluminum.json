@@ -1,0 +1,8 @@
+{
+    "type": "minecraft:stonecutting",
+    "ingredient": {
+        "item": "space:aluminum_block"
+    },
+    "result": "space:structural_aluminum",
+    "count": 9
+}

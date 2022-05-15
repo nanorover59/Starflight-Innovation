@@ -1,0 +1,29 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bab",
+        "ced",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "space:copper_cable"
+        },
+        "c": {
+            "item": "space:oxygen_pipe"
+        },
+        "d": {
+            "item": "space:hydrogen_pipe"
+        },
+        "e": {
+            "item": "minecraft:bucket"
+        }
+    },
+    "result": {
+        "item": "space:electrolyzer",
+        "count": 1
+    }
+}

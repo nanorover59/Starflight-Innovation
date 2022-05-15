@@ -1,0 +1,33 @@
+{
+  "replace": false,
+  "values": [
+    "space:aluminum_block",
+    "space:structural_aluminum",
+    "space:riveted_aluminum",
+    "space:bauxite_ore",
+    "space:deepslate_bauxite_ore",
+    "space:bauxite_block",
+    "space:sulfur_ore",
+    "space:deepslate_sulfur_ore",
+    "space:sulfur_block",
+    "space:planetarium",
+    "space:stirling_engine",
+    "space:electric_furnace",
+    "space:solar_panel",
+    "space:battery",
+    "space:oxygen_tank",
+    "space:hydrogen_tank",
+    "space:oxygen_inlet_valve",
+    "space:oxygen_outlet_valve",
+    "space:hydrogen_inlet_valve",
+    "space:hydrogen_outlet_valve",
+    "space:vent",
+    "space:electrolyzer",
+    "space:oxygen_dispenser",
+    "space:atmosphere_generator",
+    "space:airlock_door",
+    "space:airlock_trapdoor",
+    "space:rocket_controller",
+    "space:thruster_small"
+  ]
+}

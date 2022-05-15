@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:rubber"
+    ]
+  },
+  "criteria": {
+    "has_rubber_resin": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:rubber_resin"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:rubber"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_rubber_resin",
+      "has_the_recipe"
+    ]
+  ]
+}

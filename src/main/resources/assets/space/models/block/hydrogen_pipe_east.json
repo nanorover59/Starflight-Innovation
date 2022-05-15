@@ -1,0 +1,21 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "hydrogen_pipe": "space:block/hydrogen_pipe",
+        "particle": "#hydrogen_pipe"
+    },
+    "elements": [
+        {
+            "from": [ 10, 6, 6 ], 
+            "to": [ 16, 10, 10 ], 
+            "faces": {
+                "north": { "texture": "#hydrogen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "east": { "texture": "#hydrogen_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "south": { "texture": "#hydrogen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "west": { "texture": "#hydrogen_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "up": { "texture": "#hydrogen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "down": { "texture": "#hydrogen_pipe", "uv": [ 4, 0, 10, 4 ] }
+            }
+        }
+    ]
+}

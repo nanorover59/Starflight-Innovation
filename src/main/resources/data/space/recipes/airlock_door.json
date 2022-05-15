@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "ba",
+        "aa",
+        "aa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "minecraft:glass_pane"
+        }
+    },
+    "result": {
+        "item": "space:airlock_door",
+        "count": 2
+    }
+}

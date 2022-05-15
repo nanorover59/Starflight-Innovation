@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/planetarium_top",
+    "front": "space:block/aluminum_machine",
+    "side": "space:block/aluminum_machine"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:purple_dye"
+    },
+    {
+      "item": "minecraft:compass"
+    },
+    {
+      "item": "space:substrate"
+    }
+  ],
+  "result": {
+    "item": "space:arrival_card",
+    "count": 1
+  }
+}

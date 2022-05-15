@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:glass"
+    },
+    {
+      "item": "minecraft:lapis_lazuli"
+    },
+    {
+      "item": "space:substrate"
+    }
+  ],
+  "result": {
+    "item": "space:solar_cell",
+    "count": 9
+  }
+}

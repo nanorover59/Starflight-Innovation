@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:structural_aluminum"
+    ]
+  },
+  "criteria": {
+    "has_aluminum_block": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:aluminum_block"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:structural_aluminum"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_aluminum_block",
+      "has_the_recipe"
+    ]
+  ]
+}

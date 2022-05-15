@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,rubber_sap=false": {
+      "model": "space:block/tree_tap",
+      "y": 90
+    },
+    "facing=east,rubber_sap=true": {
+      "model": "space:block/tree_tap_rubber",
+      "y": 90
+    },
+    "facing=north,rubber_sap=false": {
+      "model": "space:block/tree_tap"
+    },
+    "facing=north,rubber_sap=true": {
+      "model": "space:block/tree_tap_rubber"
+    },
+    "facing=south,rubber_sap=false": {
+      "model": "space:block/tree_tap",
+      "y": 180
+    },
+    "facing=south,rubber_sap=true": {
+      "model": "space:block/tree_tap_rubber",
+      "y": 180
+    },
+    "facing=west,rubber_sap=false": {
+      "model": "space:block/tree_tap",
+      "y": 270
+    },
+    "facing=west,rubber_sap=true": {
+      "model": "space:block/tree_tap_rubber",
+      "y": 270
+    }
+  }
+}

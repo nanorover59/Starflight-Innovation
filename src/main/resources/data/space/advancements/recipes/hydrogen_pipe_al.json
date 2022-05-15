@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:hydrogen_pipe_al"
+    ]
+  },
+  "criteria": {
+    "has_hydrogen_pipe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:hydrogen_pipe"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:hydrogen_pipe_al"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_hydrogen_pipe",
+      "has_the_recipe"
+    ]
+  ]
+}

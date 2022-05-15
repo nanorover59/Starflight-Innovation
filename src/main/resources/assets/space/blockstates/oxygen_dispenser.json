@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "space:block/oxygen_dispenser",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "space:block/oxygen_dispenser",
+      "y": 0
+    },
+    "facing=south": {
+      "model": "space:block/oxygen_dispenser",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "space:block/oxygen_dispenser",
+      "y": 270
+    }
+  }
+}

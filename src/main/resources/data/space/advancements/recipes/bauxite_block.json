@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:bauxite_block"
+    ]
+  },
+  "criteria": {
+    "has_bauxite": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:bauxite"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:bauxite_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_bauxite",
+      "has_the_recipe"
+    ]
+  ]
+}

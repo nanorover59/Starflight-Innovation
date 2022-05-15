@@ -1,0 +1,21 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "oxygen_pipe": "space:block/oxygen_pipe",
+        "particle": "#oxygen_pipe"
+    },
+    "elements": [
+        {
+            "from": [ 10, 6, 6 ], 
+            "to": [ 16, 10, 10 ], 
+            "faces": {
+                "north": { "texture": "#oxygen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "east": { "texture": "#oxygen_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "south": { "texture": "#oxygen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "west": { "texture": "#oxygen_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "up": { "texture": "#oxygen_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "down": { "texture": "#oxygen_pipe", "uv": [ 4, 0, 10, 4 ] }
+            }
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "black_concrete": "minecraft:block/gray_concrete",
+        "particle": "#black_concrete"
+    },
+    "elements": [
+        {
+            "from": [ 5, 5, 5 ], 
+            "to": [ 11, 11, 11 ], 
+            "faces": {
+                "north": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] },
+                "east": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] },
+                "south": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] },
+                "west": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] },
+                "up": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] },
+                "down": { "texture": "#black_concrete", "uv": [ 0, 0, 6, 6 ] }
+            }
+        }
+    ]
+}

@@ -1,0 +1,91 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "rubber_sap": "space:block/rubber_sap",
+        "cauldron_inner": "minecraft:block/cauldron_inner",
+        "particle": "#rubber_sap"
+    },
+    "elements": [
+        {
+            "from": [ 4, 0, 8 ], 
+            "to": [ 12, 1, 16 ], 
+            "faces": {
+                "north": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ] },
+                "east": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ] },
+                "south": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 8 ], "rotation": 180 },
+                "down": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 8 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 4, 1, 15 ], 
+            "to": [ 12, 9, 16 ], 
+            "faces": {
+                "north": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 8 ] },
+                "east": { "texture": "#cauldron_inner", "uv": [ 2, 0, 3, 8 ] },
+                "south": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 8 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 8 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 4, 1, 8 ], 
+            "to": [ 12, 7, 9 ], 
+            "faces": {
+                "north": { "texture": "#cauldron_inner", "uv": [ 5, 1, 13, 7 ] },
+                "east": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 6 ] },
+                "south": { "texture": "#cauldron_inner", "uv": [ 4, 0, 12, 6 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 6 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 8, 1 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 4, 1, 9 ], 
+            "to": [ 5, 7, 15 ], 
+            "faces": {
+                "east": { "texture": "#cauldron_inner", "uv": [ 2, 0, 8, 6 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 11, 1, 16, 7 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 6 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 11, 1, 9 ], 
+            "to": [ 12, 7, 15 ], 
+            "faces": {
+                "east": { "texture": "#cauldron_inner", "uv": [ 0, 2, 6, 8 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 6, 6 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 6 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 6, 9, 15 ], 
+            "to": [ 10, 11, 16 ], 
+            "faces": {
+                "north": { "texture": "#cauldron_inner", "uv": [ 0, 0, 4, 2 ] },
+                "east": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 2 ] },
+                "south": { "texture": "#cauldron_inner", "uv": [ 0, 0, 4, 2 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 1, 2 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 0, 0, 4, 1 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 7, 9, 12 ], 
+            "to": [ 9, 10, 15 ], 
+            "faces": {
+                "north": { "texture": "#cauldron_inner", "uv": [ 8, 4, 10, 5 ] },
+                "east": { "texture": "#cauldron_inner", "uv": [ 0, 0, 3, 1 ] },
+                "west": { "texture": "#cauldron_inner", "uv": [ 0, 0, 3, 1 ] },
+                "up": { "texture": "#cauldron_inner", "uv": [ 4, 3, 6, 6 ], "rotation": 180 },
+                "down": { "texture": "#cauldron_inner", "uv": [ 0, 0, 2, 3 ], "rotation": 180 }
+            }
+        },
+        {
+            "from": [ 5, 2, 9 ], 
+            "to": [ 11, 7, 15 ], 
+            "faces": {
+                "up": { "texture": "#rubber_sap", "uv": [ 4, 4, 10, 10 ], "rotation": 180 }
+            }
+        }
+    ]
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "space:regolith",
+    "space:balsaltic_regolith",
+    "space:icy_regolith",
+    "space:dry_snow_block"
+  ]
+}

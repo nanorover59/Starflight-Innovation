@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:oxygen_inlet_valve"
+    ]
+  },
+  "criteria": {
+    "has_oxygen_pipe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:oxygen_pipe"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:oxygen_inlet_valve"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_oxygen_pipe",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:solar_panel"
+    ]
+  },
+  "criteria": {
+    "has_solar_cell": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:solar_cell"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:solar_panel"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_solar_cell",
+      "has_the_recipe"
+    ]
+  ]
+}

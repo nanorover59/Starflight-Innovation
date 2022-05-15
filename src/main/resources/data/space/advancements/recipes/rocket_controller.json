@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:rocket_controller"
+    ]
+  },
+  "criteria": {
+    "has_control_unit": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:control_unit"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:rocket_controller"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_control_unit",
+      "has_the_recipe"
+    ]
+  ]
+}

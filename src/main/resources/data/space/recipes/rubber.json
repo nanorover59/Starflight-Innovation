@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "space:rubber_resin"
+  },
+  "result": "space:rubber",
+  "experience": 0.6,
+  "cookingtime": 200
+}

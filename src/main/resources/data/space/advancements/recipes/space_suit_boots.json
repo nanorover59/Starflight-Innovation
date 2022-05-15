@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:space_suit_boots"
+    ]
+  },
+  "criteria": {
+    "has_fabric": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:reinforced_fabric"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:space_suit_boots"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_fabric",
+      "has_the_recipe"
+    ]
+  ]
+}

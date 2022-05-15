@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "space:block/solar_panel_top",
+    "bottom": "space:block/riveted_aluminum",
+    "side": "space:block/solar_panel_side"
+  }
+}

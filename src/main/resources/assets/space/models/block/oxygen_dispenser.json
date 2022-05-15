@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/riveted_aluminum",
+    "front": "space:block/oxygen_dispenser",
+    "side": "space:block/riveted_aluminum"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "id": "space",
+  "version": "1.0.0",
+
+  "name": "Project Starflight",
+  "description": "Finally, there is a sequel to The Space Age Mod!",
+  "authors": [
+    "nanorover59"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": ""
+  },
+
+  "license": "CC0-1.0",
+  "icon": "assets/space/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "space.StarflightMod"
+    ],
+    "client": [ 
+      "space.client.StarflightModClient"
+    ]
+  },
+  "mixins": [
+    "space.mixins.json"
+  ],
+
+  "depends": {
+    "fabricloader": ">=0.11.3",
+    "fabric": "*",
+    "minecraft": "1.18.2",
+    "java": ">=17"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}

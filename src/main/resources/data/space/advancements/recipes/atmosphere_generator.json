@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:atmosphere_generator"
+    ]
+  },
+  "criteria": {
+    "has_vent": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:vent"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:atmosphere_generator"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_vent",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/iron_machine",
+    "front": "space:block/stirling_engine_front",
+    "side": "space:block/iron_machine"
+  }
+}

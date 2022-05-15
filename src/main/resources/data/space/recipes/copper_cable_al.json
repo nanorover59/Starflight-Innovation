@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:copper_cable"
+    },
+    {
+      "item": "space:riveted_aluminum"
+    }
+  ],
+  "result": {
+    "item": "space:copper_cable_al",
+    "count": 1
+  }
+}

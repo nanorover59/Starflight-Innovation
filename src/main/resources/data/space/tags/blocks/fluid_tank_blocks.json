@@ -1,0 +1,16 @@
+{
+    "replace": false,
+    "values": [
+        "space:hydrogen_tank",
+        "space:oxygen_tank",
+        "space:hydrogen_inlet_valve",
+        "space:hydrogen_outlet_valve",
+        "space:oxygen_inlet_valve",
+        "space:oxygen_outlet_valve",
+        "space:aluminum_block",
+        "space:structural_aluminum",
+        "space:riveted_aluminum",
+        "minecraft:iron_block",
+        "minecraft:gold_block"
+    ]
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:arrival_card"
+    ]
+  },
+  "criteria": {
+    "has_substrate": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:substrate"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:arrival_card"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_substrate",
+      "has_the_recipe"
+    ]
+  ]
+}

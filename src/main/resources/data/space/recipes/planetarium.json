@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aba",
+        "aca",
+        "ada"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "minecraft:tinted_glass"
+        },
+        "c": {
+            "item": "minecraft:diamond"
+        },
+        "d": {
+            "item": "space:control_unit"
+        }
+    },
+    "result": {
+        "item": "space:planetarium",
+        "count": 1
+    }
+}

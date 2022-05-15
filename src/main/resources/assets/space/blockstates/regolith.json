@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/regolith"
+      },
+      {
+        "model": "space:block/regolith",
+        "y": 90
+      },
+      {
+        "model": "space:block/regolith",
+        "y": 180
+      },
+      {
+        "model": "space:block/regolith",
+        "y": 270
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "aaa",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:sulfur"
+        }
+    },
+    "result": {
+        "item": "space:sulfur_block",
+        "count": 1
+    }
+}

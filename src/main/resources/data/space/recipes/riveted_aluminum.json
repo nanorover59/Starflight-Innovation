@@ -1,0 +1,8 @@
+{
+    "type": "minecraft:stonecutting",
+    "ingredient": {
+        "item": "space:structural_aluminum"
+    },
+    "result": "space:riveted_aluminum",
+    "count": 1
+}

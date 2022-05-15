@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:sulfur_from_smelting_deepslate_sulfur_ore"
+    ]
+  },
+  "criteria": {
+    "has_deepslate_sulfur_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:deepslate_sulfur_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:sulfur_from_smelting_deepslate_sulfur_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_deepslate_sulfur_ore",
+      "has_the_recipe"
+    ]
+  ]
+}

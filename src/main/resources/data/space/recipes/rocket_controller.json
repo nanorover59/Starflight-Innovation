@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "cdc",
+        "aba",
+        "cac"
+    ],
+    "key": {
+        "a": {
+            "item": "space:control_unit"
+        },
+        "b": {
+            "item": "space:aluminum_ingot"
+        },
+        "c": {
+            "item": "minecraft:iron_nugget"
+        },
+        "d": {
+            "item": "minecraft:glass_pane"
+        }
+    },
+    "result": {
+        "item": "space:rocket_controller",
+        "count": 1
+    }
+}

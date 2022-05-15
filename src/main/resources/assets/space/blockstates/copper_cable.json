@@ -1,0 +1,64 @@
+{
+  "multipart": [
+	{
+      "apply": {
+        "model": "space:block/copper_cable_center",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_north",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_east",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_south",
+        "uvlock": true
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_west",
+        "uvlock": true
+      }
+    },
+	{
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_up",
+        "uvlock": true
+      }
+    },
+	{
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "space:block/copper_cable_down",
+        "uvlock": true
+      }
+    }
+  ]
+}

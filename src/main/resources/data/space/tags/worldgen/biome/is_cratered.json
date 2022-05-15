@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "space:moon_lowlands",
+        "space:moon_midlands",
+        "space:moon_ice",
+        "space:mars_lowlands",
+        "space:mars_midlands"
+    ]
+}

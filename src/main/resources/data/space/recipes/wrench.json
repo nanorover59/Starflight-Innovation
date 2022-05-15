@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "  a",
+        " a ",
+        "a  "
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_ingot"
+        }
+    },
+    "result": {
+        "item": "space:wrench",
+        "count": 1
+    }
+}

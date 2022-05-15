@@ -1,0 +1,7 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "space:item/space_suit_leggings",
+        "layer1": "space:item/space_suit_leggings_overlay"
+    }
+}

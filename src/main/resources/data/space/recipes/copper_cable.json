@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bbb",
+        "aaa",
+        "bbb"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:copper_ingot"
+        },
+        "b": {
+            "item": "space:rubber"
+        }
+    },
+    "result": {
+        "item": "space:copper_cable",
+        "count": 16
+    }
+}

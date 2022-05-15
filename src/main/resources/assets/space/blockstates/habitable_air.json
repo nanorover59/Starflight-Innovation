@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "space:block/habitable_air"
+    }
+  }
+}

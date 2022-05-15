@@ -1,0 +1,221 @@
+{
+  "sea_level" : 0,
+  "aquifers_enabled" : false,
+  "ore_veins_enabled" : false,
+  "legacy_random_source" : false,
+  "disable_mob_generation" : false,
+  "default_block" : {
+    "Name" : "minecraft:stone"
+  },
+  "default_fluid" : {
+    "Name" : "minecraft:air"
+  },
+  "noise_router" : {
+    "final_density" : {
+      "argument1" : {
+        "argument" : {
+          "argument1" : 0.64,
+          "argument2" : {
+            "argument" : {
+              "argument" : {
+                "argument" : {
+                  "max_exclusive" : 1.5625,
+                  "when_in_range" : {
+                    "argument1" : "minecraft:overworld/sloped_cheese",
+                    "argument2" : {
+                      "argument1" : 5.0,
+                      "argument2" : "minecraft:overworld/caves/entrances",
+                      "type" : "minecraft:mul"
+                    },
+                    "type" : "minecraft:min"
+                  },
+                  "when_out_of_range" : {
+                    "argument1" : {
+                      "argument1" : {
+                        "argument1" : {
+                          "argument1" : {
+                            "argument1" : 4.0,
+                            "argument2" : {
+                              "argument" : {
+                                "noise" : "minecraft:cave_layer",
+                                "xz_scale" : 1.0,
+                                "y_scale" : 8.0,
+                                "type" : "minecraft:noise"
+                              },
+                              "type" : "minecraft:square"
+                            },
+                            "type" : "minecraft:mul"
+                          },
+                          "argument2" : {
+                            "argument1" : {
+                              "input" : {
+                                "argument1" : 0.27,
+                                "argument2" : {
+                                  "noise" : "minecraft:cave_cheese",
+                                  "xz_scale" : 1.0,
+                                  "y_scale" : 0.6666666666666666,
+                                  "type" : "minecraft:noise"
+                                },
+                                "type" : "minecraft:add"
+                              },
+                              "min" : -1.0,
+                              "max" : 1.0,
+                              "type" : "minecraft:clamp"
+                            },
+                            "argument2" : {
+                              "input" : {
+                                "argument1" : 1.5,
+                                "argument2" : {
+                                  "argument1" : -0.64,
+                                  "argument2" : "minecraft:overworld/sloped_cheese",
+                                  "type" : "minecraft:mul"
+                                },
+                                "type" : "minecraft:add"
+                              },
+                              "min" : 0.0,
+                              "max" : 0.5,
+                              "type" : "minecraft:clamp"
+                            },
+                            "type" : "minecraft:add"
+                          },
+                          "type" : "minecraft:add"
+                        },
+                        "argument2" : "minecraft:overworld/caves/entrances",
+                        "type" : "minecraft:min"
+                      },
+                      "argument2" : {
+                        "argument1" : "minecraft:overworld/caves/spaghetti_2d",
+                        "argument2" : "minecraft:overworld/caves/spaghetti_roughness_function",
+                        "type" : "minecraft:add"
+                      },
+                      "type" : "minecraft:min"
+                    },
+                    "argument2" : {
+                      "max_exclusive" : 0.03,
+                      "when_in_range" : -1000000.0,
+                      "when_out_of_range" : "minecraft:overworld/caves/pillars",
+                      "input" : "minecraft:overworld/caves/pillars",
+                      "min_inclusive" : -1000000.0,
+                      "type" : "minecraft:range_choice"
+                    },
+                    "type" : "minecraft:max"
+                  },
+                  "input" : "minecraft:overworld/sloped_cheese",
+                  "min_inclusive" : -1000000.0,
+                  "type" : "minecraft:range_choice"
+                },
+                "type" : "minecraft:slide"
+              },
+              "type" : "minecraft:blend_density"
+            },
+            "type" : "minecraft:interpolated"
+          },
+          "type" : "minecraft:mul"
+        },
+        "type" : "minecraft:squeeze"
+      },
+      "argument2" : "minecraft:overworld/caves/noodle",
+      "type" : "minecraft:min"
+    },
+    "vein_toggle" : 0.0,
+    "vein_ridged" : 0.0,
+    "vein_gap" : 0.0,
+    "erosion" : 0.0,
+    "depth" : 0.0,
+    "ridges" : 0.0,
+    "initial_density_without_jaggedness" : {
+      "argument1" : 4.0,
+      "argument2" : {
+        "argument" : {
+          "argument1" : "minecraft:overworld/depth",
+          "argument2" : {
+            "argument" : "minecraft:overworld/factor",
+            "type" : "minecraft:cache_2d"
+          },
+          "type" : "minecraft:mul"
+        },
+        "type" : "minecraft:quarter_negative"
+      },
+      "type" : "minecraft:mul"
+    },
+    "lava" : 0.0,
+    "temperature" : {
+      "xz_scale" : 0.25,
+      "y_scale" : 0.0,
+      "noise" : "minecraft:temperature",
+      "shift_x" : "minecraft:shift_x",
+      "shift_y" : 0.0,
+      "shift_z" : "minecraft:shift_z",
+      "type" : "minecraft:shifted_noise"
+    },
+    "vegetation" : {
+      "xz_scale" : 0.25,
+      "y_scale" : 0.0,
+      "noise" : "minecraft:vegetation",
+      "shift_x" : "minecraft:shift_x",
+      "shift_y" : 0.0,
+      "shift_z" : "minecraft:shift_z",
+      "type" : "minecraft:shifted_noise"
+    },
+    "continents" : "minecraft:overworld/continents",
+    "barrier" : 0.0,
+    "fluid_level_floodedness" : 0.0,
+    "fluid_level_spread" : 0.0
+  },
+  "surface_rule" : {
+    "result_state" : {
+      "Name" : "minecraft:stone"
+    },
+    "type" : "minecraft:block"
+  },
+  "noise" : {
+    "bottom_slide" : {
+      "target" : 0.1171875,
+      "size" : 3,
+      "offset" : 0
+    },
+    "top_slide" : {
+      "target" : -0.078125,
+      "size" : 2,
+      "offset" : 8
+    },
+    "size_horizontal" : 2,
+    "size_vertical" : 1,
+    "terrain_shaper" : {
+      "offset" : {
+        "coordinate" : "continents",
+        "points" : [ {
+          "location" : -1.0,
+          "value" : -0.1,
+          "derivative" : 0.0
+        }, {
+          "location" : -0.5,
+          "value" : -0.1,
+          "derivative" : 0.0
+        }, {
+          "location" : 0.0,
+          "value" : 0.0,
+          "derivative" : 0.0
+        }, {
+          "location" : 0.25,
+          "value" : 0.0,
+          "derivative" : 1.0
+        }, {
+          "location" : 1.0,
+          "value" : 1.0,
+          "derivative" : 0.0
+        } ]
+      },
+      "factor" : 16.0,
+      "jaggedness" : 0.0
+    },
+    "min_y" : -64,
+    "height" : 384,
+    "sampling" : {
+      "xz_scale" : 1.0,
+      "y_scale" : 1.0,
+      "xz_factor" : 80.0,
+      "y_factor" : 20.0
+    }
+  }
+}

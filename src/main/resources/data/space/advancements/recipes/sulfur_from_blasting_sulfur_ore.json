@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:sulfur_from_blasting_sulfur_ore"
+    ]
+  },
+  "criteria": {
+    "has_sulfur_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:sulfur_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:sulfur_from_blasting_sulfur_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_sulfur_ore",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " b ",
+        "cac",
+        " b "
+    ],
+    "key": {
+        "a": {
+            "item": "space:structural_aluminum"
+        },
+        "b": {
+            "item": "minecraft:blue_dye"
+        },
+        "c": {
+            "item": "space:oxygen_pipe"
+        }
+    },
+    "result": {
+        "item": "space:oxygen_outlet_valve",
+        "count": 1
+    }
+}
