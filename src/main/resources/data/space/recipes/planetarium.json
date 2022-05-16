@@ -1,9 +1,9 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "aba",
-        "aca",
-        "ada"
+        "ebe",
+        "ada",
+        "aca"
     ],
     "key": {
         "a": {
@@ -17,6 +17,9 @@
         },
         "d": {
             "item": "space:control_unit"
+        },
+        "e": {
+            "item": "minecraft:gold_ingot"
         }
     },
     "result": {

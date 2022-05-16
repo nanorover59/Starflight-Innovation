@@ -68,7 +68,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		MutableText text = new TranslatableText("planet.space." + selectedPlanet.getName());
 		drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 20, 0x55FF55);
 		
-		double scaleFactor = selectedPlanet.getName() == "sol" ? 1.5e-10 : 1.0 / selectedPlanet.getRadius();
+		double scaleFactor = selectedPlanet.getName() == "sol" ? 1.5e-10 : (1.0 / selectedPlanet.getRadius()) * 0.75;
 		double focusX = selectedPlanet.getPosition().getX() * scaleFactor;
 		double focusY = selectedPlanet.getPosition().getZ() * scaleFactor;
 		boolean nothingSelected = mousePressed;

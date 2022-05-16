@@ -18,7 +18,6 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.option.CloudRenderMode;
-import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
@@ -87,8 +86,6 @@ public abstract class WorldRendererMixin
 			float skyG = (float) vec3d.y;
 			float skyB = (float) vec3d.z;
 			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-			BackgroundRenderer.setFogBlack();
-			BackgroundRenderer.clearFog();
 			RenderSystem.depthMask(false);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();

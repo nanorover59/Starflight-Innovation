@@ -12,13 +12,13 @@ import space.entity.StarflightEntities;
 import space.event.SpaceAgeModEvents;
 import space.item.StarflightItems;
 import space.planet.PlanetList;
-import space.world.StarflightWorldGeneration;
 import space.world.StarflightBiomes;
+import space.world.StarflightWorldGeneration;
 
 public class StarflightMod implements ModInitializer
 {
 	public static final String MOD_ID = "space";
-	public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(StarflightMod.MOD_ID, "general"), () -> new ItemStack(StarflightItems.ALUMINUM_INGOT));
+	public static ItemGroup ITEM_GROUP = FabricItemGroupBuilder.build(new Identifier(StarflightMod.MOD_ID, "general"), () -> new ItemStack(StarflightBlocks.PLANETARIUM));
 	
 	@Override
 	public void onInitialize()

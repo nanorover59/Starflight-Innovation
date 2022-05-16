@@ -2,7 +2,8 @@
   "parent": "minecraft:block/orientable",
   "textures": {
     "top": "space:block/planetarium_top",
-    "front": "space:block/aluminum_machine",
-    "side": "space:block/aluminum_machine"
+    "bottom": "space:block/riveted_aluminum",
+    "front": "space:block/planetarium_front",
+    "side": "space:block/planetarium_side"
   }
 }

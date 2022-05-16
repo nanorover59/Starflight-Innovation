@@ -14,6 +14,8 @@ import space.energy.EnergyNet;
 
 public class SolarPanelBlock extends Block implements EnergyBlock
 {
+	private static double NOMINAL_OUTPUT = 2.0;
+	
 	public SolarPanelBlock(Settings settings)
 	{
 		super(settings);
@@ -66,11 +68,11 @@ public class SolarPanelBlock extends Block implements EnergyBlock
 			float lowLimit2 = 1.0f - lowLimit1;
 			
 			if(f < highLimit1 || f > highLimit2)
-				return 10.0;
+				return NOMINAL_OUTPUT;
 			else if(f < lowLimit1)
-				return 10.0 * Math.pow(1.0 - ((f - highLimit1) / (lowLimit1 - highLimit1)), 1.0 / 3.0);
+				return NOMINAL_OUTPUT * Math.pow(1.0 - ((f - highLimit1) / (lowLimit1 - highLimit1)), 1.0 / 3.0);
 			else if(f > lowLimit2)
-				return 10.0 * Math.pow(1.0 - ((f - highLimit2) / (lowLimit2 - highLimit2)), 1.0 / 3.0);
+				return NOMINAL_OUTPUT * Math.pow(1.0 - ((f - highLimit2) / (lowLimit2 - highLimit2)), 1.0 / 3.0);
 			return 0.0;
 		}
 	}

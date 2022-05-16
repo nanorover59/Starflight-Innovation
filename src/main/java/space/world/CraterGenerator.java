@@ -116,7 +116,7 @@ public class CraterGenerator
 					BlockState surfaceState = world.getBlockState(mutable);
 					
 					if(scatter == null || random.nextFloat() < 0.25f)
-						scatter = world.getBlockState(world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).down(random.nextInt(4, 8)));
+						scatter = world.getBlockState(world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).down(random.nextInt(2, 6)));
 					
 					while((surfaceState.isAir() || world.containsFluid(new Box(mutable))) && mutable.getY() > 0)
 					{

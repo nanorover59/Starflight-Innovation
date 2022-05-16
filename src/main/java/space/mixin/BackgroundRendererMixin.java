@@ -19,7 +19,7 @@ public abstract class BackgroundRendererMixin
 	@Inject(method = "render(Lnet/minecraft/client/render/Camera;FLnet/minecraft/client/world/ClientWorld;IF)V", at = @At("HEAD"), cancellable = true)
 	private static void injected(Camera camera, float tickDelta, ClientWorld world, int i, float f, CallbackInfo info)
 	{
-		if(PlanetRenderList.isViewpointInOrbit() || (PlanetRenderList.getViewpointPlanet() != null && PlanetRenderList.getViewpointPlanet().getSurfacePressure() < 0.001D))
+		if(PlanetRenderList.isViewpointInOrbit() || (PlanetRenderList.getViewpointPlanet() != null && PlanetRenderList.getViewpointPlanet().getSurfacePressure() < 0.001))
 			info.cancel();
 	}
 }

@@ -47,7 +47,7 @@ public abstract class FluidStateMixin
 		        	
 		        	for(Direction d1 : Direction.values())
 		        	{
-		        		if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR)
+		        		if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR && (world.getFluidState(pos.offset(d1, -1)).getFluid() != Fluids.WATER || world.getBlockState(pos.up()).getBlock() == Blocks.AIR))
 		        		{
 		        			air = true;
 		        			break;

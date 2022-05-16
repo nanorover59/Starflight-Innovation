@@ -152,9 +152,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock)
         	{
         		Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
-        		double pressure = 0;
+        		double pressure = 0.0;
         		
-        		if(planet != null)
+        		if(planet != null && !PlanetList.isOrbit(world.getRegistryKey()))
         			pressure = planet.getSurfacePressure();
         		
         		thrust += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(pressure);

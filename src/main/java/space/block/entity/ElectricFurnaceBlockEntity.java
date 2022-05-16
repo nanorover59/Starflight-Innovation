@@ -113,7 +113,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		this.cookTimeTotal = nbt.getShort("CookTimeTotal");
 		NbtCompound nbtCompound = nbt.getCompound("RecipesUsed");
 		Iterator<String> var3 = nbtCompound.getKeys().iterator();
-
+		
 		while(var3.hasNext())
 		{
 			String string = (String) var3.next();

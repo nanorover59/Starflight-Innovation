@@ -29,6 +29,9 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		int bottomDepth = region.getRandom().nextInt(2, 5);
 		int newSeaLevel = 30;
 		
+		if(biome == StarflightBiomes.MARS_ICE)
+			topState = StarflightBlocks.DRY_SNOW_BLOCK.getDefaultState();
+		
 		for(int y = region.getSeaLevel(); y >= newSeaLevel; y--)
 		{
 			if(blockColumn.getState(y).getBlock() == Blocks.WATER)
@@ -57,8 +60,8 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 			{
 				if(y > surfaceY - topDepth)
 				{
-					if(biome == StarflightBiomes.MARS_ICE && y < surfaceY)
-						blockColumn.setState(y, Blocks.PACKED_ICE.getDefaultState());
+					if(biome == StarflightBiomes.MARS_ICE && y <= surfaceY)
+						blockColumn.setState(y, y == surfaceY && region.getRandom().nextFloat() < 0.25f ? Blocks.BLUE_ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState());
 					else
 						blockColumn.setState(y, topState);
 				}

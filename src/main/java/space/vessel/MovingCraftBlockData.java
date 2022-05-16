@@ -12,6 +12,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
+import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.util.BooleanByteUtil;
 
@@ -54,7 +55,9 @@ public class MovingCraftBlockData
 		{
 			BlockState otherBlockState = world.getBlockState(offsets[i]);
 			
-			if(!otherBlockState.isOpaqueFullCube(world, offsets[i]))
+			if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
+				sidesShowing[i] = false;
+			else if(!otherBlockState.isOpaqueFullCube(world, offsets[i]))
 				sidesShowing[i] = true;
 			else if(blockState.isSideSolidFullSquare(world, blockPos, directions[i]) && otherBlockState.isSideSolidFullSquare(world, offsets[i], directions[i].getOpposite()))
 				sidesShowing[i] = false;

@@ -77,7 +77,7 @@ public class StarflightBlocks
 	public static final Block REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block ICY_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_BLUE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block DRY_SNOW_BLOCK = new Block(AbstractBlock.Settings.of(Material.SNOW_BLOCK, MapColor.WHITE).sounds(BlockSoundGroup.SNOW).strength(0.5F));
+	public static final Block DRY_SNOW_BLOCK = new Block(AbstractBlock.Settings.of(Material.SNOW_BLOCK, MapColor.WHITE).sounds(BlockSoundGroup.SNOW).strength(0.1F));
 	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(2.0f, 2.0f));
 	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.WOOL).strength(1.25f, 1.25f));
@@ -105,7 +105,7 @@ public class StarflightBlocks
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.15e6, 500, 460, 10.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.15e6, 450, 400, 10.0);
 	
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
