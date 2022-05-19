@@ -105,7 +105,7 @@ public class StarflightBlocks
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.15e6, 450, 400, 10.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.15e6, 350, 320, 12.0);
 	
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
@@ -130,10 +130,10 @@ public class StarflightBlocks
 	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
 	
 	// Fluid Storage Values
-	public static final double HYDROGEN_TANK_CAPACITY = 64;
-	public static final double HYDROGEN_PIPE_CAPACITY = 8;
-	public static final double OXYGEN_TANK_CAPACITY = HYDROGEN_TANK_CAPACITY * 9;
-	public static final double OXYGEN_PIPE_CAPACITY = HYDROGEN_PIPE_CAPACITY * 9;
+	public static final double HYDROGEN_TANK_CAPACITY = 64.0;
+	public static final double HYDROGEN_PIPE_CAPACITY = 8.0;
+	public static final double OXYGEN_TANK_CAPACITY = HYDROGEN_TANK_CAPACITY * 8.0;
+	public static final double OXYGEN_PIPE_CAPACITY = HYDROGEN_PIPE_CAPACITY * 8.0;
 	
 	public static void initializeBlocks()
 	{
@@ -161,7 +161,7 @@ public class StarflightBlocks
 		initializeBlock(COPPER_CABLE, "copper_cable");
 		initializeEnergyProducerBlock(STIRLING_ENGINE, "stirling_engine", STIRLING_ENGINE_BLOCK_ENTITY, 10, List.of());
 		initializeEnergyConsumerBlock(ELECTRIC_FURNACE, "electric_furnace", ELECTRIC_FURNACE_BLOCK_ENTITY, 10, List.of());
-		initializeEnergyProducerBlock(SOLAR_PANEL, "solar_panel", null, 10, List.of());
+		initializeEnergyProducerBlock(SOLAR_PANEL, "solar_panel", null, SolarPanelBlock.NOMINAL_OUTPUT, List.of());
 		initializeBlock(BATTERY, "battery", BATTERY_BLOCK_ENTITY);
 		initializeBlock(OXYGEN_PIPE, "oxygen_pipe", OXYGEN_PIPE_BLOCK_ENTITY);
 		initializeBlock(HYDROGEN_PIPE, "hydrogen_pipe", HYDROGEN_PIPE_BLOCK_ENTITY);

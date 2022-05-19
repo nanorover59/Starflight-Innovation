@@ -128,7 +128,7 @@ public class StarflightBiomes
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
 		int waterFogColor = 0x050533;
-		int skyColor = 0xff9999;
+		int skyColor = 0xfed48c;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);

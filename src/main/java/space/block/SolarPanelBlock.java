@@ -14,7 +14,7 @@ import space.energy.EnergyNet;
 
 public class SolarPanelBlock extends Block implements EnergyBlock
 {
-	private static double NOMINAL_OUTPUT = 2.0;
+	public static double NOMINAL_OUTPUT = 2.5;
 	
 	public SolarPanelBlock(Settings settings)
 	{

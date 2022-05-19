@@ -1,35 +1,42 @@
 package space.mixin;
 
-import java.util.Random;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FallingBlock;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import space.planet.Planet;
-import space.planet.PlanetList;
+import net.minecraft.world.WorldAccess;
+import space.world.StarflightBiomes;
 
 @Mixin(FallingBlock.class)
-public class FallingBlockMixin
+public abstract class FallingBlockMixin
 {
 	/**
-	 * Prevent blocks from falling if the local gravity is sufficiently low.
+	 * Prevent blocks from falling when in orbit.
 	 */
-	@Inject(method = "scheduledTick(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Ljava/util/Random;)V", at = @At("HEAD"), cancellable = true)
-	public void scheduledTickInject(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info)
+	@Inject(method = "onBlockAdded(Lnet/minecraft/block/BlockState;Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/BlockState;Z)V", at = @At("HEAD"), cancellable = true)
+	public void onBlockAddedInject(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify, CallbackInfo info)
 	{
-		if(world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER && world.getRegistryKey() != World.END)
+		if(world.getBiome(pos).matchesId(StarflightBiomes.SPACE.getValue()))
+			info.cancel();
+	}
+	
+	/**
+	 * Prevent blocks from falling when in orbit.
+	 */
+	@Inject(method = "getStateForNeighborUpdate(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Direction;Lnet/minecraft/block/BlockState;Lnet/minecraft/world/WorldAccess;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/block/BlockState;", at = @At("HEAD"), cancellable = true)
+	public void getStateForNeighborUpdateInject(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos, CallbackInfoReturnable<BlockState> info)
+	{
+		if(world.getBiome(pos).matchesId(StarflightBiomes.SPACE.getValue()))
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
-			
-			if(currentPlanet != null && (currentPlanet.getSurfaceGravity() < 0.05 || PlanetList.isOrbit(world.getRegistryKey())))
-				info.cancel();
+			info.setReturnValue(state);
+			info.cancel();
 		}
 	}
 }

@@ -18,6 +18,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.option.CloudRenderMode;
+import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
@@ -72,7 +73,7 @@ public abstract class WorldRendererMixin
 			boolean cloudySky = viewpointPlanet.hasCloudCover();
 			
 			// Find the position of the sun and background stars in angular coordinates.
-			Vec3d starPosition = new Vec3d(0.0D, 0.0D, 0.0D);
+			Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
 			Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint() : viewpointPlanet.getSurfaceViewpoint();
 			double azimuthOfViewpoint = Math.atan2(viewpointPlanet.getPosition().getZ() - viewpoint.getZ(), viewpointPlanet.getPosition().getX() - viewpoint.getX());
 			double azimuthOfStar = Math.atan2(starPosition.getZ() - viewpoint.getZ(), starPosition.getX() - viewpoint.getX());
@@ -80,16 +81,16 @@ public abstract class WorldRendererMixin
 			
 			// Setup for sky rendering.
 			runnable.run();
-			RenderSystem.disableTexture();
 			Vec3d vec3d = starrySky ? new Vec3d(0.0f, 0.0f, 0.0f) : this.world.getSkyColor(this.client.gameRenderer.getCamera().getPos(), tickDelta);
 			float skyR = (float) vec3d.x;
 			float skyG = (float) vec3d.y;
 			float skyB = (float) vec3d.z;
 			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+			BackgroundRenderer.setFogBlack();
+			BackgroundRenderer.clearFog();
 			RenderSystem.depthMask(false);
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.clearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			RenderSystem.disableBlend();
+			RenderSystem.disableTexture();
 			
 			// Ensure a black background.
 			RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -101,6 +102,8 @@ public abstract class WorldRendererMixin
 			bufferBuilder.vertex(projectionMatrix, -10.0f,  10.0f, 0.0f).next();
 			bufferBuilder.end();
 			BufferRenderer.draw(bufferBuilder);
+			RenderSystem.enableBlend();
+			RenderSystem.defaultBlendFunc();
 			
 			// Render the stars.
 			Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
@@ -141,7 +144,7 @@ public abstract class WorldRendererMixin
 			if(!starrySky)
 			{
 				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
-				RenderSystem.setShaderColor(skyR, skyG, skyB, 0.75f);
+				RenderSystem.setShaderColor(skyR, skyG, skyB, 0.8f);
 				RenderSystem.setShader(GameRenderer::getPositionShader);
 				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
 				bufferBuilder.vertex(projectionMatrix, -10.0f, -10.0f, 0.0f).next();
@@ -155,7 +158,7 @@ public abstract class WorldRendererMixin
 			// Render the sunset effect on atmospheric planets.
 			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
 			float skyAngle = (float) trueAzimuth;
-			float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0D)), tickDelta);
+			float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
 			float t;
 			float p;
 			float q;

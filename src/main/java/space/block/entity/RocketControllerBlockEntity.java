@@ -48,7 +48,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	private String targetName = "null";
 	private double mass = 0.0;
 	private double thrust = 0.0;
+	private double thrustVacuum = 0.0;
 	private double averageVE = 0.0;
+	private double averageVEVacuum = 0.0;
 	private double hydrogen = 0.0;
 	private double hydrogenCapacity = 0.0;
 	private double oxygen = 0.0;
@@ -103,7 +105,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		targetName = "null";
 		mass = 0.0;
 		thrust = 0.0;
+		thrustVacuum = 0.0;
 		averageVE = 0.0;
+		averageVEVacuum = 0.0;
 		hydrogen = 0.0;
 		hydrogenCapacity = 0.0;
 		oxygen = 0.0;
@@ -119,10 +123,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		MovingCraftEntity.searchForBlocks(world, getPos(), positionList, limit);
         
         if(positionList.size() >= limit)
-        {
-        	System.out.println("Too many blocks detected.");
         	return;
-        }
         
         // Update the rocket's mass, fuel supply, and thrust data.
         double massFlowSum = 0;
@@ -158,11 +159,13 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         			pressure = planet.getSurfacePressure();
         		
         		thrust += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(pressure);
+        		thrustVacuum += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(0.0);
         		massFlowSum += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getMassFlow();
         	}
         }
         
         averageVE = 9.80665 * (thrust / massFlowSum);
+        averageVEVacuum = 9.80665 * (thrustVacuum / massFlowSum);
         deltaV = availableDV(mass, hydrogen, oxygen, averageVE);
         deltaVCapacity = availableDV(mass + (hydrogenCapacity - hydrogen) + (oxygenCapacity - oxygen), hydrogenCapacity, oxygenCapacity, averageVE);
         
@@ -250,7 +253,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 			        if(positionList.size() < 4096)
 			        {
 			        	double requiredDeltaV = buttonID == 1 ? rocketController.requiredDeltaV1 : rocketController.requiredDeltaV2;
-			        	double finalMass = rocketController.mass * Math.exp(-requiredDeltaV / rocketController.averageVE);
+			        	double finalMass = rocketController.mass * Math.exp(-requiredDeltaV / rocketController.averageVEVacuum);
 			        	BlockPos arrivalPos = new BlockPos(-9999, -9999, -9999);
 			        	int arrivalDirection = world.getBlockState(position).get(RocketControllerBlock.FACING).getOpposite().getHorizontal();
 			        	
@@ -297,7 +300,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		targetName = nbt.getString("targetName");
 		mass = nbt.getDouble("mass");
 		thrust = nbt.getDouble("thrust");
+		thrustVacuum = nbt.getDouble("thrustVacuum");
 		averageVE = nbt.getDouble("averageVE");
+		averageVEVacuum = nbt.getDouble("averageVEVacuum");
 		hydrogen = nbt.getDouble("hydrogen");
 		hydrogenCapacity = nbt.getDouble("hydrogenCapacity");
 		oxygen = nbt.getDouble("oxygen");
@@ -317,7 +322,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		nbt.putString("targetName", targetName);
 		nbt.putDouble("mass", mass);
 		nbt.putDouble("thrust", thrust);
+		nbt.putDouble("thrustVacuum", thrustVacuum);
 		nbt.putDouble("averageVE", averageVE);
+		nbt.putDouble("averageVEVacuum", averageVEVacuum);
 		nbt.putDouble("hydrogen", hydrogen);
 		nbt.putDouble("hydrogenCapacity", hydrogenCapacity);
 		nbt.putDouble("oxygen", oxygen);

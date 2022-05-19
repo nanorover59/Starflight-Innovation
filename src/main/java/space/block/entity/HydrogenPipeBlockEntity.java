@@ -75,9 +75,7 @@ public class HydrogenPipeBlockEntity extends FluidContainerBlockEntity
 			{
 				blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
 				blockEntity.markDirty();
-				
-				if(blockEntity.getStoredFluid() > 1)
-					VentBlock.particleEffect(world, offsetPos);
+				VentBlock.particleEffect(world, offsetPos);
 			}
 		}
 		

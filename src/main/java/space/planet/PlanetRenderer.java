@@ -186,12 +186,12 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	 */
 	private float getRenderSize(double distanceToViewpoint)
 	{
-		float t = (float) (10.0D * ((radius / 696.34e6) / (distanceToViewpoint / 1.4710e11)));
+		float t = (float) (8.0d * ((radius / 696.34e6) / (distanceToViewpoint / 1.4710e11)));
 		
 		if(t < 0.25F)
 			t = 0.25F;
-		else if(t > 500.0F)
-			t = 500.0F;
+		else if(t > 500.0f)
+			t = 500.0f;
 		
 		return t;
 	}
@@ -215,7 +215,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
 		Vec3d planetVector = position.subtract(viewpointPlanet.getPosition());
 		double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());
-		double thetaPlanet = Math.atan2(Math.sqrt((planetVector.getX() * planetVector.getX()) + (planetVector.getZ() * planetVector.getZ())), planetVector.getY()) - (Math.PI / 2.0D);
+		double thetaPlanet = Math.atan2(Math.sqrt((planetVector.getX() * planetVector.getX()) + (planetVector.getZ() * planetVector.getZ())), planetVector.getY()) - (Math.PI / 2.0d);
 		double phiPlanet = Math.atan2(planetVector.getZ(), planetVector.getX());
 		
 		if(name.contains("sol"))
@@ -223,7 +223,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			// Render this planet object in the sky.
 			float t = getRenderSize(rPlanet);
 			matrices.push();
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0F));
+			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
 			
 			if(name != PlanetRenderList.getViewpointPlanet().getName())
 			{
@@ -245,19 +245,19 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, SUN_HAZE_0);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t, 100.0F, -t).texture(0.0F, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0F, -t).texture(1.0F, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0F, t).texture(1.0F, 1.0F).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0F, t).texture(0.0F, 1.0F).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
 			bufferBuilder.end();
 			BufferRenderer.draw(bufferBuilder);
 			
 			RenderSystem.setShaderTexture(0, SUN_0);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t, 100.0F, -t).texture(0.0F, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0F, -t).texture(1.0F, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0F, t).texture(1.0F, 1.0F).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0F, t).texture(0.0F, 1.0F).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
 			bufferBuilder.end();
 			BufferRenderer.draw(bufferBuilder);
 			matrices.pop();
@@ -269,35 +269,35 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			double angleToViewpoint = Math.atan2(viewpoint.getZ() - position.getZ(), viewpoint.getX() - position.getX());
 			double angleToLineOfSight = absoluteRotation - angleToViewpoint + Math.PI;
 			
-			if(angleToLineOfSight < 0.0D)
-				angleToLineOfSight += Math.PI * 2.0D;
-			else if(angleToLineOfSight > Math.PI * 2.0D)
-				angleToLineOfSight -= Math.PI * 2.0D;
+			if(angleToLineOfSight < 0.0d)
+				angleToLineOfSight += Math.PI * 2.0d;
+			else if(angleToLineOfSight > Math.PI * 2.0d)
+				angleToLineOfSight -= Math.PI * 2.0d;
 			
-			double interval = 1.0F / 16.0F;
-			double index = Math.round(16.0D * (angleToLineOfSight / (Math.PI * 2.0D)));
+			double interval = 1.0f / 16.0f;
+			double index = Math.round(16.0d * (angleToLineOfSight / (Math.PI * 2.0d)));
 			float startFrame = (float) (index * interval);
 			float endFrame = (float) (startFrame + interval);
 			
 			// Phase angle for lighting frame.
-			Vec3d starPosition = new Vec3d(0.0D, 0.0D, 0.0D);
+			Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
 			double angleToStar = Math.atan2(starPosition.getZ() - position.getZ(), starPosition.getX() - position.getX());
 			double phaseAngle = angleToStar - angleToViewpoint;
 			
-			if(phaseAngle < 0.0D)
-				phaseAngle += Math.PI * 2.0D;
-			else if(phaseAngle > Math.PI * 2.0D)
-				phaseAngle -= Math.PI * 2.0D;
+			if(phaseAngle < 0.0d)
+				phaseAngle += Math.PI * 2.0d;
+			else if(phaseAngle > Math.PI * 2.0d)
+				phaseAngle -= Math.PI * 2.0d;
 			
 			// Final calculations for rendering parameters.
-			double shadingIndex = Math.round(16.0D * (phaseAngle / (Math.PI * 2.0D)));
+			double shadingIndex = Math.round(16.0d * (phaseAngle / (Math.PI * 2.0d)));
 			float startShadingFrame = (float) (shadingIndex * interval);
 			float endShadingFrame = (float) (startShadingFrame + interval);
 			float t = getRenderSize(rPlanet);
 			
 			// Render this planet object in the sky.
 			matrices.push();
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0F));
+			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
 			
 			if(name != PlanetRenderList.getViewpointPlanet().getName())
 			{
@@ -307,25 +307,25 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (thetaPlanet)));
 			}
 			else
-				matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180.0F));
+				matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180.0f));
 			
 			Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
 			RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
 			RenderSystem.setShaderTexture(0, getTexture(name));
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(endFrame, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startFrame, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startFrame, 1.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endFrame, 1.0F).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(endFrame, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startFrame, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startFrame, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endFrame, 1.0f).next();
 			bufferBuilder.end();
 			BufferRenderer.draw(bufferBuilder);
 			RenderSystem.setShaderTexture(0, PLANET_SHADING);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t,	100.0f, t).texture(endShadingFrame, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startShadingFrame, 0.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startShadingFrame, 1.0F).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endShadingFrame, 1.0F).next();
+			bufferBuilder.vertex(matrix4f3, -t,	100.0f, t).texture(endShadingFrame, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startShadingFrame, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startShadingFrame, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endShadingFrame, 1.0f).next();
 			bufferBuilder.end();
 			BufferRenderer.draw(bufferBuilder);
 			

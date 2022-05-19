@@ -347,9 +347,9 @@ public abstract class LivingEntityMixin extends Entity
 							if(thisEntity.horizontalCollision)
 							{
 								if(thisEntity.getPitch() < -15.0f)
-									h = 0.1;
+									h = 0.05;
 								else if(thisEntity.getPitch() > 15.0f)
-									h = -0.1;
+									h = -0.05;
 							}
 						}
 						else if(this.hasStatusEffect(StatusEffects.LEVITATION))

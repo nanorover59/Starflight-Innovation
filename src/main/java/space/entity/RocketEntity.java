@@ -210,11 +210,12 @@ public class RocketEntity extends MovingCraftEntity
 		// Move to the next dimension when a high enough altitude is reached.
 		if(this.getBlockPos().getY() > TRAVEL_CEILING && !changedDimension)
 		{
-			changedDimension = true;
-			// Use hydrogen and oxygen at the 1:9 ratio for water.
-			hydrogenSupply -= fuelToUse * (1.0 / 9.0);
-			oxygenSupply -= fuelToUse * (8.0 / 9.0);
+			// Use hydrogen and oxygen at the 1:8 ratio for water.
+			double factor = (hydrogenSupply + oxygenSupply - fuelToUse) / (hydrogenSupply + oxygenSupply);
+			hydrogenSupply *= factor;
+			oxygenSupply *= factor;
 			setVelocity(0.0, -1.0, 0.0);
+			changedDimension = true;
 			this.changeDimension(world.getServer().getWorld(nextDimension), new Vec3d(arrivalPos.getX() + 0.5, getY(), arrivalPos.getZ() + 0.5), Direction.fromHorizontal(arrivalDirection).asRotation());
 			return;
 		}
@@ -223,23 +224,25 @@ public class RocketEntity extends MovingCraftEntity
 		if(this.age > 8 && (verticalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= -0.01))))
 		{
 			// Extra displacement to avoid clipping into the ground.
-			for(int i = 0; i < 128; i++)
+			if(verticalCollision)
 			{
-				if(!(verticalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= -0.01))))
-					break;
-				
-				this.move(MovementType.SELF, new Vec3d(0.0, 0.1, 0.0));
+				for(int i = 0; i < 128; i++)
+				{
+					if(!verticalCollision)
+						break;
+					
+					this.move(MovementType.SELF, new Vec3d(0.0, 0.1, 0.0));
+				}
 			}
 			
 			// Dismount all passengers.
 			for(Entity passenger : getPassengerList())
 			{
 				updatePassengerPosition(passenger);
-				passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
+				passenger.setPosition(passenger.getPos().add(0.0, 0.75, 0.0));
 				passenger.setVelocity(Vec3d.ZERO);
 				passenger.velocityModified = true;
 				passenger.fallDistance = 0.0f;
-				passenger.dismountVehicle();
 			}
 			
 			sendRenderData(true);
