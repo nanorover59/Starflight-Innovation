@@ -1,5 +1,5 @@
 # Starflight Innovation for Fabric 1.18.2
-A minecraft mod about exploration and building rockets with some details of a spaceflight simulator game.
+A Minecraft mod about exploration and building rockets with some details of a spaceflight simulator game.
 
 [![](http://cf.way2muchnoise.eu/full_623923_downloads.svg)](https://minecraft.curseforge.com/projects/starflight-innovation)
 
