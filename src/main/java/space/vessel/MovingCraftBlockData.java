@@ -2,6 +2,7 @@ package space.vessel;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -12,6 +13,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
+import space.block.FluidTankInsideBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.util.BooleanByteUtil;
@@ -94,6 +96,13 @@ public class MovingCraftBlockData
 			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
 		
 		BlockPos blockPos = centerPos.add(position.rotate(rotation));
+		
+		if(blockState.getBlock() instanceof FluidTankInsideBlock)
+		{
+			world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+			return;
+		}
+		
 		world.setBlockState(blockPos, blockState, Block.NOTIFY_LISTENERS);
 		BlockEntity blockEntity = world.getBlockEntity(blockPos);
 		

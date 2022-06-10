@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/ferric_sand"
+      },
+      {
+        "model": "space:block/ferric_sand",
+        "y": 90
+      },
+      {
+        "model": "space:block/ferric_sand",
+        "y": 180
+      },
+      {
+        "model": "space:block/ferric_sand",
+        "y": 270
+      }
+    ]
+  }
+}

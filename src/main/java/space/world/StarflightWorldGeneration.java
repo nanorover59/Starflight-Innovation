@@ -25,6 +25,7 @@ import net.minecraft.world.gen.feature.OreConfiguredFeatures;
 import net.minecraft.world.gen.feature.OreFeatureConfig;
 import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraft.world.gen.feature.PlacedFeatures;
+import net.minecraft.world.gen.feature.SingleStateFeatureConfig;
 import net.minecraft.world.gen.feature.StructureFeature;
 import net.minecraft.world.gen.feature.TreeFeatureConfig;
 import net.minecraft.world.gen.feature.VegetationPlacedFeatures;
@@ -48,6 +49,10 @@ public class StarflightWorldGeneration
 	public static final StructureFeature<DefaultFeatureConfig> CRATER_FEATURE = StructureFeatureMixin.invokeRegister(new Identifier(StarflightMod.MOD_ID, "crater").toString(), new CraterFeature(DefaultFeatureConfig.CODEC), GenerationStep.Feature.SURFACE_STRUCTURES);
 	public static final RegistryKey<ConfiguredStructureFeature<?, ?>> CRATER_FEATURE_KEY = RegistryKey.of(Registry.CONFIGURED_STRUCTURE_FEATURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater"));
 	public static final RegistryEntry<ConfiguredStructureFeature<?, ?>> CRATER_CONFIGURED_FEATURE = ConfiguredStructureFeaturesMixin.invokeRegister(CRATER_FEATURE_KEY, CRATER_FEATURE.configure(DefaultFeatureConfig.DEFAULT, IS_CRATERED));
+	
+	public static final Feature<SingleStateFeatureConfig> BASALT_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "basalt_rock"), new SurfaceRockFeature(SingleStateFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<SingleStateFeatureConfig, ?>> BASALT_ROCK_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "basalt_rock").toString(), BASALT_ROCK, new SingleStateFeatureConfig(Blocks.SMOOTH_BASALT.getDefaultState()));
+	public static final RegistryEntry<PlacedFeature> BASALT_ROCK_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "basalt_rock").toString(), BASALT_ROCK_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.MOTION_BLOCKING_HEIGHTMAP, BiomePlacementModifier.of());
 	
 	public static final List<OreFeatureConfig.Target> BAUXITE_ORES = List.of(OreFeatureConfig.createTarget(OreConfiguredFeatures.STONE_ORE_REPLACEABLES, StarflightBlocks.BAUXITE_ORE.getDefaultState()), OreFeatureConfig.createTarget(OreConfiguredFeatures.DEEPSLATE_ORE_REPLACEABLES, StarflightBlocks.DEEPSLATE_BAUXITE_ORE.getDefaultState()));
 	public static final RegistryEntry<ConfiguredFeature<OreFeatureConfig, ?>> ORE_BAUXITE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "ore_bauxite").toString(), Feature.ORE, new OreFeatureConfig(BAUXITE_ORES, 12));

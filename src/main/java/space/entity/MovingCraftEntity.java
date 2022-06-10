@@ -274,15 +274,10 @@ public class MovingCraftEntity extends Entity
 	{
 		ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
 		
+		// Fill the block data array list.
 		for(BlockPos pos : positionList)
 		{
-			if(world.getBlockState(pos).getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
-			{
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
-				continue;
-			}
-			
-			blockDataList.add(MovingCraftBlockData.fromBlock(world, pos, centerPos, isBlockSolid(world, pos)));
+			blockDataList.add(MovingCraftBlockData.fromBlock(world, pos, centerPos, isBlockSolid(world, pos)));	
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if(blockEntity != null)
@@ -291,6 +286,16 @@ public class MovingCraftEntity extends Entity
 					((ImplementedInventory) blockEntity).clear();
 				
 				blockEntity.readNbt(new NbtCompound());
+			}
+		}
+		
+		// Remove blocks from the world.
+		for(BlockPos pos : positionList)
+		{
+			if(world.getBlockState(pos).getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
+			{
+				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+				continue;
 			}
 			
 			if(world.getBlockState(pos).getBlock() == StarflightBlocks.HABITABLE_AIR)

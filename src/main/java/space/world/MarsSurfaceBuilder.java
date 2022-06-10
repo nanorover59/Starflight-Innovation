@@ -23,14 +23,20 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 	public void buildSurface(ChunkRegion region, BlockColumn blockColumn, int bottomY, int surfaceY, int x, int z)
 	{
 		RegistryKey<Biome> biome = region.getBiome(new BlockPos(x, 0, z)).getKey().get();
-		BlockState topState = Blocks.RED_SAND.getDefaultState();
-		BlockState bottomState = Blocks.RED_SANDSTONE.getDefaultState();
+		BlockState topState = StarflightBlocks.FERRIC_SAND.getDefaultState();
+		BlockState bottomState = StarflightBlocks.FERRIC_STONE.getDefaultState();
 		int topDepth = 4;
 		int bottomDepth = region.getRandom().nextInt(2, 5);
 		int newSeaLevel = 30;
 		
 		if(biome == StarflightBiomes.MARS_ICE)
 			topState = StarflightBlocks.DRY_SNOW_BLOCK.getDefaultState();
+		
+		for(int y = surfaceY; y >= bottomY; y--)
+		{
+			if(blockColumn.getState(y).getBlock() != Blocks.BEDROCK)
+				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());
+		}
 		
 		for(int y = region.getSeaLevel(); y >= newSeaLevel; y--)
 		{

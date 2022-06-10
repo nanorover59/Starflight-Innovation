@@ -29,9 +29,9 @@ public class Planet
 	private double mass;
 	private double radius;
 	private double parkingOrbitRadius;
-	private double perihelion;
-	private double aphelion;
-	private double argumentOfPerihelion;
+	private double periapsis;
+	private double apoapsis;
+	private double argumentOfPeriapsis;
 	private double trueAnomaly;
 	private double ascendingNode;
 	private double inclination;
@@ -87,11 +87,11 @@ public class Planet
 		return false;	
 	}
 	
-	public void setOrbitParameters(double perihelion_, double aphelion_, double argumentOfPerihelion_, double trueAnomaly_, double ascendingNode_, double inclination_)
+	public void setOrbitParameters(double periapsis_, double apoapsis_, double argumentOfPeriapsis_, double trueAnomaly_, double ascendingNode_, double inclination_)
 	{
-		perihelion = perihelion_;
-		aphelion = aphelion_;
-		argumentOfPerihelion = argumentOfPerihelion_;
+		periapsis = periapsis_;
+		apoapsis = apoapsis_;
+		argumentOfPeriapsis = argumentOfPeriapsis_;
 		trueAnomaly = trueAnomaly_;
 		ascendingNode = ascendingNode_;
 		inclination = inclination_;
@@ -234,6 +234,30 @@ public class Planet
 	}
 	
 	/**
+	 * Periapsis of this object's orbit in meters.
+	 */
+	public double getPeriapsis()
+	{
+		return periapsis;
+	}
+	
+	/**
+	 * Apoapsis of this object's orbit in meters.
+	 */
+	public double getApoapsis()
+	{
+		return apoapsis;
+	}
+	
+	/**
+	 * Argument of periapsis in radians.
+	 */
+	public double getArgumentOfPeriapsis()
+	{
+		return argumentOfPeriapsis;
+	}
+	
+	/**
 	 * Precession of this object's rotation.
 	 */
 	public double getPrecession()
@@ -242,7 +266,7 @@ public class Planet
 	}
 	
 	/**
-	 * Get the simulated velocity of this object measured in meters.
+	 * Get the simulated velocity of this object measured in meters per second.
 	 */
 	public Vec3d getVelocity()
 	{
@@ -250,7 +274,7 @@ public class Planet
 	}
 	
 	/**
-	 * Set the simulated position of this object measured in meters.
+	 * Set the simulated position of this object measured in meters per second.
 	 */
 	public void setVelocity(Vec3d velocity_)
 	{
@@ -382,11 +406,11 @@ public class Planet
 	
 	private Vec3d getRelativePositionAtTrueAnomaly(double ta)
 	{
-		double ecc = (aphelion - perihelion) / (aphelion + perihelion); // Eccentricity
-		double sma = (perihelion + aphelion) / 2.0d; // Semi-Major Axis
+		double ecc = (apoapsis - periapsis) / (apoapsis + periapsis); // Eccentricity
+		double sma = (periapsis + apoapsis) / 2.0d; // Semi-Major Axis
 		double r = (sma * (1.0d - (ecc * ecc))) / (1.0d + (ecc * Math.cos(ta)));
 		Vec3d lanAxis = new Vec3d(1.0, 0.0, 0.0).rotateY((float) ascendingNode); // Longitude of Ascending Node Axis
-		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPerihelion + ta));
+		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPeriapsis + ta));
 		newPosition = VectorMathUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
 		return newPosition;
 	}
@@ -401,13 +425,13 @@ public class Planet
 		
 		if(satelliteLevel > 0)
 		{
-			double sma = (perihelion + aphelion) / 2.0d; // Semi-Major Axis
+			double sma = (periapsis + apoapsis) / 2.0d; // Semi-Major Axis
 			Vec3d relativePosition = getRelativePositionAtTrueAnomaly(trueAnomaly);
 			Vec3d relativePositionStep = getRelativePositionAtTrueAnomaly(trueAnomaly - 1e-4);
 			Vec3d tangent = relativePositionStep.subtract(relativePosition).normalize();
 			double initialSpeed = Math.sqrt(G * parent.mass * ((2.0d / relativePosition.length()) - (1.0d / sma)));
 			position = parent.position.add(relativePosition);
-			velocity = parent.velocity.add(tangent.multiply(initialSpeed));
+			velocity = tangent.multiply(initialSpeed);
 			checkList.add(name);
 		}
 		
@@ -426,16 +450,10 @@ public class Planet
 		if(satelliteLevel < 1)
 			return;
 		
-		Planet p = parent;
 		acceleration = new Vec3d(0.0d, 0.0d, 0.0d);
-		
-		for(int i = satelliteLevel; i > 0; i--)
-		{
-			double squaredDistance = position.squaredDistanceTo(p.position);
-			double accelerationMagnitude = (G * p.mass) / squaredDistance;
-			acceleration = acceleration.add(p.position.subtract(position).normalize().multiply(accelerationMagnitude));
-			p = p.parent;
-		}
+		double squaredDistance = position.squaredDistanceTo(parent.position);
+		double accelerationMagnitude = (G * parent.mass) / squaredDistance;
+		acceleration = acceleration.add(parent.position.subtract(position).normalize().multiply(accelerationMagnitude));
 	}
 	
 	/**
@@ -455,7 +473,16 @@ public class Planet
 	public void simulatePositionAndRotationChange(double timeStep)
 	{
 		if(satelliteLevel > 0)
+		{
 			position = position.add(velocity.multiply(timeStep));
+			Planet p = parent;
+			
+			for(int i = satelliteLevel; i > 0; i--)
+			{
+				position = position.add(p.velocity.multiply(timeStep));
+				p = p.parent;
+			}
+		}
 		
 		rotation -= rotationRate * timeStep;
 		
@@ -594,23 +621,23 @@ public class Planet
 						else
 							esc2 += startV2 - esc2;
 						
-						startV2 = searchList.get(i).parent.circularOrbitVelocity((searchList.get(i).perihelion + searchList.get(i).aphelion) / 2.0) + esc2;
+						startV2 = searchList.get(i).parent.circularOrbitVelocity((searchList.get(i).periapsis + searchList.get(i).apoapsis) / 2.0) + esc2;
 						continue;
 					}
 					
 					Planet s = searchList.get(i - 1);
-					esc2 = searchList.get(i).escapeVelocity((s.perihelion + s.aphelion) / 2.0);
+					esc2 = searchList.get(i).escapeVelocity((s.periapsis + s.apoapsis) / 2.0);
 					
 					if(esc2 > startV2)
 						dvEsc2 += esc2 - startV2;
 					else
 						esc2 += startV2 - esc2;
 					
-					startV2 = searchList.get(i).parent.circularOrbitVelocity((searchList.get(i).perihelion + searchList.get(i).aphelion) / 2.0) + esc2;
+					startV2 = searchList.get(i).parent.circularOrbitVelocity((searchList.get(i).periapsis + searchList.get(i).apoapsis) / 2.0) + esc2;
 				}
 				
 				Planet next = searchList.get(searchList.size() - 1);
-				double rEnd = (next.perihelion + next.aphelion) / 2.0;
+				double rEnd = (next.periapsis + next.apoapsis) / 2.0;
 				return p.dVTransfer(orbitRadius, rEnd, esc1, esc2) + dvEsc1 + dvEsc2;
 			}
 			else if(p.parent != null)
@@ -622,7 +649,7 @@ public class Planet
 				else
 					esc1 += startV1 - esc1;
 				
-				orbitRadius = (p.perihelion + p.aphelion) / 2.0;
+				orbitRadius = (p.periapsis + p.apoapsis) / 2.0;
 				startV1 = p.parent.circularOrbitVelocity(orbitRadius) + esc1;
 				p = p.parent;
 			}

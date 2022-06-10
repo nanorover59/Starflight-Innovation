@@ -14,6 +14,8 @@
         "minecraft:lava",
         "space:regolith",
         "space:balsaltic_regolith",
-        "space:icy_regolith"
+        "space:icy_regolith",
+        "space:ferric_sand",
+        "space:dry_snow"
     ]
 }

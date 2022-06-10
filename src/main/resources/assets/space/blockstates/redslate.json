@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/redslate"
+      },
+      {
+        "model": "space:block/redslate",
+        "y": 90
+      },
+      {
+        "model": "space:block/redslate",
+        "y": 180
+      },
+      {
+        "model": "space:block/redslate",
+        "y": 270
+      }
+    ]
+  }
+}

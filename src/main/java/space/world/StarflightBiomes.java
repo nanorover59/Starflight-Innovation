@@ -16,6 +16,7 @@ import net.minecraft.world.biome.GenerationSettings;
 import net.minecraft.world.biome.SpawnSettings;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.OrePlacedFeatures;
+import net.minecraft.world.gen.feature.UndergroundPlacedFeatures;
 import space.StarflightMod;
 
 public class StarflightBiomes
@@ -34,10 +35,12 @@ public class StarflightBiomes
 	public static void initializeBiomes()
 	{
 		createSpaceBiome(SPACE);
+		
 		createMoonBiome(MOON_LOWLANDS);
 		createMoonBiome(MOON_MIDLANDS);
 		createMoonBiome(MOON_HIGHLANDS);
 		createMoonBiome(MOON_ICE);
+		
 		createMarsBiome(MARS_LOWLANDS);
 		createMarsBiome(MARS_MIDLANDS);
 		createMarsBiome(MARS_HIGHLANDS);
@@ -116,6 +119,7 @@ public class StarflightBiomes
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
+		generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.BASALT_ROCK_PLACED_FEATURE);
 		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
@@ -133,6 +137,8 @@ public class StarflightBiomes
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_IRON_EXTRA);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.AMETHYST_GEODE);
 		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}

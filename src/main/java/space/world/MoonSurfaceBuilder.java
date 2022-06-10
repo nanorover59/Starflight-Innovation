@@ -31,18 +31,18 @@ public class MoonSurfaceBuilder extends CustomSurfaceBuilder
 		if(biome == StarflightBiomes.MOON_LOWLANDS)
 		{
 			topState = StarflightBlocks.BALSALTIC_REGOLITH.getDefaultState();
-			bottomState = Blocks.BASALT.getDefaultState();
+			bottomState = Blocks.SMOOTH_BASALT.getDefaultState();
 		}
 		
 		if(surfaceY < 40)
 			blockColumn.setState(surfaceY + 1, topState);
 		else
 		{
-			for(int y = surfaceY - bottomDepth; y <= surfaceY + topDepth; y++)
+			for(int y = surfaceY - (bottomDepth + topDepth); y <= surfaceY; y++)
 			{
-				if(y > surfaceY)
+				if(y > surfaceY - topDepth)
 				{
-					if(biome == StarflightBiomes.MOON_ICE && y < surfaceY + topDepth)
+					if(biome == StarflightBiomes.MOON_ICE && y < surfaceY)
 						blockColumn.setState(y, StarflightBlocks.ICY_REGOLITH.getDefaultState());
 					else
 						blockColumn.setState(y, topState);
