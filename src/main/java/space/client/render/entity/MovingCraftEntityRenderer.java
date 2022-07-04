@@ -73,7 +73,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		Random random = new Random();
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial);
+			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial);
 	}
 
 	@SuppressWarnings("deprecation")

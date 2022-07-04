@@ -104,7 +104,6 @@ public class CraterGenerator
 		{
 			final BlockPos.Mutable mutable = new BlockPos.Mutable();
 			BlockPos startPos = chunkPos.getBlockPos(0, surfaceY, 0);
-			BlockState scatter = null; // The block state to scatter around the crater as ejecta.
 
 			for(int x = 0; x < 16; x++)
 			{
@@ -114,9 +113,6 @@ public class CraterGenerator
 					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).down().getY();
 					mutable.setY(localSurfaceY);
 					BlockState surfaceState = world.getBlockState(mutable);
-					
-					if(scatter == null || random.nextFloat() < 0.25f)
-						scatter = world.getBlockState(world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).down(random.nextInt(2, 6)));
 					
 					while((surfaceState.isAir() || world.containsFluid(new Box(mutable))) && mutable.getY() > 0)
 					{
@@ -140,9 +136,6 @@ public class CraterGenerator
 							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 						}
 					}
-					
-					if(mutable.getY() >= localSurfaceY && depth > -24 && random.nextFloat() < 0.05f)
-						world.setBlockState(mutable.setY(localSurfaceY), scatter, Block.NOTIFY_LISTENERS);
 				}
 			}
 		}

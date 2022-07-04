@@ -153,6 +153,22 @@ public class PlanetList
 	}
 	
 	/**
+	 * Return true if the given planet has a parking orbit dimension assigned.
+	 */
+	public static boolean hasOrbit(Planet planet)
+	{
+		return parkingOrbitWorldKeys.containsKey(planet);
+	}
+	
+	/**
+	 * Return true if the given planet has a surface dimension assigned.
+	 */
+	public static boolean hasSurface(Planet planet)
+	{
+		return planetWorldKeys.containsKey(planet);
+	}
+	
+	/**
 	 * Save all world specific planet data.
 	 */
 	public static DataCompound saveData()

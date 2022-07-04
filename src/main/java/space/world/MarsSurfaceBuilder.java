@@ -2,6 +2,7 @@ package space.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.ChunkRegion;
@@ -27,14 +28,17 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		BlockState bottomState = StarflightBlocks.FERRIC_STONE.getDefaultState();
 		int topDepth = 4;
 		int bottomDepth = region.getRandom().nextInt(2, 5);
-		int newSeaLevel = 30;
+		int newSeaLevel = 16;
+		
+		if(biome == StarflightBiomes.MARS_LOWLANDS)
+			bottomState = StarflightBlocks.REDSLATE.getDefaultState();
 		
 		if(biome == StarflightBiomes.MARS_ICE)
 			topState = StarflightBlocks.DRY_SNOW_BLOCK.getDefaultState();
 		
 		for(int y = surfaceY; y >= bottomY; y--)
 		{
-			if(blockColumn.getState(y).getBlock() != Blocks.BEDROCK)
+			if(blockColumn.getState(y).isIn(BlockTags.BASE_STONE_OVERWORLD))
 				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());
 		}
 		

@@ -132,19 +132,19 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 		RenderSystem.setShaderTexture(0, TEXTURE);
-		//drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
+		boolean canSelectPlanet = PlanetList.hasOrbit(selectedPlanet);
 		int button1X = x + 7;
 		int button1Y = y + 39;
 		boolean button1Hover = mouseX >= button1X && mouseX < button1X + 18 && mouseY >= button1Y && mouseY < button1Y + 18;
-		drawTexture(matrices, button1X, button1Y, button1Hover ? 18 : 0, 222, 18, 18);
+		drawTexture(matrices, button1X, button1Y, canSelectPlanet ? (button1Hover ? 36 : 18) : 0, 222, 18, 18);
 		int button2X = x + 7;
 		int button2Y = y + 59;
 		boolean button2Hover = mouseX >= button2X && mouseX < button2X + 18 && mouseY >= button2Y && mouseY < button2Y + 18;
-		drawTexture(matrices, button2X, button2Y, button2Hover ? 54 : 36, 222, 18, 18);
+		drawTexture(matrices, button2X, button2Y, button2Hover ? 72 : 54, 222, 18, 18);
 		int button3X = x + 7;
 		int button3Y = y + 79;
 		boolean button3Hover = mouseX >= button3X && mouseX < button3X + 18 && mouseY >= button3Y && mouseY < button3Y + 18;
-		drawTexture(matrices, button3X, button3Y, button3Hover ? 90 : 72, 222, 18, 18);
+		drawTexture(matrices, button3X, button3Y, button3Hover ? 108 : 90, 222, 18, 18);
 		MutableText text = new TranslatableText("planet.space." + selectedPlanet.getName());
 		drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 20, 0x55FF55);
 		
@@ -162,7 +162,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		
 		if(mousePressed)
 		{
-			if(button1Hover && buttonCooldown == 0)
+			if(button1Hover && canSelectPlanet && buttonCooldown == 0)
 			{
 				int planetId = PlanetList.getPlanets().indexOf(selectedPlanet);
 				client.interactionManager.clickButton(((PlanetariumScreenHandler)handler).syncId, planetId);
@@ -170,9 +170,9 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				buttonCooldown = 20;
 			}
 			else if(button2Hover && selectedPlanet.getRadius() * scaleFactor < 8.0)
-				scaleFactor *= 1.05;
+				scaleFactor *= 1.025;
 			else if(button3Hover)
-				scaleFactor *= 0.95;
+				scaleFactor *= 0.975;
 		}
 	}
 

@@ -71,15 +71,12 @@ public class HydrogenPipeBlockEntity extends FluidContainerBlockEntity
 					}
 				}
 			}
-			else if(adjacentState.getBlock() == StarflightBlocks.VENT && world.isReceivingRedstonePower(offsetPos))
+			else if(blockEntity.getStoredFluid() > 0.05 && adjacentState.getBlock() == StarflightBlocks.VENT && world.isReceivingRedstonePower(offsetPos))
 			{
 				blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
 				blockEntity.markDirty();
 				VentBlock.particleEffect(world, offsetPos);
 			}
 		}
-		
-		if(blockEntity.getStoredFluid() < 0.01)
-			blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
     }
 }

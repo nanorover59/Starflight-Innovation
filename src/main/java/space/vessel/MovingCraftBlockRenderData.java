@@ -12,7 +12,9 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.OverlayTexture;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -23,16 +25,28 @@ import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Matrix3f;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.BlockRenderView;
+import space.block.RocketThrusterBlock;
+import space.entity.MovingCraftEntity;
+import space.entity.RocketEntity;
 import space.mixin.BlockModelRendererMixin;
 
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftBlockRenderData
 {
+	private static final Identifier THRUSTER_PLUME_TEXTURE = new Identifier("space:textures/entity/thruster_plume.png");
+	private static final Identifier MACH_DIAMOND_TEXTURE = new Identifier("space:textures/entity/mach_diamond.png");
+	 private static final RenderLayer THRUSTER_PLUME_LAYER = RenderLayer.getEntityTranslucent(THRUSTER_PLUME_TEXTURE);
+    private static final RenderLayer MACH_DIAMOND_LAYER = RenderLayer.getEntityTranslucent(MACH_DIAMOND_TEXTURE);
+	
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private BlockState blockState;
 	private BlockPos position;
@@ -78,8 +92,62 @@ public class MovingCraftBlockRenderData
 		}
 	}
 	
-	public void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial)
+	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial)
 	{
+		// Plume effects for rocket thrusters.
+		if(entity instanceof RocketEntity)
+		{
+			RocketEntity rocketEntity = (RocketEntity) entity;
+			
+			if(blockState.getBlock() instanceof RocketThrusterBlock)
+			{
+				MinecraftClient client = MinecraftClient.getInstance();
+				
+				if(rocketEntity.getThrottle() > 0.0F)
+				{
+					if(rocketEntity.getThrustUnderexpanded())
+					{
+						boolean b = false;
+						
+						for(int i = 0; i < 5; i++)
+						{
+							matrixStack.push();
+							matrixStack.translate(position.getX() + (b ? -0.01 : 0.01), position.getY() - i * 0.75, position.getZ() + (b ? -0.01 : 0.01));
+							matrixStack.scale(1.0F - i * 0.09F, 1.25F, 1.0F - i * 0.09F);
+							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
+					        MatrixStack.Entry entry = matrixStack.peek();
+					        Matrix4f matrix4f = entry.getPositionMatrix();
+					        Matrix3f matrix3f = entry.getNormalMatrix();
+					        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(MACH_DIAMOND_LAYER);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0);
+					        matrixStack.pop();
+					        b ^= true;
+						}
+					}
+					else
+					{
+						matrixStack.push();
+						matrixStack.translate(position.getX(), position.getY() - 0.8, position.getZ());
+						matrixStack.scale(2.0F, 2.5F, 2.0F);
+						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
+				        MatrixStack.Entry entry = matrixStack.peek();
+				        Matrix4f matrix4f = entry.getPositionMatrix();
+				        Matrix3f matrix3f = entry.getNormalMatrix();
+				        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(THRUSTER_PLUME_LAYER);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0);
+				        matrixStack.pop();
+					}
+				}
+			}
+		}
+		
+		// Block entity render.
 		if(blockState.getRenderType() == BlockRenderType.ENTITYBLOCK_ANIMATED && blockState.getBlock() instanceof BlockWithEntity)
 		{
 			BlockWithEntity blockWithEntity = (BlockWithEntity) blockState.getBlock();
@@ -101,6 +169,7 @@ public class MovingCraftBlockRenderData
 			return;
 		}
 		
+		// Block model render.
 		if(blockState.getRenderType() != BlockRenderType.MODEL || blockState.getRenderType() == BlockRenderType.INVISIBLE)
 			return;
 		
@@ -135,4 +204,9 @@ public class MovingCraftBlockRenderData
         
         matrixStack.pop();
 	}
+	
+	private static void thrusterPlumeVertex(VertexConsumer buffer, Matrix4f matrix, Matrix3f normalMatrix, float x, float y, int u, int v)
+	{
+        buffer.vertex(matrix, x - 0.5F, y - 0.5F, 0.0F).color(255, 255, 255, 220).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(LightmapTextureManager.MAX_BLOCK_LIGHT_COORDINATE).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
+    }
 }

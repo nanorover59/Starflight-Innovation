@@ -8,13 +8,18 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -27,12 +32,18 @@ import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
 import space.planet.Planet;
 import space.planet.PlanetList;
+import space.util.AirUtil;
 import space.vessel.BlockMass;
 import space.vessel.MovingCraftBlockData;
+import space.vessel.MovingCraftBlockRenderData;
+import space.vessel.MovingCraftRenderList;
 
 public class RocketEntity extends MovingCraftEntity
 {
-	private static final int TRAVEL_CEILING = 512; 
+	private static final int TRAVEL_CEILING = 512;
+	
+	private static final TrackedData<Boolean> THRUST_UNDEREXPANDED = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+	private static final TrackedData<Float> THROTTLE = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	
 	private ArrayList<BlockPos> activeFluidTanks = new ArrayList<BlockPos>();
 	private RegistryKey<World> nextDimension;
@@ -168,10 +179,45 @@ public class RocketEntity extends MovingCraftEntity
 	}
 	
 	@Override
+	protected void initDataTracker()
+	{
+		super.initDataTracker();
+		this.dataTracker.startTracking(THRUST_UNDEREXPANDED, Boolean.valueOf(false));
+		this.dataTracker.startTracking(THROTTLE, Float.valueOf(0.0f));
+	}
+	
+	public void setThrustUnderexpanded(boolean b)
+	{
+		this.dataTracker.set(THRUST_UNDEREXPANDED, Boolean.valueOf(b));
+	}
+	
+	public void setThrottle(float throttle)
+	{
+		this.dataTracker.set(THROTTLE, Float.valueOf(throttle));
+	}
+	
+	public boolean getThrustUnderexpanded()
+	{
+		return this.dataTracker.get(THRUST_UNDEREXPANDED);
+	}
+	
+	public float getThrottle()
+	{
+		return this.dataTracker.get(THROTTLE);
+	}
+	
+	@Override
     public void tick()
 	{
+		// Run client-side actions and then return.
 		if(this.clientMotion())
+		{
+			// Spawn thruster particles.
+			if(getThrottle() > 0.0F)
+				spawnThrusterParticles();
+			
 			return;
+		}
 		
 		// Set the target landing altitude if necessary.
 		if(changedDimension && arrivalPos.getY() == -9999)
@@ -257,6 +303,10 @@ public class RocketEntity extends MovingCraftEntity
 		setCraftRoll(craftRoll);
 		setCraftPitch(craftPitch);
 		setCraftYaw(craftYaw);
+		
+		// Update thruster state tracked data.
+		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, getBlockPos()) > 0.25);
+		setThrottle((float) throttle);
 	}
 	
 	/**
@@ -351,6 +401,100 @@ public class RocketEntity extends MovingCraftEntity
 			throttle = t;
 		else
 			throttle = 0.0;
+	}
+	
+	private void spawnThrusterParticles()
+	{
+		ArrayList<MovingCraftBlockRenderData> blocks = MovingCraftRenderList.getBlocksForEntity(getUuid());
+		ArrayList<BlockPos> thrusterOffsets = new ArrayList<BlockPos>();
+		ArrayList<Vec3f> thrusterOffsetsRotated = new ArrayList<Vec3f>();
+		Vec3f upAxis = new Vec3f(0.0F, 1.0F, 0.0F);
+        float rotationRoll = getCraftRoll();
+		float rotationPitch = getCraftPitch();
+		float rotationYaw = getCraftYaw();
+		
+		for(MovingCraftBlockRenderData block : blocks)
+		{
+			if(block.getBlockState().getBlock() instanceof RocketThrusterBlock)
+				thrusterOffsets.add(block.getPosition());
+		}
+		
+		switch(getForwardDirection())
+		{
+		case NORTH:
+			upAxis.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+			
+			for(BlockPos pos : thrusterOffsets)
+			{
+				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+				rotated.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+				thrusterOffsetsRotated.add(rotated);
+			}
+			break;
+		case EAST:
+			upAxis.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+			
+			for(BlockPos pos : thrusterOffsets)
+			{
+				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+				rotated.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+				thrusterOffsetsRotated.add(rotated);
+			}
+			break;
+		case SOUTH:
+			upAxis.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+			
+			for(BlockPos pos : thrusterOffsets)
+			{
+				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+				rotated.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+				thrusterOffsetsRotated.add(rotated);
+			}
+			break;
+		case WEST:
+			upAxis.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+			
+			for(BlockPos pos : thrusterOffsets)
+			{
+				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+				rotated.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+				thrusterOffsetsRotated.add(rotated);
+			}
+			break;
+		default:
+			break;
+		}
+		
+		Vec3f velocity = upAxis.copy();
+		velocity.scale(-2.0F + (this.random.nextFloat() * 0.25F));
+		velocity.add((float) getVelocity().getX(), (float) getVelocity().getY(), (float) getVelocity().getZ());
+		
+		for(Vec3f pos : thrusterOffsetsRotated)
+		{
+			pos.add((float) getX(), (float) getY(), (float) getZ());
+			
+			for(int i = 0; i < 3; i++)
+			{
+				world.addParticle(ParticleTypes.POOF, true, pos.getX(), pos.getY(), pos.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+				pos.add((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, 0.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);
+			}
+		}
 	}
 	
 	@Override

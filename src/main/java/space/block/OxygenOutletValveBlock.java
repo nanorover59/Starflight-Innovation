@@ -46,7 +46,7 @@ public class OxygenOutletValveBlock extends BlockWithEntity implements FluidUtil
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
-		return checkType(type, StarflightBlocks.HYDROGEN_OUTLET_VALVE_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> OxygenOutletValveBlockEntity.tick(world1, pos, blockState, blockEntity));
+		return checkType(type, StarflightBlocks.OXYGEN_OUTLET_VALVE_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> OxygenOutletValveBlockEntity.tick(world1, pos, blockState, blockEntity));
 	}
 	
 	@Override

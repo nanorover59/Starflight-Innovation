@@ -103,7 +103,7 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 		int button2Y = y + 33;
 		int button3X = x + 118;
 		int button3Y = y + 46;
-		boolean button2Enabled = requiredDeltaV1 > 0 && ((!inOrbit && ttw > 1 && requiredDeltaV1 < deltaV) || (inOrbit && requiredDeltaV1 < deltaV));
+		boolean button2Enabled = currentPlanet != null && PlanetList.hasSurface(currentPlanet) && requiredDeltaV1 > 0 && ((!inOrbit && ttw > 1 && requiredDeltaV1 < deltaV) || (inOrbit && requiredDeltaV1 < deltaV));
 		boolean button3Enabled = inOrbit && requiredDeltaV2 > 0 && requiredDeltaV2 < deltaV;
 		boolean button1Hover = mouseX >= button1X && mouseX < button1X + 48 && mouseY >= button1Y && mouseY < button1Y + 11;
 		boolean button2Hover = button2Enabled && mouseX >= button2X && mouseX < button2X + 48 && mouseY >= button2Y && mouseY < button2Y + 11;

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:aluminum_ingot_from_smelting_ferric_bauxite_ore"
+    ]
+  },
+  "criteria": {
+    "has_ferric_bauxite_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:ferric_bauxite_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:aluminum_ingot_from_smelting_ferric_bauxite_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ferric_bauxite_ore",
+      "has_the_recipe"
+    ]
+  ]
+}

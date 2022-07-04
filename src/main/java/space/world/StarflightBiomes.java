@@ -27,6 +27,7 @@ public class StarflightBiomes
 	public static final RegistryKey<Biome> MOON_MIDLANDS = registerBiomeKey("moon_midlands");
 	public static final RegistryKey<Biome> MOON_HIGHLANDS = registerBiomeKey("moon_highlands");
 	public static final RegistryKey<Biome> MOON_ICE = registerBiomeKey("moon_ice");
+	public static final RegistryKey<Biome> MOON_ROCKS = registerBiomeKey("moon_rocks");
 	public static final RegistryKey<Biome> MARS_LOWLANDS = registerBiomeKey("mars_lowlands");
 	public static final RegistryKey<Biome> MARS_MIDLANDS = registerBiomeKey("mars_midlands");
 	public static final RegistryKey<Biome> MARS_HIGHLANDS = registerBiomeKey("mars_highlands");
@@ -40,11 +41,12 @@ public class StarflightBiomes
 		createMoonBiome(MOON_MIDLANDS);
 		createMoonBiome(MOON_HIGHLANDS);
 		createMoonBiome(MOON_ICE);
+		createMoonBiome(MOON_ROCKS);
 		
-		createMarsBiome(MARS_LOWLANDS);
-		createMarsBiome(MARS_MIDLANDS);
-		createMarsBiome(MARS_HIGHLANDS);
-		createMarsBiome(MARS_ICE);
+		createMarsBiome(MARS_LOWLANDS, true);
+		createMarsBiome(MARS_MIDLANDS, true);
+		createMarsBiome(MARS_HIGHLANDS, false);
+		createMarsBiome(MARS_ICE, false);
 		
 		surfaceBuilders.add(new MoonSurfaceBuilder());
 		surfaceBuilders.add(new MarsSurfaceBuilder());
@@ -86,10 +88,22 @@ public class StarflightBiomes
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, OrePlacedFeatures.ORE_LAPIS);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, OrePlacedFeatures.ORE_LAPIS_BURIED);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, OrePlacedFeatures.ORE_COPPER);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_BAUXITE);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_BAUXITE_LOWER);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_SULFUR);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_SULFUR_LOWER);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.BAUXITE_ORE);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.BAUXITE_ORE_DEEPSLATE);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.SULFUR_ORE);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.SULFUR_ORE_DEEPSLATE);
+	}
+	
+	private static void addMarsOres(GenerationSettings.Builder generationSettings)
+	{
+		generationSettings.feature(GenerationStep.Feature.RAW_GENERATION, StarflightWorldGeneration.REDSLATE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.RAW_GENERATION, StarflightWorldGeneration.BASALT_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.IRON_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.COPPER_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.BAUXITE_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.GOLD_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.DIAMOND_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.REDSTONE_ORE_FERRIC);
 	}
 	
 	private static void createSpaceBiome(RegistryKey<Biome> biomeKey)
@@ -119,12 +133,12 @@ public class StarflightBiomes
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
-		generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.BASALT_ROCK_PLACED_FEATURE);
+		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
 		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
-	private static void createMarsBiome(RegistryKey<Biome> biomeKey)
+	private static void createMarsBiome(RegistryKey<Biome> biomeKey, boolean surfaceRocks)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
 		Biome.Category category = Biome.Category.NONE;
@@ -135,10 +149,13 @@ public class StarflightBiomes
 		int skyColor = 0xfed48c;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
-		addDefaultOres(generationSettings);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.PLACED_ORE_IRON_EXTRA);
+		addMarsOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.AMETHYST_GEODE);
+		
+		if(surfaceRocks)
+			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
+		
 		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}

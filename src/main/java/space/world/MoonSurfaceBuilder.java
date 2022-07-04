@@ -17,6 +17,7 @@ public class MoonSurfaceBuilder extends CustomSurfaceBuilder
 		applyToBiome(StarflightBiomes.MOON_MIDLANDS);
 		applyToBiome(StarflightBiomes.MOON_HIGHLANDS);
 		applyToBiome(StarflightBiomes.MOON_ICE);
+		applyToBiome(StarflightBiomes.MOON_ROCKS);
 	}
 	
 	@Override

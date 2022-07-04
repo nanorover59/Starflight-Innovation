@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "space:ferric_gold_ore",
+    "space:ferric_diamond_ore",
+    "space:ferric_redstone_ore"
+  ]
+}

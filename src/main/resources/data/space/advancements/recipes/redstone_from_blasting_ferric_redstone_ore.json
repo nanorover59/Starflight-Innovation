@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:redstone_from_blasting_ferric_redstone_ore"
+    ]
+  },
+  "criteria": {
+    "has_ferric_redstone_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:ferric_redstone_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:redstone_from_blasting_ferric_redstone_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ferric_redstone_ore",
+      "has_the_recipe"
+    ]
+  ]
+}
