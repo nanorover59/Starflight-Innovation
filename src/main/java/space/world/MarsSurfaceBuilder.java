@@ -2,7 +2,6 @@ package space.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.ChunkRegion;
@@ -38,7 +37,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		
 		for(int y = surfaceY; y >= bottomY; y--)
 		{
-			if(blockColumn.getState(y).isIn(BlockTags.BASE_STONE_OVERWORLD))
+			if(blockColumn.getState(y).getMaterial().isSolid())
 				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());
 		}
 		

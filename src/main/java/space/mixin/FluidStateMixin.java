@@ -43,7 +43,7 @@ public abstract class FluidStateMixin
 		        	float chance = 1.0f;
 					
 					if(temperature < Planet.TEMPERATE && world.getLightLevel(LightType.BLOCK, pos) > 11 - world.getBlockState(pos).getOpacity(world, pos))
-						chance /= world.getLightLevel(LightType.BLOCK, pos) * 16.0f;
+						chance /= world.getLightLevel(LightType.BLOCK, pos) * 32.0f;
 		        	
 		        	for(Direction d1 : Direction.values())
 		        	{

@@ -85,6 +85,7 @@ public class StarflightBlocks
 	public static final Block FERRIC_IRON_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_COPPER_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
+	public static final Block FERRIC_SULFUR_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_GOLD_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_DIAMOND_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_REDSTONE_ORE = new RedstoneOreBlock(AbstractBlock.Settings.of(Material.STONE).requiresTool().ticksRandomly().luminance(createLightLevelFromLitBlockState(9)).strength(3.0f, 3.0f));
@@ -174,6 +175,7 @@ public class StarflightBlocks
 		initializeBlock(FERRIC_IRON_ORE, "ferric_iron_ore");
 		initializeBlock(FERRIC_COPPER_ORE, "ferric_copper_ore");
 		initializeBlock(FERRIC_BAUXITE_ORE, "ferric_bauxite_ore");
+		initializeBlock(FERRIC_SULFUR_ORE, "ferric_sulfur_ore");
 		initializeBlock(FERRIC_GOLD_ORE, "ferric_gold_ore");
 		initializeBlock(FERRIC_DIAMOND_ORE, "ferric_diamond_ore");
 		initializeBlock(FERRIC_REDSTONE_ORE, "ferric_redstone_ore");
