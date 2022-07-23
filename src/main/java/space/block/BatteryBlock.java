@@ -23,7 +23,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -149,8 +148,8 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(new TranslatableText("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
-		textList.add(new TranslatableText("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		tooltip.addAll(textList);
 	}
 }

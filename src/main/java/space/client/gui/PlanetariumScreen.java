@@ -22,7 +22,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec2f;
@@ -145,7 +144,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		int button3Y = y + 79;
 		boolean button3Hover = mouseX >= button3X && mouseX < button3X + 18 && mouseY >= button3Y && mouseY < button3Y + 18;
 		drawTexture(matrices, button3X, button3Y, button3Hover ? 108 : 90, 222, 18, 18);
-		MutableText text = new TranslatableText("planet.space." + selectedPlanet.getName());
+		MutableText text = Text.translatable("planet.space." + selectedPlanet.getName());
 		drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 20, 0x55FF55);
 		
 		// Select planets in the GUI.
@@ -201,8 +200,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
         bufferBuilder.vertex(matrix, x + halfSize, y + halfSize, 10.0f).texture(u1, v1).next();
         bufferBuilder.vertex(matrix, x + halfSize, y - halfSize, 10.0f).texture(u1, v0).next();
         bufferBuilder.vertex(matrix, x - halfSize, y - halfSize, 10.0f).texture(u0, v0).next();
-        bufferBuilder.end();
-        BufferRenderer.draw(bufferBuilder);
+        BufferRenderer.drawWithShader(bufferBuilder.end());
     }
 	
 	private void drawOrbitEllipse(Matrix4f matrix, float centerX, float centerY, float rMin, float rMax, float aop, int divisions)
@@ -230,8 +228,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
         	}
         }
         
-        bufferBuilder.end();
-        BufferRenderer.draw(bufferBuilder);
+        BufferRenderer.drawWithShader(bufferBuilder.end());
 	}
 	
 	private int planetSelect(MinecraftClient client, float centerX, float centerY, float radius, int mouseX, int mouseY, boolean mousePressed)

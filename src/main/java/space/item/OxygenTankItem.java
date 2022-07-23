@@ -10,8 +10,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -31,7 +31,7 @@ public class OxygenTankItem extends Item
 		if(stack.getNbt() != null)
 		{
 			DecimalFormat df = new DecimalFormat("#.##");
-			tooltip.add(new TranslatableText("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
+			tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
 		}
 		else
 		{
@@ -68,7 +68,7 @@ public class OxygenTankItem extends Item
 					double oxygenToTransfer = Math.min(requiredOxygen, availableOxygen);
 					itemStack.getNbt().putDouble("oxygen", availableOxygen - oxygenToTransfer);
 					armorStack.getNbt().putDouble("oxygen", previousOxygen + oxygenToTransfer);
-					TranslatableText text = new TranslatableText("item.space.space_suit.oxygen_supply");
+					MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
 					int percent = (int) Math.ceil((armorStack.getNbt().getDouble("oxygen") / ((SpaceSuitItem) armorStack.getItem()).getMaxOxygen()) * 100.0);
 					text.append(percent + "%").formatted(Formatting.BOLD, Formatting.GREEN);
 					player.sendMessage(text, false);

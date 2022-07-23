@@ -30,7 +30,6 @@ import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.Properties;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -56,7 +55,7 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.sapling.RubberSaplingGenerator;
 import space.item.DescriptiveBlockItem;
-import space.mixin.FireBlockMixin;
+import space.mixin.common.FireBlockMixin;
 
 public class StarflightBlocks
 {
@@ -235,7 +234,7 @@ public class StarflightBlocks
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(new TranslatableText("block.space.energy_producer").append(String.valueOf(df.format(powerOutput))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(powerOutput))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
 	
@@ -243,7 +242,7 @@ public class StarflightBlocks
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(new TranslatableText("block.space.energy_consumer").append(String.valueOf(df.format(powerInput))).append("kJ/s").formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(powerInput))).append("kJ/s").formatted(Formatting.GOLD));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
 	

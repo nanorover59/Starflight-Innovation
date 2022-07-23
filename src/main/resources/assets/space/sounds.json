@@ -1,0 +1,11 @@
+{
+  "thruster": {
+    "subtitle": "subtitles.space.thruster",
+    "sounds": [
+      "space:thruster0",
+      "space:thruster1",
+      "space:thruster2",
+      "space:thruster3"
+    ]
+  }
+}

@@ -57,9 +57,9 @@ public class StarflightBiomes
         return RegistryKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, name));
     }
 	
-	private static Biome createBiome(Biome.Precipitation precipitation, Biome.Category category, float temperature, float downfall, int waterColor, int waterFogColor, int skyColor, SpawnSettings.Builder spawnSettings, GenerationSettings.Builder generationSettings, @Nullable MusicSound music)
+	private static Biome createBiome(Biome.Precipitation precipitation, float temperature, float downfall, int waterColor, int waterFogColor, int skyColor, SpawnSettings.Builder spawnSettings, GenerationSettings.Builder generationSettings, @Nullable MusicSound music)
 	{
-        return new Biome.Builder().precipitation(precipitation).category(category).temperature(temperature).downfall(downfall).effects(new BiomeEffects.Builder().waterColor(waterColor).waterFogColor(waterFogColor).fogColor(12638463).skyColor(skyColor).moodSound(BiomeMoodSound.CAVE).music(music).build()).spawnSettings(spawnSettings.build()).generationSettings(generationSettings.build()).build();
+        return new Biome.Builder().precipitation(precipitation).temperature(temperature).downfall(downfall).effects(new BiomeEffects.Builder().waterColor(waterColor).waterFogColor(waterFogColor).fogColor(12638463).skyColor(skyColor).moodSound(BiomeMoodSound.CAVE).music(music).build()).spawnSettings(spawnSettings.build()).generationSettings(generationSettings.build()).build();
     }
 	
 	public static CustomSurfaceBuilder getSurfaceBuilder(RegistryKey<Biome> biome)
@@ -110,7 +110,6 @@ public class StarflightBiomes
 	private static void createSpaceBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		Biome.Category category = Biome.Category.NONE;
 		float temperature = 0.5f;
 		float downfall = 0.0f;
 		int waterColor = 4159204;
@@ -118,14 +117,13 @@ public class StarflightBiomes
 		int skyColor = 0;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
-		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
 	private static void createMoonBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		Biome.Category category = Biome.Category.NONE;
 		float temperature = 0.5f;
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
@@ -135,14 +133,13 @@ public class StarflightBiomes
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
-		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
 	private static void createMarsBiome(RegistryKey<Biome> biomeKey, boolean surfaceRocks)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		Biome.Category category = Biome.Category.NONE;
 		float temperature = 0.5f;
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
@@ -157,7 +154,7 @@ public class StarflightBiomes
 		if(surfaceRocks)
 			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
 		
-		Biome biome = createBiome(precipitation, category, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 }

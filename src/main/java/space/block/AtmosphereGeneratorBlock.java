@@ -18,8 +18,8 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -45,7 +45,7 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("block.space.atmosphere_generator.description_1"), new TranslatableText("block.space.atmosphere_generator.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.atmosphere_generator.description_1"), Text.translatable("block.space.atmosphere_generator.description_2"));
 	}
 	
 	@Override
@@ -112,7 +112,7 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 			if(required > supply)
 			{
 				PlayerEntity player = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 32.0, false);
-				TranslatableText text = new TranslatableText("block.space.atmosphere_generator.error");
+				MutableText text = Text.translatable("block.space.atmosphere_generator.error");
 				player.sendMessage(text, true);
 			}
 			else

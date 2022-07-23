@@ -1,15 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "space.mixin",
+  "package": "space.mixin.common",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "WorldMixin",
     "NoiseChunkGeneratorMixin",
-    "ChunkGeneratorSettingsMixin",
-    "DensityFunctionsMixin",
-    "StructureFeatureMixin",
-    "ConfiguredStructureFeaturesMixin",
     "LivingEntityMixin",
     "ProjectileEntityMixin",
     "ThrownEntityMixin",
@@ -25,12 +21,6 @@
     "EntityMixin",
     "FluidStateMixin",
     "FallingBlockMixin"
-  ],
-  "client": [
-    "LevelPropertiesMixin",
-    "WorldRendererMixin",
-    "BackgroundRendererMixin",
-    "BlockModelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

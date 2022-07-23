@@ -48,7 +48,7 @@ import space.block.FluidTankControllerBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.inventory.ImplementedInventory;
-import space.mixin.EntityMixin;
+import space.mixin.common.EntityMixin;
 import space.vessel.MovingCraftBlockData;
 
 public class MovingCraftEntity extends Entity

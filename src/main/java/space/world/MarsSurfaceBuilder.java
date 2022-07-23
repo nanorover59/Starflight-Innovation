@@ -26,7 +26,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		BlockState topState = StarflightBlocks.FERRIC_SAND.getDefaultState();
 		BlockState bottomState = StarflightBlocks.FERRIC_STONE.getDefaultState();
 		int topDepth = 4;
-		int bottomDepth = region.getRandom().nextInt(2, 5);
+		int bottomDepth = 2 + region.getRandom().nextInt(3);
 		int newSeaLevel = 16;
 		
 		if(biome == StarflightBiomes.MARS_LOWLANDS)

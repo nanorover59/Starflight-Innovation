@@ -12,7 +12,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
@@ -34,7 +33,7 @@ public class VentBlock extends Block implements FluidUtilityBlock
 	@Override
 	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("block.space.vent.description_1"), new TranslatableText("block.space.vent.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"));
 	}
 
 	@Override

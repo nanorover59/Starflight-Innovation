@@ -10,7 +10,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
 
 public class BatteryCellItem extends Item
@@ -29,7 +28,7 @@ public class BatteryCellItem extends Item
 		if(stack.getNbt() != null)
 		{
 			DecimalFormat df = new DecimalFormat("#.##");
-			tooltip.add(new TranslatableText("item.space.battery_cell.description").append(df.format(stack.getNbt().getDouble("charge")) + "kJ"));
+			tooltip.add(Text.translatable("item.space.battery_cell.description").append(df.format(stack.getNbt().getDouble("charge")) + "kJ"));
 			//stack.setDamage((int) (getMaxDamage() * (MAX_CHARGE / stack.getNbt().getDouble("charge"))));
 		}
 		else

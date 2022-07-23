@@ -9,8 +9,8 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -80,12 +80,12 @@ public class FluidTankControllerBlock extends BlockWithEntity
 				if(!fluidTankController.isActive())
 				{
 					int result = initializeFluidTank(world, pos, fluidTankController.getFluidName(), capacity, fluidTankController);
-					TranslatableText text = new TranslatableText("");
+					MutableText text = Text.translatable("");
 					
 					if(result < 4)
-						text.append(new TranslatableText("block.space.fluid_tank_" + result));
+						text.append(Text.translatable("block.space.fluid_tank_" + result));
 					
-					if(text != BaseText.EMPTY)
+					if(text != Text.EMPTY)
 						player.sendMessage(text, true);
 					
 					return ActionResult.SUCCESS;

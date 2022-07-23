@@ -20,7 +20,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import space.StarflightMod;
@@ -71,8 +70,8 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 		Planet currentPlanet = PlanetList.getPlanetForWorld(client.world.getRegistryKey());
 		Planet targetPlanet = PlanetList.getByName(targetName);
 		DecimalFormat df = new DecimalFormat("#.#");
-		MutableText massText = new TranslatableText("block.space.mass").append(df.format(mass / 1000.0)).append("t");
-		MutableText ttwText = new TranslatableText("block.space.ttw");
+		MutableText massText = Text.translatable("block.space.mass").append(df.format(mass / 1000.0)).append("t");
+		MutableText ttwText = Text.translatable("block.space.ttw");
 		
 		if(!inOrbit && currentPlanet != null)
 		{
@@ -83,20 +82,20 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 		else
 			ttwText.append("NA");
 			
-		MutableText hydrogenText = new TranslatableText("block.space.hydrogen_container.level").append(df.format((hydrogen / hydrogenCapacity) * 100)).append("%");
-		MutableText oxygenText = new TranslatableText("block.space.oxygen_container.level").append(df.format((oxygen / oxygenCapacity) * 100)).append("%");
-		MutableText deltaVText = new TranslatableText("block.space.deltav").append(df.format(deltaV)).append("m/s");
-		MutableText deltaVCapacityText = new TranslatableText("block.space.deltav_capacity").append(df.format(deltaVCapacity)).append("m/s");
-		MutableText deltaVToOrbitText = new TranslatableText("block.space.deltav_to_orbit").append(df.format(requiredDeltaV1)).append("m/s");
-		MutableText deltaVToSurfaceText = new TranslatableText("block.space.deltav_to_surface").append(df.format(requiredDeltaV1)).append("m/s");
+		MutableText hydrogenText = Text.translatable("block.space.hydrogen_container.level").append(df.format((hydrogen / hydrogenCapacity) * 100)).append("%");
+		MutableText oxygenText = Text.translatable("block.space.oxygen_container.level").append(df.format((oxygen / oxygenCapacity) * 100)).append("%");
+		MutableText deltaVText = Text.translatable("block.space.deltav").append(df.format(deltaV)).append("m/s");
+		MutableText deltaVCapacityText = Text.translatable("block.space.deltav_capacity").append(df.format(deltaVCapacity)).append("m/s");
+		MutableText deltaVToOrbitText = Text.translatable("block.space.deltav_to_orbit").append(df.format(requiredDeltaV1)).append("m/s");
+		MutableText deltaVToSurfaceText = Text.translatable("block.space.deltav_to_surface").append(df.format(requiredDeltaV1)).append("m/s");
 		MutableText deltaVToTargetText = null;
 		
 		if(targetPlanet != null)
-			deltaVToTargetText = new TranslatableText("planet.space." + targetPlanet.getName()).append(": ").append(df.format(requiredDeltaV2)).append("m/s");
+			deltaVToTargetText = Text.translatable("planet.space." + targetPlanet.getName()).append(": ").append(df.format(requiredDeltaV2)).append("m/s");
 		
-		MutableText button1Text = new TranslatableText("block.space.rocket_controller.build");
-		MutableText button2Text = new TranslatableText(inOrbit ? "block.space.rocket_controller.surface" : "block.space.rocket_controller.orbit");
-		MutableText button3Text = new TranslatableText("block.space.rocket_controller.transfer");
+		MutableText button1Text = Text.translatable("block.space.rocket_controller.build");
+		MutableText button2Text = Text.translatable(inOrbit ? "block.space.rocket_controller.surface" : "block.space.rocket_controller.orbit");
+		MutableText button3Text = Text.translatable("block.space.rocket_controller.transfer");
 		int button1X = x + 118;
 		int button1Y = y + 20;
 		int button2X = x + 118;

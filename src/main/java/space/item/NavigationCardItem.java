@@ -9,7 +9,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import space.client.StarflightModClient;
@@ -27,10 +26,10 @@ public class NavigationCardItem extends Item
 		if(stack.getNbt() != null && stack.getNbt().contains("planet"))
 		{
 			String planetName = stack.getNbt().getString("planet");
-			MutableText text = new TranslatableText("planet.space." + planetName).formatted(Formatting.ITALIC);
+			MutableText text = Text.translatable("planet.space." + planetName).formatted(Formatting.ITALIC);
 			tooltip.add(text);
 		}
 		else
-			StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("item.space.navigation_card.description"));
+			StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.navigation_card.description"));
 	}
 }

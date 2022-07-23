@@ -24,7 +24,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
@@ -60,8 +59,8 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(new TranslatableText("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
-		StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("block.space.electrolyzer.description_1"), new TranslatableText("block.space.electrolyzer.description_2"));
+		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.electrolyzer.description_1"), Text.translatable("block.space.electrolyzer.description_2"));
 	}
 	
 	@Override

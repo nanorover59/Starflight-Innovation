@@ -22,7 +22,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
@@ -104,7 +103,7 @@ public class StarflightModClient implements ClientModInitializer
 				tooltip.add(text);
 		}
 		else
-			tooltip.add(new TranslatableText("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
+			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
 	}
 	
 	public static void hiddenItemTooltip(List<Text> tooltip, List<Text> texts)
@@ -115,6 +114,6 @@ public class StarflightModClient implements ClientModInitializer
 				tooltip.add(text);
 		}
 		else
-			tooltip.add(new TranslatableText("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
+			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
 	}
 }

@@ -33,6 +33,7 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.planet.Planet;
 import space.planet.PlanetList;
 import space.util.AirUtil;
+import space.util.StarflightEffects;
 import space.vessel.BlockMass;
 import space.vessel.MovingCraftBlockData;
 import space.vessel.MovingCraftBlockRenderData;
@@ -63,6 +64,7 @@ public class RocketEntity extends MovingCraftEntity
 	private double lowerHeight;
 	private double upperHeight;
 	private double maxWidth;
+	private int soundEffectTimer;
 	
 	public RocketEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
 	{
@@ -219,6 +221,15 @@ public class RocketEntity extends MovingCraftEntity
 			return;
 		}
 		
+		// Play the rocket engine sound effect.
+		if(getThrottle() > 0.0F && soundEffectTimer <= 0)
+		{
+			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 100000.0F, 0.8F + this.random.nextFloat() * 0.05F);
+			soundEffectTimer = 5;
+		}
+		else
+			soundEffectTimer--;
+			
 		// Set the target landing altitude if necessary.
 		if(changedDimension && arrivalPos.getY() == -9999)
 		{
@@ -482,14 +493,14 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		
 		Vec3f velocity = upAxis.copy();
-		velocity.scale(-2.0F + (this.random.nextFloat() * 0.25F));
+		velocity.scale(-4.0F + (this.random.nextFloat() * 0.5F));
 		velocity.add((float) getVelocity().getX(), (float) getVelocity().getY(), (float) getVelocity().getZ());
 		
 		for(Vec3f pos : thrusterOffsetsRotated)
 		{
 			pos.add((float) getX(), (float) getY(), (float) getZ());
 			
-			for(int i = 0; i < 3; i++)
+			for(int i = 0; i < 4; i++)
 			{
 				world.addParticle(ParticleTypes.POOF, true, pos.getX(), pos.getY(), pos.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 				pos.add((this.random.nextFloat() - this.random.nextFloat()) * 0.1F, 0.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.1F);

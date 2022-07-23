@@ -11,7 +11,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -30,7 +29,7 @@ public class WrenchItem extends Item
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("item.space.wrench.description"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.wrench.description"));
 	}
 
 	@Override

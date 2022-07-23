@@ -249,8 +249,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-			bufferBuilder.end();
-			BufferRenderer.draw(bufferBuilder);
+			BufferRenderer.drawWithShader(bufferBuilder.end());
 			
 			RenderSystem.setShaderTexture(0, SUN_0);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
@@ -258,8 +257,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-			bufferBuilder.end();
-			BufferRenderer.draw(bufferBuilder);
+			BufferRenderer.drawWithShader(bufferBuilder.end());
 			matrices.pop();
 		}
 		else
@@ -318,16 +316,14 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startFrame, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endFrame, 1.0f).next();
-			bufferBuilder.end();
-			BufferRenderer.draw(bufferBuilder);
+			BufferRenderer.drawWithShader(bufferBuilder.end());
 			RenderSystem.setShaderTexture(0, PLANET_SHADING);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 			bufferBuilder.vertex(matrix4f3, -t,	100.0f, t).texture(endShadingFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startShadingFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startShadingFrame, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endShadingFrame, 1.0f).next();
-			bufferBuilder.end();
-			BufferRenderer.draw(bufferBuilder);
+			BufferRenderer.drawWithShader(bufferBuilder.end());
 			
 			matrices.pop();
 		}

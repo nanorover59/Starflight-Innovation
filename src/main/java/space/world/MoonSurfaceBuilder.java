@@ -27,7 +27,7 @@ public class MoonSurfaceBuilder extends CustomSurfaceBuilder
 		BlockState topState = StarflightBlocks.REGOLITH.getDefaultState();
 		BlockState bottomState = Blocks.COBBLESTONE.getDefaultState();
 		int topDepth = 5;
-		int bottomDepth = region.getRandom().nextInt(2, 4);
+		int bottomDepth = 2 + region.getRandom().nextInt(2);
 		
 		if(biome == StarflightBiomes.MOON_LOWLANDS)
 		{

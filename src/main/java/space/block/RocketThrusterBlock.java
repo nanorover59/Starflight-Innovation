@@ -14,7 +14,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
@@ -112,11 +111,11 @@ public class RocketThrusterBlock extends Block
 		
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(new TranslatableText("block.space.vacuum_thrust").append(df.format(vacuumThrust / 1000.0)).append("kN"));
-		textList.add(new TranslatableText("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
-		textList.add(new TranslatableText("block.space.local_thrust").append(df.format(getThrust(p) / 1000.0)).append("kN"));
-		textList.add(new TranslatableText("block.space.local_isp").append(df.format(getISP(p))).append("s"));
-		textList.add(new TranslatableText("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
+		textList.add(Text.translatable("block.space.vacuum_thrust").append(df.format(vacuumThrust / 1000.0)).append("kN"));
+		textList.add(Text.translatable("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
+		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(p) / 1000.0)).append("kN"));
+		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(p))).append("s"));
+		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
 		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 }

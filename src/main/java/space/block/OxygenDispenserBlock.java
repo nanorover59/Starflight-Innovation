@@ -15,8 +15,8 @@ import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -29,8 +29,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.client.StarflightModClient;
 import space.item.OxygenTankItem;
-import space.item.StarflightItems;
 import space.item.SpaceSuitItem;
+import space.item.StarflightItems;
 import space.util.AirUtil;
 import space.util.StarflightEffects;
 
@@ -47,7 +47,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("block.space.oxygen_dispenser.description_1"), new TranslatableText("block.space.oxygen_dispenser.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.oxygen_dispenser.description_1"), Text.translatable("block.space.oxygen_dispenser.description_2"));
 	}
 	
 	@Override
@@ -96,7 +96,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 		if(availableOxygen >= requiredOxygen)
 		{
 			StarflightEffects.sendFizz(world, pos);
-			TranslatableText text = new TranslatableText("block.space.oxygen_dispenser.message");
+			MutableText text = Text.translatable("block.space.oxygen_dispenser.message");
 			player.sendMessage(text, true);
 
 			if(heldStack.getItem() instanceof OxygenTankItem)

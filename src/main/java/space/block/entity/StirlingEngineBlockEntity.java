@@ -27,7 +27,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.tag.ItemTags;
 import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -139,7 +138,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
         addFuel(map, Items.STICK, 100);
         addFuel(map, ItemTags.SAPLINGS, 100);
         addFuel(map, Items.BOWL, 100);
-        addFuel(map, ItemTags.CARPETS, 67);
+        addFuel(map, ItemTags.WOOL_CARPETS, 67);
         addFuel(map, Blocks.DRIED_KELP_BLOCK, 4001);
         addFuel(map, Items.CROSSBOW, 300);
         addFuel(map, Blocks.BAMBOO, 50);
@@ -342,7 +341,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	@Override
 	public Text getContainerName()
 	{
-		return new TranslatableText(getCachedState().getBlock().getTranslationKey());
+		return Text.translatable(getCachedState().getBlock().getTranslationKey());
 	}
 
 	@Override

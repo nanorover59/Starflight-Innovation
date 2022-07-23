@@ -9,9 +9,10 @@ import net.minecraft.util.Identifier;
 import space.block.StarflightBlocks;
 import space.block.entity.RocketControllerBlockEntity;
 import space.entity.StarflightEntities;
-import space.event.SpaceAgeModEvents;
+import space.event.StarflightEvents;
 import space.item.StarflightItems;
 import space.planet.PlanetList;
+import space.util.StarflightEffects;
 import space.world.StarflightBiomes;
 import space.world.StarflightWorldGeneration;
 
@@ -28,7 +29,8 @@ public class StarflightMod implements ModInitializer
 		StarflightEntities.initializeEntities();
 		StarflightBiomes.initializeBiomes();
 		StarflightWorldGeneration.initializeWorldGeneration();
-		SpaceAgeModEvents.registerServerEvents();
+		StarflightEvents.registerServerEvents();
+		StarflightEffects.initializeSounds();
 		PlanetList.initialize();
 		
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_button"), (server1, player, handler1, buf, sender) -> RocketControllerBlockEntity.receiveButtonPress(server1, player, handler1, buf, sender));

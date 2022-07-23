@@ -126,6 +126,7 @@
 	"block.space.airlock_trapdoor": "Airlock Trapdoor",
 	"block.space.rocket_controller": "Rocket Controller",
 	"block.space.thruster_small": "Basic Rocket Thruster",
+	"subtitles.space.thruster": "Rocket Thruster",
 	"planet.space.sol": "The Sun",
 	"planet.space.earth": "Earth",
 	"planet.space.moon": "The Moon",

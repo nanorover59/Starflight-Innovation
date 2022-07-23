@@ -1,37 +1,38 @@
 package space.world;
 
-import java.util.Random;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
-import net.minecraft.structure.StructurePiecesGenerator;
 import net.minecraft.structure.StructurePiecesHolder;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.random.ChunkRandom;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.Heightmap.Type;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
-import net.minecraft.world.gen.feature.DefaultFeatureConfig;
+import net.minecraft.world.gen.noise.NoiseConfig;
+import net.minecraft.world.gen.structure.Structure;
 
 public class CraterGenerator
 {
-	public static void addPieces(StructurePiecesGenerator.Context<DefaultFeatureConfig> context, BlockPos pos, StructurePiecesHolder holder)
+	public static void addPieces(Structure.Context context, BlockPos pos, StructurePiecesHolder holder)
 	{
 		if(!checkEvenTerrain(context, pos))
 			return;
 		
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
-		Random random = context.random();
-		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world());
-		int depth = random.nextInt(12, 32);
+		ChunkRandom random = context.random();
+		NoiseConfig noiseConfig = context.noiseConfig();
+		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(),noiseConfig);
+		int depth = 12 + random.nextInt(20);
 		BlockPos center = pos.add(random.nextInt(16), surfaceY - depth, random.nextInt(16));
 		float widthFactor = (depth / 3) + random.nextFloat();
 		int chunkRadius = (((int) Math.ceil(widthFactor * Math.sqrt(depth))) >> 4) + 1;
@@ -46,13 +47,14 @@ public class CraterGenerator
 		}
 	}
 	
-	private static boolean checkEvenTerrain(StructurePiecesGenerator.Context<DefaultFeatureConfig> context, BlockPos pos)
+	private static boolean checkEvenTerrain(Structure.Context context, BlockPos pos)
 	{
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
-		int y1 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world());
-		int y2 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world());
-		int y3 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world());
-		int y4 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world());
+		NoiseConfig noiseConfig = context.noiseConfig();
+		int y1 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
+		int y2 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
+		int y3 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
+		int y4 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
 		double average = (y1 + y2 + y3 + y4) / 4;
 		int d1 = (int) Math.abs(average - y1);
 		int d2 = (int) Math.abs(average - y2);
@@ -100,7 +102,7 @@ public class CraterGenerator
 		}
 
 		@Override
-		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pos)
+		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot)
 		{
 			final BlockPos.Mutable mutable = new BlockPos.Mutable();
 			BlockPos startPos = chunkPos.getBlockPos(0, surfaceY, 0);
@@ -127,7 +129,7 @@ public class CraterGenerator
 					for(int y = maxDepth; y > -depth; y--)
 					{
 						mutable.setY(surfaceY + y);
-
+						
 						if(!world.getBlockState(mutable).isAir() && !world.containsFluid(new Box(mutable)))
 						{
 							if(y == -depth + 1)

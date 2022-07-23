@@ -2,7 +2,6 @@ package space.vessel;
 
 import java.util.BitSet;
 import java.util.List;
-import java.util.Random;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -33,11 +32,12 @@ import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import space.block.RocketThrusterBlock;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
-import space.mixin.BlockModelRendererMixin;
+import space.mixin.client.BlockModelRendererMixin;
 
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftBlockRenderData
@@ -105,6 +105,7 @@ public class MovingCraftBlockRenderData
 				
 				if(rocketEntity.getThrottle() > 0.0F)
 				{
+					// Render mach diamonds for under expanded thrust or a simple plume for over expanded thrust.
 					if(rocketEntity.getThrustUnderexpanded())
 					{
 						boolean b = false;
@@ -113,16 +114,16 @@ public class MovingCraftBlockRenderData
 						{
 							matrixStack.push();
 							matrixStack.translate(position.getX() + (b ? -0.01 : 0.01), position.getY() - i * 0.75, position.getZ() + (b ? -0.01 : 0.01));
-							matrixStack.scale(1.0F - i * 0.09F, 1.25F, 1.0F - i * 0.09F);
+							matrixStack.scale(1.0F - i * 0.1F, 1.25F, 1.0F - i * 0.1F);
 							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
 					        MatrixStack.Entry entry = matrixStack.peek();
 					        Matrix4f matrix4f = entry.getPositionMatrix();
 					        Matrix3f matrix3f = entry.getNormalMatrix();
 					        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(MACH_DIAMOND_LAYER);
-					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1);
-					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1);
-					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0);
-					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1, 220 - i * 10);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1, 220 - i * 10);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0, 220 - i * 10);
+					        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0, 220 - i * 10);
 					        matrixStack.pop();
 					        b ^= true;
 						}
@@ -131,16 +132,16 @@ public class MovingCraftBlockRenderData
 					{
 						matrixStack.push();
 						matrixStack.translate(position.getX(), position.getY() - 0.8, position.getZ());
-						matrixStack.scale(2.0F, 2.5F, 2.0F);
+						matrixStack.scale(1.75F, 3.0F, 1.75F);
 						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
 				        MatrixStack.Entry entry = matrixStack.peek();
 				        Matrix4f matrix4f = entry.getPositionMatrix();
 				        Matrix3f matrix3f = entry.getNormalMatrix();
 				        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(THRUSTER_PLUME_LAYER);
-				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1);
-				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1);
-				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0);
-				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 0.0f, 0, 1, 220);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 0.0f, 1, 1, 220);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 1.0f, 1.0f, 1, 0, 220);
+				        thrusterPlumeVertex(vertexConsumer, matrix4f, matrix3f, 0.0f, 1.0f, 0, 0, 220);
 				        matrixStack.pop();
 					}
 				}
@@ -205,8 +206,8 @@ public class MovingCraftBlockRenderData
         matrixStack.pop();
 	}
 	
-	private static void thrusterPlumeVertex(VertexConsumer buffer, Matrix4f matrix, Matrix3f normalMatrix, float x, float y, int u, int v)
+	private static void thrusterPlumeVertex(VertexConsumer buffer, Matrix4f matrix, Matrix3f normalMatrix, float x, float y, int u, int v, int alpha)
 	{
-        buffer.vertex(matrix, x - 0.5F, y - 0.5F, 0.0F).color(255, 255, 255, 220).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(LightmapTextureManager.MAX_BLOCK_LIGHT_COORDINATE).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
+        buffer.vertex(matrix, x - 0.5F, y - 0.5F, 0.0F).color(255, 255, 255, alpha).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(LightmapTextureManager.MAX_BLOCK_LIGHT_COORDINATE).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
     }
 }

@@ -13,7 +13,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.world.World;
 
 public class SpaceSuitItem extends DyeableArmorItem
@@ -31,7 +30,7 @@ public class SpaceSuitItem extends DyeableArmorItem
 			if(stack.getNbt() != null && stack.getNbt().contains("oxygen"))
 			{
 				DecimalFormat df = new DecimalFormat("#.##");
-				tooltip.add(new TranslatableText("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
+				tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
 			}
 			else
 			{

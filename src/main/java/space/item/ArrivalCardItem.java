@@ -9,8 +9,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
@@ -33,11 +33,11 @@ public class ArrivalCardItem extends Item
 			int x = stack.getNbt().getInt("x");
 			int z = stack.getNbt().getInt("z");
 			int d = stack.getNbt().getInt("d");
-			tooltip.add(new TranslatableText("").append("X: " + x + "    Z: " + z).formatted(Formatting.ITALIC));
-			tooltip.add(new TranslatableText("").append("Facing: " + Direction.fromHorizontal(d).asString().toUpperCase()).formatted(Formatting.ITALIC));
+			tooltip.add(Text.translatable("").append("X: " + x + "    Z: " + z).formatted(Formatting.ITALIC));
+			tooltip.add(Text.translatable("").append("Facing: " + Direction.fromHorizontal(d).asString().toUpperCase()).formatted(Formatting.ITALIC));
 		}
 		else
-			StarflightModClient.hiddenItemTooltip(tooltip, new TranslatableText("item.space.arrival_card.description"));
+			StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.arrival_card.description"));
 	}
 	
 	@Override
@@ -48,7 +48,7 @@ public class ArrivalCardItem extends Item
 		nbt.putInt("x", player.getBlockX());
 		nbt.putInt("z", player.getBlockZ());
 		nbt.putInt("d", Direction.fromRotation(player.headYaw).getHorizontal());
-		TranslatableText text = new TranslatableText("item.space.arrival_card.use");
+		MutableText text = Text.translatable("item.space.arrival_card.use");
 		player.sendMessage(text, true);
 		return TypedActionResult.pass(itemStack);
 	}

@@ -2,7 +2,6 @@
   "type" : "minecraft:overworld",
   "generator" : {
     "type" : "minecraft:noise",
-    "seed" : 0,
     "settings" : "space:lunar",
     "biome_source" : {
       "type" : "minecraft:multi_noise",

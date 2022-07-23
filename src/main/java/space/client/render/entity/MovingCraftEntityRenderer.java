@@ -1,7 +1,6 @@
 package space.client.render.entity;
 
 import java.util.ArrayList;
-import java.util.Random;
 import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
@@ -14,6 +13,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.entity.MovingCraftEntity;
 import space.vessel.MovingCraftBlockRenderData;
@@ -70,7 +70,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		World world = entity.getEntityWorld();
 		BlockPos centerBlockPos = entity.getBlockPos();
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
-		Random random = new Random();
+		Random random = Random.create();
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
 			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial);
