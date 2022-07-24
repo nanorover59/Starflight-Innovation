@@ -32,12 +32,16 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private boolean hasLowClouds;
 	private boolean hasCloudCover;
 	private boolean hasWeather;
+	private boolean drawClouds;
+	private double cloudRotation;
+	private int cloudLevel;
+	
 	private static final Identifier PLANET_SHADING = new Identifier(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");
 	private static final Identifier SUN_HAZE_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_haze_0.png");
 	private static final Identifier SUN_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
-	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_)
+	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean drawClouds_, double cloudRotation_, int cloudIndex_)
 	{
 		name = name_;
 		setPosition(position_);
@@ -50,6 +54,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setLowClouds(hasLowClouds_);
 		setCloudCover(hasCloudCover_);
 		setWeather(hasWeather_);
+		setDrawClouds(drawClouds_);
+		setCloudRotation(cloudRotation_);
+		setCloudLevel(cloudIndex_);
 	}
 	
 	public PlanetRenderer(PlanetRenderer other)
@@ -65,6 +72,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setLowClouds(other.hasLowClouds);
 		setCloudCover(other.hasCloudCover);
 		setWeather(other.hasWeather);
+		setDrawClouds(other.drawClouds);
+		setCloudRotation(other.cloudRotation);
+		setCloudLevel(other.cloudLevel);
 	}
 	
 	@Override
@@ -178,6 +188,36 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	public void setWeather(boolean hasWeather)
 	{
 		this.hasWeather = hasWeather;
+	}
+	
+	public boolean drawClouds()
+	{
+		return drawClouds;
+	}
+	
+	public void setDrawClouds(boolean drawClouds)
+	{
+		this.drawClouds = drawClouds;
+	}
+	
+	public double getCloudRotation()
+	{
+		return cloudRotation;
+	}
+
+	public void setCloudRotation(double cloudRotation)
+	{
+		this.cloudRotation = cloudRotation;
+	}
+	
+	public int getCloudLevel()
+	{
+		return cloudLevel;
+	}
+
+	public void setCloudLevel(int cloudLevel)
+	{
+		this.cloudLevel = cloudLevel;
 	}
 	
 	/**
@@ -317,6 +357,31 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startFrame, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endFrame, 1.0f).next();
 			BufferRenderer.drawWithShader(bufferBuilder.end());
+			
+			if(drawClouds)
+			{
+				angleToLineOfSight = cloudRotation - angleToViewpoint + Math.PI;
+				
+				if(angleToLineOfSight < 0.0d)
+					angleToLineOfSight += Math.PI * 2.0d;
+				else if(angleToLineOfSight > Math.PI * 2.0d)
+					angleToLineOfSight -= Math.PI * 2.0d;
+				
+				double cloudIndex = Math.round(16.0d * (angleToLineOfSight / (Math.PI * 2.0d)));
+				float startCloudFrameU = (float) (cloudIndex * interval);
+				float endCloudFrameU = (float) (startCloudFrameU + interval);
+				float startCloudFrameV = (float) (cloudLevel * 0.25f);
+				float endCloudFrameV = (float) (startCloudFrameV + 0.25f);
+				
+				RenderSystem.setShaderTexture(0, getTexture(name + "_clouds"));
+				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(endCloudFrameU, startCloudFrameV).next();
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startCloudFrameU, startCloudFrameV).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startCloudFrameU, endCloudFrameV).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endCloudFrameU, endCloudFrameV).next();
+				BufferRenderer.drawWithShader(bufferBuilder.end());
+			}
+			
 			RenderSystem.setShaderTexture(0, PLANET_SHADING);
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 			bufferBuilder.vertex(matrix4f3, -t,	100.0f, t).texture(endShadingFrame, 0.0f).next();

@@ -51,10 +51,13 @@ public class PlanetRenderList
 			boolean hasLowClouds = buffer.readBoolean();
 			boolean hasCloudCover = buffer.readBoolean();
 			boolean hasWeather = buffer.readBoolean();
+			boolean drawClouds = buffer.readBoolean();
+			double cloudRotation = buffer.readDouble();
+			int cloudLevel = buffer.readInt();
 			Vec3d position = new Vec3d(positionX, positionY, positionZ);
 			Vec3d surfaceViewpoint = new Vec3d(surfaceViewpointX, surfaceViewpointY, surfaceViewpointZ);
 			Vec3d parkingOrbitViewpoint = new Vec3d(parkingOrbitViewpointX, parkingOrbitViewpointY, parkingOrbitViewpointZ);
-			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather);
+			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, drawClouds, cloudRotation, cloudLevel);
 			planetListTemporary.add(planetRenderer);
 			
 			if(viewpointName.contains(name))

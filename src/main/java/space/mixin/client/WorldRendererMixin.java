@@ -35,6 +35,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
+import space.StarflightMod;
+import space.client.StarflightModClient;
 import space.planet.PlanetRenderList;
 import space.planet.PlanetRenderer;
 
@@ -115,15 +117,16 @@ public abstract class WorldRendererMixin
 			
 			float rainGradient = starrySky ? 0.0f : this.world.getRainGradient(tickDelta);
 			float s = cloudySky ? 0.0f : (1.0f - rainGradient);
-			float starFactor = starrySky ? 1.0f : this.world.method_23787(tickDelta) * s;
+			float starFactor = starrySky ? 0.8f : this.world.method_23787(tickDelta) * s * 1.6f;
 
 			if(starFactor > 0.0f)
 			{
+				RenderSystem.enableTexture();
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
-				//BackgroundRenderer.clearFog();
-				//this.starsBuffer.setShader(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionShader());
 				this.starsBuffer.bind();
-	            this.starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionShader());
+	            this.starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
 				runnable.run();
 			}
@@ -205,5 +208,26 @@ public abstract class WorldRendererMixin
 	{
 		if(PlanetRenderList.getViewpointPlanet() != null && (PlanetRenderList.isViewpointInOrbit() || !PlanetRenderList.getViewpointPlanet().hasLowClouds()))
 			info.cancel();
+	}
+	
+	@Inject(method = "renderStars()V", at = @At("HEAD"), cancellable = true)
+	public void renderStarsInject(CallbackInfo info)
+	{
+		if(true)
+		{
+			Tessellator tessellator = Tessellator.getInstance();
+			BufferBuilder bufferBuilder = tessellator.getBuffer();
+			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			
+			if(this.starsBuffer != null)
+				this.starsBuffer.close();
+			
+			this.starsBuffer = new VertexBuffer();
+			BufferBuilder.BuiltBuffer builtBuffer = StarflightModClient.renderStars(bufferBuilder);
+			this.starsBuffer.bind();
+			this.starsBuffer.upload(builtBuffer);
+			VertexBuffer.unbind();
+			info.cancel();
+		}
 	}
 }

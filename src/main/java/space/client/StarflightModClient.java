@@ -16,7 +16,10 @@ import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.StickyKeyBinding;
+import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexFormat;
+import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -24,6 +27,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
@@ -115,5 +119,63 @@ public class StarflightModClient implements ClientModInitializer
 		}
 		else
 			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
+	}
+	
+	/**
+	 * Render textured stars to a vertex buffer. Used by the sky render inject.
+	 */
+	public static BufferBuilder.BuiltBuffer renderStars(BufferBuilder buffer)
+	{
+		Random random = Random.create(20844L);
+		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+
+		for(int i = 0; i < 3600; i++)
+		{
+			double d = random.nextFloat() * 2.0f - 1.0f;
+			double e = random.nextFloat() * 2.0f - 1.0f;
+			double f = random.nextFloat() * 2.0f - 1.0f;
+			double g = 0.5f + random.nextFloat() * 0.1f;
+			double h = d * d + e * e + f * f;
+
+			if(!(h < 1.0) || !(h > 0.001))
+				continue;
+
+			h = 1.0 / Math.sqrt(h);
+			double j = (d *= h) * 100.0;
+			double k = (e *= h) * 100.0;
+			double l = (f *= h) * 100.0;
+			double m = Math.atan2(d, f);
+			double n = Math.sin(m);
+			double o = Math.cos(m);
+			double p = Math.atan2(Math.sqrt(d * d + f * f), e);
+			double q = Math.sin(p);
+			double r = Math.cos(p);
+			double s = random.nextDouble() * Math.PI * 2.0;
+			double t = Math.sin(s);
+			double u = Math.cos(s);
+			int frame = 0;
+
+			while(random.nextFloat() < 0.4 && frame < 4)
+				frame++;
+			
+			double interval = 1.0f / 4.0f;
+			float startFrame = (float) (frame * interval);
+			float endFrame = (float) (startFrame + interval);
+
+			for(int v = 0; v < 4; v++)
+			{
+				double x = (double) ((v & 2) - 1) * g;
+				double y = (double) ((v + 1 & 2) - 1) * g;
+				double aa = x * u - y * t;
+				double ac = y * u + x * t;
+				double ad = aa * q + 0.0 * r;
+				double ae = 0.0 * q - aa * r;
+				double af = ae * n - ac * o;
+				double ah = ac * n + ae * o;
+				buffer.vertex(j + af, k + ad, l + ah).texture(v == 0 || v == 3 ? endFrame : startFrame, v < 2 ? 0.0f : 1.0f).next();
+			}
+		}
+		
+		return buffer.end();
 	}
 }

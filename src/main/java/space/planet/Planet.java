@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import net.darkhax.ess.DataCompound;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import space.util.VectorMathUtil;
 
 public class Planet
@@ -54,6 +55,11 @@ public class Planet
 	private boolean hasLowClouds;
 	private boolean hasCloudCover;
 	private boolean hasWeather;
+	private boolean drawClouds;
+	private double cloudRotation;
+	private double cloudRotationRate;
+	private int cloudLevel;
+	private int cloudTimer;
 	
 	public Planet(String name_, String parentName_, int satelliteLevel_, double mass_, double radius_, double parkingOrbitRadius_)
 	{
@@ -118,6 +124,15 @@ public class Planet
 		hasWeather = hasWeather_;
 	}
 	
+	public void setDecorativeParameters(boolean drawClouds_, double cloudRotationRate_)
+	{
+		drawClouds = drawClouds_;
+		cloudRotationRate = cloudRotationRate_;
+		rotation = 0.0d;
+		cloudLevel = 0;
+		cloudTimer = 6000;
+	}
+	
 	public void linkSatellites()
 	{
 		for(Planet p : PlanetList.getPlanets())
@@ -142,6 +157,9 @@ public class Planet
 		planetData.setValue("rotation", rotation);
 		planetData.setValue("precession", precession);
 		planetData.setValue("parkingOrbitAngle", parkingOrbitAngle);
+		planetData.setValue("cloudRotation", cloudRotation);
+		planetData.setValue("cloudLevel", cloudLevel);
+		planetData.setValue("cloudTimer", cloudTimer);
 		data.setValue(name, planetData);
 		return data;
 	}
@@ -157,6 +175,9 @@ public class Planet
 		rotation = planetData.getDouble("rotation");
 		precession = planetData.getDouble("precession");
 		parkingOrbitAngle = planetData.getDouble("parkingOrbitAngle");
+		cloudRotation = planetData.getDouble("cloudRotation");
+		cloudLevel = planetData.getInt("cloudLevel");
+		cloudTimer = planetData.getInt("cloudTimer");
 		checkList.add(name);
 		
 		if(satellites.isEmpty())
@@ -372,6 +393,21 @@ public class Planet
 		return hasWeather;
 	}
 	
+	public boolean drawClouds()
+	{
+		return drawClouds;
+	}
+	
+	public double getCloudRotation()
+	{
+		return cloudRotation;
+	}
+	
+	public int getCloudLevel()
+	{
+		return cloudLevel;
+	}
+	
 	/**
 	 * Get the multiplier for solar panel power depending on distance to the sun and the presence of heavy cloud cover.
 	 */
@@ -507,6 +543,25 @@ public class Planet
 		
 		if(isTidallyLocked)
 			surfaceViewpoint = position.add(position.subtract(parent.position).normalize().multiply(-radius));
+		
+		// Update the clouds animation if this planet has one.
+		if(drawClouds)
+		{
+			if(cloudTimer <= 0)
+			{
+				Random random = Random.create();
+				cloudLevel = random.nextInt(4);
+				cloudRotation = Math.PI * 2.0 * random.nextDouble();
+				cloudTimer = 12000 + random.nextInt(3000);
+			}
+			else
+				cloudTimer--;
+			
+			cloudRotation += cloudRotationRate * timeStep;
+			
+			if(cloudRotation >= 2.0d * Math.PI)
+				cloudRotation -= 2.0d * Math.PI;
+		}
 	}
 	
 	/**

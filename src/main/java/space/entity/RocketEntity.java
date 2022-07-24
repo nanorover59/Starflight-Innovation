@@ -224,7 +224,7 @@ public class RocketEntity extends MovingCraftEntity
 		// Play the rocket engine sound effect.
 		if(getThrottle() > 0.0F && soundEffectTimer <= 0)
 		{
-			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 100000.0F, 0.8F + this.random.nextFloat() * 0.05F);
+			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.05F);
 			soundEffectTimer = 5;
 		}
 		else
@@ -393,7 +393,22 @@ public class RocketEntity extends MovingCraftEntity
 	
 	private void launchAnimation()
 	{
-		throttle = 1.0;
+		if(gravity == 0.0)
+		{
+			if(getVelocity().getY() < 0.25)
+				throttle = 1.0;
+			else
+				throttle = 0.0;
+		}
+		else
+		{
+			double maxG = (gravity / 0.0025) * 2.0 > 20.0 ? (gravity / 0.0025) * 2.0 : 20.0; // The maximum G-force a rocket is allowed to experience during launch. Used to lower the throttle if necessary.
+			
+			if((changedDimension ? nominalThrustEnd : nominalThrustStart) / craftMass > maxG)
+				throttle = changedDimension ? (craftMass * maxG) / nominalThrustEnd : (craftMass * maxG) / nominalThrustStart;
+			else
+				throttle = 1.0;
+		}
 	}
 	
 	/**
