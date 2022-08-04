@@ -71,11 +71,13 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 				{
 				case 0:
 					StirlingEngineBlockEntity.this.powerState = value;
+					break;
 				case 1:
 					StirlingEngineBlockEntity.this.burnTime = value;
 					break;
 				case 2:
 					StirlingEngineBlockEntity.this.fuelTime = value;
+					break;
 				}
 
 			}

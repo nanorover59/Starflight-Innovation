@@ -32,6 +32,7 @@ import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
 import space.client.gui.ElectricFurnaceScreen;
+import space.client.gui.IceElectrolyzerScreen;
 import space.client.gui.PlanetariumScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
@@ -42,6 +43,7 @@ import space.item.StarflightItems;
 import space.planet.PlanetRenderList;
 import space.screen.BatteryScreenHandler;
 import space.screen.ElectricFurnaceScreenHandler;
+import space.screen.IceElectrolyzerScreenHandler;
 import space.screen.PlanetariumScreenHandler;
 import space.screen.RocketControllerScreenHandler;
 import space.screen.StirlingEngineScreenHandler;
@@ -54,22 +56,14 @@ public class StarflightModClient implements ClientModInitializer
 	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
 	public static final ScreenHandlerType<StirlingEngineScreenHandler> STIRLING_ENGINE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "stirling_engine"), StirlingEngineScreenHandler::new);
 	public static final ScreenHandlerType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "electric_furnace"), ElectricFurnaceScreenHandler::new);
+	public static final ScreenHandlerType<IceElectrolyzerScreenHandler> ICE_ELECTROLYZER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "ice_electrolyzer"), IceElectrolyzerScreenHandler::new);
 	public static final ScreenHandlerType<BatteryScreenHandler> BATTERY_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "battery"), BatteryScreenHandler::new);
 	public static final ScreenHandlerType<RocketControllerScreenHandler> ROCKET_CONTROLLER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "rocket_controller"), RocketControllerScreenHandler::new);
 	
 	@Override
 	public void onInitializeClient()
 	{
-		ColorProviderRegistry.ITEM.register(
-				(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : 0xFFFFFFF,
-				StarflightItems.SPACE_SUIT_HELMET,
-				StarflightItems.SPACE_SUIT_CHESTPLATE,
-				StarflightItems.SPACE_SUIT_LEGGINGS,
-				StarflightItems.SPACE_SUIT_BOOTS
-		);
-		
-		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
-		
+		// Client side networking.
 		ClientPlayConnectionEvents.INIT.register((handler, client) -> {
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planet_data"), (client1, handler1, buf, sender1) -> PlanetRenderList.receivePlanetListUpdate(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), (client1, handler1, buf, sender1) -> MovingCraftRenderList.receiveCraftListUpdate(handler1, sender1, client1, buf));
@@ -80,15 +74,31 @@ public class StarflightModClient implements ClientModInitializer
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "jet"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveJet(handler1, sender1, client1, buf));
 		});
 		
+		// Client side block properties.
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
+		ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> 0x437346, StarflightBlocks.RUBBER_LEAVES);
+		ColorProviderRegistry.ITEM.register((itemstack, i) -> 0x437346, StarflightBlocks.RUBBER_LEAVES.asItem());
 		
+		// Client side item properties.
+		ColorProviderRegistry.ITEM.register(
+				(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : 0xFFFFFFF,
+				StarflightItems.SPACE_SUIT_HELMET,
+				StarflightItems.SPACE_SUIT_CHESTPLATE,
+				StarflightItems.SPACE_SUIT_LEGGINGS,
+				StarflightItems.SPACE_SUIT_BOOTS
+		);
+		
+		// GUIs
 		ScreenRegistry.register(PLANETARIUM_SCREEN_HANDLER, PlanetariumScreen::new);
 		ScreenRegistry.register(STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
 		ScreenRegistry.register(ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
+		ScreenRegistry.register(ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
 		ScreenRegistry.register(BATTERY_SCREEN_HANDLER, BatteryScreen::new);
 		ScreenRegistry.register(ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
 		
+		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
 	}

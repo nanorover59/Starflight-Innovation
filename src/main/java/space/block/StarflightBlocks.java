@@ -7,7 +7,6 @@ import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
@@ -46,6 +45,7 @@ import space.block.entity.HydrogenInletValveBlockEntity;
 import space.block.entity.HydrogenOutletValveBlockEntity;
 import space.block.entity.HydrogenPipeBlockEntity;
 import space.block.entity.HydrogenTankBlockEntity;
+import space.block.entity.IceElectrolyzerBlockEntity;
 import space.block.entity.OxygenInletValveBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
 import space.block.entity.OxygenPipeBlockEntity;
@@ -112,6 +112,7 @@ public class StarflightBlocks
 	public static final Block HYDROGEN_PIPE_AL = new EncasedHydrogenPipeALBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(FabricBlockSettings.of(Material.AIR).strength(0.1f, 0.1f));
 	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block ICE_ELECTROLYZER = new IceElectrolyzerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.of(Material.AIR));
@@ -136,6 +137,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<EncasedOxygenPipeALBlockEntity> OXYGEN_PIPE_AL_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(EncasedOxygenPipeALBlockEntity::new, OXYGEN_PIPE_AL).build(null);
 	public static final BlockEntityType<EncasedHydrogenPipeALBlockEntity> HYDROGEN_PIPE_AL_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(EncasedHydrogenPipeALBlockEntity::new, HYDROGEN_PIPE_AL).build(null);
 	public static final BlockEntityType<ElectrolyzerBlockEntity> ELECTROLYZER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectrolyzerBlockEntity::new, ELECTROLYZER).build(null);
+	public static final BlockEntityType<IceElectrolyzerBlockEntity> ICE_ELECTROLYZER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(IceElectrolyzerBlockEntity::new, ICE_ELECTROLYZER).build(null);
 	public static final BlockEntityType<RocketControllerBlockEntity> ROCKET_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(RocketControllerBlockEntity::new, ROCKET_CONTROLLER).build(null);
 	
 	// Block Tags
@@ -202,6 +204,7 @@ public class StarflightBlocks
 		initializeBlock(HYDROGEN_PIPE_AL, "hydrogen_pipe_al", HYDROGEN_PIPE_AL_BLOCK_ENTITY);
 		initializeBlock(FLUID_TANK_INSIDE, "fluid_tank_inside", null, false, List.of(), List.of());
 		initializeBlock(ELECTROLYZER, "electrolyzer", ELECTROLYZER_BLOCK_ENTITY);
+		initializeBlock(ICE_ELECTROLYZER, "ice_electrolyzer", ICE_ELECTROLYZER_BLOCK_ENTITY);
 		initializeBlock(OXYGEN_DISPENSER, "oxygen_dispenser");
 		initializeBlock(ATMOSPHERE_GENERATOR, "atmosphere_generator");
 		initializeBlock(HABITABLE_AIR, "habitable_air", null, false, List.of(), List.of());
@@ -211,8 +214,6 @@ public class StarflightBlocks
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
 		
 		// Setup extra block behavior.
-		ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> 0x437346, RUBBER_LEAVES);
-		ColorProviderRegistry.ITEM.register((itemstack, i) -> 0x437346, RUBBER_LEAVES.asItem());
 		FireBlockMixin fireBlock = (FireBlockMixin) Blocks.FIRE;
 		fireBlock.callRegisterFlammableBlock(RUBBER_LOG, 5, 5);
 		fireBlock.callRegisterFlammableBlock(SAPPY_RUBBER_LOG, 30, 5);

@@ -13,30 +13,29 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
-import space.block.entity.StirlingEngineBlockEntity;
 import space.client.StarflightModClient;
 
-public class StirlingEngineScreenHandler extends ScreenHandler
+public class IceElectrolyzerScreenHandler extends ScreenHandler
 {
 	private final Inventory inventory;
 	private final PropertyDelegate propertyDelegate;
 	protected final World world;
 
-	public StirlingEngineScreenHandler(int syncId, PlayerInventory playerInventory)
+	public IceElectrolyzerScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
-		this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(3));
+		this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(2));
 	}
 
-	public StirlingEngineScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
+	public IceElectrolyzerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
-		super(StarflightModClient.STIRLING_ENGINE_SCREEN_HANDLER, syncId);
+		super(StarflightModClient.ICE_ELECTROLYZER_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 1);
-		checkDataCount(propertyDelegate, 3);
+		checkDataCount(propertyDelegate, 2);
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
 		this.world = playerInventory.player.world;
-		this.addSlot(new Slot(inventory, 0, 80, 45));
-		
+		this.addSlot(new Slot(inventory, 0, 79, 31));
+
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 9; j++)
@@ -81,12 +80,7 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 
 			if(index != 0)
 			{
-				if(StirlingEngineBlockEntity.canUseAsFuel(itemStack2))
-				{
-					if(!this.insertItem(itemStack2, 0, 1, false))
-						return ItemStack.EMPTY;
-				}
-				else if(index >= 1 && index < 28)
+				if(index >= 1 && index < 28)
 				{
 					if(!this.insertItem(itemStack2, 28, 37, false))
 						return ItemStack.EMPTY;
@@ -111,19 +105,14 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		return itemStack;
 	}
 
-	public int getFuelProgress()
-	{
-		int i = this.propertyDelegate.get(2);
-		
-		if(i == 0)
-			i = 200;
-
-		return this.propertyDelegate.get(1) * 13 / i;
-	}
-
 	public boolean isBurning()
 	{
 		return this.propertyDelegate.get(1) > 0;
+	}
+	
+	public int getProgress()
+	{
+		return this.propertyDelegate.get(1);
 	}
 
 	public boolean canInsertIntoSlot(int index)

@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "up": "space:block/riveted_aluminum",
+    "down": "space:block/riveted_aluminum",
+    "north": "space:block/ice_electrolyzer_front_on",
+    "east": "space:block/electrolyzer_oxygen",
+    "south": "space:block/riveted_aluminum",
+    "west": "space:block/electrolyzer_hydrogen",
+    "particle": "space:block/riveted_aluminum"
+  }
+}

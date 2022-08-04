@@ -27,6 +27,7 @@
     "space:hydrogen_outlet_valve",
     "space:vent",
     "space:electrolyzer",
+    "space:ice_electrolyzer",
     "space:oxygen_dispenser",
     "space:atmosphere_generator",
     "space:airlock_door",
