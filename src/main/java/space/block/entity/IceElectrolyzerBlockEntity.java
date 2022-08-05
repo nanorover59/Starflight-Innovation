@@ -96,7 +96,10 @@ public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity imp
 		boolean bl2 = false;
 		int processTime = 64;
 		
-		// !!!
+		if(blockEntity.powerState == 1 && !itemStack.isEmpty())
+		{
+			
+		}
 		
 		if(world.getBlockState(pos).get(IceElectrolyzerBlock.LIT) != (blockEntity.time > 0 && !itemStack.isEmpty()))
 		{
