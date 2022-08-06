@@ -1,20 +1,28 @@
 package space.block.entity;
 
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -26,9 +34,10 @@ import space.screen.IceElectrolyzerScreenHandler;
 
 public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity implements SidedInventory
 {
+	public static Map<Item, Integer> iceMap = Maps.newLinkedHashMap();
 	public DefaultedList<ItemStack> inventory;
-	int powerState;
-	int time;
+	private int powerState;
+	private int time;
 	protected final PropertyDelegate propertyDelegate;
 
 	public IceElectrolyzerBlockEntity(BlockPos blockPos, BlockState blockState)
@@ -69,6 +78,23 @@ public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity imp
 				return 2;
 			}
 		};
+		
+		if(iceMap.isEmpty())
+			iceMap = createIceMap();
+	}
+	
+	public static Map<Item, Integer> createIceMap()
+	{
+        LinkedHashMap<Item, Integer> map = Maps.newLinkedHashMap();
+        addIce(map, Blocks.ICE, 1000);
+        addIce(map, Blocks.PACKED_ICE, 1200);
+        addIce(map, Blocks.BLUE_ICE, 1200);
+        return map;
+    }
+
+	public static void addIce(Map<Item, Integer> iceTimes, ItemConvertible item, int iceTime)
+	{
+		iceTimes.put(item.asItem(), iceTime);
 	}
 	
 	public void readNbt(NbtCompound nbt)
@@ -87,18 +113,28 @@ public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity imp
 	
 	public boolean hasValidItem()
 	{
-		return false;
+		ItemStack itemStack = (ItemStack) inventory.get(0);
+		return iceMap.containsKey(itemStack.getItem());
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, IceElectrolyzerBlockEntity blockEntity)
 	{
 		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
 		boolean bl2 = false;
-		int processTime = 64;
 		
-		if(blockEntity.powerState == 1 && !itemStack.isEmpty())
+		if(blockEntity.powerState == 1 && !itemStack.isEmpty() && blockEntity.hasValidItem())
 		{
-			
+			if(blockEntity.time == 0)
+				blockEntity.time = iceMap.get(itemStack.getItem()) / 10;
+			else if(blockEntity.time > 0)
+			{
+				if(blockEntity.time == 1)
+				{
+					
+				}
+				
+				blockEntity.time--;
+			}
 		}
 		
 		if(world.getBlockState(pos).get(IceElectrolyzerBlock.LIT) != (blockEntity.time > 0 && !itemStack.isEmpty()))

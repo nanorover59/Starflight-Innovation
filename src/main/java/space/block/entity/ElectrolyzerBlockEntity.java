@@ -1,11 +1,14 @@
 package space.block.entity;
 
+import java.util.ArrayList;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.ElectrolyzerBlock;
 import space.block.StarflightBlocks;
@@ -38,27 +41,78 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 		
 		BlockPos leftSide = pos.offset(state.get(HorizontalFacingBlock.FACING).rotateYClockwise());
 		BlockPos rightSide = pos.offset(state.get(HorizontalFacingBlock.FACING).rotateYCounterclockwise());
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+		double totalMassFlow = 16.0; // Kilograms per tick.
+		double oxygen = totalMassFlow * (8.0 / 9.0);
+		double hydrogen = totalMassFlow * (1.0 / 9.0);
+		double remaining = 0.0;
+		
+		//System.out.println("1: " + totalMassFlow);
 		
 		if(world.getBlockState(leftSide).getBlock() == StarflightBlocks.OXYGEN_PIPE)
 		{
-			FluidContainerBlockEntity adjacentBlockEntity = ((FluidContainerBlockEntity) world.getBlockEntity(leftSide));
-			double adjecentCapacity = adjacentBlockEntity.getStorageCapacity();
-			double adjecentFluid = adjacentBlockEntity.getStoredFluid();
-			
-			if(adjecentFluid < adjecentCapacity)
-				adjacentBlockEntity.changeStoredFluid(adjecentCapacity - adjecentFluid);
+			checkList.clear();
+			remaining += recursiveSpread(world, leftSide, checkList, oxygen, 2048);
 		}
 		
 		if(world.getBlockState(rightSide).getBlock() == StarflightBlocks.HYDROGEN_PIPE)
 		{
-			FluidContainerBlockEntity adjacentBlockEntity = ((FluidContainerBlockEntity) world.getBlockEntity(rightSide));
-			double adjecentCapacity = adjacentBlockEntity.getStorageCapacity();
-			double adjecentFluid = adjacentBlockEntity.getStoredFluid();
-			
-			if(adjecentFluid < adjecentCapacity)
-				adjacentBlockEntity.changeStoredFluid(adjecentCapacity - adjecentFluid);
+			checkList.clear();
+			remaining += recursiveSpread(world, rightSide, checkList, hydrogen, 2048);
 		}
+		
+		//System.out.println("2: " + remaining);
     }
+	
+	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, int limit)
+	{
+		if(checkList.contains(position) || checkList.size() >= limit)
+			return toSpread;
+		
+		if(world.getBlockEntity(position) instanceof FluidContainerBlockEntity)
+		{
+			FluidContainerBlockEntity blockEntity = ((FluidContainerBlockEntity) world.getBlockEntity(position));
+			double capacity = blockEntity.getStorageCapacity();
+			double fluid = blockEntity.getStoredFluid();
+			checkList.add(position);
+			
+			if(fluid + toSpread < capacity)
+			{
+				blockEntity.changeStoredFluid(toSpread);
+				toSpread = 0;
+			}
+			else
+			{
+				double difference = capacity - fluid;
+				blockEntity.changeStoredFluid(difference);
+				toSpread -= difference;
+				
+				for(Direction direction : Direction.values())
+					toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, limit);
+			}
+		}
+		else if(world.getBlockEntity(position) instanceof HydrogenInletValveBlockEntity || world.getBlockEntity(position) instanceof OxygenInletValveBlockEntity)
+		{
+			FluidTankControllerBlockEntity blockEntity = ((FluidTankInterfaceBlockEntity) world.getBlockEntity(position)).getFluidTankController();
+			double capacity = blockEntity.getStorageCapacity();
+			double fluid = blockEntity.getStoredFluid();
+			checkList.add(position);
+			
+			if(fluid + toSpread < capacity)
+			{
+				blockEntity.changeStoredFluid(toSpread);
+				toSpread = 0;
+			}
+			else
+			{
+				double difference = capacity - fluid;
+				blockEntity.changeStoredFluid(difference);
+				toSpread -= difference;
+			}
+		}
+		
+		return toSpread;
+	}
 	
 	public void setWater(boolean b)
 	{

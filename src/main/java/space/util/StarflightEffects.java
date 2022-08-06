@@ -15,6 +15,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.WorldAccess;
 import space.StarflightMod;
@@ -58,6 +59,7 @@ public class StarflightEffects
 	
 	public static void receiveOutgas(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
+		Random random = Random.create();
 		BlockPos pos1 = buffer.readBlockPos();
 		BlockPos pos2 = buffer.readBlockPos();
 		boolean sound = buffer.readBoolean();
@@ -66,10 +68,10 @@ public class StarflightEffects
 		if(sound)
 			client.world.playSound(pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, false);
 		
-		for(int i = 0; i < 10 + client.world.getRandom().nextInt(6); i++)
+		for(int i = 0; i < 10 + random.nextInt(6); i++)
 		{
-			Vec3d offset = new Vec3d(client.world.getRandom().nextDouble(), client.world.getRandom().nextDouble(), client.world.getRandom().nextDouble());
-			Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + client.world.getRandom().nextDouble() * 0.25);
+			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+			Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
 			client.world.addParticle(ParticleTypes.POOF, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 		}
 	}
@@ -91,6 +93,7 @@ public class StarflightEffects
 	
 	public static void receiveJet(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
+		Random random = Random.create();
 		double px = buffer.readDouble();
 		double py = buffer.readDouble();
 		double pz = buffer.readDouble();
@@ -100,10 +103,10 @@ public class StarflightEffects
 		double vz = buffer.readDouble();
 		Vec3d velocity = new Vec3d(vx, vy, vz);
 		
-		for(int i = 0; i < 2 + client.world.getRandom().nextInt(2); i++)
+		for(int i = 0; i < 2 + random.nextInt(2); i++)
 		{
-			Vec3d offset = new Vec3d(client.world.getRandom().nextDouble(), client.world.getRandom().nextDouble(), client.world.getRandom().nextDouble());
-			offset.add(-client.world.getRandom().nextDouble(), -client.world.getRandom().nextDouble(), -client.world.getRandom().nextDouble());
+			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+			offset.add(-random.nextDouble(), -random.nextDouble(), -random.nextDouble());
 			offset = offset.multiply(0.25);
 			client.world.addParticle(ParticleTypes.POOF, sourcePos.getX() + offset.getX(), sourcePos.getY() + offset.getY(), sourcePos.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 		}
