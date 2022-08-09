@@ -395,7 +395,7 @@ public class RocketEntity extends MovingCraftEntity
 	{
 		if(gravity == 0.0)
 		{
-			if(getVelocity().getY() < 0.25)
+			if(getVelocity().getY() < 1.0)
 				throttle = 1.0;
 			else
 				throttle = 0.0;

@@ -52,19 +52,19 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 		if(world.getBlockState(leftSide).getBlock() == StarflightBlocks.OXYGEN_PIPE)
 		{
 			checkList.clear();
-			remaining += recursiveSpread(world, leftSide, checkList, oxygen, 2048);
+			remaining += recursiveSpread(world, leftSide, checkList, oxygen, "oxygen", 2048);
 		}
 		
 		if(world.getBlockState(rightSide).getBlock() == StarflightBlocks.HYDROGEN_PIPE)
 		{
 			checkList.clear();
-			remaining += recursiveSpread(world, rightSide, checkList, hydrogen, 2048);
+			remaining += recursiveSpread(world, rightSide, checkList, hydrogen, "hydrogen", 2048);
 		}
 		
 		//System.out.println("2: " + remaining);
     }
 	
-	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, int limit)
+	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, String fluidName, int limit)
 	{
 		if(checkList.contains(position) || checkList.size() >= limit)
 			return toSpread;
@@ -76,19 +76,22 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 			double fluid = blockEntity.getStoredFluid();
 			checkList.add(position);
 			
-			if(fluid + toSpread < capacity)
+			if(blockEntity.getFluidName().contains(fluidName))
 			{
-				blockEntity.changeStoredFluid(toSpread);
-				toSpread = 0;
-			}
-			else
-			{
-				double difference = capacity - fluid;
-				blockEntity.changeStoredFluid(difference);
-				toSpread -= difference;
-				
-				for(Direction direction : Direction.values())
-					toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, limit);
+				if(fluid + toSpread < capacity)
+				{
+					blockEntity.changeStoredFluid(toSpread);
+					toSpread = 0;
+				}
+				else
+				{
+					double difference = capacity - fluid;
+					blockEntity.changeStoredFluid(difference);
+					toSpread -= difference;
+					
+					for(Direction direction : Direction.values())
+						toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, fluidName, limit);
+				}
 			}
 		}
 		else if(world.getBlockEntity(position) instanceof HydrogenInletValveBlockEntity || world.getBlockEntity(position) instanceof OxygenInletValveBlockEntity)
@@ -98,16 +101,19 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 			double fluid = blockEntity.getStoredFluid();
 			checkList.add(position);
 			
-			if(fluid + toSpread < capacity)
+			if(blockEntity.getFluidName().contains(fluidName))
 			{
-				blockEntity.changeStoredFluid(toSpread);
-				toSpread = 0;
-			}
-			else
-			{
-				double difference = capacity - fluid;
-				blockEntity.changeStoredFluid(difference);
-				toSpread -= difference;
+				if(fluid + toSpread < capacity)
+				{
+					blockEntity.changeStoredFluid(toSpread);
+					toSpread = 0;
+				}
+				else
+				{
+					double difference = capacity - fluid;
+					blockEntity.changeStoredFluid(difference);
+					toSpread -= difference;
+				}
 			}
 		}
 		
