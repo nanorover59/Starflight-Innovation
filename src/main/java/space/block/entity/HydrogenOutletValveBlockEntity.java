@@ -47,6 +47,10 @@ public class HydrogenOutletValveBlockEntity extends FluidTankInterfaceBlockEntit
 					adjacentBlockEntity.changeStoredFluid(deltaFluid);
 					blockEntity.markDirty();
 					adjacentBlockEntity.markDirty();
+					
+					/*ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+					double remaining = ElectrolyzerBlockEntity.recursiveSpread(world, offsetPos, checkList, StarflightBlocks.HYDROGEN_PIPE_CAPACITY, "hydrogen", 2048);
+					blockEntity.getFluidTankController().changeStoredFluid(remaining - StarflightBlocks.HYDROGEN_PIPE_CAPACITY);*/
 				}
 			}
 		}

@@ -2,7 +2,6 @@ package space.block;
 
 import java.text.DecimalFormat;
 import java.util.List;
-import java.util.Random;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -20,12 +19,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -43,7 +39,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.block.entity.ElectrolyzerBlockEntity;
 import space.block.entity.IceElectrolyzerBlockEntity;
 import space.client.StarflightModClient;
 import space.energy.EnergyNet;

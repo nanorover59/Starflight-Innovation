@@ -47,8 +47,6 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 		double hydrogen = totalMassFlow * (1.0 / 9.0);
 		double remaining = 0.0;
 		
-		//System.out.println("1: " + totalMassFlow);
-		
 		if(world.getBlockState(leftSide).getBlock() == StarflightBlocks.OXYGEN_PIPE)
 		{
 			checkList.clear();
@@ -60,8 +58,6 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 			checkList.clear();
 			remaining += recursiveSpread(world, rightSide, checkList, hydrogen, "hydrogen", 2048);
 		}
-		
-		//System.out.println("2: " + remaining);
     }
 	
 	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, String fluidName, int limit)

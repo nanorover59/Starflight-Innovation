@@ -13,6 +13,7 @@ import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
+import space.block.entity.IceElectrolyzerBlockEntity;
 import space.client.StarflightModClient;
 
 public class IceElectrolyzerScreenHandler extends ScreenHandler
@@ -23,14 +24,14 @@ public class IceElectrolyzerScreenHandler extends ScreenHandler
 
 	public IceElectrolyzerScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
-		this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(2));
+		this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(3));
 	}
 
 	public IceElectrolyzerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
 		super(StarflightModClient.ICE_ELECTROLYZER_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 1);
-		checkDataCount(propertyDelegate, 2);
+		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
 		this.world = playerInventory.player.world;
@@ -80,7 +81,12 @@ public class IceElectrolyzerScreenHandler extends ScreenHandler
 
 			if(index != 0)
 			{
-				if(index >= 1 && index < 28)
+				if(IceElectrolyzerBlockEntity.iceMap.containsKey(itemStack2.getItem()))
+				{
+					if(!this.insertItem(itemStack2, 0, 1, false))
+						return ItemStack.EMPTY;
+				}
+				else if(index >= 1 && index < 28)
 				{
 					if(!this.insertItem(itemStack2, 28, 37, false))
 						return ItemStack.EMPTY;
@@ -107,12 +113,14 @@ public class IceElectrolyzerScreenHandler extends ScreenHandler
 
 	public boolean isBurning()
 	{
-		return this.propertyDelegate.get(1) > 0;
+		return this.propertyDelegate.get(0) > 0;
 	}
 	
-	public int getProgress()
+	public double getProgress()
 	{
-		return this.propertyDelegate.get(1);
+		double time = this.propertyDelegate.get(1);
+		double totalTime = this.propertyDelegate.get(2);
+		return totalTime == 0 ? 0.0 : 1.0 - (time / totalTime);
 	}
 
 	public boolean canInsertIntoSlot(int index)

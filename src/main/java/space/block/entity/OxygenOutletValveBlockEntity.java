@@ -47,6 +47,10 @@ public class OxygenOutletValveBlockEntity extends FluidTankInterfaceBlockEntity
 					adjacentBlockEntity.changeStoredFluid(deltaFluid);
 					blockEntity.markDirty();
 					adjacentBlockEntity.markDirty();
+					
+					/*ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+					double remaining = ElectrolyzerBlockEntity.recursiveSpread(world, offsetPos, checkList, StarflightBlocks.OXYGEN_PIPE_CAPACITY, "oxygen", 2048);
+					blockEntity.getFluidTankController().changeStoredFluid(remaining - StarflightBlocks.OXYGEN_PIPE_CAPACITY);*/
 				}
 			}
 		}

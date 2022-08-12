@@ -54,10 +54,10 @@ public class IceElectrolyzerScreen extends HandledScreen<ScreenHandler>
 		int l;
 
 		if(((IceElectrolyzerScreenHandler) this.handler).isBurning())
-			this.drawTexture(matrices, i + 81, j + 52, 176, 0, 14, 14);
+			this.drawTexture(matrices, i + 80, j + 52, 176, 0, 14, 14);
 
-		l = ((IceElectrolyzerScreenHandler) this.handler).getProgress();
-		this.drawTexture(matrices, i + 63, j + 29, 176, 14, l + 1, 16);
-		this.drawTexture(matrices, i + 99, j + 29, 176, 14, l + 1, 16);
+		l = (int) Math.floor(((IceElectrolyzerScreenHandler) this.handler).getProgress() * 29.0);
+		this.drawTexture(matrices, i + 63, j + 57 - l, 176, 42 - l, 12, l);
+		this.drawTexture(matrices, i + 99, j + 57 - l, 176, 42 - l, 12, l);
 	}
 }

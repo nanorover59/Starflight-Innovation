@@ -13,7 +13,7 @@ import space.util.StarflightEffects;
 
 public class HabitableAirBlock extends AirBlock
 {
-	public static final double DENSITY = 1.0; // The density of habitable air in kilograms per cubic meter.
+	public static final double DENSITY = 2.0; // The density of habitable air in kilograms per cubic meter.
 	
 	public HabitableAirBlock(Settings settings)
 	{
@@ -31,27 +31,21 @@ public class HabitableAirBlock extends AirBlock
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
 			AirUtil.recursiveVolume(world, fromPos, checkList, foundList, AirUtil.MAX_VOLUME);
+			checkList.clear();
+			BlockPos sourcePos = recursiveFindSource(world, pos, checkList, AirUtil.MAX_VOLUME);
+			checkList.clear();
 			
-			if(foundList.size() <= 4)
+			if(sourcePos.equals(new BlockPos(-9999, -9999, -9999)))
+			{
+				AirUtil.recursiveRemove(world, pos, checkList, AirUtil.MAX_VOLUME);
+				StarflightEffects.sendOutgas(world, pos, fromPos, true);
+			}
+			else if(AirUtil.requestSupply(world, sourcePos, foundList.size() * DENSITY, StarflightBlocks.ATMOSPHERE_GENERATOR))
 				AirUtil.fillVolume(world, foundList);
 			else
 			{
-				checkList.clear();
-				BlockPos sourcePos = recursiveFindSource(world, pos, checkList, AirUtil.MAX_VOLUME);
-				checkList.clear();
-				
-				if(sourcePos.equals(new BlockPos(-9999, -9999, -9999)))
-				{
-					AirUtil.recursiveRemove(world, pos, checkList, AirUtil.MAX_VOLUME);
-					StarflightEffects.sendOutgas(world, pos, fromPos, true);
-				}
-				else if(AirUtil.requestSupply(world, sourcePos, foundList.size() * DENSITY, StarflightBlocks.ATMOSPHERE_GENERATOR))
-					AirUtil.fillVolume(world, foundList);
-				else
-				{
-					AirUtil.recursiveRemove(world, pos, checkList, AirUtil.MAX_VOLUME);
-					StarflightEffects.sendOutgas(world, pos, fromPos, true);
-				}
+				AirUtil.recursiveRemove(world, pos, checkList, AirUtil.MAX_VOLUME);
+				StarflightEffects.sendOutgas(world, pos, fromPos, true);
 			}
 		}
     }
@@ -63,7 +57,7 @@ public class HabitableAirBlock extends AirBlock
 	{
 		if(world.getBlockState(position).getBlock() != StarflightBlocks.HABITABLE_AIR || checkList.contains(position))
 		{
-			if(world.getBlockState(position).getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR)
+			if(world.getBlockState(position).getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR && world.getBlockState(position).get(AtmosphereGeneratorBlock.LIT))
 				return position;
 			else
 				return new BlockPos(-9999, -9999, -9999);

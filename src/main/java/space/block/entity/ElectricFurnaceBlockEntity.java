@@ -318,10 +318,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public boolean isValid(int slot, ItemStack stack)
 	{
-		if(slot == 1)
-			return false;
-		else
-			return true;
+		return slot != 1;
 	}
 
 	public void clear()
