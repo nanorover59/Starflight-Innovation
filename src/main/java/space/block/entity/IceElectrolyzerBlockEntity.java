@@ -121,6 +121,7 @@ public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity imp
 		super.writeNbt(nbt);
 		nbt.putShort("time", (short) this.time);
 		nbt.putShort("totalTime", (short) this.totalTime);
+		Inventories.writeNbt(nbt, this.inventory);
 	}
 	
 	public boolean hasValidItem()
