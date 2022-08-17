@@ -20,6 +20,7 @@ public class PlanetList
 	private static ArrayList<Planet> planetList = new ArrayList<Planet>();
 	private static HashMap<Planet, RegistryKey<World>> planetWorldKeys = new HashMap<Planet, RegistryKey<World>>();
 	private static HashMap<Planet, RegistryKey<World>> parkingOrbitWorldKeys = new HashMap<Planet, RegistryKey<World>>();
+	private static double timeMultiplier = 1.0;
 	
 	/**
 	 * Register all planets.
@@ -41,7 +42,7 @@ public class PlanetList
 		earth.setOrbitParameters(1.4710e11, 1.5210e11, 5.0282936, 0.0, 3.0525809, 0.0);
 		earth.setRotationParameters(false, -0.40910518, 7.2921150e-5, 7.663e-12);
 		earth.setAtmosphereParameters(Planet.TEMPERATE, 1.0, true, true, false, true);
-		earth.setDecorativeParameters(true, 7.4e-5);
+		earth.setDecorativeParameters(true, 7.2921150e-5);
 		planetList.add(earth);
 		planetWorldKeys.put(earth, World.OVERWORLD);
 		parkingOrbitWorldKeys.put(earth, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "earth_orbit")));
@@ -59,7 +60,7 @@ public class PlanetList
 		mars.setOrbitParameters(2.06617e11, 2.49229e11, 5.86501907915, 0.0, 0.86530876133, 0.03229923767);
 		mars.setRotationParameters(false, -0.43964844, 7.088218e-5, 1.1385e-12);
 		mars.setAtmosphereParameters(Planet.COLD, 0.00602, false, false, false, true);
-		mars.setDecorativeParameters(true, 7.2e-5);
+		mars.setDecorativeParameters(true, 7.088218e-5);
 		planetList.add(mars);
 		planetWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars")));
 		parkingOrbitWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars_orbit")));
@@ -74,6 +75,11 @@ public class PlanetList
 	{
 		for(Planet p : planetList)
 			p.linkSatellites();
+	}
+	
+	public static void setTimeMultiplier(float f)
+	{
+		timeMultiplier = f;
 	}
 	
 	/**
@@ -182,6 +188,7 @@ public class PlanetList
 		for(Planet p : planetList)
 			data = p.saveData(data);
 		
+		data.setValue("timeMultiplier", timeMultiplier);
 		return data;
 	}
 	
@@ -195,7 +202,10 @@ public class PlanetList
 		ArrayList<String> checkList = new ArrayList<String>();
 		
 		if(data != null)
+		{
+			timeMultiplier = data.getDouble("timeMultiplier");
 			centerPlanet.loadData(data, checkList);
+		}
 		else
 			centerPlanet.setInitialPositionAndVelocity(checkList);
 	}
@@ -249,7 +259,7 @@ public class PlanetList
 	 */
 	public static void simulateMotion()
 	{
-		double timeStep = 72.0d * 0.05d;
+		double timeStep = 72.0 * 0.05 * timeMultiplier;
 		
 		for(Planet p : planetList)
 		{

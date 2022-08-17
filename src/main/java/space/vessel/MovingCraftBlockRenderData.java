@@ -34,6 +34,7 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
+import space.StarflightMod;
 import space.block.RocketThrusterBlock;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
@@ -42,8 +43,8 @@ import space.mixin.client.BlockModelRendererMixin;
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftBlockRenderData
 {
-	private static final Identifier THRUSTER_PLUME_TEXTURE = new Identifier("space:textures/entity/thruster_plume.png");
-	private static final Identifier MACH_DIAMOND_TEXTURE = new Identifier("space:textures/entity/mach_diamond.png");
+	private static final Identifier THRUSTER_PLUME_TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/thruster_plume.png");
+	private static final Identifier MACH_DIAMOND_TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/mach_diamond.png");
 	 private static final RenderLayer THRUSTER_PLUME_LAYER = RenderLayer.getEntityTranslucent(THRUSTER_PLUME_TEXTURE);
     private static final RenderLayer MACH_DIAMOND_LAYER = RenderLayer.getEntityTranslucent(MACH_DIAMOND_TEXTURE);
 	

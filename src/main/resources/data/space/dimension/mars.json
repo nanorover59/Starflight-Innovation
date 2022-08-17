@@ -1,5 +1,5 @@
 {
-  "type" : "minecraft:overworld",
+  "type" : "space:mars",
   "generator" : {
     "type" : "minecraft:noise",
     "seed" : 2066,

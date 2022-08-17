@@ -63,6 +63,8 @@ public class StarflightBlocks
 	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 5.0f));
 	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
 	public static final Block RIVETED_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
+	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 4.0f));
+	public static final Block WALKWAY = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 4.0f));
 	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.of(Material.WOOL).sounds(BlockSoundGroup.WOOL).strength(2.0f, 3.0f));
 	public static final Block BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block DEEPSLATE_BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
@@ -155,6 +157,8 @@ public class StarflightBlocks
 		initializeBlock(ALUMINUM_BLOCK, "aluminum_block");
 		initializeBlock(STRUCTURAL_ALUMINUM, "structural_aluminum");
 		initializeBlock(RIVETED_ALUMINUM, "riveted_aluminum");
+		initializeBlock(ALUMINUM_FRAME, "aluminum_frame");
+		initializeBlock(WALKWAY, "walkway");
 		initializeBlock(REINFORCED_FABRIC, "reinforced_fabric");
 		initializeBlock(BAUXITE_ORE, "bauxite_ore");
 		initializeBlock(DEEPSLATE_BAUXITE_ORE, "deepslate_bauxite_ore");

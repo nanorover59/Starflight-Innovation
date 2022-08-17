@@ -1,8 +1,15 @@
 {
-    "type": "minecraft:stonecutting",
-    "ingredient": {
-        "item": "space:aluminum_block"
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:aluminum_frame"
     },
-    "result": "space:structural_aluminum",
-    "count": 9
+    {
+      "item": "space:aluminum_ingot"
+    }
+  ],
+  "result": {
+    "item": "space:structural_aluminum",
+    "count": 1
+  }
 }

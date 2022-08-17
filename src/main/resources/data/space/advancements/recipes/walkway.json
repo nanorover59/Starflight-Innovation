@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:walkway"
+    ]
+  },
+  "criteria": {
+    "has_aluminum_frame": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:aluminum_frame"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:walkway"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_aluminum_frame",
+      "has_the_recipe"
+    ]
+  ]
+}

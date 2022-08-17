@@ -17,6 +17,7 @@ import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidContainerBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
+import space.entity.StarflightEntities;
 import space.planet.Planet;
 import space.planet.PlanetList;
 
@@ -49,6 +50,9 @@ public class AirUtil
 		
 		if(currentPlanet == null)
 			return false;
+		
+		if(entity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
+			return true;
 		
 		if(currentPlanet.getSurfacePressure() > 0.6 && currentPlanet.hasOxygen() && !PlanetList.isOrbit(world.getRegistryKey()))
 			return true;

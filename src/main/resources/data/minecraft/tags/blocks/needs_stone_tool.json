@@ -4,6 +4,8 @@
     "space:aluminum_block",
     "space:structural_aluminum",
     "space:riveted_aluminum",
+    "space:aluminum_frame",
+    "space:walkway",
     "space:bauxite_ore",
     "space:deepslate_bauxite_ore",
     "space:bauxite_block",

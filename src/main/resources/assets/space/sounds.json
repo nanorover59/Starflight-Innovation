@@ -7,5 +7,12 @@
       "space:thruster2",
       "space:thruster3"
     ]
+  },
+  "mars_wind": {
+    "subtitle": "subtitles.space.wind",
+    "sounds": [
+      "space:wind0",
+      "space:wind1"
+    ]
   }
 }

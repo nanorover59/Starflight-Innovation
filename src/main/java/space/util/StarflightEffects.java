@@ -23,10 +23,12 @@ import space.StarflightMod;
 public class StarflightEffects
 {
 	public static SoundEvent THRUSTER_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "thruster"));
+	public static SoundEvent MARS_WIND_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "mars_wind"));
 	
 	public static void initializeSounds()
 	{
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "thruster"), THRUSTER_SOUND_EVENT);
+		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "mars_wind"), MARS_WIND_SOUND_EVENT);
 	}
 	
 	public static void sendFizz(WorldAccess world, BlockPos pos)

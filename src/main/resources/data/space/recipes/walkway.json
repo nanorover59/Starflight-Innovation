@@ -2,14 +2,14 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     {
-      "item": "space:structural_aluminum"
+      "item": "space:aluminum_frame"
     },
     {
       "item": "minecraft:iron_nugget"
     }
   ],
   "result": {
-    "item": "space:riveted_aluminum",
+    "item": "space:walkway",
     "count": 1
   }
 }

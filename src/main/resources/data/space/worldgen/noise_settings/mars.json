@@ -8,7 +8,7 @@
     "Name": "minecraft:stone"
   },
   "default_fluid": {
-    "Name": "minecraft:air",
+    "Name": "minecraft:water",
     "Properties": {
       "level": "0"
     }

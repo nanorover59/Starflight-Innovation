@@ -4,6 +4,9 @@ import java.util.ArrayList;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
+import net.minecraft.sound.BiomeAdditionsSound;
 import net.minecraft.sound.BiomeMoodSound;
 import net.minecraft.sound.MusicSound;
 import net.minecraft.util.Identifier;
@@ -18,6 +21,8 @@ import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.OrePlacedFeatures;
 import net.minecraft.world.gen.feature.UndergroundPlacedFeatures;
 import space.StarflightMod;
+import space.entity.StarflightEntities;
+import space.util.StarflightEffects;
 
 public class StarflightBiomes
 {
@@ -32,6 +37,8 @@ public class StarflightBiomes
 	public static final RegistryKey<Biome> MARS_MIDLANDS = registerBiomeKey("mars_midlands");
 	public static final RegistryKey<Biome> MARS_HIGHLANDS = registerBiomeKey("mars_highlands");
 	public static final RegistryKey<Biome> MARS_ICE = registerBiomeKey("mars_ice");
+	
+	private static final BiomeAdditionsSound MARS_WIND = new BiomeAdditionsSound(StarflightEffects.MARS_WIND_SOUND_EVENT, 0.001);
 	
 	public static void initializeBiomes()
 	{
@@ -57,9 +64,14 @@ public class StarflightBiomes
         return RegistryKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, name));
     }
 	
-	private static Biome createBiome(Biome.Precipitation precipitation, float temperature, float downfall, int waterColor, int waterFogColor, int skyColor, SpawnSettings.Builder spawnSettings, GenerationSettings.Builder generationSettings, @Nullable MusicSound music)
+	private static Biome createBiome(Biome.Precipitation precipitation, float temperature, float downfall, int waterColor, int waterFogColor, int fogColor, int skyColor, SpawnSettings.Builder spawnSettings, GenerationSettings.Builder generationSettings, @Nullable MusicSound music)
 	{
-        return new Biome.Builder().precipitation(precipitation).temperature(temperature).downfall(downfall).effects(new BiomeEffects.Builder().waterColor(waterColor).waterFogColor(waterFogColor).fogColor(12638463).skyColor(skyColor).moodSound(BiomeMoodSound.CAVE).music(music).build()).spawnSettings(spawnSettings.build()).generationSettings(generationSettings.build()).build();
+        return new Biome.Builder().precipitation(precipitation).temperature(temperature).downfall(downfall).effects(new BiomeEffects.Builder().waterColor(waterColor).waterFogColor(waterFogColor).fogColor(fogColor).skyColor(skyColor).moodSound(BiomeMoodSound.CAVE).music(music).build()).spawnSettings(spawnSettings.build()).generationSettings(generationSettings.build()).build();
+    }
+	
+	private static Biome createBiome(Biome.Precipitation precipitation, float temperature, float downfall, int waterColor, int waterFogColor, int fogColor, int skyColor, SpawnSettings.Builder spawnSettings, GenerationSettings.Builder generationSettings, BiomeMoodSound moodSound, BiomeAdditionsSound additionsSound, @Nullable MusicSound music)
+	{
+        return new Biome.Builder().precipitation(precipitation).temperature(temperature).downfall(downfall).effects(new BiomeEffects.Builder().waterColor(waterColor).waterFogColor(waterFogColor).fogColor(fogColor).skyColor(skyColor).moodSound(moodSound).additionsSound(additionsSound).music(music).build()).spawnSettings(spawnSettings.build()).generationSettings(generationSettings.build()).build();
     }
 	
 	public static CustomSurfaceBuilder getSurfaceBuilder(RegistryKey<Biome> biome)
@@ -114,10 +126,11 @@ public class StarflightBiomes
 		float downfall = 0.0f;
 		int waterColor = 4159204;
 		int waterFogColor = 329011;
-		int skyColor = 0;
+		int fogColor = 0x000000;
+		int skyColor = 0x000000;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
-		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, fogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
@@ -128,12 +141,13 @@ public class StarflightBiomes
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
 		int waterFogColor = 0x050533;
+		int fogColor = 0x000000;
 		int skyColor = 0x000000;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
-		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, fogColor, skyColor, spawnSettings, generationSettings, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
@@ -144,8 +158,10 @@ public class StarflightBiomes
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
 		int waterFogColor = 0x050533;
+		int fogColor = 0xfed48c;
 		int skyColor = 0xfed48c;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
+		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.DUST, 100, 1, 4));
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addMarsOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
@@ -154,7 +170,7 @@ public class StarflightBiomes
 		if(surfaceRocks)
 			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
 		
-		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, skyColor, spawnSettings, generationSettings, null);
+		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, fogColor, skyColor, spawnSettings, generationSettings, BiomeMoodSound.CAVE, MARS_WIND, null);
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 }
