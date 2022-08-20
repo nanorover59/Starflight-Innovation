@@ -224,11 +224,23 @@ public class PlanetList
 			buffer.writeInt(planetList.size());
 			RegistryKey<World> worldKey = player.world.getRegistryKey();
 			Planet planet = getPlanetForWorld(worldKey);
-			buffer.writeString(isOrbit(worldKey) ? (planet.getName() + "_orbit") : planet.getName());
+			int viewpointIndex = 0;
 			
-			for(Planet p : planetList)
+			for(int i = 0; i < planetList.size(); i++)
 			{
-				buffer.writeString(p.getName());
+				if(planetList.get(i) == planet)
+				{
+					viewpointIndex = i;
+					break;
+				}
+			}
+			
+			buffer.writeInt(viewpointIndex);
+			buffer.writeBoolean(isOrbit(worldKey));
+			
+			for(int i = 0; i < planetList.size(); i++)
+			{
+				Planet p = planetList.get(i);
 				buffer.writeDouble(p.getPosition().getX());
 				buffer.writeDouble(p.getPosition().getY());
 				buffer.writeDouble(p.getPosition().getZ());
@@ -238,14 +250,7 @@ public class PlanetList
 				buffer.writeDouble(p.getParkingOrbitViewpoint().getX());
 				buffer.writeDouble(p.getParkingOrbitViewpoint().getY());
 				buffer.writeDouble(p.getParkingOrbitViewpoint().getZ());	
-				buffer.writeDouble(p.getObliquity());
 				buffer.writeDouble(p.getPrecession());
-				buffer.writeDouble(p.getRadius());
-				buffer.writeDouble(p.getSurfacePressure());
-				buffer.writeBoolean(p.hasLowClouds());
-				buffer.writeBoolean(p.hasCloudCover());
-				buffer.writeBoolean(p.hasWeather());
-				buffer.writeBoolean(p.drawClouds());
 				buffer.writeDouble(p.getCloudRotation());
 				buffer.writeInt(p.getCloudLevel());
 			}

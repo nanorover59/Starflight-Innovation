@@ -15,6 +15,7 @@ import net.minecraft.util.math.Vec3d;
 public class PlanetRenderList
 {
 	private static ArrayList<PlanetRenderer> planetList = new ArrayList<PlanetRenderer>();
+	private static ArrayList<PlanetRenderer> planetListUnsorted = new ArrayList<PlanetRenderer>();
 	private static ArrayList<PlanetRenderer> planetListTemporary = new ArrayList<PlanetRenderer>();
 	private static PlanetRenderer viewpoint;
 	private static PlanetRenderer viewpointTemporary;
@@ -29,12 +30,12 @@ public class PlanetRenderList
 		
 		planetListTemporary.clear();
 		int count = buffer.readInt();
-		String viewpointName = buffer.readString();
-		inOrbitTemporary = viewpointName.contains("_orbit");	
+		int viewpointIndex = buffer.readInt();
+		inOrbitTemporary = buffer.readBoolean();
 		
 		for(int i = 0; i < count; i++)
 		{
-			String name = buffer.readString();
+			// Get dynamic values from the buffer.
 			double positionX = buffer.readDouble();
 			double positionY = buffer.readDouble();
 			double positionZ = buffer.readDouble();
@@ -44,45 +45,52 @@ public class PlanetRenderList
 			double parkingOrbitViewpointX = buffer.readDouble();
 			double parkingOrbitViewpointY = buffer.readDouble();
 			double parkingOrbitViewpointZ = buffer.readDouble();
-			double obliquity = buffer.readDouble();
 			double precession = buffer.readDouble();
-			double radius = buffer.readDouble();
-			double surfacePressure = buffer.readDouble();
-			boolean hasLowClouds = buffer.readBoolean();
-			boolean hasCloudCover = buffer.readBoolean();
-			boolean hasWeather = buffer.readBoolean();
-			boolean drawClouds = buffer.readBoolean();
 			double cloudRotation = buffer.readDouble();
 			int cloudLevel = buffer.readInt();
 			Vec3d position = new Vec3d(positionX, positionY, positionZ);
 			Vec3d surfaceViewpoint = new Vec3d(surfaceViewpointX, surfaceViewpointY, surfaceViewpointZ);
 			Vec3d parkingOrbitViewpoint = new Vec3d(parkingOrbitViewpointX, parkingOrbitViewpointY, parkingOrbitViewpointZ);
+			
+			// Get constant values from the PlanetList class.
+			Planet planet = PlanetList.getPlanets().get(i);
+			String name = planet.getName();
+			double obliquity = planet.getObliquity();
+			double radius = planet.getRadius();
+			double surfacePressure = planet.getSurfacePressure();
+			boolean hasLowClouds = planet.hasLowClouds();
+			boolean hasCloudCover = planet.hasCloudCover();
+			boolean hasWeather = planet.hasWeather();
+			boolean drawClouds = planet.drawClouds();
+			
 			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, drawClouds, cloudRotation, cloudLevel);
 			planetListTemporary.add(planetRenderer);
 			
-			if(viewpointName.contains(name))
+			if(i == viewpointIndex)
 				viewpointTemporary = planetRenderer;
 		}
 		
 		updated = true;
 	}
 	
-	public static ArrayList<PlanetRenderer> getRenderers()
+	public static ArrayList<PlanetRenderer> getRenderers(boolean sorted)
 	{
 		if(updated)
 		{
 			planetList.clear();
+			planetListUnsorted.clear();
 			
-			for(PlanetRenderer planetRenderer : planetListTemporary)
+			for(PlanetRenderer planetRenderer : planetListTemporary)	
 				planetList.add(new PlanetRenderer(planetRenderer));
 			
 			viewpoint = new PlanetRenderer(viewpointTemporary);
 			inOrbit = inOrbitTemporary;
+			planetListUnsorted.addAll(planetList);
 			Collections.sort(planetList);
 			updated = false;
 		}
 		
-		return planetList;
+		return sorted ? planetList : planetListUnsorted;
 	}
 	
 	public static PlanetRenderer getViewpointPlanet()

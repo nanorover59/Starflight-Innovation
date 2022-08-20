@@ -66,7 +66,7 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
 	public void renderSkyInject(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo info)
 	{
-		ArrayList<PlanetRenderer> planetList = PlanetRenderList.getRenderers();
+		ArrayList<PlanetRenderer> planetList = PlanetRenderList.getRenderers(true);
 		PlanetRenderer viewpointPlanet = PlanetRenderList.getViewpointPlanet();
 		
 		if(this.client.world.getDimensionEffects().getSkyType() == DimensionEffects.SkyType.NORMAL && viewpointPlanet != null)

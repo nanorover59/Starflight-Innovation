@@ -63,7 +63,6 @@ public class StarflightEvents
 			PlanetList.simulateMotion();
 			PlanetList.sendToClients(server);
 			EnergyNet.doEnergyFlow(server);
-			
 	    });
 	}
 	

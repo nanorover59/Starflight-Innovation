@@ -70,7 +70,7 @@ public class Planet
 		radius = radius_;
 		parkingOrbitRadius = radius + parkingOrbitRadius_;
 		surfaceGravity = ((G * mass) / (radius * radius) / ((G * EARTH_MASS) / (EARTH_RADIUS * EARTH_RADIUS)));
-		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(parkingOrbitRadius, 3.0d));
+		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(parkingOrbitRadius, 3.0));
 		position = new Vec3d(0.0, 0.0, 0.0);
 		velocity = new Vec3d(0.0, 0.0, 0.0);
 		acceleration = new Vec3d(0.0, 0.0, 0.0);
@@ -109,9 +109,9 @@ public class Planet
 		obliquity = obliquity_;
 		rotationRate = rotationRate_;
 		precessionRate = precessionRate_;
-		rotation = 0.0d;
-		precession = 0.0d;
-		parkingOrbitAngle = 0.0d;
+		rotation = 0.0;
+		precession = 0.0;
+		parkingOrbitAngle = 0.0;
 	}
 	
 	public void setAtmosphereParameters(int temperatureCategory_, double surfacePressure_, boolean hasOxygen_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_)
@@ -128,7 +128,7 @@ public class Planet
 	{
 		drawClouds = drawClouds_;
 		cloudRotationRate = cloudRotationRate_;
-		rotation = 0.0d;
+		rotation = 0.0;
 		cloudLevel = 0;
 		cloudTimer = 6000;
 	}
@@ -303,7 +303,7 @@ public class Planet
 	}
 	
 	/**
-	 * Set the simulated position of this object measured in meters.
+	 * Set the simulated position of this object relative to its parent object measured in meters.
 	 */
 	public void setPosition(Vec3d position_)
 	{
@@ -311,11 +311,20 @@ public class Planet
 	}
 	
 	/**
-	 * Get the simulated position of this object measured in meters.
+	 * Get the simulated absolute position of this object measured in meters.
 	 */
 	public Vec3d getPosition()
 	{
-		return position;
+		Vec3d absolutePosition = position;
+		Planet p = parent;
+		
+		for(int i = satelliteLevel; i > 0; i--)
+		{
+			absolutePosition = absolutePosition.add(p.position);
+			p = p.parent;
+		}
+		
+		return absolutePosition;
 	}
 	
 	public void setRotation(double rotation_)
@@ -426,16 +435,17 @@ public class Planet
 	 */
 	public double getSunAngleXZ(boolean fromOrbit)
 	{
-		Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
+		Vec3d starPosition = new Vec3d(0.0, 0.0, 0.0);
+		Vec3d absolutePosition = getPosition();
 		Vec3d viewpoint = fromOrbit ? parkingOrbitViewpoint : surfaceViewpoint;
-		double azimuthOfViewpoint = Math.atan2(viewpoint.getZ() - position.getZ(), viewpoint.getX() - position.getX());
-		double azimuthOfStar = Math.atan2(starPosition.getZ() - position.getZ(), starPosition.getX() - position.getX());
+		double azimuthOfViewpoint = Math.atan2(viewpoint.getZ() - absolutePosition.getZ(), viewpoint.getX() - absolutePosition.getX());
+		double azimuthOfStar = Math.atan2(starPosition.getZ() - absolutePosition.getZ(), starPosition.getX() - absolutePosition.getX());
 		double trueAzimuth = azimuthOfStar - azimuthOfViewpoint;
 		
-		if(trueAzimuth < 0.0d)
-			trueAzimuth += Math.PI * 2.0d;
-		else if(trueAzimuth > Math.PI * 2.0d)
-			trueAzimuth -= Math.PI * 2.0d;
+		if(trueAzimuth < 0.0)
+			trueAzimuth += Math.PI * 2.0;
+		else if(trueAzimuth > Math.PI * 2.0)
+			trueAzimuth -= Math.PI * 2.0;
 		
 		return trueAzimuth;
 	}
@@ -443,8 +453,8 @@ public class Planet
 	private Vec3d getRelativePositionAtTrueAnomaly(double ta)
 	{
 		double ecc = (apoapsis - periapsis) / (apoapsis + periapsis); // Eccentricity
-		double sma = (periapsis + apoapsis) / 2.0d; // Semi-Major Axis
-		double r = (sma * (1.0d - (ecc * ecc))) / (1.0d + (ecc * Math.cos(ta)));
+		double sma = (periapsis + apoapsis) / 2.0; // Semi-Major Axis
+		double r = (sma * (1.0 - (ecc * ecc))) / (1.0 + (ecc * Math.cos(ta)));
 		Vec3d lanAxis = new Vec3d(1.0, 0.0, 0.0).rotateY((float) ascendingNode); // Longitude of Ascending Node Axis
 		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPeriapsis + ta));
 		newPosition = VectorMathUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
@@ -461,12 +471,12 @@ public class Planet
 		
 		if(satelliteLevel > 0)
 		{
-			double sma = (periapsis + apoapsis) / 2.0d; // Semi-Major Axis
+			double sma = (periapsis + apoapsis) / 2.0; // Semi-Major Axis
 			Vec3d relativePosition = getRelativePositionAtTrueAnomaly(trueAnomaly);
-			Vec3d relativePositionStep = getRelativePositionAtTrueAnomaly(trueAnomaly - 1e-4);
+			Vec3d relativePositionStep = getRelativePositionAtTrueAnomaly(trueAnomaly - 1e-3);
 			Vec3d tangent = relativePositionStep.subtract(relativePosition).normalize();
-			double initialSpeed = Math.sqrt(G * parent.mass * ((2.0d / relativePosition.length()) - (1.0d / sma)));
-			position = parent.position.add(relativePosition);
+			double initialSpeed = Math.sqrt(G * parent.mass * ((2.0 / relativePosition.length()) - (1.0 / sma)));
+			position = relativePosition;
 			velocity = tangent.multiply(initialSpeed);
 			checkList.add(name);
 		}
@@ -486,10 +496,10 @@ public class Planet
 		if(satelliteLevel < 1)
 			return;
 		
-		acceleration = new Vec3d(0.0d, 0.0d, 0.0d);
-		double squaredDistance = position.squaredDistanceTo(parent.position);
+		acceleration = new Vec3d(0.0, 0.0, 0.0);
+		double squaredDistance = position.getX() * position.getX() + position.getY() * position.getY() + position.getZ() * position.getZ();
 		double accelerationMagnitude = (G * parent.mass) / squaredDistance;
-		acceleration = acceleration.add(parent.position.subtract(position).normalize().multiply(accelerationMagnitude));
+		acceleration = acceleration.add(position.normalize().multiply(-accelerationMagnitude));
 	}
 	
 	/**
@@ -509,40 +519,32 @@ public class Planet
 	public void simulatePositionAndRotationChange(double timeStep)
 	{
 		if(satelliteLevel > 0)
-		{
 			position = position.add(velocity.multiply(timeStep));
-			Planet p = parent;
-			
-			for(int i = satelliteLevel; i > 0; i--)
-			{
-				position = position.add(p.velocity.multiply(timeStep));
-				p = p.parent;
-			}
-		}
 		
 		rotation -= rotationRate * timeStep;
 		
-		if(rotation <= 0.0d)
-			rotation += 2.0d * Math.PI;
+		if(rotation <= 0.0)
+			rotation += 2.0 * Math.PI;
 		
 		precession -= precessionRate * timeStep;
 		
-		if(precession <= 2.0d * Math.PI)
-			precession += 2.0d * Math.PI;
+		if(precession <= 2.0 * Math.PI)
+			precession += 2.0 * Math.PI;
 		
 		parkingOrbitAngle -= parkingOrbitAngularSpeed * timeStep;
 		
-		if(parkingOrbitAngle <= 2.0d * Math.PI)
-			parkingOrbitAngle += 2.0d * Math.PI;
+		if(parkingOrbitAngle <= 2.0 * Math.PI)
+			parkingOrbitAngle += 2.0 * Math.PI;
 		
+		Vec3d absolutePosition = getPosition();
 		Vec3d axisOfRotation = new Vec3d(0.0, 1.0, 0.0);
 		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
 		axisOfRotation = axisOfRotation.rotateY((float) precession);
-		surfaceViewpoint = position.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
-		parkingOrbitViewpoint = position.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
+		surfaceViewpoint = absolutePosition.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
+		parkingOrbitViewpoint = absolutePosition.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
 		
 		if(isTidallyLocked)
-			surfaceViewpoint = position.add(position.subtract(parent.position).normalize().multiply(-radius));
+			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));
 		
 		// Update the clouds animation if this planet has one.
 		if(drawClouds)
@@ -559,8 +561,8 @@ public class Planet
 			
 			cloudRotation += cloudRotationRate * timeStep;
 			
-			if(cloudRotation >= 2.0d * Math.PI)
-				cloudRotation -= 2.0d * Math.PI;
+			if(cloudRotation >= 2.0 * Math.PI)
+				cloudRotation -= 2.0 * Math.PI;
 		}
 	}
 	

@@ -28,6 +28,7 @@ import net.minecraft.util.math.Vec2f;
 import space.StarflightMod;
 import space.planet.Planet;
 import space.planet.PlanetList;
+import space.planet.PlanetRenderList;
 import space.planet.PlanetRenderer;
 import space.screen.PlanetariumScreenHandler;
 
@@ -65,8 +66,15 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
 		
-		double selectedPlanetX = selectedPlanet.getPosition().getX() * scaleFactor;
-		double selectedPlanetY = selectedPlanet.getPosition().getZ() * scaleFactor;
+		if(PlanetList.getPlanets().size() != PlanetRenderList.getRenderers(false).size())
+			return;
+		
+		@SuppressWarnings("unchecked")
+		ArrayList<Planet> planetList = (ArrayList<Planet>) PlanetList.getPlanets().clone();
+		
+		PlanetRenderer selectedPlanetRenderer = PlanetRenderList.getRenderers(false).get(planetList.indexOf(selectedPlanet));
+		double selectedPlanetX = selectedPlanetRenderer.getPosition().getX() * scaleFactor;
+		double selectedPlanetY = selectedPlanetRenderer.getPosition().getZ() * scaleFactor;
 		double focusX = selectedPlanetX;
 		double focusY = selectedPlanetY;
 		boolean nothingSelected = mousePressed;
@@ -75,8 +83,6 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 			mouseHold = false;
 		
 		// Render the displayed planets.
-		@SuppressWarnings("unchecked")
-		ArrayList<Planet> planetList = (ArrayList<Planet>) PlanetList.getPlanets().clone();
 		
 		for(Planet p : selectedPlanet.getSatellites())
 		{
@@ -88,28 +94,32 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 			drawOrbitEllipse(matrices.peek().getPositionMatrix(), px, py, rMin, rMax, (float) p.getArgumentOfPeriapsis(), 256);
 		}
 		
-		for(Planet p : planetList)
+		for(int i = 0; i < planetList.size(); i++)
 		{
-			if(p != selectedPlanet && p.getParent() != selectedPlanet)
+			Planet planet = planetList.get(i);
+			PlanetRenderer planetRenderer = PlanetRenderList.getRenderers(false).get(i);
+			System.out.println(i + "   " + planet.getName() + " " + planetRenderer.getName());
+			
+			if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
 				continue;
 			
-			int renderType = p.getName() == "sol" ? 1 : 0;
-			float renderWidth = Math.max(5.0f, (float) (p.getRadius() * scaleFactor * 16.0));
-			float px = (float) ((p.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
-			float py = (float) ((p.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
+			int renderType = planet.getName() == "sol" ? 1 : 0;
+			float renderWidth = Math.max(5.0f, (float) (planet.getRadius() * scaleFactor * 16.0));
+			float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
+			float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
 			
-			if(!inBounds(px, py) || (p != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
+			if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
 				continue;
 			
 			int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mousePressed);
-			RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png") : PlanetRenderer.getTexture(p.getName()));
+			RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png") : PlanetRenderer.getTexture(planet.getName()));
 			
 			if(renderType == 1)
 				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 			else
 				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
 			
-			if(mouseHold || p == selectedPlanet)
+			if(mouseHold || planet == selectedPlanet)
 				continue;
 			
 			if(selection > 0)
@@ -119,7 +129,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				
 				if(selection > 1)
 				{
-					selectedPlanet = p;
+					selectedPlanet = planet;
 					mouseHold = true;
 					nothingSelected = false;
 					scaleFactor = selectedPlanet.getName() == "sol" ? 1.5e-10 : (1.0 / selectedPlanet.getRadius()) * 0.75;
