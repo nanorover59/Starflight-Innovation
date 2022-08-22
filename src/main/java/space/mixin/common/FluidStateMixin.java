@@ -12,11 +12,11 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import space.planet.Planet;
 import space.planet.PlanetList;
 import space.util.StarflightEffects;
+import space.world.StarflightWorldGeneration;
 
 @Mixin(FluidState.class)
 public abstract class FluidStateMixin
@@ -33,17 +33,14 @@ public abstract class FluidStateMixin
 		{
 			Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
 			
-			if(currentPlanet != null && this.getFluid() == Fluids.WATER && world.getFluidState(pos).isStill())
+			if(currentPlanet != null && this.getFluid() == Fluids.WATER && (world.getFluidState(pos).isStill() || world.getFluidState(pos).getLevel() == 0))
 			{
 				int temperature = currentPlanet.getTemperatureCategory(world.getSkyAngle(1.0f), PlanetList.isOrbit(world.getRegistryKey()));
 				
-		        if(temperature != Planet.TEMPERATE)
+		        if(temperature != Planet.TEMPERATE && !world.getBiome(pos).isIn(StarflightWorldGeneration.LIQUID_WATER))
 		        {
 		        	boolean air = false;
-		        	float chance = 1.0f;
-					
-					if(temperature < Planet.TEMPERATE && world.getLightLevel(LightType.BLOCK, pos) > 11 - world.getBlockState(pos).getOpacity(world, pos))
-						chance /= world.getLightLevel(LightType.BLOCK, pos) * 32.0f;
+		        	float chance = temperature == Planet.EXTRA_COLD ? 0.5f : 0.05f;
 		        	
 		        	for(Direction d1 : Direction.values())
 		        	{
@@ -54,26 +51,18 @@ public abstract class FluidStateMixin
 		        		}
 		        	}
 		        	
-		        	if(air && world.getRandom().nextFloat() < chance)
+		        	if(air)
 		        	{
-						if(temperature < Planet.TEMPERATE)
+						if(temperature < Planet.TEMPERATE && world.getRandom().nextFloat() < chance)
 							world.setBlockState(pos, Blocks.ICE.getDefaultState());
-						else
+						else if(temperature >= Planet.TEMPERATE)
 						{
 							world.setBlockState(pos, Blocks.AIR.getDefaultState());
 							StarflightEffects.sendOutgas(world, pos, pos.up(), true);
 						}
-						
-						for(Direction d2 : Direction.values())
-			        	{
-							if(world.getFluidState(pos.offset(d2)).getFluid() == Fluids.WATER)
-								world.createAndScheduleFluidTick(pos.offset(d2), world.getFluidState(pos.offset(d2)).getFluid(), 2);
-			        	}
-						
-						info.cancel();
+						else
+							world.createAndScheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 5);
 		        	}
-		        	else if(air)
-			        	world.createAndScheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 2);
 		        }
 			}
 		}

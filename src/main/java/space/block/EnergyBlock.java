@@ -22,9 +22,4 @@ public interface EnergyBlock
 	}
 	
 	void addNode(World world, BlockPos pos);
-	
-	default void addNode(World world, BlockPos pos, double storedEnergy)
-	{
-		
-	}
 }

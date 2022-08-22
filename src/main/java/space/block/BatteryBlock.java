@@ -138,12 +138,6 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
-	public void addNode(World world, BlockPos pos, double storedEnergy)
-	{
-		EnergyNet.addDual(world, pos, storedEnergy);
-	}
-	
-	@Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();

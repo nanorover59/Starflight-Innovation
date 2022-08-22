@@ -1,14 +1,16 @@
 package space.entity;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.AttackGoal;
 import net.minecraft.entity.ai.goal.LookAroundGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
+import net.minecraft.entity.ai.goal.WanderAroundGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.data.DataTracker;
@@ -18,19 +20,19 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.ServerWorldAccess;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 
 public class DustEntity extends HostileEntity
 {
 	private static final TrackedData<Integer> STAMINA = DataTracker.registerData(DustEntity.class, TrackedDataHandlerRegistry.INTEGER);
-	public static final int INITIAL_STAMINA = 400;
+	public static final int INITIAL_STAMINA = 1600;
 	
 	public DustEntity(EntityType<? extends HostileEntity> entityType, World world)
 	{
@@ -41,7 +43,7 @@ public class DustEntity extends HostileEntity
     protected void initGoals()
 	{
         this.goalSelector.add(2, new AttackGoal(this));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 0.8));
+        this.goalSelector.add(7, new DustWanderAroundGoal(this, 1.0));
         this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 16.0f));
         this.goalSelector.add(9, new LookAroundGoal(this));
         this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
@@ -52,11 +54,16 @@ public class DustEntity extends HostileEntity
         return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 50.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
     }
 	
-	/*@Override
+	@Override
     public boolean isAttackable()
 	{
         return false;
-    }*/
+    }
+	
+	@Override
+	public void pushAwayFrom(Entity entity)
+	{
+	}
 	
 	@Override
     protected void initDataTracker()
@@ -69,16 +76,6 @@ public class DustEntity extends HostileEntity
 	{
 		return dataTracker.get(STAMINA);
 	}
-	
-	public static boolean canSpawn(EntityType<DustEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) 
-	{
-		float spawnChance = 0.25f;
-		
-		if(world.toServerWorld().isRaining() || world.toServerWorld().isThundering())
-			spawnChance = 0.75f;
-		
-        return random.nextFloat() < spawnChance && world.isSkyVisible(pos) && world.getBlockState(pos.down()).getBlock() == StarflightBlocks.FERRIC_SAND;
-    }
 
     @Override
     public void tick()
@@ -130,5 +127,37 @@ public class DustEntity extends HostileEntity
 		}
 		
 		return false;
+	}
+	
+	@Override
+	public void writeCustomDataToNbt(NbtCompound nbt)
+	{
+		super.writeCustomDataToNbt(nbt);
+		nbt.putInt("stamina", dataTracker.get(STAMINA));
+	}
+	
+	@Override
+	public void readCustomDataFromNbt(NbtCompound nbt)
+	{
+		super.readCustomDataFromNbt(nbt);
+		dataTracker.set(STAMINA, nbt.getInt("stamina"));
+	}
+	
+	static public class DustWanderAroundGoal extends WanderAroundGoal
+	{
+		public DustWanderAroundGoal(PathAwareEntity mob, double speed)
+		{
+			super(mob, speed);
+		}
+
+		@Override
+		@Nullable
+		protected Vec3d getWanderTarget()
+		{
+			if(this.mob.getRandom().nextFloat() <= 0.5f)
+				return FuzzyTargeting.find(this.mob, 16, 4);
+			else
+				return super.getWanderTarget();
+		}
 	}
 }

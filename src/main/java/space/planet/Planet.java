@@ -450,7 +450,7 @@ public class Planet
 		return trueAzimuth;
 	}
 	
-	private Vec3d getRelativePositionAtTrueAnomaly(double ta)
+	public Vec3d getRelativePositionAtTrueAnomaly(double ta)
 	{
 		double ecc = (apoapsis - periapsis) / (apoapsis + periapsis); // Eccentricity
 		double sma = (periapsis + apoapsis) / 2.0; // Semi-Major Axis
@@ -473,7 +473,7 @@ public class Planet
 		{
 			double sma = (periapsis + apoapsis) / 2.0; // Semi-Major Axis
 			Vec3d relativePosition = getRelativePositionAtTrueAnomaly(trueAnomaly);
-			Vec3d relativePositionStep = getRelativePositionAtTrueAnomaly(trueAnomaly - 1e-3);
+			Vec3d relativePositionStep = getRelativePositionAtTrueAnomaly(trueAnomaly - 1e-4);
 			Vec3d tangent = relativePositionStep.subtract(relativePosition).normalize();
 			double initialSpeed = Math.sqrt(G * parent.mass * ((2.0 / relativePosition.length()) - (1.0 / sma)));
 			position = relativePosition;

@@ -25,6 +25,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec2f;
+import net.minecraft.util.math.Vec3d;
 import space.StarflightMod;
 import space.planet.Planet;
 import space.planet.PlanetList;
@@ -87,24 +88,21 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		for(Planet p : selectedPlanet.getSatellites())
 		{
 			// Draw the planet's orbit in the GUI.
-			float rMin = (float) (p.getPeriapsis() * scaleFactor);
-			float rMax = (float) (p.getApoapsis() * scaleFactor);
 			float px = (float) (x + 99.0);
 			float py = (float) (y + 71.0);
-			drawOrbitEllipse(matrices.peek().getPositionMatrix(), px, py, rMin, rMax, (float) p.getArgumentOfPeriapsis(), 256);
+			drawOrbitEllipse(matrices.peek().getPositionMatrix(), p, px, py, 256);
 		}
 		
 		for(int i = 0; i < planetList.size(); i++)
 		{
 			Planet planet = planetList.get(i);
 			PlanetRenderer planetRenderer = PlanetRenderList.getRenderers(false).get(i);
-			System.out.println(i + "   " + planet.getName() + " " + planetRenderer.getName());
 			
 			if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
 				continue;
 			
 			int renderType = planet.getName() == "sol" ? 1 : 0;
-			float renderWidth = Math.max(5.0f, (float) (planet.getRadius() * scaleFactor * 16.0));
+			float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor * 8.0));
 			float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
 			float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
 			
@@ -204,32 +202,28 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 	{
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-        float halfSize = size / 2.0f;
         bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix, x - halfSize, y + halfSize, 10.0f).texture(u0, v1).next();
-        bufferBuilder.vertex(matrix, x + halfSize, y + halfSize, 10.0f).texture(u1, v1).next();
-        bufferBuilder.vertex(matrix, x + halfSize, y - halfSize, 10.0f).texture(u1, v0).next();
-        bufferBuilder.vertex(matrix, x - halfSize, y - halfSize, 10.0f).texture(u0, v0).next();
+        bufferBuilder.vertex(matrix, x - size, y + size, 10.0f).texture(u0, v1).next();
+        bufferBuilder.vertex(matrix, x + size, y + size, 10.0f).texture(u1, v1).next();
+        bufferBuilder.vertex(matrix, x + size, y - size, 10.0f).texture(u1, v0).next();
+        bufferBuilder.vertex(matrix, x - size, y - size, 10.0f).texture(u0, v0).next();
         BufferRenderer.drawWithShader(bufferBuilder.end());
     }
 	
-	private void drawOrbitEllipse(Matrix4f matrix, float centerX, float centerY, float rMin, float rMax, float aop, int divisions)
+	private void drawOrbitEllipse(Matrix4f matrix, Planet planet, float centerX, float centerY, int divisions)
 	{
-		float a = (rMin + rMax) / 2.0f;
-		float ecc = (rMax - rMin) / (rMax + rMin);
-		float p = a * (1.0f - (ecc * ecc));
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
         
         for(float theta = 0.0f; theta < Math.PI * 2.0f; theta += (Math.PI * 2.0f) / divisions)
         {
-        	float r1 =  p / (1.0f + (ecc * (float) Math.cos((double) theta)));
-        	float x1 = centerX + (r1 * (float) Math.cos((double) theta + aop));
-        	float y1 = centerY + (r1 * (float) Math.sin((double) theta + aop));
-        	float r2 =  p / (1.0f + (ecc * (float) Math.cos((double) theta + ((Math.PI * 2.0f) / divisions))));
-        	float x2 = centerX + (r2 * (float) Math.cos((double) theta + aop + ((Math.PI * 2.0f) / divisions)));
-        	float y2 = centerY + (r2 * (float) Math.sin((double) theta + aop + ((Math.PI * 2.0f) / divisions)));
+        	Vec3d r1 = planet.getRelativePositionAtTrueAnomaly(theta);
+        	float x1 = (float) (r1.getX() * scaleFactor) + centerX;
+        	float y1 = (float) (r1.getZ() * scaleFactor) + centerY;
+        	Vec3d r2 = planet.getRelativePositionAtTrueAnomaly(theta + ((Math.PI * 2.0f) / divisions));
+        	float x2 = (float) (r2.getX() * scaleFactor) + centerX;
+        	float y2 = (float) (r2.getZ() * scaleFactor) + centerY;
         	
         	if(inBounds(x1, y1) && inBounds(x2, y2))
         	{

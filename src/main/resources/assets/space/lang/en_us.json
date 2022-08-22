@@ -131,6 +131,8 @@
 	"block.space.airlock_trapdoor": "Airlock Trapdoor",
 	"block.space.rocket_controller": "Rocket Controller",
 	"block.space.thruster_small": "Basic Rocket Thruster",
+	"entity.space.dust": "Dust Devil",
+	"entity.space.cerulean": "Cerulean",
 	"subtitles.space.thruster": "Rocket Thruster",
 	"subtitles.space.wind": "Wind",
 	"planet.space.sol": "The Sun",

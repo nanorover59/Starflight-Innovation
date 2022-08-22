@@ -298,6 +298,11 @@ public class EnergyNet
 				
 				if(adjacentEnergyNode != null)
 					found.add(adjacentEnergyNode);
+				else
+				{
+					energyBlock.addNode(world, adjacentPosition);
+					found.add(getConsumer(adjacentPosition, world.getRegistryKey()));
+				}
 			}
 		}
 		else if(adjacentBlockState.getBlock() instanceof EnergyCableBlock)
@@ -382,6 +387,11 @@ public class EnergyNet
 				
 				if(adjacentEnergyNode != null)
 					found.add(adjacentEnergyNode);
+				else
+				{
+					energyBlock.addNode(world, adjacentPosition);
+					found.add(getProducer(adjacentPosition, world.getRegistryKey()));
+				}
 			}
 		}
 		else if(adjacentBlockState.getBlock() instanceof EnergyCableBlock)

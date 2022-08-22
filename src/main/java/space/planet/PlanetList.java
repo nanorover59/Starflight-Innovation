@@ -48,7 +48,7 @@ public class PlanetList
 		parkingOrbitWorldKeys.put(earth, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "earth_orbit")));
 		 
 		Planet moon = new Planet("moon", "earth", 2, 7.34767309e22, 1.7381e6, 200e3);
-		moon.setOrbitParameters(3.633e8, 4.055e8, 5.55276502, 2.36090688, 2.18305783, 0.09005899);
+		moon.setOrbitParameters(3.633e8, 4.055e8, 5.55276502, 0.0, 2.18305783, 0.09005899);
 		moon.setRotationParameters(true, -0.1164135, 0.0, 0.0);
 		moon.setAtmosphereParameters(Planet.TEMPERATE, 0.0, false, false, false, false);
 		moon.setDecorativeParameters(false, 0);

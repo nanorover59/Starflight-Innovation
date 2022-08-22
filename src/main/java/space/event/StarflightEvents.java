@@ -13,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
 import space.energy.EnergyNet;
 import space.planet.PlanetList;
+import space.util.MobSpawningUtil;
 
 public class StarflightEvents
 {
@@ -63,6 +64,7 @@ public class StarflightEvents
 			PlanetList.simulateMotion();
 			PlanetList.sendToClients(server);
 			EnergyNet.doEnergyFlow(server);
+			MobSpawningUtil.doCustomMobSpawning(server);
 	    });
 	}
 	

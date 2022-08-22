@@ -38,8 +38,10 @@ import space.client.gui.IceElectrolyzerScreen;
 import space.client.gui.PlanetariumScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
+import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.entity.MovingCraftEntity;
 import space.entity.StarflightEntities;
@@ -65,6 +67,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static final ScreenHandlerType<RocketControllerScreenHandler> ROCKET_CONTROLLER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "rocket_controller"), RocketControllerScreenHandler::new);
 	
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
+	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
 	
 	@Override
 	public void onInitializeClient()
@@ -110,8 +113,10 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
 	}
 	
 	int getColor(ItemStack stack)

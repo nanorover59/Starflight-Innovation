@@ -17,6 +17,8 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		applyToBiome(StarflightBiomes.MARS_MIDLANDS);
 		applyToBiome(StarflightBiomes.MARS_HIGHLANDS);
 		applyToBiome(StarflightBiomes.MARS_ICE);
+		applyToBiome(StarflightBiomes.MARS_DRIPSTONE);
+		applyToBiome(StarflightBiomes.MARS_LUSH_CAVES);
 	}
 	
 	@Override
@@ -47,11 +49,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 			{
 				if(y == newSeaLevel)
 				{
-					int j = region.getRandom().nextInt(3);
-					j += region.getRandom().nextBoolean() ? 2 : 3;
-					
-					for(int i = 0; i < j; i++)
-						blockColumn.setState(y - i, i < 2 || region.getRandom().nextBoolean() ? Blocks.PACKED_ICE.getDefaultState() :  Blocks.ICE.getDefaultState());
+					blockColumn.setState(y, region.getRandom().nextBoolean() ? Blocks.PACKED_ICE.getDefaultState() : Blocks.ICE.getDefaultState());
 					
 					if(y > surfaceY)
 						blockColumn.setState(y, topState);

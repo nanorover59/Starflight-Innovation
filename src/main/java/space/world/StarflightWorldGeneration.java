@@ -52,6 +52,7 @@ public class StarflightWorldGeneration
 {
 	public static final TagKey<Biome> IS_CRATERED = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "is_cratered"));
 	public static final TagKey<Biome> MORE_SCATTER = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "more_scatter"));
+	public static final TagKey<Biome> LIQUID_WATER = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "liquid_water"));
 
 	public static final RuleTest FERRIC_STONE_ORE_REPLACEABLES = new BlockMatchRuleTest(StarflightBlocks.FERRIC_STONE);
 	public static final RuleTest FRIGID_STONE_ORE_REPLACEABLES = new BlockMatchRuleTest(StarflightBlocks.FRIGID_STONE);
@@ -63,6 +64,10 @@ public class StarflightWorldGeneration
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SURFACE_ROCK_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK);
 	public static final RegistryEntry<PlacedFeature> SURFACE_ROCK_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
+
+	public static final Feature<DefaultFeatureConfig> ICE_BLADE = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "ice_blade"), new IceBladeFeature(DefaultFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> ICE_BLADE_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE);
+	public static final RegistryEntry<PlacedFeature> ICE_BLADE_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
 
 	public static final RegistryEntry<PlacedFeature> BAUXITE_ORE = orePlacedFeature("bauxite_ore", 10, 8, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.BAUXITE_ORE.getDefaultState(), Blocks.STONE);
 	public static final RegistryEntry<PlacedFeature> BAUXITE_ORE_DEEPSLATE = orePlacedFeature("bauxite_ore_deepslate", 10, 8, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.DEEPSLATE_BAUXITE_ORE.getDefaultState(), Blocks.DEEPSLATE);
