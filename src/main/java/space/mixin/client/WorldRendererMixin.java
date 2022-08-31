@@ -22,7 +22,6 @@ import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
@@ -69,7 +68,7 @@ public abstract class WorldRendererMixin
 		ArrayList<PlanetRenderer> planetList = PlanetRenderList.getRenderers(true);
 		PlanetRenderer viewpointPlanet = PlanetRenderList.getViewpointPlanet();
 		
-		if(this.client.world.getDimensionEffects().getSkyType() == DimensionEffects.SkyType.NORMAL && viewpointPlanet != null)
+		if(viewpointPlanet != null)
 		{
 			boolean starrySky = PlanetRenderList.isViewpointInOrbit() || viewpointPlanet.getSurfacePressure() < 0.001D;
 			boolean cloudySky = viewpointPlanet.hasCloudCover();
@@ -106,7 +105,7 @@ public abstract class WorldRendererMixin
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			
-			// Render the stars.
+			// Render the stars and milky way.
 			Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
 			double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());	
 			matrices.push();
@@ -121,12 +120,24 @@ public abstract class WorldRendererMixin
 
 			if(starFactor > 0.0f)
 			{
+				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
+				float tx = 120.0f;
+				float tz = 1024.0f;
+				float factor = 0.25f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
-				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
+				RenderSystem.setShaderColor(starFactor * factor, starFactor * factor, starFactor * factor, starFactor * factor);
+				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
+				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+				bufferBuilder.vertex(matrix4f3, -tx, 100.0f, -tz).texture(0.0f, 1.0f).next();
+				bufferBuilder.vertex(matrix4f3, tx, 100.0f, -tz).texture(0.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, tx, 100.0f, tz).texture(1.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, -tx, 100.0f, tz).texture(1.0f, 1.0f).next();
+				BufferRenderer.drawWithShader(bufferBuilder.end());
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
+				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
 				this.starsBuffer.bind();
-	            this.starsBuffer.draw(matrices.peek().getPositionMatrix(), projectionMatrix, GameRenderer.getPositionTexShader());
+	            this.starsBuffer.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
 				runnable.run();
 			}

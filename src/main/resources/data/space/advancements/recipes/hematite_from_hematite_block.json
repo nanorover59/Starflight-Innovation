@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:hematite_from_hematite_block"
+    ]
+  },
+  "criteria": {
+    "has_hematite_block": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:hematite_block"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:hematite_from_hematite_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_hematite_block",
+      "has_the_recipe"
+    ]
+  ]
+}

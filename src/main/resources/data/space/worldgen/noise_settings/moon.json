@@ -8,10 +8,7 @@
     "Name": "minecraft:stone"
   },
   "default_fluid": {
-    "Name": "minecraft:air",
-    "Properties": {
-      "level": "0"
-    }
+    "Name": "minecraft:air"
   },
   "noise": {
     "min_y": -64,

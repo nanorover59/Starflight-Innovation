@@ -34,6 +34,9 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
+import space.item.StarflightItems;
+import space.planet.Planet;
+import space.planet.PlanetList;
 import space.screen.StirlingEngineScreenHandler;
 
 public class StirlingEngineBlockEntity extends LockableContainerBlockEntity implements SidedInventory
@@ -249,6 +252,14 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 
 	protected int getFuelTime(ItemStack fuel)
 	{
+		if(world != null && !fuel.isIn(StarflightItems.NO_OXYGEN_FUEL_ITEM_TAG))
+		{
+			Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+			
+			if((planet != null && !planet.hasOxygen()) || PlanetList.isOrbit(world.getRegistryKey()))
+				return 0;
+		}
+		
 		if(fuel.isEmpty())
 			return 0;
 		else

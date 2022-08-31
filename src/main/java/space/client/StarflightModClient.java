@@ -89,6 +89,8 @@ public class StarflightModClient implements ClientModInitializer
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_TOP, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_STEM, RenderLayer.getCutout());
 		ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> 0x437346, StarflightBlocks.RUBBER_LEAVES);
 		ColorProviderRegistry.ITEM.register((itemstack, i) -> 0x437346, StarflightBlocks.RUBBER_LEAVES.asItem());
 		
@@ -155,15 +157,20 @@ public class StarflightModClient implements ClientModInitializer
 		Random random = Random.create(20844L);
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
-		for(int i = 0; i < 3600; i++)
+		for(int i = 0; i < 4000; i++)
 		{
+			int frame = 0;
+
+			while(random.nextFloat() < 0.4 && frame < 3)
+				frame++;
+			
 			double d = random.nextFloat() * 2.0f - 1.0f;
 			double e = random.nextFloat() * 2.0f - 1.0f;
 			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.5f + random.nextFloat() * 0.1f;
+			double g = 0.6f - (frame * 0.15f) + random.nextFloat() * 0.15f; // Star size.
 			double h = d * d + e * e + f * f;
 
-			if(!(h < 1.0) || !(h > 0.001))
+			if(!(h < 1.0) || !(h > 0.01))
 				continue;
 
 			h = 1.0 / Math.sqrt(h);
@@ -179,10 +186,6 @@ public class StarflightModClient implements ClientModInitializer
 			double s = random.nextDouble() * Math.PI * 2.0;
 			double t = Math.sin(s);
 			double u = Math.cos(s);
-			int frame = 0;
-
-			while(random.nextFloat() < 0.4 && frame < 4)
-				frame++;
 			
 			double interval = 1.0f / 4.0f;
 			float startFrame = (float) (frame * interval);

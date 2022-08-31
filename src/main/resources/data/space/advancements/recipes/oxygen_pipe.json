@@ -2,7 +2,7 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "space:oxygen_tank_item"
+      "space:aluminum_block"
     ]
   },
   "criteria": {
@@ -21,7 +21,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "space:oxygen_tank_item"
+        "recipe": "space:aluminum_block"
       }
     }
   },

@@ -36,9 +36,9 @@ public class CeruleanEntityModel<T extends LivingEntity> extends BipedEntityMode
 	}
 
 	@Override
-	public void setAngles(T livingEntity, float f, float g, float h, float i, float j)
+	public void setAngles(T entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch)
 	{
-		super.setAngles(livingEntity, f, g, h, i, j);
+		super.setAngles(entity, limbAngle, limbDistance, animationProgress, headYaw, headPitch);
 		this.head.visible = true;
 		
 		this.body.pivotY = 8.0f;

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:hematite_block"
+    }
+  ],
+  "result": {
+    "item": "space:hematite",
+    "count": 9
+  }
+}

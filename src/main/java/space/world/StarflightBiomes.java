@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.sound.BiomeAdditionsSound;
 import net.minecraft.sound.BiomeMoodSound;
 import net.minecraft.sound.MusicSound;
@@ -21,6 +22,7 @@ import net.minecraft.world.gen.feature.DefaultBiomeFeatures;
 import net.minecraft.world.gen.feature.OrePlacedFeatures;
 import net.minecraft.world.gen.feature.UndergroundPlacedFeatures;
 import space.StarflightMod;
+import space.entity.StarflightEntities;
 import space.util.StarflightEffects;
 
 public class StarflightBiomes
@@ -39,7 +41,7 @@ public class StarflightBiomes
 	public static final RegistryKey<Biome> MARS_DRIPSTONE = registerBiomeKey("mars_dripstone");
 	public static final RegistryKey<Biome> MARS_LUSH_CAVES = registerBiomeKey("mars_lush_caves");
 	
-	private static final BiomeAdditionsSound MARS_WIND = new BiomeAdditionsSound(StarflightEffects.MARS_WIND_SOUND_EVENT, 0.001);
+	private static final BiomeAdditionsSound MARS_WIND = new BiomeAdditionsSound(StarflightEffects.MARS_WIND_SOUND_EVENT, 0.0005);
 	
 	public static void initializeBiomes()
 	{
@@ -120,6 +122,7 @@ public class StarflightBiomes
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.DIAMOND_ORE_FERRIC);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.REDSTONE_ORE_FERRIC);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.SULFUR_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.HEMATITE_ORE);
 	}
 	
 	private static void createSpaceBiome(RegistryKey<Biome> biomeKey)
@@ -147,6 +150,7 @@ public class StarflightBiomes
 		int fogColor = 0x000000;
 		int skyColor = 0x000000;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
+		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.CERULEAN, 10, 1, 4));
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
@@ -184,11 +188,9 @@ public class StarflightBiomes
 			DefaultBiomeFeatures.addDripstone(generationSettings);
 		else if(biomeKey.getValue().getPath().contains("lush_caves"))
 		{
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.LUSH_CAVES_CEILING_VEGETATION);
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.CAVE_VINES);
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.LUSH_CAVES_CLAY);
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.LUSH_CAVES_VEGETATION);
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.SPORE_BLOSSOM);
+			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_PLACED_FEATURE);
+			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_CEILING_PLACED_FEATURE);
+			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.MARS_CAVE_POOL_PLACED_FEATURE);
 		}
 		
 		Biome biome = createBiome(precipitation, temperature, downfall, waterColor, waterFogColor, fogColor, skyColor, spawnSettings, generationSettings, BiomeMoodSound.CAVE, MARS_WIND, null);

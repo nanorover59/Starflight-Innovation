@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/structural_aluminum_slab"
+    },
+    "type=double": {
+      "model": "space:block/structural_aluminum"
+    },
+    "type=top": {
+      "model": "space:block/structural_aluminum_slab_top"
+    }
+  }
+}

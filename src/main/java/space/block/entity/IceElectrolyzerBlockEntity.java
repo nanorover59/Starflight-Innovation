@@ -239,7 +239,7 @@ public class IceElectrolyzerBlockEntity extends LockableContainerBlockEntity imp
 		if(this.world.getBlockEntity(this.pos) != this)
 			return false;
 		else
-			return player.squaredDistanceTo((double) this.pos.getX() + 0.5D, (double) this.pos.getY() + 0.5D, (double) this.pos.getZ() + 0.5D) <= 64.0D;
+			return player.squaredDistanceTo((double) this.pos.getX() + 0.5, (double) this.pos.getY() + 0.5, (double) this.pos.getZ() + 0.5) <= 64.0;
 	}
 
 	public boolean isValid(int slot, ItemStack stack)

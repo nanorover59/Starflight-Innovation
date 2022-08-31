@@ -32,7 +32,7 @@ import space.block.StarflightBlocks;
 public class DustEntity extends HostileEntity
 {
 	private static final TrackedData<Integer> STAMINA = DataTracker.registerData(DustEntity.class, TrackedDataHandlerRegistry.INTEGER);
-	public static final int INITIAL_STAMINA = 1600;
+	public static final int INITIAL_STAMINA = 1200;
 	
 	public DustEntity(EntityType<? extends HostileEntity> entityType, World world)
 	{
@@ -44,14 +44,14 @@ public class DustEntity extends HostileEntity
 	{
         this.goalSelector.add(2, new AttackGoal(this));
         this.goalSelector.add(7, new DustWanderAroundGoal(this, 1.0));
-        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 16.0f));
+        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0f));
         this.goalSelector.add(9, new LookAroundGoal(this));
         this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
     }
 	
 	public static DefaultAttributeContainer.Builder createDustAttributes()
 	{
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 50.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
     }
 	
 	@Override
@@ -121,7 +121,6 @@ public class DustEntity extends HostileEntity
 			if(target instanceof LivingEntity)
 			{
 				((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 120, 0), this);
-				((LivingEntity) this).addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 120, 0), this);
 				return true;
 			}
 		}
@@ -154,10 +153,7 @@ public class DustEntity extends HostileEntity
 		@Nullable
 		protected Vec3d getWanderTarget()
 		{
-			if(this.mob.getRandom().nextFloat() <= 0.5f)
-				return FuzzyTargeting.find(this.mob, 16, 4);
-			else
-				return super.getWanderTarget();
+			return FuzzyTargeting.find(this.mob, 24, 6);
 		}
 	}
 }

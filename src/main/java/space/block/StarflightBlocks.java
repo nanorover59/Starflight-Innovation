@@ -14,13 +14,18 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CarpetBlock;
+import net.minecraft.block.LadderBlock;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.Material;
+import net.minecraft.block.MossBlock;
 import net.minecraft.block.OreBlock;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.block.RedstoneOreBlock;
 import net.minecraft.block.SandBlock;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
@@ -55,22 +60,24 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.sapling.RubberSaplingGenerator;
 import space.item.DescriptiveBlockItem;
-import space.mixin.common.FireBlockMixin;
+import space.mixin.common.FireBlockInvokerMixin;
 
 public class StarflightBlocks
 {
 	// Blocks
 	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 5.0f));
 	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
-	public static final Block RIVETED_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
-	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 4.0f));
-	public static final Block WALKWAY = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 4.0f));
+	public static final Block RIVETED_ALUMINUM = new Block(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
+	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 3.0f));
+	public static final Block WALKWAY = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME));
+	public static final Block STRUCTURAL_ALUMINUM_STAIRS = new StairsBlock(STRUCTURAL_ALUMINUM.getDefaultState(), AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
+	public static final Block STRUCTURAL_ALUMINUM_SLAB = new SlabBlock(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
 	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.of(Material.WOOL).sounds(BlockSoundGroup.WOOL).strength(2.0f, 3.0f));
-	public static final Block BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
-	public static final Block DEEPSLATE_BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
+	public static final Block BAUXITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.IRON_ORE));
+	public static final Block DEEPSLATE_BAUXITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_IRON_ORE));
 	public static final Block BAUXITE_BLOCK = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 5.0f));
-	public static final Block SULFUR_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
-	public static final Block DEEPSLATE_SULFUR_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
+	public static final Block SULFUR_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.COAL_ORE));
+	public static final Block DEEPSLATE_SULFUR_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_COAL_ORE));
 	public static final Block SULFUR_BLOCK = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 5.0f));
 	public static final Block RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.SPRUCE_BROWN);
 	public static final Block SAPPY_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.SPRUCE_BROWN);
@@ -90,7 +97,13 @@ public class StarflightBlocks
 	public static final Block FERRIC_GOLD_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_DIAMOND_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_REDSTONE_ORE = new RedstoneOreBlock(AbstractBlock.Settings.of(Material.STONE).requiresTool().ticksRandomly().luminance(createLightLevelFromLitBlockState(9)).strength(3.0f, 3.0f));
+	public static final Block HEMATITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
+	public static final Block HEMATITE_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 8.0f));
 	public static final Block DRY_SNOW_BLOCK = new Block(AbstractBlock.Settings.of(Material.SNOW_BLOCK, MapColor.WHITE).sounds(BlockSoundGroup.SNOW).strength(0.1F));
+	public static final Block ARES_MOSS_CARPET = new CarpetBlock(AbstractBlock.Settings.of(Material.PLANT, MapColor.PURPLE).strength(0.1f).sounds(BlockSoundGroup.MOSS_CARPET));
+    public static final Block ARES_MOSS_BLOCK = new MossBlock(AbstractBlock.Settings.of(Material.MOSS_BLOCK, MapColor.PURPLE).strength(0.1f).sounds(BlockSoundGroup.MOSS_BLOCK));
+    public static final Block LYCOPHYTE_TOP = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), true);
+    public static final Block LYCOPHYTE_STEM = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), false);
 	public static final Block SEARING_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(2.0f, 5.0f));
 	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(2.0f, 2.0f));
@@ -117,11 +130,13 @@ public class StarflightBlocks
 	public static final Block ICE_ELECTROLYZER = new IceElectrolyzerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.of(Material.AIR));
+	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.of(Material.AIR).air());
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
+	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
+	public static final Block LANDING_LEG = new Block(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.1e6, 360, 320, 12.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.1e6, 330, 300, 12.0);
 	
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
@@ -145,6 +160,7 @@ public class StarflightBlocks
 	// Block Tags
 	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
 	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
+	public static final TagKey<Block> NO_RECURSIVE_SEARCH_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "no_recursive_search_blocks"));
 	
 	// Fluid Storage Values
 	public static final double HYDROGEN_TANK_CAPACITY = 64.0;
@@ -159,6 +175,8 @@ public class StarflightBlocks
 		initializeBlock(RIVETED_ALUMINUM, "riveted_aluminum");
 		initializeBlock(ALUMINUM_FRAME, "aluminum_frame");
 		initializeBlock(WALKWAY, "walkway");
+		initializeBlock(STRUCTURAL_ALUMINUM_STAIRS, "structural_aluminum_stairs");
+		initializeBlock(STRUCTURAL_ALUMINUM_SLAB, "structural_aluminum_slab");
 		initializeBlock(REINFORCED_FABRIC, "reinforced_fabric");
 		initializeBlock(BAUXITE_ORE, "bauxite_ore");
 		initializeBlock(DEEPSLATE_BAUXITE_ORE, "deepslate_bauxite_ore");
@@ -184,7 +202,13 @@ public class StarflightBlocks
 		initializeBlock(FERRIC_GOLD_ORE, "ferric_gold_ore");
 		initializeBlock(FERRIC_DIAMOND_ORE, "ferric_diamond_ore");
 		initializeBlock(FERRIC_REDSTONE_ORE, "ferric_redstone_ore");
+		initializeBlock(HEMATITE_ORE, "hematite_ore");
+		initializeBlock(HEMATITE_BLOCK, "hematite_block");
 		initializeBlock(DRY_SNOW_BLOCK, "dry_snow_block");
+		initializeBlock(ARES_MOSS_CARPET, "ares_moss_carpet");
+		initializeBlock(ARES_MOSS_BLOCK, "ares_moss_block");
+		initializeBlock(LYCOPHYTE_TOP, "lycophyte_top");
+		initializeBlock(LYCOPHYTE_STEM, "lycophyte_stem", null, false, List.of(), List.of());
 		initializeBlock(SEARING_REGOLITH, "searing_regolith");
 		initializeBlock(FRIGID_STONE, "frigid_stone");
 		initializeBlock(TREE_TAP, "tree_tap");
@@ -214,11 +238,13 @@ public class StarflightBlocks
 		initializeBlock(HABITABLE_AIR, "habitable_air", null, false, List.of(), List.of());
 		initializeBlock(AIRLOCK_DOOR, "airlock_door");
 		initializeBlock(AIRLOCK_TRAPDOOR, "airlock_trapdoor");
+		initializeBlock(IRON_LADDER, "iron_ladder");
+		initializeBlock(LANDING_LEG, "landing_leg");
 		initializeBlock(ROCKET_CONTROLLER, "rocket_controller", ROCKET_CONTROLLER_BLOCK_ENTITY);
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
 		
 		// Setup extra block behavior.
-		FireBlockMixin fireBlock = (FireBlockMixin) Blocks.FIRE;
+		FireBlockInvokerMixin fireBlock = (FireBlockInvokerMixin) Blocks.FIRE;
 		fireBlock.callRegisterFlammableBlock(RUBBER_LOG, 5, 5);
 		fireBlock.callRegisterFlammableBlock(SAPPY_RUBBER_LOG, 30, 5);
 		fireBlock.callRegisterFlammableBlock(STRIPPED_RUBBER_LOG, 5, 5);

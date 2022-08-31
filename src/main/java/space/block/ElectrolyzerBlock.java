@@ -66,8 +66,17 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		addNode(world, pos);
 		updateWaterState(world, pos, (Direction) state.get(FACING));
+		
+		if(!world.isClient())
+			addNode(world, pos);
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
+	{
+		if(!world.isClient())
+			addNode(world, pos);
 	}
 	
 	@Override

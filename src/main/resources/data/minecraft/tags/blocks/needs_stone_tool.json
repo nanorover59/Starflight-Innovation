@@ -6,6 +6,8 @@
     "space:riveted_aluminum",
     "space:aluminum_frame",
     "space:walkway",
+    "space:structural_aluminum_stairs",
+    "space:structural_aluminum_slab",
     "space:bauxite_ore",
     "space:deepslate_bauxite_ore",
     "space:bauxite_block",
@@ -16,6 +18,8 @@
     "space:ferric_copper_ore",
     "space:ferric_bauxite_ore",
     "space:ferric_sulfur_ore",
+    "space:hematite_ore",
+    "space:hematite_block",
     "space:planetarium",
     "space:stirling_engine",
     "space:electric_furnace",
@@ -34,6 +38,8 @@
     "space:atmosphere_generator",
     "space:airlock_door",
     "space:airlock_trapdoor",
+    "space:iron_ladder",
+    "space:landing_leg",
     "space:rocket_controller",
     "space:thruster_small"
   ]

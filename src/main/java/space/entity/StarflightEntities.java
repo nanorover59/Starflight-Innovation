@@ -20,8 +20,8 @@ public class StarflightEntities
 {
 	public static final EntityType<MovingCraftEntity> MOVING_CRAFT = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<MovingCraftEntity>) MovingCraftEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
 	public static final EntityType<RocketEntity> ROCKET = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<RocketEntity>) RocketEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
-	public static final EntityType<DustEntity> DUST = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<DustEntity>) DustEntity::new).dimensions(EntityDimensions.changing(1.0f, 2.8f)).build();
-	public static final EntityType<CeruleanEntity> CERULEAN = FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, (EntityType.EntityFactory<CeruleanEntity>) CeruleanEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.25f)).build();
+	public static final EntityType<DustEntity> DUST = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<DustEntity>) DustEntity::new).dimensions(EntityDimensions.changing(1.0f, 2.8f)).build();
+	public static final EntityType<CeruleanEntity> CERULEAN = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<CeruleanEntity>) CeruleanEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.5f)).build();
 	
 	// Entity Tags
 	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(Registry.ENTITY_TYPE_KEY, new Identifier(StarflightMod.MOD_ID, "no_oxygen"));

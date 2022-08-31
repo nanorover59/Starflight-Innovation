@@ -228,9 +228,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	{
 		float t = (float) (8.0d * ((radius / 696.34e6) / (distanceToViewpoint / 1.4710e11)));
 		
-		if(t < 0.25F)
-			t = 0.25F;
-		else if(t > 500.0f)
+		if(t > 500.0f)
 			t = 500.0f;
 		
 		return t;

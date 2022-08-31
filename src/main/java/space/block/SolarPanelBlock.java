@@ -24,10 +24,9 @@ public class SolarPanelBlock extends Block implements EnergyBlock
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		addNode(world, pos);
-		
 		if(!world.isClient())
 		{
+			addNode(world, pos);
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			EnergyNet.updateEnergyNodes(world, pos, checkList);
 		}
@@ -38,6 +37,7 @@ public class SolarPanelBlock extends Block implements EnergyBlock
 	{
 		if(!world.isClient())
 		{
+			addNode(world, pos);
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			EnergyNet.updateEnergyNodes(world, pos, checkList);
 		}

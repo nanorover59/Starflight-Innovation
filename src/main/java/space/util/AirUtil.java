@@ -49,7 +49,7 @@ public class AirUtil
 		Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
 		
 		if(currentPlanet == null)
-			return false;
+			return true;
 		
 		if(entity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
 			return true;

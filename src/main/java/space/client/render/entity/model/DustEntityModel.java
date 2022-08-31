@@ -45,6 +45,7 @@ public class DustEntityModel<T extends Entity> extends SinglePartEntityModel<T>
 		modelPartData.addChild(EntityModelPartNames.HEAD, ModelPartBuilder.create().uv(0, 0).cuboid(-4.0f, -4.0f, -4.0f, 8.0f, 8.0f, 8.0f), ModelTransform.NONE);
 		float f = 0.0f;
 		int rodCount = 12;
+		finalRodCount = 0;
 		ModelPartBuilder modelPartBuilder = ModelPartBuilder.create().uv(0, 16).cuboid(-1.0f, 0.0f, -1.0f, 2.0f, 8.0f, 2.0f);
 		
 		for(int i = 0; i < 5; i++)

@@ -111,7 +111,7 @@ public class MovingCraftBlockRenderData
 					{
 						boolean b = false;
 						
-						for(int i = 0; i < 5; i++)
+						for(int i = 0; i < 6; i++)
 						{
 							matrixStack.push();
 							matrixStack.translate(position.getX() + (b ? -0.01 : 0.01), position.getY() - i * 0.75, position.getZ() + (b ? -0.01 : 0.01));
@@ -202,13 +202,16 @@ public class MovingCraftBlockRenderData
         List<BakedQuad> list = model.getQuads(blockState, null, random);
         
         if(!list.isEmpty())
-        	((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, -1, OverlayTexture.DEFAULT_UV, true, matrixStack, vertexConsumer, list, bitSet);
+        {
+        	int light = WorldRenderer.getLightmapCoordinates(world, blockState, centerBlockPos);
+        	((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, light, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
+        }
         
         matrixStack.pop();
 	}
 	
 	private static void thrusterPlumeVertex(VertexConsumer buffer, Matrix4f matrix, Matrix3f normalMatrix, float x, float y, int u, int v, int alpha)
 	{
-        buffer.vertex(matrix, x - 0.5F, y - 0.5F, 0.0F).color(255, 255, 255, alpha).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(LightmapTextureManager.MAX_BLOCK_LIGHT_COORDINATE).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
+        buffer.vertex(matrix, x - 0.5F, y - 0.5F, 0.0F).color(255, 255, 255, alpha).texture(u, v).overlay(OverlayTexture.DEFAULT_UV).light(LightmapTextureManager.MAX_LIGHT_COORDINATE).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
     }
 }

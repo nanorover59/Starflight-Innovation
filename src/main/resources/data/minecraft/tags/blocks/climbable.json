@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "space:iron_ladder",
+    "space:aluminum_frame",
+    "space:walkway"
+  ]
+}

@@ -61,7 +61,7 @@ public class StarflightEffects
 	
 	public static void receiveOutgas(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.create();
+		Random random = Random.createThreadSafe();
 		BlockPos pos1 = buffer.readBlockPos();
 		BlockPos pos2 = buffer.readBlockPos();
 		boolean sound = buffer.readBoolean();
@@ -95,7 +95,7 @@ public class StarflightEffects
 	
 	public static void receiveJet(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.create();
+		Random random = Random.createThreadSafe();
 		double px = buffer.readDouble();
 		double py = buffer.readDouble();
 		double pz = buffer.readDouble();

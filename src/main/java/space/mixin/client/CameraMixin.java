@@ -25,7 +25,7 @@ public abstract class CameraMixin
 	{
 		if(thirdPerson && focusedEntity.getVehicle() instanceof MovingCraftEntity)
 		{
-			this.moveBy(-this.clipToSpace(24.0), 0.0, 0.0);
+			this.moveBy(-this.clipToSpace(32.0), 0.0, 0.0);
 		}
 	}
 }

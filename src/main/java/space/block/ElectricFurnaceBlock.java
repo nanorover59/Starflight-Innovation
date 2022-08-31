@@ -84,7 +84,8 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
 	}
-
+	
+	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
 		if(itemStack.hasCustomName())
@@ -95,9 +96,18 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 				((ElectricFurnaceBlockEntity) blockEntity).setCustomName(itemStack.getName());
 		}
 		
-		addNode(world, pos);
+		if(!world.isClient())
+			addNode(world, pos);
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
+	{
+		if(!world.isClient())
+			addNode(world, pos);
 	}
 
+	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 		if(!state.isOf(newState.getBlock()))

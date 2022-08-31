@@ -1,6 +1,7 @@
 {
   "values": [
     "minecraft:iron_golem",
-    "space:dust"
+    "space:dust",
+    "space:cerulean"
   ]
 }

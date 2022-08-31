@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bcb",
+        "dad",
+        "bcb"
+    ],
+    "key": {
+        "a": {
+            "item": "space:electrolyzer"
+        },
+        "b": {
+            "item": "space:copper_cable"
+        },
+        "c": {
+            "item": "minecraft:iron_ingot"
+        },
+        "d": {
+            "item": "minecraft:diamond"
+        }
+    },
+    "result": {
+        "item": "space:ice_electrolyzer",
+        "count": 1
+    }
+}

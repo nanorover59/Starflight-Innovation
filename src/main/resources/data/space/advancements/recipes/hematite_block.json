@@ -2,17 +2,17 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "space:aluminum_ingot_from_smelting_ferric_bauxite_ore"
+      "space:hematite_block"
     ]
   },
   "criteria": {
-    "has_ferric_bauxite_ore": {
+    "has_hematite": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:ferric_bauxite_ore"
+              "space:hematite"
             ]
           }
         ]
@@ -21,13 +21,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "space:aluminum_ingot_from_smelting_ferric_bauxite_ore"
+        "recipe": "space:hematite_block"
       }
     }
   },
   "requirements": [
     [
-      "has_ferric_bauxite_ore",
+      "has_hematite",
       "has_the_recipe"
     ]
   ]

@@ -106,6 +106,10 @@ public class RocketThrusterBlock extends Block
 		if(client.player != null)
 		{
 			Planet planet = PlanetList.getPlanetForWorld(client.player.getWorld().getRegistryKey());
+			
+			if(planet == null)
+				planet = PlanetList.getByName("earth");
+			
 			p = planet.getSurfacePressure();
 		}
 		
@@ -115,7 +119,7 @@ public class RocketThrusterBlock extends Block
 		textList.add(Text.translatable("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
 		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(p) / 1000.0)).append("kN"));
 		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(p))).append("s"));
-		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
+		//textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
 		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 }

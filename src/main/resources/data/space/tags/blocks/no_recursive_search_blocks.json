@@ -1,0 +1,13 @@
+{
+    "replace": false,
+    "values": [
+        "space:oxygen_inlet_valve",
+        "space:oxygen_outlet_valve",
+        "space:hydrogen_inlet_valve",
+        "space:hydrogen_outlet_valve",
+        "space:copper_cable_al",
+        "space:oxygen_pipe_al",
+        "space:hydrogen_pipe_al",
+        "space:landing_leg"
+    ]
+}

@@ -57,9 +57,18 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 		stateManager.add(LIT);
 	}
 	
+	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		addNode(world, pos);
+		if(!world.isClient())
+			addNode(world, pos);
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
+	{
+		if(!world.isClient())
+			addNode(world, pos);
 	}
 	
 	public BlockState getPlacementState(ItemPlacementContext ctx)

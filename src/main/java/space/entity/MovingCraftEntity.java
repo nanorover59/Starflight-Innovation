@@ -335,6 +335,9 @@ public class MovingCraftEntity extends Entity
 		
 		positionList.add(pos);
 		
+		if(world.getBlockState(pos).isIn(StarflightBlocks.NO_RECURSIVE_SEARCH_TAG))
+			return;
+		
 		for(Direction direction : DIRECTIONS)
 			searchForBlocks(world, pos.offset(direction), positionList, limit);
 	}

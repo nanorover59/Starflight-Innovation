@@ -173,6 +173,10 @@ public abstract class LivingEntityMixin extends Entity
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
 			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			
+			if(currentPlanet == null)
+				return;
+			
 			LivingEntity thisEntity = (LivingEntity) world.getEntityById(getId());
 			boolean b = true;
 			
@@ -339,7 +343,8 @@ public abstract class LivingEntityMixin extends Entity
 						BlockPos e = this.getVelocityAffectingPos();
 						float i = this.world.getBlockState(e).getBlock().getSlipperiness();
 						float f = this.onGround ? i * 0.91f : drag1;
-						Vec3d g = this.applyMovementInput(this.onGround ? movementInput : movementInput.multiply(airMultiplier), i);
+						boolean flag = world.getBlockState(e.down()).getMaterial().blocksMovement();
+						Vec3d g = this.applyMovementInput(this.onGround || flag ? movementInput : movementInput.multiply(airMultiplier), i);
 						double h = g.y;
 						ChunkPos chunkPos = new ChunkPos(e);
 						

@@ -18,9 +18,12 @@
     "AbstractMinecartEntityMixin",
     "AxeItemMixin",
     "FireBlockMixin",
+    "FireBlockInvokerMixin",
     "EntityMixin",
     "FluidStateMixin",
-    "FallingBlockMixin"
+    "FallingBlockMixin",
+    "AbstractFurnaceBlockEntityMixin",
+    "AbstractFurnaceBlockEntityAccessorMixin"
   ],
   "injectors": {
     "defaultRequire": 1

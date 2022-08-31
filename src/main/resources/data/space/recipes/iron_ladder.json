@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "   ",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_nugget"
+        }
+    },
+    "result": {
+        "item": "space:iron_ladder",
+        "count": 1
+    }
+}

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:ice_electrolyzer"
+    ]
+  },
+  "criteria": {
+    "has_electrolyzer": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:electrolyzer"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:ice_electrolyzer"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_electrolyzer",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -29,6 +29,7 @@ public class PlanetRenderList
 			return;
 		
 		planetListTemporary.clear();
+		viewpointTemporary = null;
 		int count = buffer.readInt();
 		int viewpointIndex = buffer.readInt();
 		inOrbitTemporary = buffer.readBoolean();
@@ -83,10 +84,13 @@ public class PlanetRenderList
 			for(PlanetRenderer planetRenderer : planetListTemporary)	
 				planetList.add(new PlanetRenderer(planetRenderer));
 			
-			viewpoint = new PlanetRenderer(viewpointTemporary);
+			viewpoint = viewpointTemporary == null ? null : new PlanetRenderer(viewpointTemporary);
 			inOrbit = inOrbitTemporary;
 			planetListUnsorted.addAll(planetList);
-			Collections.sort(planetList);
+			
+			if(viewpoint != null)
+				Collections.sort(planetList);
+			
 			updated = false;
 		}
 		

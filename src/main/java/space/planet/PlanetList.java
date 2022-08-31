@@ -217,14 +217,11 @@ public class PlanetList
 	{
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
 		{
-			if(getPlanetForWorld(player.getWorld().getRegistryKey()) == null)
-				continue;
-			
 			PacketByteBuf buffer = PacketByteBufs.create();
-			buffer.writeInt(planetList.size());
 			RegistryKey<World> worldKey = player.world.getRegistryKey();
 			Planet planet = getPlanetForWorld(worldKey);
-			int viewpointIndex = 0;
+			buffer.writeInt(planetList.size());
+			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.
 			
 			for(int i = 0; i < planetList.size(); i++)
 			{

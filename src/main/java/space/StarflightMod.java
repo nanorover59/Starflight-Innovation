@@ -25,8 +25,8 @@ public class StarflightMod implements ModInitializer
 	@Override
 	public void onInitialize()
 	{
-		StarflightItems.initializeItems();
 		StarflightBlocks.initializeBlocks();
+		StarflightItems.initializeItems();
 		StarflightEntities.initializeEntities();
 		StarflightBiomes.initializeBiomes();
 		StarflightWorldGeneration.initializeWorldGeneration();

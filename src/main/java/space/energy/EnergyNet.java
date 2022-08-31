@@ -33,8 +33,12 @@ public class EnergyNet
 			return;
 		
 		EnergyNode energyNode = new EnergyNode(position, world.getRegistryKey(), true, false);
-		energyProducers.add(energyNode);
-		connectProducer(world, energyNode);
+		
+		if(!energyProducers.contains(energyNode))
+		{
+			energyProducers.add(energyNode);
+			connectProducer(world, energyNode);
+		}
 	}
 	
 	public static void addConsumer(World world, BlockPos position, double storedEnergy)
@@ -43,8 +47,12 @@ public class EnergyNet
 			return;
 		
 		EnergyNode energyNode = new EnergyNode(position, world.getRegistryKey(), false, true);
-		energyConsumers.add(energyNode);
-		connectConsumer(world, energyNode);
+		
+		if(!energyConsumers.contains(energyNode))
+		{
+			energyConsumers.add(energyNode);
+			connectConsumer(world, energyNode);
+		}
 	}
 	
 	public static void addDual(World world, BlockPos position, double storedEnergy)
@@ -53,10 +61,18 @@ public class EnergyNet
 			return;
 		
 		EnergyNode energyNode = new EnergyNode(position, world.getRegistryKey(), true, true);
-		energyProducers.add(energyNode);
-		energyConsumers.add(energyNode);
-		connectProducer(world, energyNode);
-		connectConsumer(world, energyNode);
+		
+		if(!energyProducers.contains(energyNode))
+		{
+			energyProducers.add(energyNode);
+			connectProducer(world, energyNode);
+		}
+		
+		if(!energyConsumers.contains(energyNode))
+		{
+			energyConsumers.add(energyNode);
+			connectConsumer(world, energyNode);
+		}
 	}
 	
 	public static void addProducer(World world, BlockPos position)
@@ -298,11 +314,6 @@ public class EnergyNet
 				
 				if(adjacentEnergyNode != null)
 					found.add(adjacentEnergyNode);
-				else
-				{
-					energyBlock.addNode(world, adjacentPosition);
-					found.add(getConsumer(adjacentPosition, world.getRegistryKey()));
-				}
 			}
 		}
 		else if(adjacentBlockState.getBlock() instanceof EnergyCableBlock)
@@ -387,11 +398,6 @@ public class EnergyNet
 				
 				if(adjacentEnergyNode != null)
 					found.add(adjacentEnergyNode);
-				else
-				{
-					energyBlock.addNode(world, adjacentPosition);
-					found.add(getProducer(adjacentPosition, world.getRegistryKey()));
-				}
 			}
 		}
 		else if(adjacentBlockState.getBlock() instanceof EnergyCableBlock)
@@ -445,7 +451,12 @@ public class EnergyNet
 			if(adjacentState.getBlock() instanceof EnergyCableBlock)
 				updateEnergyNodes(world, adjacentPosition, checkList);
 			else if(adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN && direction != Direction.UP)
+			{
+				if(producer != null)
+					EnergyNet.connectProducer(world, producer);
+				
 				updateEnergyNodes(world, adjacentPosition, checkList);
+			}
 			else
 			{
 				if(producer != null)

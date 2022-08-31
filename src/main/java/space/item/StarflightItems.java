@@ -4,16 +4,21 @@ import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.Item;
+import net.minecraft.item.SpawnEggItem;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import space.StarflightMod;
+import space.entity.StarflightEntities;
 import space.materials.SpaceSuitArmorMaterial;
 
 public class StarflightItems
 {
+	// Items
 	public static final Item ALUMINUM_INGOT = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item BAUXITE = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item SULFUR = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
+	public static final Item HEMATITE = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
@@ -28,11 +33,22 @@ public class StarflightItems
 	public static final Item ARRIVAL_CARD = new ArrivalCardItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item WAND = new MovingCraftWandItem(new FabricItemSettings());
 	
+	// Space Suit Armor Items
     public static final ArmorMaterial SPACE_SUIT_ARMOR_MATERIAL = new SpaceSuitArmorMaterial();
     public static final Item SPACE_SUIT_HELMET = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.HEAD, new Item.Settings().group(StarflightMod.ITEM_GROUP));
     public static final Item SPACE_SUIT_CHESTPLATE = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.CHEST, new Item.Settings().group(StarflightMod.ITEM_GROUP));
     public static final Item SPACE_SUIT_LEGGINGS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.LEGS, new Item.Settings().group(StarflightMod.ITEM_GROUP));
     public static final Item SPACE_SUIT_BOOTS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.FEET, new Item.Settings().group(StarflightMod.ITEM_GROUP));
+    
+    // Structure Placer Items
+    public static final Item ROCKET_1 = new StructurePlacerItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), 7, 20, 7, "rocket_1");
+    
+    // Spawn Egg Items
+    public static final Item CERULEAN_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CERULEAN, 0x1485AD, 0x000000, new Item.Settings().group(StarflightMod.ITEM_GROUP));
+	public static final Item DUST_SPAWN_EGG = new SpawnEggItem(StarflightEntities.DUST, 0xBE673F, 0x82342B, new Item.Settings().group(StarflightMod.ITEM_GROUP));
+	
+	// Item Tags
+	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(Registry.ITEM_KEY, new Identifier(StarflightMod.MOD_ID, "no_oxygen_fuel"));
     
 	public static void initializeItems()
 	{
@@ -40,6 +56,7 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "aluminum_ingot"), ALUMINUM_INGOT);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "bauxite"), BAUXITE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "sulfur"), SULFUR);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "hematite"), HEMATITE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber"), RUBBER);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber_sap"), RUBBER_SAP);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber_resin"), RUBBER_RESIN);
@@ -58,5 +75,10 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_chestplate"), SPACE_SUIT_CHESTPLATE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_leggings"), SPACE_SUIT_LEGGINGS);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_boots"), SPACE_SUIT_BOOTS);
+		
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "rocket_1"), ROCKET_1);
+		
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "cerulean_spawn_egg"), CERULEAN_SPAWN_EGG);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "dust_spawn_egg"), DUST_SPAWN_EGG);
 	}
 }
