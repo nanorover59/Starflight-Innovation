@@ -32,6 +32,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private boolean hasLowClouds;
 	private boolean hasCloudCover;
 	private boolean hasWeather;
+	private boolean simpleTexture;
 	private boolean drawClouds;
 	private double cloudRotation;
 	private int cloudLevel;
@@ -41,7 +42,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private static final Identifier SUN_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
-	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean drawClouds_, double cloudRotation_, int cloudIndex_)
+	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_, double cloudRotation_, int cloudIndex_)
 	{
 		name = name_;
 		setPosition(position_);
@@ -54,6 +55,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setLowClouds(hasLowClouds_);
 		setCloudCover(hasCloudCover_);
 		setWeather(hasWeather_);
+		setSimpleTexture(simpleTexture_);
 		setDrawClouds(drawClouds_);
 		setCloudRotation(cloudRotation_);
 		setCloudLevel(cloudIndex_);
@@ -72,6 +74,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setLowClouds(other.hasLowClouds);
 		setCloudCover(other.hasCloudCover);
 		setWeather(other.hasWeather);
+		setSimpleTexture(other.simpleTexture);
 		setDrawClouds(other.drawClouds);
 		setCloudRotation(other.cloudRotation);
 		setCloudLevel(other.cloudLevel);
@@ -190,6 +193,16 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		this.hasWeather = hasWeather;
 	}
 	
+	public boolean hasSimpleTexture()
+	{
+		return simpleTexture;
+	}
+	
+	public void setSimpleTexture(boolean drawClouds)
+	{
+		this.drawClouds = drawClouds;
+	}
+	
 	public boolean drawClouds()
 	{
 		return drawClouds;
@@ -298,7 +311,10 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			BufferRenderer.drawWithShader(bufferBuilder.end());
 			matrices.pop();
 		}
-		else
+		else if(simpleTexture)
+		{
+			
+		}
 		{
 			// Rotation frame to view this planet.
 			double absoluteRotation = Math.atan2(surfaceViewpoint.getZ() - position.getZ(), surfaceViewpoint.getX() - position.getX());

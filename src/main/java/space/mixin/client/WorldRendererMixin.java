@@ -123,7 +123,7 @@ public abstract class WorldRendererMixin
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
 				float tx = 120.0f;
 				float tz = 1024.0f;
-				float factor = 0.25f;
+				float factor = 0.35f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * factor, starFactor * factor, starFactor * factor, starFactor * factor);

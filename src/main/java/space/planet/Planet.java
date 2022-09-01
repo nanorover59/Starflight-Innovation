@@ -55,6 +55,7 @@ public class Planet
 	private boolean hasLowClouds;
 	private boolean hasCloudCover;
 	private boolean hasWeather;
+	private boolean simpleTexture;
 	private boolean drawClouds;
 	private double cloudRotation;
 	private double cloudRotationRate;
@@ -124,8 +125,9 @@ public class Planet
 		hasWeather = hasWeather_;
 	}
 	
-	public void setDecorativeParameters(boolean drawClouds_, double cloudRotationRate_)
+	public void setDecorativeParameters(boolean simpleTexture_, boolean drawClouds_, double cloudRotationRate_)
 	{
+		simpleTexture = simpleTexture_;
 		drawClouds = drawClouds_;
 		cloudRotationRate = cloudRotationRate_;
 		rotation = 0.0;
@@ -400,6 +402,11 @@ public class Planet
 	public boolean hasWeather()
 	{
 		return hasWeather;
+	}
+	
+	public boolean hasSimpleTexture()
+	{
+		return simpleTexture;
 	}
 	
 	public boolean drawClouds()

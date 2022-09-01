@@ -62,9 +62,10 @@ public class PlanetRenderList
 			boolean hasLowClouds = planet.hasLowClouds();
 			boolean hasCloudCover = planet.hasCloudCover();
 			boolean hasWeather = planet.hasWeather();
+			boolean simpleTexture = planet.hasSimpleTexture();
 			boolean drawClouds = planet.drawClouds();
 			
-			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, drawClouds, cloudRotation, cloudLevel);
+			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds, cloudRotation, cloudLevel);
 			planetListTemporary.add(planetRenderer);
 			
 			if(i == viewpointIndex)

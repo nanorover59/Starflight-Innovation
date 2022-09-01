@@ -35,14 +35,14 @@ public class PlanetList
 		sol.setOrbitParameters(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 		sol.setRotationParameters(false, -0.1265364d, 2.9089e-6, 0);
 		sol.setAtmosphereParameters(Planet.EXTRA_HOT, 0.0, false, false, false, false);
-		sol.setDecorativeParameters(false, 0);
+		sol.setDecorativeParameters(false, false, 0);
 		planetList.add(sol);
 		 
 		Planet earth = new Planet("earth", "sol", 1, Planet.EARTH_MASS, Planet.EARTH_RADIUS, 500e3);
 		earth.setOrbitParameters(1.4710e11, 1.5210e11, 5.0282936, 0.0, 3.0525809, 0.0);
 		earth.setRotationParameters(false, -0.40910518, 7.2921150e-5, 7.663e-12);
 		earth.setAtmosphereParameters(Planet.TEMPERATE, 1.0, true, true, false, true);
-		earth.setDecorativeParameters(true, 7.2921150e-5);
+		earth.setDecorativeParameters(false, true, 7.2921150e-5);
 		planetList.add(earth);
 		planetWorldKeys.put(earth, World.OVERWORLD);
 		parkingOrbitWorldKeys.put(earth, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "earth_orbit")));
@@ -51,7 +51,7 @@ public class PlanetList
 		moon.setOrbitParameters(3.633e8, 4.055e8, 5.55276502, 0.0, 2.18305783, 0.09005899);
 		moon.setRotationParameters(true, -0.1164135, 0.0, 0.0);
 		moon.setAtmosphereParameters(Planet.TEMPERATE, 0.0, false, false, false, false);
-		moon.setDecorativeParameters(false, 0);
+		moon.setDecorativeParameters(false, false, 0);
 		planetList.add(moon);
 		planetWorldKeys.put(moon, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "moon")));
 		parkingOrbitWorldKeys.put(moon, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "moon_orbit")));
@@ -60,7 +60,7 @@ public class PlanetList
 		mars.setOrbitParameters(2.06617e11, 2.49229e11, 5.86501907915, 0.0, 0.86530876133, 0.03229923767);
 		mars.setRotationParameters(false, -0.43964844, 7.088218e-5, 1.1385e-12);
 		mars.setAtmosphereParameters(Planet.COLD, 0.00602, false, false, false, true);
-		mars.setDecorativeParameters(true, 7.088218e-5);
+		mars.setDecorativeParameters(false, true, 7.088218e-5);
 		planetList.add(mars);
 		planetWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars")));
 		parkingOrbitWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars_orbit")));
