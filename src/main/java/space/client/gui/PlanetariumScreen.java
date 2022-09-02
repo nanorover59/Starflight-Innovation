@@ -102,7 +102,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				continue;
 			
 			int renderType = planet.getName() == "sol" ? 1 : 0;
-			float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor * 8.0));
+			float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor));
 			float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
 			float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
 			
@@ -110,9 +110,11 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				continue;
 			
 			int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mousePressed);
-			RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png") : PlanetRenderer.getTexture(planet.getName()));
+			RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
 			
 			if(renderType == 1)
+				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+			else if(planet.hasSimpleTexture())
 				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 			else
 				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
@@ -130,7 +132,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 					selectedPlanet = planet;
 					mouseHold = true;
 					nothingSelected = false;
-					scaleFactor = selectedPlanet.getName() == "sol" ? 1.5e-10 : (1.0 / selectedPlanet.getRadius()) * 0.75;
+					scaleFactor = getInitialScaleFactor(selectedPlanet);
 				}
 			}
 		}
@@ -159,7 +161,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		if(nothingSelected && !mouseHold && mouseX >= x + 30 && mouseX < x + 167 && mouseY >= y + 18 && mouseY < y + 123 && selectedPlanet.getParent() != null)
 		{
 			selectedPlanet = selectedPlanet.getParent();
-			scaleFactor = selectedPlanet.getName() == "sol" ? 1.5e-10 : (1.0 / selectedPlanet.getRadius()) * 0.75;
+			scaleFactor = getInitialScaleFactor(selectedPlanet);
 			mouseHold = true;
 		}
 		
@@ -176,7 +178,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				client.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.5F, 1.0f);
 				buttonCooldown = 20;
 			}
-			else if(button2Hover && selectedPlanet.getRadius() * scaleFactor < 8.0)
+			else if(button2Hover && selectedPlanet.getRadius() * scaleFactor < 32.0)
 				scaleFactor *= 1.025;
 			else if(button3Hover)
 				scaleFactor *= 0.975;
@@ -254,5 +256,23 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		float xMax = startX + 167;
 		float yMax = startY + 123;
 		return x > xMin && x < xMax && y > yMin && y < yMax;
+	}
+	
+	private double getInitialScaleFactor(Planet planet)
+	{
+		if(selectedPlanet.getSatelliteLevel() == 0)
+			return 1.5e-10;
+		else
+		{
+			double maxDistance = selectedPlanet.getRadius();
+			
+			for(Planet satellite : selectedPlanet.getSatellites())
+			{
+				if(satellite.getApoapsis() > maxDistance)
+					maxDistance = satellite.getApoapsis();
+			}
+			
+			return (1.0 / maxDistance) * 32.0;
+		}
 	}
 }

@@ -20,13 +20,14 @@ public class PlanetList
 	private static ArrayList<Planet> planetList = new ArrayList<Planet>();
 	private static HashMap<Planet, RegistryKey<World>> planetWorldKeys = new HashMap<Planet, RegistryKey<World>>();
 	private static HashMap<Planet, RegistryKey<World>> parkingOrbitWorldKeys = new HashMap<Planet, RegistryKey<World>>();
-	private static double timeMultiplier = 1.0;
+	private static int timeSteps = 1;
 	
 	/**
 	 * Register all planets.
 	 */
 	public static void initialize()
 	{
+		timeSteps = 1;
 		planetList.clear();
 		planetWorldKeys.clear();
 		parkingOrbitWorldKeys.clear();
@@ -35,7 +36,7 @@ public class PlanetList
 		sol.setOrbitParameters(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
 		sol.setRotationParameters(false, -0.1265364d, 2.9089e-6, 0);
 		sol.setAtmosphereParameters(Planet.EXTRA_HOT, 0.0, false, false, false, false);
-		sol.setDecorativeParameters(false, false, 0);
+		sol.setDecorativeParameters(true, false, 0);
 		planetList.add(sol);
 		 
 		Planet earth = new Planet("earth", "sol", 1, Planet.EARTH_MASS, Planet.EARTH_RADIUS, 500e3);
@@ -65,6 +66,20 @@ public class PlanetList
 		planetWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars")));
 		parkingOrbitWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars_orbit")));
 		
+		Planet phobos = new Planet("phobos", "mars", 2, 1.0659e16, 11.2667e3, 0);
+		phobos.setOrbitParameters(9.23442e6, 9.51758e6, 3.7751472, 0.0, 2.9530971, 0.019076449);
+		phobos.setRotationParameters(true, 0.0, 0.0, 0.0);
+		phobos.setAtmosphereParameters(Planet.COLD, 0.0, false, false, false, false);
+		phobos.setDecorativeParameters(true, false, 0);
+		planetList.add(phobos);
+		
+		Planet deimos = new Planet("deimos", "mars", 2, 1.4762e15, 6.38e3, 0);
+		deimos.setOrbitParameters(2.34555e7, 2.34709e7, 0.0, 0.0, 0.9494591, 0.0314159);
+		deimos.setRotationParameters(true, 0.0, 0.0, 0.0);
+		deimos.setAtmosphereParameters(Planet.COLD, 0.0, false, false, false, false);
+		deimos.setDecorativeParameters(true, false, 0);
+		planetList.add(deimos);
+		
 		linkSatellites();
 	}
 	
@@ -77,9 +92,9 @@ public class PlanetList
 			p.linkSatellites();
 	}
 	
-	public static void setTimeMultiplier(float f)
+	public static void setTimeSteps(int i)
 	{
-		timeMultiplier = f;
+		timeSteps = i;
 	}
 	
 	/**
@@ -188,7 +203,8 @@ public class PlanetList
 		for(Planet p : planetList)
 			data = p.saveData(data);
 		
-		data.setValue("timeMultiplier", timeMultiplier);
+		data.setValue("planetCount", planetList.size());
+		data.setValue("timeSteps", timeSteps);
 		return data;
 	}
 	
@@ -201,10 +217,15 @@ public class PlanetList
 		Planet centerPlanet = planetList.get(0);
 		ArrayList<String> checkList = new ArrayList<String>();
 		
-		if(data != null)
+		if(data != null && data.hasValue("planetCount"))
 		{
-			timeMultiplier = data.getDouble("timeMultiplier");
-			centerPlanet.loadData(data, checkList);
+			if(data.getInt("planetCount") != planetList.size())
+				centerPlanet.setInitialPositionAndVelocity(checkList);
+			else
+			{
+				timeSteps = data.getInt("timeSteps");
+				centerPlanet.loadData(data, checkList);
+			}
 		}
 		else
 			centerPlanet.setInitialPositionAndVelocity(checkList);
@@ -261,17 +282,20 @@ public class PlanetList
 	 */
 	public static void simulateMotion()
 	{
-		double timeStep = 72.0 * 0.05 * timeMultiplier;
+		double timeStep = 72.0 * 0.05; //* timeMultiplier;
 		
-		for(Planet p : planetList)
+		for(int i = 0; i < timeSteps; i++)
 		{
-			p.simulateGravityAcceleration();
-			p.simulateVelocityChange(timeStep);
-		}
-		
-		for(Planet p : planetList)
-		{
-			p.simulatePositionAndRotationChange(timeStep);
+			for(Planet p : planetList)
+			{
+				p.simulateGravityAcceleration();
+				p.simulateVelocityChange(timeStep);
+			}
+			
+			for(Planet p : planetList)
+			{
+				p.simulatePositionAndRotationChange(timeStep);
+			}
 		}
 	}
 }

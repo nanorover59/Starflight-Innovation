@@ -155,5 +155,7 @@
 	"planet.space.sol": "The Sun",
 	"planet.space.earth": "Earth",
 	"planet.space.moon": "The Moon",
-	"planet.space.mars": "Mars"
+	"planet.space.mars": "Mars",
+	"planet.space.phobos": "Phobos",
+	"planet.space.deimos": "Deimos"
 }

@@ -309,11 +309,11 @@ public class RocketEntity extends MovingCraftEntity
 			sendRenderData(false);
 		
 		// Update rotation variables.
-		this.setYaw(craftYaw);
-		this.setPitch(prevPitch);
-		setCraftRoll(craftRoll);
-		setCraftPitch(craftPitch);
-		setCraftYaw(craftYaw);
+		this.setYaw(getCraftYaw());
+		this.setPitch(getCraftPitch());
+		//setCraftRoll(craftRoll);
+		//setCraftPitch(craftPitch);
+		//setCraftYaw(craftYaw);
 		
 		// Update thruster state tracked data.
 		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, getBlockPos()) > 0.25);
@@ -346,24 +346,24 @@ public class RocketEntity extends MovingCraftEntity
         switch(getForwardDirection())
 		{
 		case NORTH:
-			direction.rotateZ(rotationRoll);
-			direction.rotateX(rotationPitch);
-			direction.rotateY(rotationYaw);
+			direction = direction.rotateZ(rotationRoll);
+			direction = direction.rotateX(rotationPitch);
+			direction = direction.rotateY(rotationYaw);
 			break;
 		case EAST:
-			direction.rotateX(rotationRoll);
-			direction.rotateZ(rotationPitch);
-			direction.rotateY(rotationYaw);
+			direction = direction.rotateX(rotationRoll);
+			direction = direction.rotateZ(rotationPitch);
+			direction = direction.rotateY(rotationYaw);
 			break;
 		case SOUTH:
-			direction.rotateZ(rotationRoll);
-			direction.rotateX(rotationPitch);
-			direction.rotateY(rotationYaw);
+			direction = direction.rotateZ(rotationRoll);
+			direction = direction.rotateX(rotationPitch);
+			direction = direction.rotateY(rotationYaw);
 			break;
 		case WEST:
-			direction.rotateX(rotationRoll);
-			direction.rotateZ(rotationPitch);
-			direction.rotateY(rotationYaw);
+			direction = direction.rotateX(rotationRoll);
+			direction = direction.rotateZ(rotationPitch);
+			direction = direction.rotateY(rotationYaw);
 			break;
 		default:
 			break;
@@ -416,6 +416,8 @@ public class RocketEntity extends MovingCraftEntity
 	 */
 	private void verticalLandingAutoThrottle()
 	{
+		setCraftPitch(15.0f);
+		
 		double vy = getVelocity().getY(); // Vertical velocity in m/tick.
 		double currentHeight = (getPos().getY() - lowerHeight) - arrivalPos.getY() - 1.0;
 		

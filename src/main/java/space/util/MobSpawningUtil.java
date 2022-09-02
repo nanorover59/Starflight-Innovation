@@ -63,7 +63,7 @@ public class MobSpawningUtil
 		
 		for(ChunkPos chunkPos : chunkPosList)
 		{
-			float chance = weather ? 0.025f : 0.001f;
+			float chance = weather ? 0.025f : 0.0005f;
 			
 			if(world.random.nextFloat() > chance)
 				continue;

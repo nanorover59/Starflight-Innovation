@@ -121,19 +121,12 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float tx = 120.0f;
-				float tz = 1024.0f;
-				float factor = 0.35f;
+				float factor = 0.5f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * factor, starFactor * factor, starFactor * factor, starFactor * factor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
-				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-				bufferBuilder.vertex(matrix4f3, -tx, 100.0f, -tz).texture(0.0f, 1.0f).next();
-				bufferBuilder.vertex(matrix4f3, tx, 100.0f, -tz).texture(0.0f, 0.0f).next();
-				bufferBuilder.vertex(matrix4f3, tx, 100.0f, tz).texture(1.0f, 0.0f).next();
-				bufferBuilder.vertex(matrix4f3, -tx, 100.0f, tz).texture(1.0f, 1.0f).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
+				StarflightModClient.wrapAroundSky(bufferBuilder, matrix4f3, 32, 128.0f, 128.0f / 1024.0f);
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
 				this.starsBuffer.bind();
@@ -197,7 +190,7 @@ public abstract class WorldRendererMixin
 
 				for(int o = 0; o <= 16; o++)
 				{
-					p = (float) o * 6.2831855F / 16.0f;
+					p = (float) o * 6.2831855f / 16.0f;
 					q = MathHelper.sin(p);
 					r = MathHelper.cos(p);
 					bufferBuilder.vertex(matrix4f2, q * 120.0f, r * 120.0f, -r * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).next();

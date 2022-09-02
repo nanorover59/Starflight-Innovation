@@ -141,17 +141,17 @@ public class MovingCraftEntity extends Entity
     
     public void setCraftRoll(float f)
     {
-        this.dataTracker.set(CRAFT_ROLL, Float.valueOf(craftRoll));
+        this.dataTracker.set(CRAFT_ROLL, Float.valueOf(f));
     }
     
     public void setCraftPitch(float f)
     {
-        this.dataTracker.set(CRAFT_PITCH, Float.valueOf(craftPitch));
+        this.dataTracker.set(CRAFT_PITCH, Float.valueOf(f));
     }
     
     public void setCraftYaw(float f)
     {
-        this.dataTracker.set(CRAFT_YAW, Float.valueOf(craftYaw));
+        this.dataTracker.set(CRAFT_YAW, Float.valueOf(f));
     }
 
     public BlockPos getInitialBlockPos()

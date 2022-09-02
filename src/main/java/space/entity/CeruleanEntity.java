@@ -37,8 +37,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.event.GameEvent;
@@ -120,7 +118,7 @@ public class CeruleanEntity extends AnimalEntity implements Angerable
 	@Override
 	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
-        return !world.isSkyVisible(getBlockPos()) || this.random.nextFloat() < 0.05f;
+        return !world.isSkyVisible(getBlockPos()) || this.random.nextFloat() < 0.01f;
     }
 
 	@Override

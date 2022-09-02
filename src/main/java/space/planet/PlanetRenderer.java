@@ -198,9 +198,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		return simpleTexture;
 	}
 	
-	public void setSimpleTexture(boolean drawClouds)
+	public void setSimpleTexture(boolean simpleTexture)
 	{
-		this.drawClouds = drawClouds;
+		this.simpleTexture = simpleTexture;
 	}
 	
 	public boolean drawClouds()
@@ -269,13 +269,13 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		double thetaPlanet = Math.atan2(Math.sqrt((planetVector.getX() * planetVector.getX()) + (planetVector.getZ() * planetVector.getZ())), planetVector.getY()) - (Math.PI / 2.0d);
 		double phiPlanet = Math.atan2(planetVector.getZ(), planetVector.getX());
 		
-		if(name.contains("sol"))
+		if(simpleTexture)
 		{
 			// Render this planet object in the sky.
 			float t = getRenderSize(rPlanet);
 			matrices.push();
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-			
+
 			if(name != PlanetRenderList.getViewpointPlanet().getName())
 			{
 				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.getPrecession()));
@@ -285,24 +285,35 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			}
 			else
 				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) Math.PI));
-			
+
 			Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-			
-			if(weather)
-				RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
+
+			if(name.contains("sol"))
+			{
+				if(weather)
+					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
+				else
+					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+			}
 			else
-				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-			
+			{
+				// Phase angle for lighting factor.
+				Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
+				double angleToStar = Math.atan2(starPosition.getZ() - position.getZ(), starPosition.getX() - position.getX());
+				double angleToViewpoint = Math.atan2(viewpoint.getZ() - position.getZ(), viewpoint.getX() - position.getX());
+				double phaseAngle = angleToStar - angleToViewpoint;
+				
+				if(phaseAngle < 0.0d)
+					phaseAngle += Math.PI * 2.0d;
+				else if(phaseAngle > Math.PI * 2.0d)
+					phaseAngle -= Math.PI * 2.0d;
+				
+				float lightingFactor = brightness * (float) (Math.abs(phaseAngle - Math.PI) / Math.PI);
+				RenderSystem.setShaderColor(lightingFactor, lightingFactor, lightingFactor, 1.0f);
+			}
+
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderTexture(0, SUN_HAZE_0);
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-			BufferRenderer.drawWithShader(bufferBuilder.end());
-			
-			RenderSystem.setShaderTexture(0, SUN_0);
+			RenderSystem.setShaderTexture(0, getTexture(name));
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
@@ -311,10 +322,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			BufferRenderer.drawWithShader(bufferBuilder.end());
 			matrices.pop();
 		}
-		else if(simpleTexture)
-		{
-			
-		}
+		else
 		{
 			// Rotation frame to view this planet.
 			double absoluteRotation = Math.atan2(surfaceViewpoint.getZ() - position.getZ(), surfaceViewpoint.getX() - position.getX());

@@ -18,6 +18,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.option.StickyKeyBinding;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -29,6 +30,7 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
@@ -150,6 +152,35 @@ public class StarflightModClient implements ClientModInitializer
 	}
 	
 	/**
+	 * Used to properly render the milky way wrapped around the sky.
+	 */
+	public static void wrapAroundSky(BufferBuilder bufferBuilder, Matrix4f matrix4f3, int segments, float radius, float textureRatio)
+	{
+		float height = radius * (float) Math.tan(Math.PI / segments) * (float) segments * textureRatio;
+		
+		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+		
+		for(int i = 0; i < segments; i++)
+		{
+			double theta1 = (i * Math.PI * 2.0) / segments;
+			double theta2 = ((i + 1) * Math.PI * 2.0) / segments;
+			float y1 = radius * (float) Math.cos(theta1);
+			float z1 = radius * (float) Math.sin(theta1);
+			float y2 = radius * (float) Math.cos(theta2);
+			float z2 = radius * (float) Math.sin(theta2);
+			float u1 = (float) i / segments;
+			float u2 = (float) (i + 1) / segments;
+			
+			bufferBuilder.vertex(matrix4f3, -height, y1, z1).texture(u1, 0.0f).next();
+			bufferBuilder.vertex(matrix4f3, height, y1, z1).texture(u1, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, height, y2, z2).texture(u2, 1.0f).next();
+			bufferBuilder.vertex(matrix4f3, -height, y2, z2).texture(u2, 0.0f).next();
+		}
+		
+		BufferRenderer.drawWithShader(bufferBuilder.end());
+	}
+	
+	/**
 	 * Render textured stars to a vertex buffer. Used by the sky render inject.
 	 */
 	public static BufferBuilder.BuiltBuffer renderStars(BufferBuilder buffer)
@@ -167,7 +198,7 @@ public class StarflightModClient implements ClientModInitializer
 			double d = random.nextFloat() * 2.0f - 1.0f;
 			double e = random.nextFloat() * 2.0f - 1.0f;
 			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.75f - (frame * 0.1f) + random.nextFloat() * 0.15f; // Star size.
+			double g = 0.8f - (frame * 0.15f) + random.nextFloat() * 0.1f; // Star size.
 			double h = d * d + e * e + f * f;
 
 			if(!(h < 1.0) || !(h > 0.01))
