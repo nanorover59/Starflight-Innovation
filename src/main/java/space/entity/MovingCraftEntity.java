@@ -63,9 +63,6 @@ public class MovingCraftEntity extends Entity
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	protected BlockPos centerOfMass;
-	protected float craftRoll;
-	protected float craftPitch;
-	protected float craftYaw;
 	private int clientInterpolationSteps;
     private double clientX;
     private double clientY;
@@ -86,7 +83,6 @@ public class MovingCraftEntity extends Entity
 		this((EntityType<? extends MovingCraftEntity>) StarflightEntities.MOVING_CRAFT, world);
 		this.setPosition(position.getX() + 0.5, position.getY(), position.getZ() + 0.5);
 		this.setInitialBlockPos(this.getBlockPos());
-		this.craftYaw = 0.0f;
 		
 		if(!blockDataList.isEmpty())
 		{
@@ -474,9 +470,9 @@ public class MovingCraftEntity extends Entity
 	{
 		nbt.put("initialBlockPos", NbtHelper.fromBlockPos(getInitialBlockPos()));
 		nbt.putInt("forward", getForwardDirection().getHorizontal());
-		nbt.putFloat("roll", craftRoll);
-		nbt.putFloat("pitch", craftPitch);
-		nbt.putFloat("yaw", craftYaw);
+		nbt.putFloat("roll", getCraftRoll());
+		nbt.putFloat("pitch", getCraftPitch());
+		nbt.putFloat("yaw", getCraftYaw());
 		int blockCount = blockDataList.size();
 		nbt.putInt("blockCount", blockCount);
 		int[] x = new int[blockCount];
@@ -515,9 +511,9 @@ public class MovingCraftEntity extends Entity
 	{
 		setInitialBlockPos(NbtHelper.toBlockPos(nbt.getCompound("initialBlockPos")));
 		setForwardDirection(nbt.getInt("forward"));
-		craftRoll = nbt.getFloat("roll");
-		craftPitch = nbt.getFloat("pitch");
-		craftYaw = nbt.getFloat("yaw");
+		setCraftRoll(nbt.getFloat("roll"));
+		setCraftPitch(nbt.getFloat("pitch"));
+		setCraftYaw(nbt.getFloat("yaw"));
 		int blockCount = nbt.getInt("blockCount");
 		int[] x = nbt.getIntArray("x");
 		int[] y = nbt.getIntArray("y");

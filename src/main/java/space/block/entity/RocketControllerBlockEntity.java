@@ -165,8 +165,8 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         
         averageVE = 9.80665 * (thrust / massFlowSum);
         averageVEVacuum = 9.80665 * (thrustVacuum / massFlowSum);
-        deltaV = availableDV(mass, hydrogen, oxygen, averageVE);
-        deltaVCapacity = availableDV(mass + (hydrogenCapacity - hydrogen) + (oxygenCapacity - oxygen), hydrogenCapacity, oxygenCapacity, averageVE);
+        deltaV = availableDV(mass, hydrogen, oxygen, averageVEVacuum);
+        deltaVCapacity = availableDV(mass + (hydrogenCapacity - hydrogen) + (oxygenCapacity - oxygen), hydrogenCapacity, oxygenCapacity, averageVEVacuum);
         
         // Run delta-V calculations.
         runDeltaVCalculations();
@@ -174,8 +174,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	
 	private double availableDV(double initialMass, double hydrogen, double oxygen, double averageVE)
 	{
-		double fuelMass = hydrogen > oxygen / 8.0 ? oxygen + (oxygen / 8.0) : hydrogen + (hydrogen * 8.0);
+		double fuelMass = Math.min(oxygen + (oxygen / 8.0), hydrogen + (hydrogen * 8.0));
 		double finalMass = initialMass - fuelMass;
+		System.out.println(hydrogen + "    " + oxygen + "    " + oxygen / hydrogen + "    " + fuelMass + "    " + initialMass);
 		return averageVE * Math.log(initialMass / finalMass);
 	}
 	

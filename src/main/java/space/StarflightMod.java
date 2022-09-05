@@ -9,6 +9,7 @@ import net.minecraft.util.Identifier;
 import space.block.StarflightBlocks;
 import space.block.entity.RocketControllerBlockEntity;
 import space.command.StarflightCommands;
+import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.event.StarflightEvents;
 import space.item.StarflightItems;
@@ -36,5 +37,6 @@ public class StarflightMod implements ModInitializer
 		PlanetList.initialize();
 		
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_button"), (server1, player, handler1, buf, sender) -> RocketControllerBlockEntity.receiveButtonPress(server1, player, handler1, buf, sender));
+		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_input"), (server1, player, handler1, buf, sender) -> RocketEntity.receiveInput(server1, player, handler1, buf, sender));
 	}
 }

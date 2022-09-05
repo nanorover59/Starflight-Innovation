@@ -6,6 +6,7 @@ import org.lwjgl.glfw.GLFW;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -13,10 +14,10 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.option.StickyKeyBinding;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.RenderLayer;
@@ -26,6 +27,7 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -46,6 +48,7 @@ import space.client.render.entity.MovingCraftEntityRenderer;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.entity.MovingCraftEntity;
+import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
 import space.planet.PlanetRenderList;
@@ -60,7 +63,17 @@ import space.vessel.MovingCraftRenderList;
 
 public class StarflightModClient implements ClientModInitializer
 {
-	public static final KeyBinding TOOLTIP_KEY = KeyBindingHelper.registerKeyBinding(new StickyKeyBinding("key.space.tooltip", GLFW.GLFW_KEY_LEFT_CONTROL, "key.category.space", () -> true));
+	private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.category.space"));
+	private static KeyBinding throttleDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_X, "key.category.space"));
+	private static KeyBinding pitchUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UP, "key.category.space"));
+	private static KeyBinding pitchDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_DOWN, "key.category.space"));
+	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT, "key.category.space"));
+	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT, "key.category.space"));
+	private static int previousThrottleState = 0;
+	private static int previousPitchState = 0;
+	private static int previousYawState = 0;
+	
+	//public static final KeyBinding TOOLTIP_KEY = KeyBindingHelper.registerKeyBinding(new StickyKeyBinding("key.space.tooltip", GLFW.GLFW_KEY_LEFT_CONTROL, "key.category.space", () -> true));
 	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
 	public static final ScreenHandlerType<StirlingEngineScreenHandler> STIRLING_ENGINE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "stirling_engine"), StirlingEngineScreenHandler::new);
 	public static final ScreenHandlerType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "electric_furnace"), ElectricFurnaceScreenHandler::new);
@@ -121,6 +134,45 @@ public class StarflightModClient implements ClientModInitializer
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
+		
+		// Client Tick Event
+		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+			
+			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
+			{
+				int throttleState = 0;
+				int pitchState = 0;
+				int yawState = 0;
+				
+				if(throttleUp.isPressed())
+					throttleState++;
+
+				if(throttleDown.isPressed())
+					throttleState--;
+
+				if(pitchUp.isPressed())
+					pitchState++;
+
+				if(pitchDown.isPressed())
+					pitchState--;
+
+				if(yawLeft.isPressed())
+					yawState++;
+
+				if(yawRight.isPressed())
+					yawState--;
+				
+				if(throttleState != previousThrottleState || pitchState != previousPitchState || yawState != previousYawState)
+				{
+					PacketByteBuf buffer = PacketByteBufs.create();
+					buffer.writeInt(throttleState);
+					buffer.writeInt(pitchState);
+					buffer.writeInt(yawState);
+					ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
+				}
+			}
+			
+		});
 	}
 	
 	int getColor(ItemStack stack)

@@ -6,11 +6,11 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
@@ -22,6 +22,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.StarflightMod;
+import space.block.FluidTankControllerBlock;
+import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
 
 public class StructurePlacerItem extends Item
@@ -61,7 +63,6 @@ public class StructurePlacerItem extends Item
 			return ActionResult.PASS;
 		}
 		
-		MinecraftServer minecraftServer = context.getWorld().getServer();
 		StructureTemplateManager templateManager = serverWorld.getStructureTemplateManager();
 		
 		for(Identifier structure : structureList)
@@ -69,6 +70,7 @@ public class StructurePlacerItem extends Item
 			StructureTemplate template = templateManager.getTemplate(structure).get();
 			StructurePlacementData placementdata = new StructurePlacementData();
 			template.place(serverWorld, placementPosition, placementPosition, placementdata, serverWorld.getRandom(), Block.NOTIFY_LISTENERS);
+			postPlacement(serverWorld, placementPosition, placementPosition.add(size));
 			placementPosition = placementPosition.up(32);
 		}
 		
@@ -78,7 +80,7 @@ public class StructurePlacerItem extends Item
 		return ActionResult.SUCCESS;
 	}
 	
-	private boolean checkVolume(ServerWorld serverWorld, BlockPos start, BlockPos end)
+	private boolean checkVolume(ServerWorld world, BlockPos start, BlockPos end)
 	{
 		for(int i = start.getX(); i < end.getX(); i++)
 		{
@@ -86,12 +88,47 @@ public class StructurePlacerItem extends Item
 			{
 				for(int k = start.getZ(); k < end.getZ(); k++)
 				{
-					if(!serverWorld.getBlockState(new BlockPos(i, j, k)).getMaterial().isReplaceable())
+					if(!world.getBlockState(new BlockPos(i, j, k)).getMaterial().isReplaceable())
 						return true;
 				}
 			}
 		}
 		
 		return false;
+	}
+	
+	private void postPlacement(ServerWorld world, BlockPos start, BlockPos end)
+	{
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+		
+		for(int i = start.getX(); i < end.getX(); i++)
+		{
+			for(int j = start.getY(); j < end.getY(); j++)
+			{
+				for(int k = start.getZ(); k < end.getZ(); k++)
+				{
+					BlockPos blockPos = new BlockPos(i, j, k);
+					Block block = world.getBlockState(blockPos).getBlock();
+					
+					if(block instanceof FluidTankControllerBlock)
+						checkList.add(blockPos);
+				}
+			}
+		}
+		
+		for(BlockPos blockPos : checkList)
+		{
+			BlockEntity blockEntity = world.getBlockEntity(blockPos);
+			
+			if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
+			{
+				FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
+				
+				if(world.getBlockState(blockPos).getBlock() instanceof FluidTankControllerBlock)
+					((FluidTankControllerBlock) world.getBlockState(blockPos).getBlock()).initializeFluidTank(world, blockPos, fluidTank);
+				
+				fluidTank.setStoredFluid(fluidTank.getStorageCapacity());
+			}
+		}
 	}
 }

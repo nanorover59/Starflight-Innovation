@@ -6,7 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.MutableText;
@@ -162,7 +162,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 				for(BlockPos p : checkList)
 				{
-					if(world.getBlockState(p).getBlock() == Blocks.AIR)
+					if(world.getBlockState(p).getMaterial() == Material.AIR)
 					{
 						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
 						fluidTankController.setStorageCapacity(fluidTankController.getStorageCapacity() + capacity);
