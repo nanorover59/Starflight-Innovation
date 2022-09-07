@@ -23,11 +23,13 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.FluidTankControllerBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
@@ -47,16 +49,22 @@ import space.vessel.MovingCraftRenderList;
 public class RocketEntity extends MovingCraftEntity
 {
 	private static final int TRAVEL_CEILING = 1024;
+	private static final double ZERO_G_SPEED = 2.0;
 	private static final double SG = 9.80665; // Standard gravity for ISP calculations.
 	
 	private static final TrackedData<Boolean> THRUST_UNDEREXPANDED = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
+	private static final TrackedData<Boolean> USER_INPUT = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 	private static final TrackedData<Float> THROTTLE = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
+	private static final TrackedData<Float> ALTITUDE = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
+	private static final TrackedData<Float> OXYGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
+	private static final TrackedData<Float> HYDROGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	
 	private ArrayList<BlockPos> activeFluidTanks = new ArrayList<BlockPos>();
 	private RegistryKey<World> nextDimension;
 	private BlockPos arrivalPos;
 	private int arrivalDirection;
 	private boolean changedDimension;
+	private boolean userInput;
 	private double craftMass;
 	private double craftMassInitial;
 	private double gravity;
@@ -85,11 +93,12 @@ public class RocketEntity extends MovingCraftEntity
 		this((EntityType<? extends RocketEntity>) StarflightEntities.ROCKET, world);
 		this.nextDimension = nextDimension;
 		this.changedDimension = false;
+		this.userInput = false;
 		this.fuelToUse = fuelToUse;
 		this.arrivalPos = arrivalPos;
 		this.arrivalDirection = arrivalDirection;
 		setForwardDirection(forward.getHorizontal());
-		Vec3d centerOfMass = new Vec3d(0.0, 0.0, 0.0);
+		Vec3d centerOfMass = Vec3d.ZERO;
 		BlockPos min = new BlockPos(blockPosList.get(0));
 		BlockPos max = new BlockPos(blockPosList.get(0));
 		
@@ -200,7 +209,11 @@ public class RocketEntity extends MovingCraftEntity
 	{
 		super.initDataTracker();
 		this.dataTracker.startTracking(THRUST_UNDEREXPANDED, Boolean.valueOf(false));
+		this.dataTracker.startTracking(USER_INPUT, Boolean.valueOf(false));
 		this.dataTracker.startTracking(THROTTLE, Float.valueOf(0.0f));
+		this.dataTracker.startTracking(ALTITUDE, Float.valueOf(0.0f));
+		this.dataTracker.startTracking(OXYGEN_LEVEL, Float.valueOf(0.0f));
+		this.dataTracker.startTracking(HYDROGEN_LEVEL, Float.valueOf(0.0f));
 	}
 	
 	public void setThrustUnderexpanded(boolean b)
@@ -208,9 +221,29 @@ public class RocketEntity extends MovingCraftEntity
 		this.dataTracker.set(THRUST_UNDEREXPANDED, Boolean.valueOf(b));
 	}
 	
+	public void setUserInput(boolean b)
+	{
+		this.dataTracker.set(USER_INPUT, Boolean.valueOf(b));
+	}
+	
 	public void setThrottle(float throttle)
 	{
 		this.dataTracker.set(THROTTLE, Float.valueOf(throttle));
+	}
+	
+	public void setAltitude(float altitude)
+	{
+		this.dataTracker.set(ALTITUDE, Float.valueOf(altitude));
+	}
+	
+	public void setOxygenLevel(float oxygenLevel)
+	{
+		this.dataTracker.set(OXYGEN_LEVEL, Float.valueOf(oxygenLevel));
+	}
+	
+	public void setHydrogenLevel(float hydrogenLevel)
+	{
+		this.dataTracker.set(HYDROGEN_LEVEL, Float.valueOf(hydrogenLevel));
 	}
 	
 	public boolean getThrustUnderexpanded()
@@ -218,9 +251,29 @@ public class RocketEntity extends MovingCraftEntity
 		return this.dataTracker.get(THRUST_UNDEREXPANDED);
 	}
 	
+	public boolean getUserInput()
+	{
+		return this.dataTracker.get(USER_INPUT);
+	}
+	
 	public float getThrottle()
 	{
 		return this.dataTracker.get(THROTTLE);
+	}
+	
+	public float getAltitude()
+	{
+		return this.dataTracker.get(ALTITUDE);
+	}
+	
+	public float getOxygenLevel()
+	{
+		return this.dataTracker.get(OXYGEN_LEVEL);
+	}
+	
+	public float getHydrogenLevel()
+	{
+		return this.dataTracker.get(HYDROGEN_LEVEL);
 	}
 	
 	@Override
@@ -230,16 +283,16 @@ public class RocketEntity extends MovingCraftEntity
 		if(this.clientMotion())
 		{
 			// Spawn thruster particles.
-			if(getThrottle() > 0.0F)
+			if(getThrottle() > 0.0f)
 				spawnThrusterParticles();
 			
 			return;
 		}
 		
 		// Play the rocket engine sound effect.
-		if(getThrottle() > 0.0F && soundEffectTimer <= 0)
+		if(getThrottle() > 0.0f && soundEffectTimer <= 0)
 		{
-			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.05F);
+			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
 			soundEffectTimer = 5;
 		}
 		else
@@ -266,18 +319,21 @@ public class RocketEntity extends MovingCraftEntity
 				arrivalPos = new BlockPos(arrivalPos.getX(), 64, arrivalPos.getZ());
 		}
 		
-		// Move according to either launch or landing behavior.
-		if(changedDimension)
-			verticalLandingAutoThrottle();
-		else
-			launchAnimation();
+		// Automatically control thrust according to either launch or landing behavior.
+		if(!userInput)
+		{
+			if(changedDimension)
+				verticalLandingAutoThrottle();
+			else
+				launchAnimation();
+		}
 		
 		applyGravity();
 		applyThrust();
 		
-		this.move(MovementType.SELF, this.getVelocity());
-		this.setBoundingBox(this.calculateBoundingBox());
-		this.fallDistance = 0.0f;
+		move(MovementType.SELF, getVelocity());
+		setBoundingBox(calculateBoundingBox());
+		fallDistance = 0.0f;
 		
 		// Move to the next dimension when a high enough altitude is reached.
 		if(this.getBlockPos().getY() > TRAVEL_CEILING && !changedDimension)
@@ -288,15 +344,41 @@ public class RocketEntity extends MovingCraftEntity
 			hydrogenSupply *= factor;
 			oxygenSupply *= factor;
 			craftMass -= fuelToUse;
-			setVelocity(0.0, -1.0, 0.0);
+			setVelocity(0.0, PlanetList.isOrbit(nextDimension) ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
 			changedDimension = true;
-			this.changeDimension(world.getServer().getWorld(nextDimension), new Vec3d(arrivalPos.getX() + 0.5, getY(), arrivalPos.getZ() + 0.5), Direction.fromHorizontal(arrivalDirection).asRotation());
+			userInput = false;
+			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
+			this.changeDimension(world.getServer().getWorld(nextDimension), new Vec3d(arrivalPos.getX() + 0.5, getY(), arrivalPos.getZ() + 0.5), arrivalYaw);
 			return;
 		}
 		
 		// Turn back into blocks when landed.
-		if(this.age > 8 && (verticalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= -0.01))))
+		if(this.age > 10 && (verticalCollision || horizontalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= -0.01))))
 		{
+			Vec3f trackedVelocity = getTrackedVelocity();
+			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.getX(), trackedVelocity.getY(), trackedVelocity.getZ()) * 20.0f; // Get the craft's speed in m/s.
+			boolean crashLandingFlag = false;
+			
+			// Crash landing effects go here.
+			if((verticalCollision || horizontalCollision) && craftSpeed > 10.0)
+			{
+				BlockPos bottom = getBlockPos().add(0, -lowerHeight, 0);
+				float power = Math.min(craftSpeed / 10.0f, 10.0f);
+				boolean fire = !PlanetList.isOrbit(world.getRegistryKey()) && PlanetList.getPlanetForWorld(world.getRegistryKey()).hasOxygen();
+				int count = random.nextBetween(4, 5);
+				
+				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, fire, DestructionType.DESTROY);
+				
+				for(int i = 0; i < count; i++)
+				{
+					Vec3d offset = new Vec3d(maxWidth * random.nextDouble(), 3.0 * (0.5 - random.nextDouble()), 0.0);
+					offset = offset.rotateY((float) Math.PI * 2.0f * random.nextFloat());
+					world.createExplosion(null, bottom.getX() + 0.5 + offset.getX(), bottom.getY() + 0.5 + offset.getY(), bottom.getZ() + 0.5 + offset.getZ(), power, fire, DestructionType.DESTROY);
+				}
+				
+				crashLandingFlag = true;
+			}
+			
 			// Extra displacement to avoid clipping into the ground.
 			if(verticalCollision)
 			{
@@ -309,14 +391,10 @@ public class RocketEntity extends MovingCraftEntity
 				}
 			}
 			
-			// Dismount all passengers.
-			for(Entity passenger : getPassengerList())
+			if(crashLandingFlag)
 			{
-				updatePassengerPosition(passenger);
-				passenger.setPosition(passenger.getPos().add(0.0, 0.75, 0.0));
-				passenger.setVelocity(Vec3d.ZERO);
-				passenger.velocityModified = true;
-				passenger.fallDistance = 0.0f;
+				int yOffset = random.nextBetween(MathHelper.floor(craftSpeed / 10.0f), MathHelper.floor(craftSpeed / 10.0f) + 1) * (trackedVelocity.getY() > 0.0f ? 1 : -1);
+				this.setPosition(getPos().add(0.0, yOffset, 0.0));
 			}
 			
 			sendRenderData(true);
@@ -325,13 +403,19 @@ public class RocketEntity extends MovingCraftEntity
 		else
 			sendRenderData(false);
 		
-		// Update rotation variables.
-		this.setYaw(getCraftYaw());
-		this.setPitch(getCraftPitch());
-		
 		// Update thruster state tracked data.
 		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, getBlockPos()) > 0.25);
 		setThrottle((float) throttle);
+		int yCheck = world.getTopY();
+		
+		while(!world.getBlockState(new BlockPos(getX(), yCheck, getZ())).getMaterial().blocksMovement() && yCheck > world.getBottomY())
+			yCheck--;
+		
+		setUserInput(userInput);
+		setAltitude((float) (getY() - lowerHeight - yCheck));
+		setTrackedVelocity(new Vec3f(getVelocity()));
+		setOxygenLevel((float) (oxygenSupply / oxygenCapacity));
+		setHydrogenLevel((float) (hydrogenSupply / hydrogenCapacity));
 	}
 	
 	/**
@@ -347,37 +431,37 @@ public class RocketEntity extends MovingCraftEntity
 	 */
 	private void applyThrust()
 	{
-		if(throttle == 0.0)
+		if(throttle == 0.0 || oxygenSupply <= 0.0 || hydrogenSupply <= 0.0)
 			return;
 		
 		double force = changedDimension ? nominalThrustEnd * throttle : nominalThrustStart * throttle;
 		double acc = (force / craftMass) * 0.0025;
-		Vec3d direction = new Vec3d(0.0, 1.0, 0.0);
+		Vec3f direction = Vec3f.POSITIVE_Y.copy();
 		float rotationRoll = getCraftRoll();
 		float rotationPitch = getCraftPitch();
 		float rotationYaw = getCraftYaw();
 		
-        switch(getForwardDirection())
+		switch(getForwardDirection())
 		{
 		case NORTH:
-			direction = direction.rotateZ(rotationRoll);
-			direction = direction.rotateX(rotationPitch);
-			direction = direction.rotateY(rotationYaw);
+			direction.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
+			direction.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationPitch));
+			direction.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 			break;
 		case EAST:
-			direction = direction.rotateX(rotationRoll);
-			direction = direction.rotateZ(rotationPitch);
-			direction = direction.rotateY(rotationYaw);
+			direction.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
+			direction.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationPitch));
+			direction.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 			break;
 		case SOUTH:
-			direction = direction.rotateZ(rotationRoll);
-			direction = direction.rotateX(rotationPitch);
-			direction = direction.rotateY(rotationYaw);
+			direction.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
+			direction.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
+			direction.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 			break;
 		case WEST:
-			direction = direction.rotateX(rotationRoll);
-			direction = direction.rotateZ(rotationPitch);
-			direction = direction.rotateY(rotationYaw);
+			direction.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationRoll));
+			direction.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationPitch));
+			direction.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 			break;
 		default:
 			break;
@@ -391,8 +475,6 @@ public class RocketEntity extends MovingCraftEntity
         double factor = (hydrogenSupply + oxygenSupply - totalMassFlow) / (hydrogenSupply + oxygenSupply);
 		hydrogenSupply *= factor;
 		oxygenSupply *= factor;
-		
-		//System.out.println(throttle + "    " + hydrogenSupply / hydrogenCapacity + "    " + oxygenSupply / oxygenCapacity + "    " + getVelocity().getY() * 20.0);
 	}
 	
 	/**
@@ -418,10 +500,13 @@ public class RocketEntity extends MovingCraftEntity
 	{
 		if(gravity == 0.0)
 		{
-			if(getVelocity().getY() < 1.0)
+			if(getVelocity().getY() < ZERO_G_SPEED)
 				throttle = 1.0;
 			else
 				throttle = 0.0;
+			
+			if(getVelocity().getY() > ZERO_G_SPEED)
+				setVelocity(0.0, ZERO_G_SPEED, 0.0);
 		}
 		else
 		{
@@ -446,10 +531,15 @@ public class RocketEntity extends MovingCraftEntity
 		double t = Math.min(((Math.pow(vy, 2.0) * 0.5) + (gravity * currentHeight)) / (((nominalThrustEnd / craftMass) * 0.0025) * currentHeight), 1.0);
 		
 		// Activate the engines if the necessary throttle is significantly high and the vehicle has a little bit of altitude.
-		if(t > 0.9 && !(gravity > 0.0 && currentHeight < 0.25))
-			throttle = t;
+		if(gravity > 0.0)
+		{
+			if((t > 0.8 || throttle > 0.0) && currentHeight > 0.15)
+				throttle = t;
+			else
+				throttle = 0.0;
+		}
 		else
-			throttle = 0.0;
+			throttle = t > 0.8 && currentHeight > 0.1 ? t : 0.0;
 	}
 	
 	private void spawnThrusterParticles()
@@ -471,58 +561,58 @@ public class RocketEntity extends MovingCraftEntity
 		switch(getForwardDirection())
 		{
 		case NORTH:
-			upAxis.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationRoll));
-			upAxis.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationPitch));
-			upAxis.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+			upAxis.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 			
 			for(BlockPos pos : thrusterOffsets)
 			{
 				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
-				rotated.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationRoll));
-				rotated.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationPitch));
-				rotated.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+				rotated.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 				thrusterOffsetsRotated.add(rotated);
 			}
 			break;
 		case EAST:
-			upAxis.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationRoll));
-			upAxis.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationPitch));
-			upAxis.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+			upAxis.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 			
 			for(BlockPos pos : thrusterOffsets)
 			{
 				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
-				rotated.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationRoll));
-				rotated.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationPitch));
-				rotated.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+				rotated.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 				thrusterOffsetsRotated.add(rotated);
 			}
 			break;
 		case SOUTH:
-			upAxis.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationRoll));
-			upAxis.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationPitch));
-			upAxis.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+			upAxis.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 			
 			for(BlockPos pos : thrusterOffsets)
 			{
 				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
-				rotated.rotate(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationRoll));
-				rotated.rotate(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationPitch));
-				rotated.rotate(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
+				rotated.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
 				thrusterOffsetsRotated.add(rotated);
 			}
 			break;
 		case WEST:
-			upAxis.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationRoll));
-			upAxis.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationPitch));
-			upAxis.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+			upAxis.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationRoll));
+			upAxis.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationPitch));
+			upAxis.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 			
 			for(BlockPos pos : thrusterOffsets)
 			{
 				Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
-				rotated.rotate(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationRoll));
-				rotated.rotate(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationPitch));
-				rotated.rotate(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
+				rotated.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationRoll));
+				rotated.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationPitch));
+				rotated.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
 				thrusterOffsetsRotated.add(rotated);
 			}
 			break;
@@ -549,11 +639,25 @@ public class RocketEntity extends MovingCraftEntity
 	@Override
 	protected void releaseBlocks()
 	{
-		float deltaYaw = this.getYaw();
-		int rotationSteps = (int) Math.round(deltaYaw / 90.0f);
+		int rotationSteps = getRotationSteps();
 		ArrayList<MovingCraftBlockData> toPlaceFirst = new ArrayList<MovingCraftBlockData>();
 		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
 		BlockRotation rotation = BlockRotation.NONE;
+		
+		// Snap the rotation of this entity into place and then dismount all passengers.
+		this.setCraftRoll(0.0f);
+		this.setCraftPitch(0.0f);
+		this.setCraftYaw(rotationSteps * (float) (Math.PI / 2.0));
+
+		for(Entity passenger : this.getPassengerList())
+		{
+			updatePassengerPosition(passenger);
+			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
+			passenger.setVelocity(Vec3d.ZERO);
+			passenger.velocityModified = true;
+			passenger.fallDistance = 0.0f;
+			passenger.dismountVehicle();
+		}
 		
 		for(int i = 0; i < rotationSteps; i++)
 			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
@@ -618,6 +722,7 @@ public class RocketEntity extends MovingCraftEntity
 		nbt.putInt("arrivalZ", arrivalPos.getZ());
 		nbt.putInt("arrivalDirection", arrivalDirection);
 		nbt.putBoolean("arrived", changedDimension);
+		nbt.putBoolean("userInput", userInput);
 		nbt.putDouble("mass", craftMass);
 		nbt.putDouble("massInitial", craftMassInitial);
 		nbt.putDouble("gravity", gravity);
@@ -661,6 +766,7 @@ public class RocketEntity extends MovingCraftEntity
 		arrivalPos = new BlockPos(nbt.getInt("arrivalX"), nbt.getInt("arrivalY"), nbt.getInt("arrivalZ"));
 		arrivalDirection = nbt.getInt("arrivalDirection");
 		changedDimension = nbt.getBoolean("arrived");
+		userInput = nbt.getBoolean("userInput");
 		craftMass = nbt.getDouble("mass");
 		craftMassInitial = nbt.getDouble("massInitial");
 		gravity = nbt.getDouble("gravity");
@@ -697,23 +803,45 @@ public class RocketEntity extends MovingCraftEntity
 		if(entity instanceof RocketEntity)
 		{
 			RocketEntity rocketEntity = (RocketEntity) entity;
-			float throttle = rocketEntity.getThrottle();
 			float craftPitch = rocketEntity.getCraftPitch();
 			float craftYaw = rocketEntity.getCraftYaw();
+			float rotationRate = (float) (Math.PI / 180.0);
 			
-			if(yawState == 1)
-				craftYaw -= 0.05;
-			else if(yawState == -1)
-				craftYaw += 0.05;
-			
-			if(craftYaw < 0.0)
-				craftYaw += Math.PI * 2.0;
-			else if(craftYaw > Math.PI * 2.0);
-				craftYaw -= Math.PI * 2.0;
+			if(rocketEntity.userInput)
+			{
+				if(throttleState == 1)
+					rocketEntity.throttle += 0.01;
+				else if(throttleState == -1)
+					rocketEntity.throttle -= 0.01;
+				else if(throttleState == 2)
+					rocketEntity.throttle = 1.0;
+				else if(throttleState == -2)
+					rocketEntity.throttle = 0.0;
 				
-			rocketEntity.setThrottle(throttle);
-			rocketEntity.setPitch(craftPitch);
-			rocketEntity.setYaw(craftYaw);
+				if(rocketEntity.throttle < 0.0)
+					rocketEntity.throttle = 0.0;
+				else if(rocketEntity.throttle > 1.0)
+					rocketEntity.throttle = 1.0;
+				
+				// Invert the controls for north and west front directions.
+				float pitchRate = (rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.SOUTH) ? -rotationRate : rotationRate;
+				float yawRate = (rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.WEST) ? -rotationRate : rotationRate;
+				
+				if(pitchState == 1)
+					craftPitch += pitchRate;
+				else if(pitchState == -1)
+					craftPitch -= pitchRate;
+				
+				if(yawState == 1)
+					craftYaw += yawRate;
+				else if(yawState == -1)
+					craftYaw -= yawRate;
+				
+				rocketEntity.setCraftPitch(craftPitch);
+				rocketEntity.setCraftYaw(craftYaw);
+			}
+			else if((throttleState != 0 || pitchState != 0 || yawState != 0) && rocketEntity.gravity > 0.0)
+				rocketEntity.userInput = true;
 		}
 	}
 }

@@ -5,12 +5,16 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.WallMountedBlock;
+import net.minecraft.block.Waterloggable;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -20,27 +24,29 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import space.item.StarflightItems;
 
-public class TreeTapBlock extends WallMountedBlock
+public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 {
 	public static final BooleanProperty RUBBER_SAP = BooleanProperty.of("rubber_sap");
 	protected static final VoxelShape NORTH_SHAPE = Block.createCuboidShape(4.0, 0.0, 8.0, 12.0, 11.0, 16.0);
 	protected static final VoxelShape SOUTH_SHAPE = Block.createCuboidShape(4.0, 0.0, 0.0, 12.0, 11.0, 8.0);
 	protected static final VoxelShape WEST_SHAPE = Block.createCuboidShape(8.0, 0.0, 4.0, 16.0, 11.0, 12.0);
 	protected static final VoxelShape EAST_SHAPE = Block.createCuboidShape(0.0, 0.0, 4.0, 8.0, 11.0, 12.0);
+	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 
 	public TreeTapBlock(Settings settings)
 	{
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH).with(RUBBER_SAP, false)));
+		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH).with(RUBBER_SAP, false).with(WATERLOGGED, false)));
 	}
 
 	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
 	{
-		builder.add(FACING, FACE, RUBBER_SAP);
+		builder.add(FACING, FACE, RUBBER_SAP, WATERLOGGED);
 	}
 
 	public BlockRenderType getRenderType(BlockState state)
@@ -79,6 +85,15 @@ public class TreeTapBlock extends WallMountedBlock
 	{
 		Direction direction = state.get(FACING);
 		return shapeFromDirection(direction);
+	}
+	
+	@Override
+	public FluidState getFluidState(BlockState state)
+	{
+		if(state.get(WATERLOGGED).booleanValue())
+			return Fluids.WATER.getStill(false);
+		
+		return super.getFluidState(state);
 	}
 
 	public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos)
@@ -121,5 +136,14 @@ public class TreeTapBlock extends WallMountedBlock
 			return;
 
 		world.setBlockState(pos, world.getBlockState(pos).with(RUBBER_SAP, true), Block.NOTIFY_LISTENERS);
+	}
+	
+	@Override
+	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
+	{
+		if(state.get(WATERLOGGED).booleanValue())
+			world.createAndScheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+
+		return state;
 	}
 }

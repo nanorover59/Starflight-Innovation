@@ -94,7 +94,7 @@ public class FluidTankInsideBlock extends Block
 						StarflightEffects.sendOutgas(world, pos1, pos2, true);
 					
 					if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_TANK_CAPACITY)
-						blockEntity.getWorld().createExplosion(null, pos1.getX() + 0.5, pos1.getY() + 0.5, pos1.getZ() + 0.5, 2.0F, DestructionType.DESTROY);
+						blockEntity.getWorld().createExplosion(null, pos1.getX() + 0.5, pos1.getY() + 0.5, pos1.getZ() + 0.5, 2.0f, DestructionType.DESTROY);
 					
 					fluidTankController.setActive(false);
 					fluidTankController.setStorageCapacity(0);

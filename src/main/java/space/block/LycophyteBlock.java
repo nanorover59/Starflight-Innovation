@@ -4,6 +4,7 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Fertilizable;
+import net.minecraft.block.Material;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -12,6 +13,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
@@ -51,7 +53,7 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos)
 	{
 		Block block = world.getBlockState(pos.down()).getBlock();
-		return block == StarflightBlocks.FERRIC_SAND || block == StarflightBlocks.ARES_MOSS_BLOCK || block == StarflightBlocks.LYCOPHYTE_TOP || block == StarflightBlocks.LYCOPHYTE_STEM;
+		return block.getDefaultState().isIn(BlockTags.DIRT) || block == StarflightBlocks.ARES_MOSS_BLOCK || block == StarflightBlocks.LYCOPHYTE_TOP || block == StarflightBlocks.LYCOPHYTE_STEM;
 	}
 
 	@Override
@@ -84,6 +86,10 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 			pos = pos.up();
 		
 		pos = pos.up();
+		
+		if(world.getBlockState(pos).getMaterial() != Material.AIR)
+			return;
+		
 		world.setBlockState(pos, StarflightBlocks.LYCOPHYTE_TOP.getDefaultState());
 		world.setBlockState(pos.down(), StarflightBlocks.LYCOPHYTE_STEM.getDefaultState());
 	}

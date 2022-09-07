@@ -10,20 +10,29 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.Waterloggable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.BooleanProperty;
+import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.WorldAccess;
 import space.client.StarflightModClient;
 import space.planet.Planet;
 import space.planet.PlanetList;
 import space.util.CubicHermiteSpline;
 
-public class RocketThrusterBlock extends Block
+public class RocketThrusterBlock extends Block implements Waterloggable
 {
+	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	protected static final VoxelShape SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 	private final double standardGravity = 9.80665;
 	private final double massFlow;
@@ -38,6 +47,7 @@ public class RocketThrusterBlock extends Block
 	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
 	{
 		super(settings);
+		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
 		this.vacuumThrust = vacuumThrust;
 		this.vacuumISP = vacuumISP;
 		this.atmISP = atmISP;
@@ -47,30 +57,59 @@ public class RocketThrusterBlock extends Block
 		this.massFlow = vacuumThrust / (vacuumISP * standardGravity);
 		this.atmThrust = atmISP * massFlow * standardGravity;
 	}
-
+	
+	@Override
+    protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
+	{
+        builder.add(WATERLOGGED);
+    }
+	
+	@Override
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.MODEL;
 	}
 
+	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
 	{
 		return SHAPE;
 	}
 
+	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
 	{
 		return SHAPE;
 	}
 
+	@Override
 	public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos)
 	{
 		return SHAPE;
 	}
+	
+	@Override
+	public FluidState getFluidState(BlockState state)
+	{
+		if(state.get(WATERLOGGED).booleanValue())
+			return Fluids.WATER.getStill(false);
+		
+		return super.getFluidState(state);
+	}
 
+	@Override
 	public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos)
 	{
-		return true;
+		return !(Boolean) state.get(WATERLOGGED);
+	}
+	
+	@Override
+	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
+	{
+		if(state.get(WATERLOGGED).booleanValue())
+			world.createAndScheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+
+		return state;
 	}
 	
 	/**
@@ -119,7 +158,7 @@ public class RocketThrusterBlock extends Block
 		textList.add(Text.translatable("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
 		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(p) / 1000.0)).append("kN"));
 		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(p))).append("s"));
-		//textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
+		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
 		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 }

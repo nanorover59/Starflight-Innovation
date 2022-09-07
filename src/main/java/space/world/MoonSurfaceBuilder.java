@@ -57,7 +57,7 @@ public class MoonSurfaceBuilder extends CustomSurfaceBuilder
 		{
 			for(int y = surfaceY; y > region.getBottomY(); y--)
 			{
-				if(blockColumn.getState(y).getBlock() == Blocks.AIR && blockColumn.getState(y - 1).getBlock() == Blocks.STONE)
+				if(blockColumn.getState(y).getBlock() == Blocks.AIR && (blockColumn.getState(y - 1).getBlock() == Blocks.STONE || blockColumn.getState(y + 1).getBlock() == Blocks.STONE))
 					blockColumn.setState(y, region.getRandom().nextBoolean() ? Blocks.ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState());
 			}
 		}

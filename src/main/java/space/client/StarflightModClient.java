@@ -63,15 +63,14 @@ import space.vessel.MovingCraftRenderList;
 
 public class StarflightModClient implements ClientModInitializer
 {
-	private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Z, "key.category.space"));
-	private static KeyBinding throttleDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_X, "key.category.space"));
+	private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
+	private static KeyBinding throttleDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.category.space"));
+	private static KeyBinding throttleMax = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_max", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.category.space"));
+	private static KeyBinding throttleMin = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_min", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.category.space"));
 	private static KeyBinding pitchUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UP, "key.category.space"));
 	private static KeyBinding pitchDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_DOWN, "key.category.space"));
 	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT, "key.category.space"));
 	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT, "key.category.space"));
-	private static int previousThrottleState = 0;
-	private static int previousPitchState = 0;
-	private static int previousYawState = 0;
 	
 	//public static final KeyBinding TOOLTIP_KEY = KeyBindingHelper.registerKeyBinding(new StickyKeyBinding("key.space.tooltip", GLFW.GLFW_KEY_LEFT_CONTROL, "key.category.space", () -> true));
 	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
@@ -149,6 +148,12 @@ public class StarflightModClient implements ClientModInitializer
 
 				if(throttleDown.isPressed())
 					throttleState--;
+				
+				if(throttleMax.isPressed())
+					throttleState = 2;
+				
+				if(throttleMin.isPressed())
+					throttleState = -2;
 
 				if(pitchUp.isPressed())
 					pitchState++;
@@ -162,14 +167,11 @@ public class StarflightModClient implements ClientModInitializer
 				if(yawRight.isPressed())
 					yawState--;
 				
-				if(throttleState != previousThrottleState || pitchState != previousPitchState || yawState != previousYawState)
-				{
-					PacketByteBuf buffer = PacketByteBufs.create();
-					buffer.writeInt(throttleState);
-					buffer.writeInt(pitchState);
-					buffer.writeInt(yawState);
-					ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
-				}
+				PacketByteBuf buffer = PacketByteBufs.create();
+				buffer.writeInt(throttleState);
+				buffer.writeInt(pitchState);
+				buffer.writeInt(yawState);
+				ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
 			}
 			
 		});

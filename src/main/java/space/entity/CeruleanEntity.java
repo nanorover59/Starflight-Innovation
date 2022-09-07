@@ -65,9 +65,6 @@ public class CeruleanEntity extends AnimalEntity implements Angerable
 		this.goalSelector.add(10, new LookAroundGoal(this));
 		this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(new Class[0]));
 		this.targetSelector.add(4, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
-		// this.targetSelector.add(7, new
-		// ActiveTargetGoal<AbstractSkeletonEntity>((MobEntity) this,
-		// AbstractSkeletonEntity.class, false));
 		this.targetSelector.add(8, new UniversalAngerGoal<CeruleanEntity>(this, true));
 	}
 
@@ -118,7 +115,7 @@ public class CeruleanEntity extends AnimalEntity implements Angerable
 	@Override
 	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
-        return !world.isSkyVisible(getBlockPos()) || this.random.nextFloat() < 0.01f;
+        return (!world.isSkyVisible(getBlockPos()) && this.random.nextFloat() < 0.5f) || this.random.nextFloat() < 0.005f;
     }
 
 	@Override
@@ -131,7 +128,7 @@ public class CeruleanEntity extends AnimalEntity implements Angerable
 	@Override
 	public int getLimitPerChunk()
 	{
-		return 4;
+		return 2;
 	}
 
 	@Override

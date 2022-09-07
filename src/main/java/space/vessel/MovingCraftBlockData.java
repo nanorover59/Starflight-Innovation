@@ -1,10 +1,12 @@
 package space.vessel;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.BlockRotation;
@@ -96,6 +98,18 @@ public class MovingCraftBlockData
 			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
 		
 		BlockPos blockPos = centerPos.add(position.rotate(rotation));
+		
+		// Do not overwrite existing solid world blocks.
+		if(world.getBlockState(blockPos).getMaterial().blocksMovement())
+		{
+			BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
+			
+			if(blockEntity != null && blockEntityData != null)
+				blockEntity.readNbt(blockEntityData);
+			
+            Block.dropStacks(blockState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
+            return;
+		}
 		
 		if(blockState.getBlock() instanceof FluidTankInsideBlock)
 		{

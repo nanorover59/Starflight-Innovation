@@ -134,7 +134,7 @@ public class StarflightBlocks
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
-	public static final Block LANDING_LEG = new Block(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
+	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.1e6, 330, 300, 12.0);
 	

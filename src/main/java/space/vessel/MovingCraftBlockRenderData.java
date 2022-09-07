@@ -116,7 +116,7 @@ public class MovingCraftBlockRenderData
 							matrixStack.push();
 							matrixStack.translate(position.getX() + (b ? -0.01 : 0.01), position.getY() - i * 0.75, position.getZ() + (b ? -0.01 : 0.01));
 							matrixStack.scale(1.0F - i * 0.1F, 1.25F, 1.0F - i * 0.1F);
-							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
+							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rocketEntity.getYaw() - client.gameRenderer.getCamera().getYaw() + 180.0F));
 					        MatrixStack.Entry entry = matrixStack.peek();
 					        Matrix4f matrix4f = entry.getPositionMatrix();
 					        Matrix3f matrix3f = entry.getNormalMatrix();
@@ -134,7 +134,7 @@ public class MovingCraftBlockRenderData
 						matrixStack.push();
 						matrixStack.translate(position.getX(), position.getY() - 0.8, position.getZ());
 						matrixStack.scale(1.75F, 3.0F, 1.75F);
-						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-client.gameRenderer.getCamera().getYaw() + 180.0F));
+						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rocketEntity.getYaw() - client.gameRenderer.getCamera().getYaw() + 180.0F));
 				        MatrixStack.Entry entry = matrixStack.peek();
 				        Matrix4f matrix4f = entry.getPositionMatrix();
 				        Matrix3f matrix3f = entry.getNormalMatrix();

@@ -2,6 +2,7 @@ package space.world;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.Material;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.ChunkRegion;
@@ -29,7 +30,6 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		BlockState bottomState = StarflightBlocks.FERRIC_STONE.getDefaultState();
 		int topDepth = 4;
 		int bottomDepth = 2 + region.getRandom().nextInt(3);
-		int newSeaLevel = 16;
 		
 		if(biome == StarflightBiomes.MARS_LOWLANDS)
 			bottomState = StarflightBlocks.REDSLATE.getDefaultState();
@@ -41,22 +41,9 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		{
 			if(blockColumn.getState(y).getMaterial().isSolid())
 				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());
-		}
-		
-		for(int y = region.getSeaLevel(); y >= newSeaLevel; y--)
-		{
-			if(blockColumn.getState(y).getBlock() == Blocks.WATER)
-			{
-				if(y == newSeaLevel)
-				{
-					blockColumn.setState(y, region.getRandom().nextBoolean() ? Blocks.PACKED_ICE.getDefaultState() : Blocks.ICE.getDefaultState());
-					
-					if(y > surfaceY)
-						blockColumn.setState(y, topState);
-				}
-				else
-					blockColumn.setState(y, Blocks.AIR.getDefaultState());
-			}
+			
+			if(blockColumn.getState(y).getBlock() == Blocks.WATER && blockColumn.getState(y + 1).getMaterial() == Material.AIR)
+				blockColumn.setState(y, region.getRandom().nextBoolean() ? Blocks.PACKED_ICE.getDefaultState() : Blocks.ICE.getDefaultState());
 		}
 		
 		if(surfaceY < 30)
@@ -68,7 +55,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 				if(y > surfaceY - topDepth)
 				{
 					if(biome == StarflightBiomes.MARS_ICE && y <= surfaceY)
-						blockColumn.setState(y, y == surfaceY && region.getRandom().nextFloat() < 0.25f ? Blocks.BLUE_ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState());
+						blockColumn.setState(y, y == surfaceY && region.getRandom().nextFloat() < 0.25f ? Blocks.PACKED_ICE.getDefaultState() : StarflightBlocks.FERRIC_SAND.getDefaultState());
 					else
 						blockColumn.setState(y, topState);
 				}

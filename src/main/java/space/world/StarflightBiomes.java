@@ -188,6 +188,7 @@ public class StarflightBiomes
 			DefaultBiomeFeatures.addDripstone(generationSettings);
 		else if(biomeKey.getValue().getPath().contains("lush_caves"))
 		{
+			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.MARS_GLOW_LICHEN_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_CEILING_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.MARS_CAVE_POOL_PLACED_FEATURE);

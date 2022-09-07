@@ -43,24 +43,24 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		switch(entity.getForwardDirection())
 		{
 		case NORTH:
-			matrixStack.multiply(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
-			matrixStack.multiply(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationPitch));
-			matrixStack.multiply(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationRoll));
+			matrixStack.multiply(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
+			matrixStack.multiply(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationPitch));
+			matrixStack.multiply(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
 			break;
 		case EAST:
-			matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
-			matrixStack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationPitch));
-			matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationRoll));
+			matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
+			matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationPitch));
+			matrixStack.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
 			break;
 		case SOUTH:
-			matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYaw));
-			matrixStack.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationPitch));
-			matrixStack.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationRoll));
+			matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
+			matrixStack.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
+			matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
 			break;
 		case WEST:
-			matrixStack.multiply(Vec3f.NEGATIVE_Y.getDegreesQuaternion(rotationYaw));
-			matrixStack.multiply(Vec3f.NEGATIVE_Z.getDegreesQuaternion(rotationPitch));
-			matrixStack.multiply(Vec3f.NEGATIVE_X.getDegreesQuaternion(rotationRoll));
+			matrixStack.multiply(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
+			matrixStack.multiply(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationPitch));
+			matrixStack.multiply(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationRoll));
 			break;
 		default:
 			break;

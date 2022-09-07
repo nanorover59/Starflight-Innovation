@@ -176,7 +176,6 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	{
 		double fuelMass = Math.min(oxygen + (oxygen / 8.0), hydrogen + (hydrogen * 8.0));
 		double finalMass = initialMass - fuelMass;
-		System.out.println(hydrogen + "    " + oxygen + "    " + oxygen / hydrogen + "    " + fuelMass + "    " + initialMass);
 		return averageVE * Math.log(initialMass / finalMass);
 	}
 	

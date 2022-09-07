@@ -6,10 +6,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -53,11 +56,22 @@ public abstract class FluidStateMixin
 		        	
 		        	if(air)
 		        	{
+		        		BlockState blockState = world.getBlockState(pos);
+		        		
 						if(temperature < Planet.TEMPERATE && world.getRandom().nextFloat() < chance)
-							world.setBlockState(pos, Blocks.ICE.getDefaultState());
+						{
+							if(blockState.getBlock() instanceof Waterloggable)
+								world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
+							else
+								world.setBlockState(pos, Blocks.ICE.getDefaultState());
+						}
 						else if(temperature >= Planet.TEMPERATE)
 						{
-							world.setBlockState(pos, Blocks.AIR.getDefaultState());
+							if(blockState.getBlock() instanceof Waterloggable)
+								world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
+							else
+								world.setBlockState(pos, Blocks.AIR.getDefaultState());
+							
 							StarflightEffects.sendOutgas(world, pos, pos.up(), true);
 						}
 						else
