@@ -217,12 +217,15 @@ public class PlanetList
 		Planet centerPlanet = planetList.get(0);
 		ArrayList<String> checkList = new ArrayList<String>();
 		
-		if(data != null && data.hasValue("planetCount"))
+		if(data != null && data.hasName("planetCount"))
 		{
+			System.out.println(data.getInt("planetCount") + "    " + planetList.size());
+			
 			if(data.getInt("planetCount") != planetList.size())
 				centerPlanet.setInitialPositionAndVelocity(checkList);
 			else
 			{
+				System.out.println("Loading Data");
 				timeSteps = data.getInt("timeSteps");
 				centerPlanet.loadData(data, checkList);
 			}

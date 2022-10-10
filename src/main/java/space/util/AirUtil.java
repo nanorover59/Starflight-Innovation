@@ -28,25 +28,24 @@ public class AirUtil
 	/**
 	 * Get the air resistance multiplier for the atmospheric conditions at the given location.
 	 */
-	public static double getAirResistanceMultiplier(World world, BlockPos pos)
+	public static double getAirResistanceMultiplier(World world, Planet currentPlanet, BlockPos pos)
 	{
+		if(currentPlanet == null)
+			return 1.0;
+		
 		if(world.getBlockState(pos).getBlock() == StarflightBlocks.HABITABLE_AIR)
-			return 0.85;
+			return 0.9;
 		
-		Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
-		boolean inOrbit = PlanetList.isOrbit(world.getRegistryKey());
-		
-		return inOrbit ? 0.0 : currentPlanet.getSurfacePressure();
+		return PlanetList.isOrbit(world.getRegistryKey()) ? 0.0 : currentPlanet.getSurfacePressure();
 	}
 	
 	/**
 	 * Return true if the given entity can breathe in its current location.
 	 */
-	public static boolean canEntityBreathe(LivingEntity entity)
+	public static boolean canEntityBreathe(LivingEntity entity, Planet currentPlanet)
 	{
 		World world = entity.getWorld();
 		BlockPos pos = entity.getBlockPos();
-		Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
 		
 		if(currentPlanet == null)
 			return true;

@@ -43,7 +43,7 @@ public abstract class BoatEntityMixin extends Entity
 
 			if(currentPlanet != null && this.location == Location.IN_AIR)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = (float) ((1.0 / this.velocityDecay) * (1.0 / (1.0 + ((1.0 - this.velocityDecay) * airMultiplier))));
 				this.setVelocity(this.getVelocity().x * d, this.getVelocity().y, this.getVelocity().z * d);
 				

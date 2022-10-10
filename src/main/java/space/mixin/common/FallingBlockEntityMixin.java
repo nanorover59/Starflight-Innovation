@@ -33,7 +33,7 @@ public abstract class FallingBlockEntityMixin extends Entity
 
 			if(currentPlanet != null)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				this.setVelocity(this.getVelocity().multiply(1.0 / 0.98));
 				
 				if(!this.hasNoGravity() && !this.onGround)

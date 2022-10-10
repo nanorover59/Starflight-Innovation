@@ -279,12 +279,21 @@ public class RocketEntity extends MovingCraftEntity
 	@Override
     public void tick()
 	{
+		//System.out.println(this.world.isClient + "    " + clientInterpolationSteps);
+		
 		// Run client-side actions and then return.
 		if(this.clientMotion())
 		{
 			// Spawn thruster particles.
 			if(getThrottle() > 0.0f)
 				spawnThrusterParticles();
+			
+			this.clientCraftRollPrevious = this.clientCraftRoll;
+	        this.clientCraftPitchPrevious = this.clientCraftPitch;
+	        this.clientCraftYawPrevious = this.clientCraftYaw;
+	        this.clientCraftRoll = this.getCraftRoll();
+	    	this.clientCraftPitch = this.getCraftPitch();
+	    	this.clientCraftYaw = this.getCraftYaw();
 			
 			return;
 		}
@@ -297,7 +306,9 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		else
 			soundEffectTimer--;
-			
+		
+		//setPreviousCraftRotation(getCraftRoll(), getCraftPitch(), getCraftYaw());
+		
 		// Set the target landing altitude if necessary.
 		if(changedDimension && arrivalPos.getY() == -9999)
 		{
@@ -363,18 +374,18 @@ public class RocketEntity extends MovingCraftEntity
 			if((verticalCollision || horizontalCollision) && craftSpeed > 10.0)
 			{
 				BlockPos bottom = getBlockPos().add(0, -lowerHeight, 0);
-				float power = Math.min(craftSpeed / 10.0f, 10.0f);
+				float power = Math.min(craftSpeed / 5.0f, 10.0f);
 				boolean fire = !PlanetList.isOrbit(world.getRegistryKey()) && PlanetList.getPlanetForWorld(world.getRegistryKey()).hasOxygen();
 				int count = random.nextBetween(4, 5);
 				
 				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, fire, DestructionType.DESTROY);
 				
-				for(int i = 0; i < count; i++)
+				/*for(int i = 0; i < count; i++)
 				{
 					Vec3d offset = new Vec3d(maxWidth * random.nextDouble(), 3.0 * (0.5 - random.nextDouble()), 0.0);
 					offset = offset.rotateY((float) Math.PI * 2.0f * random.nextFloat());
 					world.createExplosion(null, bottom.getX() + 0.5 + offset.getX(), bottom.getY() + 0.5 + offset.getY(), bottom.getZ() + 0.5 + offset.getZ(), power, fire, DestructionType.DESTROY);
-				}
+				}*/
 				
 				crashLandingFlag = true;
 			}
@@ -404,7 +415,7 @@ public class RocketEntity extends MovingCraftEntity
 			sendRenderData(false);
 		
 		// Update thruster state tracked data.
-		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, getBlockPos()) > 0.25);
+		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, PlanetList.getPlanetForWorld(world.getRegistryKey()), getBlockPos()) > 0.25);
 		setThrottle((float) throttle);
 		int yCheck = world.getTopY();
 		
@@ -805,7 +816,7 @@ public class RocketEntity extends MovingCraftEntity
 			RocketEntity rocketEntity = (RocketEntity) entity;
 			float craftPitch = rocketEntity.getCraftPitch();
 			float craftYaw = rocketEntity.getCraftYaw();
-			float rotationRate = (float) (Math.PI / 180.0);
+			float rotationRate = (float) (Math.PI / 360.0);
 			
 			if(rocketEntity.userInput)
 			{
@@ -825,7 +836,7 @@ public class RocketEntity extends MovingCraftEntity
 				
 				// Invert the controls for north and west front directions.
 				float pitchRate = (rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.SOUTH) ? -rotationRate : rotationRate;
-				float yawRate = (rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.WEST) ? -rotationRate : rotationRate;
+				float yawRate = 2.0f * ((rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.WEST) ? -rotationRate : rotationRate);
 				
 				if(pitchState == 1)
 					craftPitch += pitchRate;

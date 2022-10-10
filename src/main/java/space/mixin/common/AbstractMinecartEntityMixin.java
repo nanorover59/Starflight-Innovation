@@ -54,7 +54,7 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 
 			if(currentPlanet != null && !this.onGround)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = Math.min(this.getMaxSpeed() / (airMultiplier + Double.MIN_VALUE), 20.0);
 				Vec3d vec3d = this.getVelocity();
 				this.setVelocity(MathHelper.clamp(vec3d.x, -d, d), vec3d.y, MathHelper.clamp(vec3d.z, -d, d));

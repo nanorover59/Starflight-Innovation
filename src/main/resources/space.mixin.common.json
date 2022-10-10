@@ -22,10 +22,11 @@
     "EntityMixin",
     "FluidStateMixin",
     "FallingBlockMixin",
+    "CampfireBlockMixin",
     "AbstractFurnaceBlockEntityMixin",
     "AbstractFurnaceBlockEntityAccessorMixin"
   ],
   "injectors": {
-    "defaultRequire": 1
+    "defaultRequire": 0
   }
 }

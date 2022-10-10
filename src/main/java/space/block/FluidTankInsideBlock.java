@@ -39,6 +39,12 @@ public class FluidTankInsideBlock extends Block
     }
 	
 	@Override
+	public boolean canMobSpawnInside()
+	{
+		return false;
+	}
+	
+	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
 	{
 		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();

@@ -27,6 +27,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
@@ -34,6 +35,7 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
+import net.minecraft.world.World;
 import space.StarflightMod;
 import space.block.RocketThrusterBlock;
 import space.entity.MovingCraftEntity;
@@ -93,7 +95,7 @@ public class MovingCraftBlockRenderData
 		}
 	}
 	
-	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial)
+	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, float craftYaw)
 	{
 		// Plume effects for rocket thrusters.
 		if(entity instanceof RocketEntity)
@@ -116,7 +118,7 @@ public class MovingCraftBlockRenderData
 							matrixStack.push();
 							matrixStack.translate(position.getX() + (b ? -0.01 : 0.01), position.getY() - i * 0.75, position.getZ() + (b ? -0.01 : 0.01));
 							matrixStack.scale(1.0F - i * 0.1F, 1.25F, 1.0F - i * 0.1F);
-							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rocketEntity.getYaw() - client.gameRenderer.getCamera().getYaw() + 180.0F));
+							matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(craftYaw * (180.0f / MathHelper.PI) - client.gameRenderer.getCamera().getYaw() + 180.0F));
 					        MatrixStack.Entry entry = matrixStack.peek();
 					        Matrix4f matrix4f = entry.getPositionMatrix();
 					        Matrix3f matrix3f = entry.getNormalMatrix();
@@ -134,7 +136,7 @@ public class MovingCraftBlockRenderData
 						matrixStack.push();
 						matrixStack.translate(position.getX(), position.getY() - 0.8, position.getZ());
 						matrixStack.scale(1.75F, 3.0F, 1.75F);
-						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rocketEntity.getYaw() - client.gameRenderer.getCamera().getYaw() + 180.0F));
+						matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(craftYaw * (180.0f / MathHelper.PI) - client.gameRenderer.getCamera().getYaw() + 180.0F));
 				        MatrixStack.Entry entry = matrixStack.peek();
 				        Matrix4f matrix4f = entry.getPositionMatrix();
 				        Matrix3f matrix3f = entry.getNormalMatrix();
@@ -154,6 +156,7 @@ public class MovingCraftBlockRenderData
 		{
 			BlockWithEntity blockWithEntity = (BlockWithEntity) blockState.getBlock();
 			BlockEntity blockEntity = blockWithEntity.createBlockEntity(position.add(centerBlockPosInitial), blockState);
+			blockEntity.setWorld((World) world);
 			BlockEntityRenderDispatcher blockEntityRenderDispatcher = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
 			int light = WorldRenderer.getLightmapCoordinates(world, blockState, position.add(centerBlockPos));
 			matrixStack.push();

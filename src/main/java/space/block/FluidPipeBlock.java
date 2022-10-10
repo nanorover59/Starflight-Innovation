@@ -15,6 +15,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -94,6 +95,7 @@ public class FluidPipeBlock extends BlockWithEntity implements Waterloggable, Fl
 		return super.getFluidState(state);
 	}
 
+	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
 		Direction[] directions = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN };
@@ -104,6 +106,7 @@ public class FluidPipeBlock extends BlockWithEntity implements Waterloggable, Fl
 		world.setBlockState(pos, state);
 	}
 
+	@Override
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
 	{
 		Direction[] directions = new Direction[] { Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN };
@@ -117,6 +120,15 @@ public class FluidPipeBlock extends BlockWithEntity implements Waterloggable, Fl
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 
+	}
+	
+	@Override
+	@Nullable
+	public BlockState getPlacementState(ItemPlacementContext context)
+	{
+		BlockPos blockPos = context.getBlockPos();
+		FluidState fluidState = context.getWorld().getFluidState(blockPos);
+		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
 	}
 
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)

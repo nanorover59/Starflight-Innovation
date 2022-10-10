@@ -3,6 +3,7 @@ package space.item;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorMaterial;
+import net.minecraft.item.FoodComponents;
 import net.minecraft.item.Item;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.tag.TagKey;
@@ -22,6 +23,7 @@ public class StarflightItems
 	public static final Item RUBBER = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
+	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE).group(StarflightMod.ITEM_GROUP));
 	public static final Item BATTERY_CELL = new BatteryCellItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), 256.0);
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item SUBSTRATE = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
@@ -60,6 +62,7 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber"), RUBBER);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber_sap"), RUBBER_SAP);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rubber_resin"), RUBBER_RESIN);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "cheese"), CHEESE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "battery_cell"), BATTERY_CELL);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "oxygen_tank_item"), OXYGEN_TANK_ITEM);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "substrate"), SUBSTRATE);

@@ -1,6 +1,3 @@
-/*
- * Decompiled with CFR 0.1.1 (FabricMC 57d88659).
- */
 package space.world;
 
 import java.util.List;
@@ -21,7 +18,6 @@ import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.biome.source.FixedBiomeSource;
 import net.minecraft.world.chunk.Chunk;
@@ -40,7 +36,7 @@ public class SpaceChunkGenerator extends ChunkGenerator
 
 	public SpaceChunkGenerator(Registry<StructureSet> structureSetRegistry, Registry<Biome> biomeRegistry)
 	{
-		super(structureSetRegistry, Optional.empty(), new FixedBiomeSource(biomeRegistry.getOrCreateEntry(BiomeKeys.PLAINS)));
+		super(structureSetRegistry, Optional.empty(), new FixedBiomeSource(biomeRegistry.getOrCreateEntry(StarflightBiomes.SPACE)));
 		this.biomeRegistry = biomeRegistry;
 	}
 

@@ -27,7 +27,7 @@ public class IceBladeFeature extends Feature<DefaultFeatureConfig>
 	{
 		BlockPos blockPos = context.getOrigin();
 		StructureWorldAccess structureWorldAccess = context.getWorld();
-		Random random = context.getRandom();
+		Random random = structureWorldAccess.getRandom();
 		BlockState blockState = Blocks.PACKED_ICE.getDefaultState();
 		float angle = random.nextFloat() * (float) Math.PI * 2.0f;
 		int size = random.nextBetween(1, 6);

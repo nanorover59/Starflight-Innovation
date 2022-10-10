@@ -12,6 +12,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
@@ -36,9 +37,9 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		if(!MovingCraftRenderList.hasBlocksForEntity(entityUUID))
 			return;
 		
-		float rotationRoll = entity.getCraftRoll();
-		float rotationPitch = entity.getCraftPitch();
-		float rotationYaw = entity.getCraftYaw();
+		float rotationRoll = lerpAngleRadians(g, entity.clientCraftRollPrevious, entity.clientCraftRoll);
+		float rotationPitch = lerpAngleRadians(g, entity.clientCraftPitchPrevious, entity.clientCraftPitch);
+		float rotationYaw = lerpAngleRadians(g, entity.clientCraftYawPrevious, entity.clientCraftYaw);
 		
 		switch(entity.getForwardDirection())
 		{
@@ -70,10 +71,10 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		World world = entity.getEntityWorld();
 		BlockPos centerBlockPos = entity.getBlockPos();
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
-		Random random = Random.create();
+		Random random = world.getRandom();
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial);
+			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, rotationYaw);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -82,4 +83,19 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 	{
 		return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
 	}
+	
+	private float lerpAngleRadians(float delta, float start, float end)
+	{
+		float d = end - start;
+		
+		if(Math.abs(d) > MathHelper.PI)
+		{
+			if(start > end)
+				d += MathHelper.PI * 2.0f;
+			else
+				d -= MathHelper.PI * 2.0f;
+		}
+		
+        return start + delta * d;
+    }
 }

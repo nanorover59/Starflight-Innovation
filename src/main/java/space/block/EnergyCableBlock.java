@@ -2,6 +2,8 @@ package space.block;
 
 import java.util.ArrayList;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -10,6 +12,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -131,6 +134,15 @@ public class EnergyCableBlock extends Block implements Waterloggable
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			EnergyNet.updateEnergyNodes(world, pos, checkList);
 		}
+	}
+	
+	@Override
+	@Nullable
+	public BlockState getPlacementState(ItemPlacementContext context)
+	{
+		BlockPos blockPos = context.getBlockPos();
+		FluidState fluidState = context.getWorld().getFluidState(blockPos);
+		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
 	}
 	
 	@Override

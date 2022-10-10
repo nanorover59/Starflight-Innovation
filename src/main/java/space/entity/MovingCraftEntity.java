@@ -40,7 +40,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.TeleportTarget;
@@ -68,12 +67,17 @@ public class MovingCraftEntity extends Entity
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	protected BlockPos centerOfMass;
-	private int clientInterpolationSteps;
+	public int clientInterpolationSteps;
     private double clientX;
     private double clientY;
     private double clientZ;
-    private double clientYaw;
-    private double clientPitch;
+    public float clientCraftRoll;
+    public float clientCraftPitch;
+    public float clientCraftYaw;
+    public float clientCraftRollPrevious;
+    public float clientCraftPitchPrevious;
+    public float clientCraftYawPrevious;
+    
     private double clientXVelocity;
     private double clientYVelocity;
     private double clientZVelocity;
@@ -230,6 +234,16 @@ public class MovingCraftEntity extends Entity
     	return new Vec3f(this.dataTracker.get(TRACKED_VX).floatValue(), this.dataTracker.get(TRACKED_VY).floatValue(), this.dataTracker.get(TRACKED_VZ).floatValue());
     }
     
+    public void setClientCraftRotation(float roll, float pitch, float yaw)
+    {
+    	clientCraftRollPrevious = clientCraftRoll;
+    	clientCraftPitchPrevious = clientCraftPitch;
+    	clientCraftYawPrevious = clientCraftYaw;
+    	clientCraftRoll = roll;
+    	clientCraftPitch = pitch;
+    	clientCraftYaw = yaw;
+    }
+    
     /**
      * Return the number of horizontal rotation steps for rotation about the y-axis. Used for converting back to blocks.
      */
@@ -256,18 +270,11 @@ public class MovingCraftEntity extends Entity
                 double a = this.getX() + (this.clientX - this.getX()) / (double) this.clientInterpolationSteps;
                 double b = this.getY() + (this.clientY - this.getY()) / (double) this.clientInterpolationSteps;
                 double c = this.getZ() + (this.clientZ - this.getZ()) / (double) this.clientInterpolationSteps;
-                double d = MathHelper.wrapDegrees(this.clientYaw - (double) this.getYaw());
-                this.setYaw(this.getYaw() + (float) d / (float) this.clientInterpolationSteps);
-                this.setPitch(this.getPitch() + (float) (this.clientPitch - (double) this.getPitch()) / (float) this.clientInterpolationSteps);
                 this.clientInterpolationSteps--;
                 this.setPosition(a, b, c);
-                this.setRotation(this.getYaw(), this.getPitch());
             }
             else
-            {
                 this.refreshPosition();
-                this.setRotation(this.getYaw(), this.getPitch());
-            }
             
             return true;
         }
@@ -281,8 +288,6 @@ public class MovingCraftEntity extends Entity
         this.clientX = x;
         this.clientY = y;
         this.clientZ = z;
-        this.clientYaw = yaw;
-        this.clientPitch = pitch;
         this.clientInterpolationSteps = interpolationSteps + 2;
         this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
     }
@@ -628,7 +633,6 @@ public class MovingCraftEntity extends Entity
 	
 	public void sendRenderData(boolean forceUnload)
 	{
-		shouldRender(clientInterpolationSteps);
 		MinecraftServer server = this.getServer();
 		
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())

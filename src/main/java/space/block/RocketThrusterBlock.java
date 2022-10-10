@@ -15,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -101,6 +102,15 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos)
 	{
 		return !(Boolean) state.get(WATERLOGGED);
+	}
+	
+	@Override
+	@Nullable
+	public BlockState getPlacementState(ItemPlacementContext context)
+	{
+		BlockPos blockPos = context.getBlockPos();
+		FluidState fluidState = context.getWorld().getFluidState(blockPos);
+		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
 	}
 	
 	@Override

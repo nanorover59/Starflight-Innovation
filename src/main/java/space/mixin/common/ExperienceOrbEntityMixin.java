@@ -33,7 +33,7 @@ public abstract class ExperienceOrbEntityMixin extends Entity
 
 			if(currentPlanet != null && !this.onGround)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				this.setVelocity(this.getVelocity().multiply(1.02));
 				
 				if(!(this.hasNoGravity() || PlanetList.isOrbit(this.world.getRegistryKey())))

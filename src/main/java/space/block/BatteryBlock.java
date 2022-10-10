@@ -101,11 +101,29 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 		return ActionResult.SUCCESS;
 	}
 	
+	@Override
+	public boolean hasComparatorOutput(BlockState state)
+	{
+		return true;
+	}
+
+	@Override
+	public int getComparatorOutput(BlockState state, World world, BlockPos pos)
+	{
+		if(world.isClient)
+			return 0;
+		
+		BatteryBlockEntity blockEntity = (BatteryBlockEntity) world.getBlockEntity(pos);
+		return Math.min((int) Math.ceil((blockEntity.getCharge() / blockEntity.getChargeCapacity()) * 15.0), 15);
+	}
+	
+    @Override
 	public BlockState rotate(BlockState state, BlockRotation rotation)
 	{
 		return (BlockState) state.with(FACING, rotation.rotate((Direction) state.get(FACING)));
 	}
-
+    
+    @Override
 	public BlockState mirror(BlockState state, BlockMirror mirror)
 	{
 		return state.rotate(mirror.getRotation((Direction) state.get(FACING)));

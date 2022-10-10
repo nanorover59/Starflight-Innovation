@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:cheese_from_cheese_block"
+    ]
+  },
+  "criteria": {
+    "has_cheese_block": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:cheese_block"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:cheese_from_cheese_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_cheese_block",
+      "has_the_recipe"
+    ]
+  ]
+}

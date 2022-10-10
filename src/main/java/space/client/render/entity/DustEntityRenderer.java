@@ -34,9 +34,9 @@ public class DustEntityRenderer extends MobEntityRenderer<DustEntity, DustEntity
             return;
         
         float yaw = -MathHelper.lerpAngleDegrees(g, dustEntity.prevHeadYaw, dustEntity.headYaw);
-        float pitch = MathHelper.lerp(g, dustEntity.prevPitch, dustEntity.getPitch()) + 180.0f;
+        float pitch = MathHelper.lerpAngleDegrees(g, dustEntity.prevPitch, dustEntity.getPitch()) + 180.0f;
         double x = (double) dustEntity.getStamina() / (double) DustEntity.INITIAL_STAMINA; 
-        float alpha = (float) (1.0 - Math.pow((x * 2.0) + 1.0, -4.0));
+        float alpha = (float) (1.0 - Math.pow((x * 2.0) + 1.0, -3.0));
         
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucent(this.getTexture(dustEntity)));
         ((DustEntityModel<DustEntity>) this.getModel()).copyStateTo(this.model);

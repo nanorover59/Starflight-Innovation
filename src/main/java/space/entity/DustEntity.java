@@ -61,9 +61,16 @@ public class DustEntity extends HostileEntity
     }
 	
 	@Override
-	public void pushAwayFrom(Entity entity)
+    public boolean isCollidable()
 	{
-	}
+        return false;
+    }
+	
+	@Override
+    public boolean collidesWith(Entity other)
+	{
+        return false;
+    }
 	
 	@Override
     protected void initDataTracker()
@@ -104,7 +111,7 @@ public class DustEntity extends HostileEntity
         int decrease = 1;
         
         if(world.getBlockState(getBlockPos().down()).getBlock() != StarflightBlocks.FERRIC_SAND || !world.isSkyVisible(getBlockPos()))
-        	decrease = 2;
+        	decrease = 4;
         
         stamina -= decrease;
         dataTracker.set(STAMINA, stamina);
@@ -120,7 +127,7 @@ public class DustEntity extends HostileEntity
 		{
 			if(target instanceof LivingEntity)
 			{
-				((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 120, 0), this);
+				((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.LEVITATION, 80, 0), this);
 				return true;
 			}
 		}

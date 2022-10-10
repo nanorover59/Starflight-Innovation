@@ -1,5 +1,7 @@
 package space.block;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -8,6 +10,7 @@ import net.minecraft.block.Material;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -54,6 +57,15 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 	{
 		Block block = world.getBlockState(pos.down()).getBlock();
 		return block.getDefaultState().isIn(BlockTags.DIRT) || block == StarflightBlocks.ARES_MOSS_BLOCK || block == StarflightBlocks.LYCOPHYTE_TOP || block == StarflightBlocks.LYCOPHYTE_STEM;
+	}
+	
+	@Override
+	@Nullable
+	public BlockState getPlacementState(ItemPlacementContext context)
+	{
+		BlockPos blockPos = context.getBlockPos();
+		FluidState fluidState = context.getWorld().getFluidState(blockPos);
+		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
 	}
 
 	@Override

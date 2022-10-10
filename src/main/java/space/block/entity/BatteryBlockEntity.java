@@ -107,6 +107,8 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 			else
 				stack.getNbt().putDouble("charge", previousCharge + (amount / batteryCount));
 		}
+		
+		world.updateComparators(pos, world.getBlockState(pos).getBlock());
 	}
 	
 	public void discharge(double amount)
@@ -139,6 +141,8 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 			else
 				stack.getNbt().putDouble("charge", previousCharge - (amount / batteryCount));
 		}
+		
+		world.updateComparators(pos, world.getBlockState(pos).getBlock());
 	}
 	
 	public double getChargeCapacity()

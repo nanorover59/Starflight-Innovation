@@ -17,10 +17,12 @@ import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
@@ -32,7 +34,6 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
@@ -82,6 +83,9 @@ public class StarflightModClient implements ClientModInitializer
 	
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
 	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
+	
+	public static VertexBuffer stars;
+	public static VertexBuffer milkyWay;
 	
 	@Override
 	public void onInitializeClient()
@@ -205,10 +209,29 @@ public class StarflightModClient implements ClientModInitializer
 			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
 	}
 	
+	public static void initializeBuffers()
+	{
+		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		stars = buildStars(stars, bufferBuilder);
+		milkyWay = buildMilkyWay(milkyWay, bufferBuilder);
+	}
+	
+	private static VertexBuffer buildMilkyWay(VertexBuffer vertexBuffer, BufferBuilder bufferBuilder)
+	{
+		if(vertexBuffer != null)
+			vertexBuffer.close();
+		
+		vertexBuffer = new VertexBuffer();
+		BuiltBuffer builtBuffer = wrapAroundSky(bufferBuilder, 64, 100.0f, 0.125f);
+		vertexBuffer.bind();
+		vertexBuffer.upload(builtBuffer);
+		return vertexBuffer;
+	}
+	
 	/**
 	 * Used to properly render the milky way wrapped around the sky.
 	 */
-	public static void wrapAroundSky(BufferBuilder bufferBuilder, Matrix4f matrix4f3, int segments, float radius, float textureRatio)
+	private static BuiltBuffer wrapAroundSky(BufferBuilder bufferBuilder, int segments, float radius, float textureRatio)
 	{
 		float height = radius * (float) Math.tan(Math.PI / segments) * (float) segments * textureRatio;
 		
@@ -225,19 +248,31 @@ public class StarflightModClient implements ClientModInitializer
 			float u1 = (float) i / segments;
 			float u2 = (float) (i + 1) / segments;
 			
-			bufferBuilder.vertex(matrix4f3, -height, y1, z1).texture(u1, 0.0f).next();
-			bufferBuilder.vertex(matrix4f3, height, y1, z1).texture(u1, 1.0f).next();
-			bufferBuilder.vertex(matrix4f3, height, y2, z2).texture(u2, 1.0f).next();
-			bufferBuilder.vertex(matrix4f3, -height, y2, z2).texture(u2, 0.0f).next();
+			bufferBuilder.vertex(-height, y1, z1).texture(u1, 0.0f).next();
+			bufferBuilder.vertex(height, y1, z1).texture(u1, 1.0f).next();
+			bufferBuilder.vertex(height, y2, z2).texture(u2, 1.0f).next();
+			bufferBuilder.vertex(-height, y2, z2).texture(u2, 0.0f).next();
 		}
 		
-		BufferRenderer.drawWithShader(bufferBuilder.end());
+		return bufferBuilder.end();
+	}
+	
+	private static VertexBuffer buildStars(VertexBuffer vertexBuffer, BufferBuilder bufferBuilder)
+	{
+		if(vertexBuffer != null)
+			vertexBuffer.close();
+		
+		vertexBuffer = new VertexBuffer();
+		BuiltBuffer builtBuffer = renderStars(bufferBuilder);
+		vertexBuffer.bind();
+		vertexBuffer.upload(builtBuffer);
+		return vertexBuffer;
 	}
 	
 	/**
 	 * Render textured stars to a vertex buffer. Used by the sky render inject.
 	 */
-	public static BufferBuilder.BuiltBuffer renderStars(BufferBuilder buffer)
+	private static BuiltBuffer renderStars(BufferBuilder buffer)
 	{
 		Random random = Random.create(20844L);
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);

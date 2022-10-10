@@ -39,7 +39,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	
 	private static final Identifier PLANET_SHADING = new Identifier(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");
 	private static final Identifier SUN_HAZE_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_haze_0.png");
-	private static final Identifier SUN_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_0.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
 	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_, double cloudRotation_, int cloudIndex_)
@@ -293,7 +292,18 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 				if(weather)
 					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 				else
+				{
+					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.9f);
+					RenderSystem.setShader(GameRenderer::getPositionTexShader);
+					RenderSystem.setShaderTexture(0, SUN_HAZE_0);
+					bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+					bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+					bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+					bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+					bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
+					BufferRenderer.drawWithShader(bufferBuilder.end());
 					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+				}
 			}
 			else
 			{

@@ -110,10 +110,10 @@ public class StarflightWorldGeneration
 	public static final RegistryEntry<PlacedFeature> REDSLATE_FERRIC = orePlacedFeature("redslate_ferric", 64, 12, YOffset.fixed(16), YOffset.TOP, StarflightBlocks.REDSLATE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> BASALT_FERRIC = orePlacedFeature("basalt_ferric", 32, 8, YOffset.BOTTOM, YOffset.TOP, Blocks.SMOOTH_BASALT.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> IRON_ORE_FERRIC = orePlacedFeature("iron_ore_ferric", 12, 24, YOffset.BOTTOM, YOffset.TOP, StarflightBlocks.FERRIC_IRON_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
-	public static final RegistryEntry<PlacedFeature> COPPER_ORE_FERRIC = orePlacedFeature("copper_ore_ferric", 12, 16, 0.25f, YOffset.BOTTOM, YOffset.fixed(64), StarflightBlocks.FERRIC_COPPER_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
-	public static final RegistryEntry<PlacedFeature> GOLD_ORE_FERRIC = orePlacedFeature("gold_ore_ferric", 6, 6, 0.25f, YOffset.BOTTOM, YOffset.fixed(16), StarflightBlocks.FERRIC_GOLD_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
-	public static final RegistryEntry<PlacedFeature> DIAMOND_ORE_FERRIC = orePlacedFeature("diamond_ore_ferric", 4, 4, 0.7f, YOffset.BOTTOM, YOffset.fixed(16), StarflightBlocks.FERRIC_DIAMOND_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
-	public static final RegistryEntry<PlacedFeature> REDSTONE_ORE_FERRIC = orePlacedFeature("redstone_ore_ferric", 8, 6, YOffset.BOTTOM, YOffset.fixed(24), StarflightBlocks.FERRIC_REDSTONE_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
+	public static final RegistryEntry<PlacedFeature> COPPER_ORE_FERRIC = orePlacedFeature("copper_ore_ferric", 8, 12, 0.25f, YOffset.BOTTOM, YOffset.fixed(72), StarflightBlocks.FERRIC_COPPER_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
+	public static final RegistryEntry<PlacedFeature> GOLD_ORE_FERRIC = orePlacedFeatureTrapezoid("gold_ore_ferric", 6, 4, 0.7f, YOffset.fixed(-64), YOffset.fixed(32), StarflightBlocks.FERRIC_GOLD_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
+	public static final RegistryEntry<PlacedFeature> DIAMOND_ORE_FERRIC = orePlacedFeatureTrapezoid("diamond_ore_ferric", 4, 3, 0.8f, YOffset.aboveBottom(-80), YOffset.aboveBottom(80), StarflightBlocks.FERRIC_DIAMOND_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
+	public static final RegistryEntry<PlacedFeature> REDSTONE_ORE_FERRIC = orePlacedFeatureTrapezoid("redstone_ore_ferric", 8, 8, 0.0f, YOffset.aboveBottom(-32), YOffset.aboveBottom(32), StarflightBlocks.FERRIC_REDSTONE_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> SULFUR_ORE_FERRIC = orePlacedFeature("sulfur_ore_ferric", 10, 6, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.FERRIC_SULFUR_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> HEMATITE_ORE = orePlacedFeature("hematite_ore", 12, 32, 0.5f, YOffset.BOTTOM, YOffset.fixed(256), StarflightBlocks.HEMATITE_ORE.getDefaultState(), StarflightBlocks.REDSLATE);
 
@@ -138,6 +138,9 @@ public class StarflightWorldGeneration
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, TALL_RUBBER_TREE_CHECKED.getKey().get());
 	}
 
+	/**
+	 * Register an ore placed feature with uniform y-level distribution.
+	 */
 	private static RegistryEntry<PlacedFeature> orePlacedFeature(String name, int size, int count, float discardOnAirChance, YOffset bottom, YOffset top, BlockState oreBlockState, Block ruleBlock)
 	{
 		List<OreFeatureConfig.Target> ores = List.of(OreFeatureConfig.createTarget(new BlockMatchRuleTest(ruleBlock), oreBlockState));
@@ -145,6 +148,19 @@ public class StarflightWorldGeneration
 		return PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, name).toString(), configuredOreFeature, List.of(CountPlacementModifier.of(count), SquarePlacementModifier.of(), HeightRangePlacementModifier.uniform(bottom, top), BiomePlacementModifier.of()));
 	}
 	
+	/**
+	 * Register an ore placed feature with trapezoid y-level distribution.
+	 */
+	private static RegistryEntry<PlacedFeature> orePlacedFeatureTrapezoid(String name, int size, int count, float discardOnAirChance, YOffset bottom, YOffset top, BlockState oreBlockState, Block ruleBlock)
+	{
+		List<OreFeatureConfig.Target> ores = List.of(OreFeatureConfig.createTarget(new BlockMatchRuleTest(ruleBlock), oreBlockState));
+		RegistryEntry<ConfiguredFeature<OreFeatureConfig, ?>> configuredOreFeature = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, name).toString(), Feature.ORE, new OreFeatureConfig(ores, size));
+		return PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, name).toString(), configuredOreFeature, List.of(CountPlacementModifier.of(count), SquarePlacementModifier.of(), HeightRangePlacementModifier.trapezoid(bottom, top), BiomePlacementModifier.of()));
+	}
+	
+	/**
+	 * Register an ore placed feature with uniform y-level distribution and a discard on air chance of zero.
+	 */
 	private static RegistryEntry<PlacedFeature> orePlacedFeature(String name, int size, int count, YOffset bottom, YOffset top, BlockState oreBlockState, Block ruleBlock)
 	{
 		return orePlacedFeature(name, size, count, 0.0f, bottom, top, oreBlockState, ruleBlock);

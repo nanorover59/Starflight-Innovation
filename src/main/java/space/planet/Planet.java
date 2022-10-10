@@ -558,10 +558,10 @@ public class Planet
 		{
 			if(cloudTimer <= 0)
 			{
-				Random random = Random.create();
+				Random random = Random.createLocal();
 				cloudLevel = random.nextInt(4);
 				cloudRotation = Math.PI * 2.0 * random.nextDouble();
-				cloudTimer = 12000 + random.nextInt(3000);
+				cloudTimer = 6000 + random.nextInt(3000);
 			}
 			else
 				cloudTimer--;

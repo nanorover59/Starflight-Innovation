@@ -68,7 +68,7 @@ public class StarflightBlocks
 	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 5.0f));
 	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
 	public static final Block RIVETED_ALUMINUM = new Block(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
-	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).nonOpaque().requiresTool().strength(3.0f, 3.0f));
+	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 3.0f));
 	public static final Block WALKWAY = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME));
 	public static final Block STRUCTURAL_ALUMINUM_STAIRS = new StairsBlock(STRUCTURAL_ALUMINUM.getDefaultState(), AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
 	public static final Block STRUCTURAL_ALUMINUM_SLAB = new SlabBlock(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
@@ -84,6 +84,7 @@ public class StarflightBlocks
 	public static final Block STRIPPED_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.OAK_TAN);
 	public static final Block RUBBER_LEAVES = createLeavesBlock(BlockSoundGroup.WET_GRASS);
 	public static final Block RUBBER_SAPLING = new RubberSaplingBlock(new RubberSaplingGenerator(), FabricBlockSettings.copyOf(Blocks.OAK_SAPLING));
+	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.of(Material.ORGANIC_PRODUCT).strength(2.0f, 2.0f));
 	public static final Block REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block ICY_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_BLUE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
@@ -189,6 +190,7 @@ public class StarflightBlocks
 		initializeBlock(STRIPPED_RUBBER_LOG, "stripped_rubber_log");
 		initializeBlock(RUBBER_LEAVES, "rubber_leaves");
 		initializeBlock(RUBBER_SAPLING, "rubber_sapling");
+		initializeBlock(CHEESE_BLOCK, "cheese_block");
 		initializeBlock(REGOLITH, "regolith");
 		initializeBlock(BALSALTIC_REGOLITH, "balsaltic_regolith");
 		initializeBlock(ICY_REGOLITH, "icy_regolith");

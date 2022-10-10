@@ -44,7 +44,9 @@ public class StarflightEffects
 	public static void receiveFizz(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
 		BlockPos pos = buffer.readBlockPos();
-		client.world.playSound(pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f, false);
+		
+		if(client.world != null)
+			client.world.playSound(pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f, false);
 	}
 	
 	public static void sendOutgas(WorldAccess world, BlockPos pos1, BlockPos pos2, boolean sound)
@@ -61,16 +63,20 @@ public class StarflightEffects
 	
 	public static void receiveOutgas(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.createThreadSafe();
+		Random random = Random.createLocal();
 		BlockPos pos1 = buffer.readBlockPos();
 		BlockPos pos2 = buffer.readBlockPos();
 		boolean sound = buffer.readBoolean();
 		Vec3i unitVector = pos2.subtract(pos1);
+		int particleCount = 10 + random.nextInt(6);
+		
+		if(client.world == null)
+			return;
 		
 		if(sound)
 			client.world.playSound(pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, false);
 		
-		for(int i = 0; i < 10 + random.nextInt(6); i++)
+		for(int i = 0; i < particleCount; i++)
 		{
 			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
 			Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
@@ -95,7 +101,7 @@ public class StarflightEffects
 	
 	public static void receiveJet(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.createThreadSafe();
+		Random random = Random.createLocal();
 		double px = buffer.readDouble();
 		double py = buffer.readDouble();
 		double pz = buffer.readDouble();
@@ -104,8 +110,9 @@ public class StarflightEffects
 		double vy = buffer.readDouble();
 		double vz = buffer.readDouble();
 		Vec3d velocity = new Vec3d(vx, vy, vz);
+		int particleCount = 2 + random.nextInt(2);
 		
-		for(int i = 0; i < 2 + random.nextInt(2); i++)
+		for(int i = 0; i < particleCount; i++)
 		{
 			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
 			offset.add(-random.nextDouble(), -random.nextDouble(), -random.nextDouble());

@@ -35,13 +35,13 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		if(structureWorldAccess.getBiome(blockPos).isIn(StarflightWorldGeneration.MORE_SCATTER))
 			chance = 0.75F;
 		
-		// Skip generating at random or if the block found is not stone related.
-		if(random.nextFloat() > chance || !blockState.isIn(BlockTags.PICKAXE_MINEABLE))
-			return true;
-		
 		// Random chance of generating a stray basalt rock.
 		if(random.nextInt(4) == 0)
 			blockState = Blocks.SMOOTH_BASALT.getDefaultState();
+		
+		// Skip generating at random or if the block found is not stone related.
+		if(random.nextFloat() > chance || !blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+			return true;
 		
 		while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
 			blockPos = blockPos.down();
@@ -49,11 +49,21 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		if(blockPos.getY() <= structureWorldAccess.getBottomY() + 3)
 			return false;
 		
-		for(int i = 0; i < 4; i++)
+		int rockSize = 2;
+		
+		for(int i = 0; i < 8; i++)
 		{
-			int j = random.nextInt(2);
-			int k = random.nextInt(2);
-			int l = random.nextInt(2);
+			if(random.nextInt(4) == 0)
+				rockSize++;
+			else
+				break;
+		}
+		
+		for(int i = 0; i < 3 + (rockSize / 2); i++)
+		{
+			int j = random.nextInt(rockSize);
+			int k = random.nextInt(rockSize);
+			int l = random.nextInt(rockSize);
 			float f = (float) (j + k + l) * 0.333f + 0.5f;
 			
 			for(BlockPos blockPos2 : BlockPos.iterate(blockPos.add(-j, -k, -l), blockPos.add(j, k, l)))
@@ -64,7 +74,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NO_REDRAW);
 			}
 			
-			blockPos = blockPos.add(-1 + random.nextInt(2), -random.nextInt(2), -1 + random.nextInt(2));
+			blockPos = blockPos.add(-1 + random.nextInt(rockSize), -random.nextInt(rockSize), -1 + random.nextInt(rockSize));
 		}
 		
 		return true;

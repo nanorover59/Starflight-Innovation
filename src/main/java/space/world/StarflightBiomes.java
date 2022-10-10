@@ -154,7 +154,6 @@ public class StarflightBiomes
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addDefaultOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
-		//generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, UndergroundPlacedFeatures.GLOW_LICHEN);
 		
 		if(biomeKey.getValue().getPath().contains("ice"))
 			generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, StarflightWorldGeneration.ICE_BLADE_PLACED_FEATURE);
@@ -179,7 +178,6 @@ public class StarflightBiomes
 		generationSettings.carver(GenerationStep.Carver.AIR, ConfiguredCarvers.CAVE_EXTRA_UNDERGROUND);
 		generationSettings.carver(GenerationStep.Carver.AIR, ConfiguredCarvers.CANYON);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
-		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.AMETHYST_GEODE);
 		
 		if(surfaceRocks)
 			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);

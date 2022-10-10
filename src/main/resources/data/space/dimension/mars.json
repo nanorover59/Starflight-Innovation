@@ -102,7 +102,7 @@
           "continentalness" : [ 0.8, 1 ],
           "erosion" : [ -1, 1 ],
           "weirdness" : [ -1, 1 ],
-          "depth" : [ 0.9, 1.1 ],
+          "depth" : [ 1.0, 1.2 ],
           "offset" : 0
         }
       }, {
@@ -113,7 +113,7 @@
           "continentalness" : [ -1, 0.5 ],
           "erosion" : [ -1, 1 ],
           "weirdness" : [ -1, 1 ],
-          "depth" : 1.1,
+          "depth" : 1.2,
           "offset" : 0
         }
       } ]

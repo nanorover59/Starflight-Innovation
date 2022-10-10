@@ -12,6 +12,7 @@ import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelPartNames;
 import net.minecraft.entity.LivingEntity;
+import space.entity.CeruleanEntity;
 
 @Environment(value = EnvType.CLIENT)
 public class CeruleanEntityModel<T extends LivingEntity> extends BipedEntityModel<T>
@@ -41,16 +42,31 @@ public class CeruleanEntityModel<T extends LivingEntity> extends BipedEntityMode
 		super.setAngles(entity, limbAngle, limbDistance, animationProgress, headYaw, headPitch);
 		this.head.visible = true;
 		
-		this.body.pivotY = 8.0f;
+		boolean sitting = this.riding || ((CeruleanEntity) entity).isInSittingPose();
+		float yOffset = sitting ? 4.15f : 0.0f;
+		
+		this.body.pivotY = 8.0f + yOffset;
         this.body.pivotZ = 0.0f;
-        this.head.pivotY = 8.0f;
+        this.head.pivotY = 8.0f + yOffset;
         this.head.pivotZ = 0.0f;
         this.hat.pivotX = this.head.pivotX;
         this.hat.pivotY = this.head.pivotY;
         this.hat.pivotZ = this.head.pivotZ;
-        this.rightArm.setPivot(-3.0f, 10.0f, 0.0f);
-        this.leftArm.setPivot(3.0f, 10.0f, 0.0f);
-        this.rightLeg.setPivot(-1.0f, 16.0f, 0.0f);
-        this.leftLeg.setPivot(1.0f, 16.0f, 0.0f);
+        this.rightArm.setPivot(-3.0f, 10.0f + yOffset, 0.0f);
+        this.leftArm.setPivot(3.0f, 10.0f + yOffset, 0.0f);
+        this.rightLeg.setPivot(-1.0f, 16.0f + yOffset, 0.0f);
+        this.leftLeg.setPivot(1.0f, 16.0f + yOffset, 0.0f);
+        
+        if(sitting)
+        {
+            this.rightArm.pitch += -0.62831855f;
+            this.leftArm.pitch += -0.62831855f;
+            this.rightLeg.pitch = -1.4137167f;
+            this.rightLeg.yaw = 0.31415927f;
+            this.rightLeg.roll = 0.07853982f;
+            this.leftLeg.pitch = -1.4137167f;
+            this.leftLeg.yaw = -0.31415927f;
+            this.leftLeg.roll = -0.07853982f;
+        }
 	}
 }

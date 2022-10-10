@@ -41,8 +41,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		{
 			if(blockColumn.getState(y).getMaterial().isSolid())
 				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());
-			
-			if(blockColumn.getState(y).getBlock() == Blocks.WATER && blockColumn.getState(y + 1).getMaterial() == Material.AIR)
+			else if(blockColumn.getState(y).getBlock() == Blocks.WATER && blockColumn.getState(y + 1).getMaterial() == Material.AIR)
 				blockColumn.setState(y, region.getRandom().nextBoolean() ? Blocks.PACKED_ICE.getDefaultState() : Blocks.ICE.getDefaultState());
 		}
 		

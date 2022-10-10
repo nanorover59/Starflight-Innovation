@@ -121,16 +121,17 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float factor = 0.5f;
+				float milkyWayFactor = 0.4f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
-				RenderSystem.setShaderColor(starFactor * factor, starFactor * factor, starFactor * factor, starFactor * factor);
+				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
-				StarflightModClient.wrapAroundSky(bufferBuilder, matrix4f3, 32, 128.0f, 128.0f / 1024.0f);
+				StarflightModClient.milkyWay.bind();
+				StarflightModClient.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
-				this.starsBuffer.bind();
-	            this.starsBuffer.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
+				StarflightModClient.stars.bind();
+				StarflightModClient.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
 				runnable.run();
 			}
@@ -217,21 +218,6 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderStars()V", at = @At("HEAD"), cancellable = true)
 	public void renderStarsInject(CallbackInfo info)
 	{
-		if(true)
-		{
-			Tessellator tessellator = Tessellator.getInstance();
-			BufferBuilder bufferBuilder = tessellator.getBuffer();
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			
-			if(this.starsBuffer != null)
-				this.starsBuffer.close();
-			
-			this.starsBuffer = new VertexBuffer();
-			BufferBuilder.BuiltBuffer builtBuffer = StarflightModClient.renderStars(bufferBuilder);
-			this.starsBuffer.bind();
-			this.starsBuffer.upload(builtBuffer);
-			VertexBuffer.unbind();
-			info.cancel();
-		}
+		StarflightModClient.initializeBuffers();
 	}
 }
