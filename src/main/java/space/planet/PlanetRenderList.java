@@ -65,7 +65,9 @@ public class PlanetRenderList
 			boolean simpleTexture = planet.hasSimpleTexture();
 			boolean drawClouds = planet.drawClouds();
 			
+			// Create the updated PlanetRenderer instance.
 			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds, cloudRotation, cloudLevel);
+			planetRenderer.setPreviousVectors(position, surfaceViewpoint, parkingOrbitViewpoint);
 			planetListTemporary.add(planetRenderer);
 			
 			if(i == viewpointIndex)
@@ -80,11 +82,11 @@ public class PlanetRenderList
 		if(updated)
 		{
 			planetList.clear();
+			
+			for(int i = 0; i < planetListTemporary.size(); i++)
+				planetList.add(new PlanetRenderer(planetListTemporary.get(i)));
+			
 			planetListUnsorted.clear();
-			
-			for(PlanetRenderer planetRenderer : planetListTemporary)	
-				planetList.add(new PlanetRenderer(planetRenderer));
-			
 			viewpoint = viewpointTemporary == null ? null : new PlanetRenderer(viewpointTemporary);
 			inOrbit = inOrbitTemporary;
 			planetListUnsorted.addAll(planetList);

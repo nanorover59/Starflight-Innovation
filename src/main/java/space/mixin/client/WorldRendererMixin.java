@@ -17,7 +17,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.option.CloudRenderMode;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
@@ -55,7 +54,6 @@ public abstract class WorldRendererMixin
 	@Shadow private int lastCloudsBlockY = Integer.MIN_VALUE;
 	@Shadow private int lastCloudsBlockZ = Integer.MIN_VALUE;
 	@Shadow private Vec3d lastCloudsColor = Vec3d.ZERO;
-	@Shadow @Nullable private CloudRenderMode lastCloudsRenderMode;
 	@Shadow abstract BufferBuilder.BuiltBuffer renderClouds(BufferBuilder builder, double x, double y, double z, Vec3d color);
 	@Shadow private int ticks;
 	@Shadow @Final private static Identifier SUN;
@@ -72,11 +70,12 @@ public abstract class WorldRendererMixin
 		{
 			boolean starrySky = PlanetRenderList.isViewpointInOrbit() || viewpointPlanet.getSurfacePressure() < 0.001D;
 			boolean cloudySky = viewpointPlanet.hasCloudCover();
+			Vec3d viewpointPlanetPosition = viewpointPlanet.getPosition(tickDelta);
 			
 			// Find the position of the sun and background stars in angular coordinates.
 			Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
-			Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint() : viewpointPlanet.getSurfaceViewpoint();
-			double azimuthOfViewpoint = Math.atan2(viewpointPlanet.getPosition().getZ() - viewpoint.getZ(), viewpointPlanet.getPosition().getX() - viewpoint.getX());
+			Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(tickDelta) : viewpointPlanet.getSurfaceViewpoint(tickDelta);
+			double azimuthOfViewpoint = Math.atan2(viewpointPlanetPosition.getZ() - viewpoint.getZ(), viewpointPlanetPosition.getX() - viewpoint.getX());
 			double azimuthOfStar = Math.atan2(starPosition.getZ() - viewpoint.getZ(), starPosition.getX() - viewpoint.getX());
 			double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
 			
@@ -106,7 +105,7 @@ public abstract class WorldRendererMixin
 			RenderSystem.defaultBlendFunc();
 			
 			// Render the stars and milky way.
-			Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
+			Vec3d viewpointVector = viewpoint.subtract(viewpointPlanetPosition);
 			double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());	
 			matrices.push();
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
@@ -121,7 +120,7 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float milkyWayFactor = 0.4f;
+				float milkyWayFactor = 0.5f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
@@ -145,7 +144,7 @@ public abstract class WorldRendererMixin
 			for(PlanetRenderer planetRenderer : planetList)
 			{
 				if(planetRenderer != null)
-					planetRenderer.doRender(bufferBuilder, matrices, celestialFactor, s < 0.95f);
+					planetRenderer.doRender(bufferBuilder, matrices, tickDelta, celestialFactor, s < 0.95f);
 			}
 			
 			RenderSystem.disableTexture();

@@ -88,7 +88,7 @@ public class StarflightBlocks
 	public static final Block REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block ICY_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_BLUE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block FERRIC_SAND = new SandBlock(0xFF6F33, AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.ORANGE).sounds(BlockSoundGroup.SAND).strength(0.5F));
+	public static final Block FERRIC_SAND = new SandBlock(0xB7633D, AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.ORANGE).sounds(BlockSoundGroup.SAND).strength(0.5F));
 	public static final Block FERRIC_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
 	public static final Block REDSLATE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
 	public static final Block FERRIC_IRON_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));

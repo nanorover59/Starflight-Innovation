@@ -13,6 +13,7 @@ import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
@@ -25,6 +26,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private Vec3d position;
 	private Vec3d surfaceViewpoint;
 	private Vec3d parkingOrbitViewpoint;
+	private Vec3d positionPrevious;
+	private Vec3d surfaceViewpointPrevious;
+	private Vec3d parkingOrbitViewpointPrevious;
 	private double obliquity;
 	private double precession;
 	private double radius;
@@ -77,6 +81,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setDrawClouds(other.drawClouds);
 		setCloudRotation(other.cloudRotation);
 		setCloudLevel(other.cloudLevel);
+		this.positionPrevious = other.positionPrevious;
+		this.surfaceViewpointPrevious = other.surfaceViewpointPrevious;
+		this.parkingOrbitViewpointPrevious = other.parkingOrbitViewpointPrevious;
 	}
 	
 	@Override
@@ -91,30 +98,54 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	{
 		return name;
 	}
-
+	
 	public Vec3d getPosition()
 	{
 		return position;
+	}
+
+	public Vec3d getPosition(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, positionPrevious.getX(), position.getX());
+		double y = MathHelper.lerp(partialTicks, positionPrevious.getY(), position.getY());
+		double z = MathHelper.lerp(partialTicks, positionPrevious.getZ(), position.getZ());
+		return new Vec3d(x, y, z);
 	}
 
 	public void setPosition(Vec3d position)
 	{
 		this.position = position;
 	}
-
+	
 	public Vec3d getSurfaceViewpoint()
 	{
 		return surfaceViewpoint;
+	}
+
+	public Vec3d getSurfaceViewpoint(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getX(), surfaceViewpoint.getX());
+		double y = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getY(), surfaceViewpoint.getY());
+		double z = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getZ(), surfaceViewpoint.getZ());
+		return new Vec3d(x, y, z);
 	}
 
 	public void setSurfaceViewpoint(Vec3d surfaceViewpoint)
 	{
 		this.surfaceViewpoint = surfaceViewpoint;
 	}
-
+	
 	public Vec3d getParkingOrbitViewpoint()
 	{
 		return parkingOrbitViewpoint;
+	}
+
+	public Vec3d getParkingOrbitViewpoint(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getX(), parkingOrbitViewpoint.getX());
+		double y = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getY(), parkingOrbitViewpoint.getY());
+		double z = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getZ(), parkingOrbitViewpoint.getZ());
+		return new Vec3d(x, y, z);
 	}
 
 	public void setParkingOrbitViewpoint(Vec3d parkingOrbitViewpoint)
@@ -232,6 +263,13 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		this.cloudLevel = cloudLevel;
 	}
 	
+	public void setPreviousVectors(Vec3d position, Vec3d surfaceViewpoint, Vec3d parkingOrbitViewpoint)
+	{
+		this.positionPrevious = new Vec3d(position.getX(), position.getY(), position.getZ());
+		this.surfaceViewpointPrevious = new Vec3d(surfaceViewpoint.getX(), surfaceViewpoint.getY(), surfaceViewpoint.getZ());
+		this.parkingOrbitViewpointPrevious = new Vec3d(parkingOrbitViewpoint.getX(), parkingOrbitViewpoint.getY(), parkingOrbitViewpoint.getZ());
+	}
+	
 	/**
 	 * Return the size to render this planet object depending on its distance from the viewpoint.
 	 * The size is calculated as a factor of the size of the Sun viewed from Earth.
@@ -256,14 +294,15 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		return newTexture;
 	}
 	
-	public void doRender(BufferBuilder bufferBuilder, MatrixStack matrices, float brightness, boolean weather)
+	public void doRender(BufferBuilder bufferBuilder, MatrixStack matrices, float partialTicks, float brightness, boolean weather)
 	{
 		// Angles to render this planet in the sky.
 		PlanetRenderer viewpointPlanet = PlanetRenderList.getViewpointPlanet();
-		Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint() : viewpointPlanet.getSurfaceViewpoint();
-		double rPlanet = viewpoint.subtract(position).length();
+		Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(partialTicks) : viewpointPlanet.getSurfaceViewpoint(partialTicks);
+		Vec3d positionVector = getPosition(partialTicks);
+		double rPlanet = viewpoint.subtract(positionVector).length();
 		Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
-		Vec3d planetVector = position.subtract(viewpointPlanet.getPosition());
+		Vec3d planetVector = positionVector.subtract(viewpointPlanet.getPosition());
 		double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());
 		double thetaPlanet = Math.atan2(Math.sqrt((planetVector.getX() * planetVector.getX()) + (planetVector.getZ() * planetVector.getZ())), planetVector.getY()) - (Math.PI / 2.0d);
 		double phiPlanet = Math.atan2(planetVector.getZ(), planetVector.getX());
@@ -309,8 +348,8 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			{
 				// Phase angle for lighting factor.
 				Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
-				double angleToStar = Math.atan2(starPosition.getZ() - position.getZ(), starPosition.getX() - position.getX());
-				double angleToViewpoint = Math.atan2(viewpoint.getZ() - position.getZ(), viewpoint.getX() - position.getX());
+				double angleToStar = Math.atan2(starPosition.getZ() - positionVector.getZ(), starPosition.getX() - positionVector.getX());
+				double angleToViewpoint = Math.atan2(viewpoint.getZ() - positionVector.getZ(), viewpoint.getX() - positionVector.getX());
 				double phaseAngle = angleToStar - angleToViewpoint;
 				
 				if(phaseAngle < 0.0d)
@@ -335,8 +374,8 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		else
 		{
 			// Rotation frame to view this planet.
-			double absoluteRotation = Math.atan2(surfaceViewpoint.getZ() - position.getZ(), surfaceViewpoint.getX() - position.getX());
-			double angleToViewpoint = Math.atan2(viewpoint.getZ() - position.getZ(), viewpoint.getX() - position.getX());
+			double absoluteRotation = Math.atan2(getSurfaceViewpoint(partialTicks).getZ() - positionVector.getZ(), getSurfaceViewpoint(partialTicks).getX() - positionVector.getX());
+			double angleToViewpoint = Math.atan2(viewpoint.getZ() - positionVector.getZ(), viewpoint.getX() - positionVector.getX());
 			double angleToLineOfSight = absoluteRotation - angleToViewpoint + Math.PI;
 			
 			if(angleToLineOfSight < 0.0d)
@@ -351,7 +390,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			
 			// Phase angle for lighting frame.
 			Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
-			double angleToStar = Math.atan2(starPosition.getZ() - position.getZ(), starPosition.getX() - position.getX());
+			double angleToStar = Math.atan2(starPosition.getZ() - positionVector.getZ(), starPosition.getX() - positionVector.getX());
 			double phaseAngle = angleToStar - angleToViewpoint;
 			
 			if(phaseAngle < 0.0d)

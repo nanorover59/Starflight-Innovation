@@ -37,7 +37,7 @@ public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 		if(biome == StarflightBiomes.MARS_ICE)
 			topState = StarflightBlocks.DRY_SNOW_BLOCK.getDefaultState();
 		
-		for(int y = surfaceY; y >= bottomY; y--)
+		for(int y = Math.min(surfaceY + 16, region.getTopY()); y >= bottomY; y--)
 		{
 			if(blockColumn.getState(y).getMaterial().isSolid())
 				blockColumn.setState(y, StarflightBlocks.FERRIC_STONE.getDefaultState());

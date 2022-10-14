@@ -3,7 +3,7 @@
   "id" : "space",
   "version" : "1.1.0",
   "name" : "Starflight Innovation",
-  "description" : "Yet another rocket building mod. This time with delta-v mechanics!",
+  "description" : "Yet another rocket building mod!",
   "authors" : [ "nanorover59" ],
   "contact" : {
     "homepage" : "",
@@ -19,7 +19,7 @@
   "mixins" : [ "space.mixin.common.json", "space.mixin.client.json" ],
   "depends" : {
     "fabricloader": ">=0.14.6",
-    "fabric": "*",
+    "fabric-api": "*",
     "minecraft" : "~1.19",
     "java": ">=17"
   }

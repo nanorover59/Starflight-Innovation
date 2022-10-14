@@ -32,7 +32,7 @@ import space.block.StarflightBlocks;
 public class DustEntity extends HostileEntity
 {
 	private static final TrackedData<Integer> STAMINA = DataTracker.registerData(DustEntity.class, TrackedDataHandlerRegistry.INTEGER);
-	public static final int INITIAL_STAMINA = 1200;
+	public static final int INITIAL_STAMINA = 1600;
 	
 	public DustEntity(EntityType<? extends HostileEntity> entityType, World world)
 	{
@@ -51,14 +51,14 @@ public class DustEntity extends HostileEntity
 	
 	public static DefaultAttributeContainer.Builder createDustAttributes()
 	{
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 4.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
     }
 	
-	@Override
+	/*@Override
     public boolean isAttackable()
 	{
         return false;
-    }
+    }*/
 	
 	@Override
     public boolean isCollidable()

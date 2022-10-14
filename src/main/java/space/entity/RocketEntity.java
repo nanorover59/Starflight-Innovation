@@ -72,7 +72,6 @@ public class RocketEntity extends MovingCraftEntity
 	private double nominalThrustEnd;
 	private double startISP;
 	private double endISP;
-	private double throttle;
 	private double hydrogenCapacity;
 	private double oxygenCapacity;
 	private double hydrogenSupply;
@@ -81,6 +80,8 @@ public class RocketEntity extends MovingCraftEntity
 	private double lowerHeight;
 	private double upperHeight;
 	private double maxWidth;
+	public double throttle;
+	public float throttlePrevious;
 	private int soundEffectTimer;
 	
 	public RocketEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
@@ -279,8 +280,6 @@ public class RocketEntity extends MovingCraftEntity
 	@Override
     public void tick()
 	{
-		//System.out.println(this.world.isClient + "    " + clientInterpolationSteps);
-		
 		// Run client-side actions and then return.
 		if(this.clientMotion())
 		{
@@ -291,10 +290,11 @@ public class RocketEntity extends MovingCraftEntity
 			this.clientCraftRollPrevious = this.clientCraftRoll;
 	        this.clientCraftPitchPrevious = this.clientCraftPitch;
 	        this.clientCraftYawPrevious = this.clientCraftYaw;
+	        this.throttlePrevious = (float) this.throttle;
 	        this.clientCraftRoll = this.getCraftRoll();
 	    	this.clientCraftPitch = this.getCraftPitch();
 	    	this.clientCraftYaw = this.getCraftYaw();
-			
+			this.throttle = this.getThrottle();
 			return;
 		}
 		
@@ -306,8 +306,6 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		else
 			soundEffectTimer--;
-		
-		//setPreviousCraftRotation(getCraftRoll(), getCraftPitch(), getCraftYaw());
 		
 		// Set the target landing altitude if necessary.
 		if(changedDimension && arrivalPos.getY() == -9999)

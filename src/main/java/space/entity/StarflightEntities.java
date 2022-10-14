@@ -2,12 +2,10 @@ package space.entity;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.fabricmc.fabric.mixin.object.builder.SpawnRestrictionAccessor;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.SpawnRestriction.Location;
-import net.minecraft.entity.SpawnRestriction.SpawnPredicate;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.tag.TagKey;
@@ -31,14 +29,13 @@ public class StarflightEntities
 		Registry.register(Registry.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "moving_craft"), MOVING_CRAFT);
 		Registry.register(Registry.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "rocket"), ROCKET);
 		
-		registerMobEntity(DUST, "dust", DustEntity.createDustAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobEntity::canMobSpawn);
-		registerMobEntity(CERULEAN, "cerulean", CeruleanEntity.createCeruleanAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobEntity::canMobSpawn);
+		registerMobEntity(DUST, "dust", DustEntity.createDustAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
+		registerMobEntity(CERULEAN, "cerulean", CeruleanEntity.createCeruleanAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 	}
 	
-	private static <T extends MobEntity> void registerMobEntity(EntityType<T> entityType, String name, DefaultAttributeContainer.Builder attributes, Location location, Heightmap.Type heightmap, SpawnPredicate<T> spawnPredicate)
+	private static <T extends MobEntity> void registerMobEntity(EntityType<T> entityType, String name, DefaultAttributeContainer.Builder attributes, Location location, Heightmap.Type heightmap)
 	{
 		Registry.register(Registry.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, name), entityType);
 		FabricDefaultAttributeRegistry.register(entityType, attributes);
-		SpawnRestrictionAccessor.callRegister(entityType, location, heightmap, spawnPredicate);
 	}
 }

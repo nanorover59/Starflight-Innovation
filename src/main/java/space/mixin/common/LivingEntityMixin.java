@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -244,6 +245,21 @@ public abstract class LivingEntityMixin extends Entity
 	public float frictionInject3(float f)
 	{
 		return 1.0f - (0.09f * airMultiplier);
+	}
+	
+	/**
+	 * Modify the lift for living entity fall flight.
+	 */
+	@ModifyArg(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(DD)D"), index = 0)
+	private double minInject1(double d)
+	{
+		return d * airMultiplier;
+	}
+	
+	@ModifyArg(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(DD)D"), index = 1)
+	private double minInject2(double d)
+	{
+		return d * airMultiplier;
 	}
 	
 	/**

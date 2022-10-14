@@ -26,7 +26,6 @@ public class CeruleanEntityModel<T extends LivingEntity> extends BipedEntityMode
 	{
 		ModelData modelData = BipedEntityModel.getModelData(Dilation.NONE, 0.0f);
 		ModelPartData modelPartData = modelData.getRoot();
-        modelPartData.addChild(EntityModelPartNames.HAT, ModelPartBuilder.create().uv(0, 0).cuboid(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f), ModelTransform.pivot(0.0f, 8.0f, 0.0f));
         modelPartData.addChild(EntityModelPartNames.HEAD, ModelPartBuilder.create().uv(0, 0).cuboid(-4.0f, -8.0f, -4.0f, 8.0f, 8.0f, 8.0f), ModelTransform.pivot(0.0f, 8.0f, 0.0f));
         modelPartData.addChild(EntityModelPartNames.BODY, ModelPartBuilder.create().uv(8, 16).cuboid(-2.0f, 0.0f, -1.0f, 4.0f, 8.0f, 2.0f), ModelTransform.pivot(0.0f, 8.0f, 0.0f));
         modelPartData.addChild(EntityModelPartNames.RIGHT_ARM, ModelPartBuilder.create().uv(0, 16).cuboid(-1.0f, -2.0f, -1.0f, 2.0f, 8.0f, 2.0f), ModelTransform.pivot(-3.0f, 10.0f, 0.0f));
@@ -49,9 +48,7 @@ public class CeruleanEntityModel<T extends LivingEntity> extends BipedEntityMode
         this.body.pivotZ = 0.0f;
         this.head.pivotY = 8.0f + yOffset;
         this.head.pivotZ = 0.0f;
-        this.hat.pivotX = this.head.pivotX;
-        this.hat.pivotY = this.head.pivotY;
-        this.hat.pivotZ = this.head.pivotZ;
+        this.hat.visible = false;
         this.rightArm.setPivot(-3.0f, 10.0f + yOffset, 0.0f);
         this.leftArm.setPivot(3.0f, 10.0f + yOffset, 0.0f);
         this.rightLeg.setPivot(-1.0f, 16.0f + yOffset, 0.0f);

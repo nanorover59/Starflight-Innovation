@@ -16,6 +16,14 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+	
+	flatDir {
+       dirs 'libraries'
+   }
+}
+
+configurations {
+    libraries
 }
 
 dependencies {
@@ -26,6 +34,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	
+	// JAR file libraries located in the "libraries" directory.
+	libraries fileTree(dir: 'libraries', include: ['*.jar'])
+	implementation configurations.libraries
 
 	// Uncomment the following line to enable the deprecated Fabric API modules. 
 	// These are included in the Fabric API production distribution and allow you to update your mod to the latest modules at a later more convenient time.
@@ -50,13 +62,16 @@ java {
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
 	// If you remove this line, sources will not be generated.
-	withSourcesJar()
+	// withSourcesJar()
 }
 
 jar {
 	from("LICENSE") {
 		rename { "${it}_${project.archivesBaseName}"}
 	}
+	from {
+        configurations.libraries.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
 
 // configure the maven publication

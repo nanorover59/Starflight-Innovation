@@ -3,6 +3,7 @@ package space.world;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
@@ -130,7 +131,7 @@ public class CraterGenerator
 					{
 						mutable.setY(surfaceY + y);
 						
-						if(!world.getBlockState(mutable).isAir() && !world.containsFluid(new Box(mutable)))
+						if((!world.getBlockState(mutable).isAir() && !world.containsFluid(new Box(mutable))) || world.getFluidState(mutable).getFluid() == Fluids.WATER)
 						{
 							if(y == -depth + 1)
 								world.setBlockState(mutable.down(), surfaceState, Block.NOTIFY_LISTENERS);

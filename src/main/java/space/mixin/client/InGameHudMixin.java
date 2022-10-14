@@ -19,6 +19,7 @@ import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import space.StarflightMod;
 import space.entity.RocketEntity;
 
@@ -51,7 +52,7 @@ public abstract class InGameHudMixin
             DrawableHelper.drawTexture(matrices, displayX, displayY, 24, 0, 100, 62, 256, 256);
             
             // Throttle
-            float throttle = rocketEntity.getThrottle();
+            float throttle = (float) MathHelper.lerp(tickDelta, rocketEntity.throttlePrevious, rocketEntity.throttle);
             int throttleX = 16;
             int throttleY = scaledHeight - barHeight - 8;
             DrawableHelper.drawTexture(matrices, throttleX, throttleY, 0, 0, 12, barHeight, 256, 256);

@@ -94,8 +94,13 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 	@Override
 	public void grow(ServerWorld world, Random random, BlockPos pos, BlockState blockState)
 	{
-		while(world.getBlockState(pos).getBlock() == StarflightBlocks.LYCOPHYTE_STEM)
-			pos = pos.up();
+		for(int i = 0; i < 16; i++)
+		{
+			if(world.getBlockState(pos).getBlock() == StarflightBlocks.LYCOPHYTE_STEM)
+				pos = pos.up();
+			else
+				break;
+		}
 		
 		pos = pos.up();
 		
