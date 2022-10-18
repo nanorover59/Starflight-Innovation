@@ -219,8 +219,6 @@ public class PlanetList
 		
 		if(data != null && data.hasName("planetCount"))
 		{
-			System.out.println(data.getInt("planetCount") + "    " + planetList.size());
-			
 			if(data.getInt("planetCount") != planetList.size())
 				centerPlanet.setInitialPositionAndVelocity(checkList);
 			else
@@ -244,6 +242,7 @@ public class PlanetList
 			PacketByteBuf buffer = PacketByteBufs.create();
 			RegistryKey<World> worldKey = player.world.getRegistryKey();
 			Planet planet = getPlanetForWorld(worldKey);
+			buffer.writeLong(server.getTimeReference());
 			buffer.writeInt(planetList.size());
 			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.
 			
@@ -270,7 +269,7 @@ public class PlanetList
 				buffer.writeDouble(p.getSurfaceViewpoint().getZ());
 				buffer.writeDouble(p.getParkingOrbitViewpoint().getX());
 				buffer.writeDouble(p.getParkingOrbitViewpoint().getY());
-				buffer.writeDouble(p.getParkingOrbitViewpoint().getZ());	
+				buffer.writeDouble(p.getParkingOrbitViewpoint().getZ());
 				buffer.writeDouble(p.getPrecession());
 				buffer.writeDouble(p.getCloudRotation());
 				buffer.writeInt(p.getCloudLevel());

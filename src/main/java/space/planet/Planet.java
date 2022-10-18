@@ -525,6 +525,9 @@ public class Planet
 	 */
 	public void simulatePositionAndRotationChange(double timeStep)
 	{
+		Vec3d absolutePosition = getPosition();
+		Vec3d axisOfRotation = new Vec3d(0.0, 1.0, 0.0);
+		
 		if(satelliteLevel > 0)
 			position = position.add(velocity.multiply(timeStep));
 		
@@ -543,8 +546,6 @@ public class Planet
 		if(parkingOrbitAngle <= 2.0 * Math.PI)
 			parkingOrbitAngle += 2.0 * Math.PI;
 		
-		Vec3d absolutePosition = getPosition();
-		Vec3d axisOfRotation = new Vec3d(0.0, 1.0, 0.0);
 		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
 		axisOfRotation = axisOfRotation.rotateY((float) precession);
 		surfaceViewpoint = absolutePosition.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
@@ -586,7 +587,7 @@ public class Planet
 	 */
 	public double dVOrbitToSurface()
 	{
-		if(surfacePressure < 0.0001)
+		if(surfacePressure < 0.001)
 			return dVSurfaceToOrbit();
 		
 		return 500.0;

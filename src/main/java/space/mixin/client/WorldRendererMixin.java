@@ -68,7 +68,7 @@ public abstract class WorldRendererMixin
 		
 		if(viewpointPlanet != null)
 		{
-			boolean starrySky = PlanetRenderList.isViewpointInOrbit() || viewpointPlanet.getSurfacePressure() < 0.001D;
+			boolean starrySky = PlanetRenderList.isViewpointInOrbit() || viewpointPlanet.getSurfacePressure() < 0.001d;
 			boolean cloudySky = viewpointPlanet.hasCloudCover();
 			Vec3d viewpointPlanetPosition = viewpointPlanet.getPosition(tickDelta);
 			
@@ -80,7 +80,7 @@ public abstract class WorldRendererMixin
 			double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
 			
 			// Setup for sky rendering.
-			runnable.run();
+			//runnable.run();
 			Vec3d vec3d = starrySky ? new Vec3d(0.0f, 0.0f, 0.0f) : this.world.getSkyColor(this.client.gameRenderer.getCamera().getPos(), tickDelta);
 			float skyR = (float) vec3d.x;
 			float skyG = (float) vec3d.y;
@@ -132,7 +132,7 @@ public abstract class WorldRendererMixin
 				StarflightModClient.stars.bind();
 				StarflightModClient.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
-				runnable.run();
+				//runnable.run();
 			}
 			
 			matrices.pop();

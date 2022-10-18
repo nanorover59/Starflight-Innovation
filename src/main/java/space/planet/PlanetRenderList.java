@@ -9,6 +9,7 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
 
 @Environment(value=EnvType.CLIENT)
@@ -19,14 +20,14 @@ public class PlanetRenderList
 	private static ArrayList<PlanetRenderer> planetListTemporary = new ArrayList<PlanetRenderer>();
 	private static PlanetRenderer viewpoint;
 	private static PlanetRenderer viewpointTemporary;
+	private static long lastUpdateTime;
 	private static boolean inOrbit;
 	private static boolean inOrbitTemporary;
 	private static boolean updated;
 	
 	public static void receivePlanetListUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		if(updated)
-			return;
+		long serverTime = buffer.readLong();
 		
 		planetListTemporary.clear();
 		viewpointTemporary = null;
@@ -67,36 +68,46 @@ public class PlanetRenderList
 			
 			// Create the updated PlanetRenderer instance.
 			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds, cloudRotation, cloudLevel);
-			planetRenderer.setPreviousVectors(position, surfaceViewpoint, parkingOrbitViewpoint);
+			planetRenderer.setPositionPrevious(position);
+			planetRenderer.setSurfaceViewpointPrevious(surfaceViewpoint);
+			planetRenderer.setParkingOrbitViewpointPrevious(parkingOrbitViewpoint);
 			planetListTemporary.add(planetRenderer);
 			
 			if(i == viewpointIndex)
 				viewpointTemporary = planetRenderer;
 		}
+	}
+	
+	public static void updateRenderers()
+	{
+		planetList.clear();
 		
-		updated = true;
+		for(int i = 0; i < planetListTemporary.size(); i++)
+		{
+			PlanetRenderer planetRenderer = planetListTemporary.get(i);
+			PlanetRenderer planetRendererPrevious = planetListTemporary.size() == planetListUnsorted.size() ? planetListUnsorted.get(i) : null;
+			
+			if(planetRendererPrevious != null)
+			{
+				planetRenderer.setPositionPrevious(planetRendererPrevious.getPosition());
+				planetRenderer.setSurfaceViewpointPrevious(planetRendererPrevious.getSurfaceViewpoint());
+				planetRenderer.setParkingOrbitViewpointPrevious(planetRendererPrevious.getParkingOrbitViewpoint());
+			}
+			
+			planetList.add(planetRenderer);
+		}
+		
+		planetListUnsorted.clear();
+		viewpoint = viewpointTemporary == null ? null : viewpointTemporary;
+		inOrbit = inOrbitTemporary;
+		planetListUnsorted.addAll(planetList);
+		
+		if(viewpoint != null)
+			Collections.sort(planetList);
 	}
 	
 	public static ArrayList<PlanetRenderer> getRenderers(boolean sorted)
 	{
-		if(updated)
-		{
-			planetList.clear();
-			
-			for(int i = 0; i < planetListTemporary.size(); i++)
-				planetList.add(new PlanetRenderer(planetListTemporary.get(i)));
-			
-			planetListUnsorted.clear();
-			viewpoint = viewpointTemporary == null ? null : new PlanetRenderer(viewpointTemporary);
-			inOrbit = inOrbitTemporary;
-			planetListUnsorted.addAll(planetList);
-			
-			if(viewpoint != null)
-				Collections.sort(planetList);
-			
-			updated = false;
-		}
-		
 		return sorted ? planetList : planetListUnsorted;
 	}
 	

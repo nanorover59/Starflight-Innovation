@@ -141,6 +141,8 @@ public class StarflightModClient implements ClientModInitializer
 		// Client Tick Event
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			
+			PlanetRenderList.updateRenderers();
+			
 			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
 			{
 				int throttleState = 0;

@@ -70,6 +70,9 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setPosition(other.position);
 		setSurfaceViewpoint(other.surfaceViewpoint);
 		setParkingOrbitViewpoint(other.parkingOrbitViewpoint);
+		setPositionPrevious(other.positionPrevious);
+		setSurfaceViewpointPrevious(other.surfaceViewpointPrevious);
+		setParkingOrbitViewpointPrevious(other.parkingOrbitViewpointPrevious);
 		setObliquity(other.obliquity);
 		setPrecession(other.precession);
 		setRadius(other.radius);
@@ -81,9 +84,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setDrawClouds(other.drawClouds);
 		setCloudRotation(other.cloudRotation);
 		setCloudLevel(other.cloudLevel);
-		this.positionPrevious = other.positionPrevious;
-		this.surfaceViewpointPrevious = other.surfaceViewpointPrevious;
-		this.parkingOrbitViewpointPrevious = other.parkingOrbitViewpointPrevious;
 	}
 	
 	@Override
@@ -151,6 +151,36 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	public void setParkingOrbitViewpoint(Vec3d parkingOrbitViewpoint)
 	{
 		this.parkingOrbitViewpoint = parkingOrbitViewpoint;
+	}
+	
+	public Vec3d getPositionPrevious()
+	{
+		return positionPrevious;
+	}
+
+	public void setPositionPrevious(Vec3d position)
+	{
+		this.positionPrevious = position;
+	}
+	
+	public Vec3d getSurfaceViewpointPrevious()
+	{
+		return surfaceViewpointPrevious;
+	}
+
+	public void setSurfaceViewpointPrevious(Vec3d surfaceViewpoint)
+	{
+		this.surfaceViewpointPrevious = surfaceViewpoint;
+	}
+	
+	public Vec3d getParkingOrbitViewpointPrevious()
+	{
+		return parkingOrbitViewpointPrevious;
+	}
+
+	public void setParkingOrbitViewpointPrevious(Vec3d parkingOrbitViewpoint)
+	{
+		this.parkingOrbitViewpointPrevious = parkingOrbitViewpoint;
 	}
 	
 	public double getObliquity()
@@ -263,13 +293,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		this.cloudLevel = cloudLevel;
 	}
 	
-	public void setPreviousVectors(Vec3d position, Vec3d surfaceViewpoint, Vec3d parkingOrbitViewpoint)
-	{
-		this.positionPrevious = new Vec3d(position.getX(), position.getY(), position.getZ());
-		this.surfaceViewpointPrevious = new Vec3d(surfaceViewpoint.getX(), surfaceViewpoint.getY(), surfaceViewpoint.getZ());
-		this.parkingOrbitViewpointPrevious = new Vec3d(parkingOrbitViewpoint.getX(), parkingOrbitViewpoint.getY(), parkingOrbitViewpoint.getZ());
-	}
-	
 	/**
 	 * Return the size to render this planet object depending on its distance from the viewpoint.
 	 * The size is calculated as a factor of the size of the Sun viewed from Earth.
@@ -301,8 +324,8 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(partialTicks) : viewpointPlanet.getSurfaceViewpoint(partialTicks);
 		Vec3d positionVector = getPosition(partialTicks);
 		double rPlanet = viewpoint.subtract(positionVector).length();
-		Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition());
-		Vec3d planetVector = positionVector.subtract(viewpointPlanet.getPosition());
+		Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition(partialTicks));
+		Vec3d planetVector = positionVector.subtract(viewpointPlanet.getPosition(partialTicks));
 		double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());
 		double thetaPlanet = Math.atan2(Math.sqrt((planetVector.getX() * planetVector.getX()) + (planetVector.getZ() * planetVector.getZ())), planetVector.getY()) - (Math.PI / 2.0d);
 		double phiPlanet = Math.atan2(planetVector.getZ(), planetVector.getX());
