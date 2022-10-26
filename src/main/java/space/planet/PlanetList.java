@@ -242,7 +242,6 @@ public class PlanetList
 			PacketByteBuf buffer = PacketByteBufs.create();
 			RegistryKey<World> worldKey = player.world.getRegistryKey();
 			Planet planet = getPlanetForWorld(worldKey);
-			buffer.writeLong(server.getTimeReference());
 			buffer.writeInt(planetList.size());
 			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.
 			

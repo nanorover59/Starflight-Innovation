@@ -9,7 +9,6 @@ import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.Vec3d;
 
 @Environment(value=EnvType.CLIENT)
@@ -20,14 +19,14 @@ public class PlanetRenderList
 	private static ArrayList<PlanetRenderer> planetListTemporary = new ArrayList<PlanetRenderer>();
 	private static PlanetRenderer viewpoint;
 	private static PlanetRenderer viewpointTemporary;
-	private static long lastUpdateTime;
 	private static boolean inOrbit;
 	private static boolean inOrbitTemporary;
-	private static boolean updated;
+	private static boolean updateInProgress = false;
 	
 	public static void receivePlanetListUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		long serverTime = buffer.readLong();
+		if(updateInProgress)
+			return;
 		
 		planetListTemporary.clear();
 		viewpointTemporary = null;
@@ -80,6 +79,7 @@ public class PlanetRenderList
 	
 	public static void updateRenderers()
 	{
+		updateInProgress = true;
 		planetList.clear();
 		
 		for(int i = 0; i < planetListTemporary.size(); i++)
@@ -104,6 +104,8 @@ public class PlanetRenderList
 		
 		if(viewpoint != null)
 			Collections.sort(planetList);
+		
+		updateInProgress = false;
 	}
 	
 	public static ArrayList<PlanetRenderer> getRenderers(boolean sorted)
