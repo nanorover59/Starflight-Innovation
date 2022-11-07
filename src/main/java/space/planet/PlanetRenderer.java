@@ -45,14 +45,10 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private static final Identifier SUN_HAZE_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_haze_0.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
-	public PlanetRenderer(String name_, Vec3d position_, Vec3d surfaceViewpoint_, Vec3d parkingOrbitViewpoint_, double obliquity_, double precession_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_, double cloudRotation_, int cloudIndex_)
+	public PlanetRenderer(String name_, double obliquity_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_)
 	{
 		name = name_;
-		setPosition(position_);
-		setSurfaceViewpoint(surfaceViewpoint_);
-		setParkingOrbitViewpoint(parkingOrbitViewpoint_);
 		setObliquity(obliquity_);
-		setPrecession(precession_);
 		setRadius(radius_);
 		setSurfacePressure(surfacePressure_);
 		setLowClouds(hasLowClouds_);
@@ -60,8 +56,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setWeather(hasWeather_);
 		setSimpleTexture(simpleTexture_);
 		setDrawClouds(drawClouds_);
-		setCloudRotation(cloudRotation_);
-		setCloudLevel(cloudIndex_);
 	}
 	
 	public PlanetRenderer(PlanetRenderer other)

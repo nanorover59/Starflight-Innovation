@@ -10,6 +10,7 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -283,7 +284,7 @@ public class PlanetList
 	 */
 	public static void simulateMotion()
 	{
-		double timeStep = 72.0 * 0.05; //* timeMultiplier;
+		double timeStep = 72.0 * 0.05;
 		
 		for(int i = 0; i < timeSteps; i++)
 		{
@@ -294,9 +295,24 @@ public class PlanetList
 			}
 			
 			for(Planet p : planetList)
-			{
 				p.simulatePositionAndRotationChange(timeStep);
-			}
+		}
+	}
+	
+	/**
+	 * Fast forward the simulation to sunrise on the given planet.
+	 */
+	public static void skipToMorning(Planet planet)
+	{
+		double angle = 0.0;
+		
+		while(angle < 1.75)
+		{
+			Vec3d position = planet.getPosition();
+			Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? planet.getParkingOrbitViewpoint().subtract(position) : planet.getSurfaceViewpoint().subtract(position);
+			Vec3d starPosition = new Vec3d(0.0, 0.0, 0.0).subtract(position);
+			angle = Math.acos(position.dotProduct(viewpoint) / (viewpoint.length() * starPosition.length()));
+			simulateMotion();
 		}
 	}
 }

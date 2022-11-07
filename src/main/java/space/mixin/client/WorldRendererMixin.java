@@ -80,7 +80,6 @@ public abstract class WorldRendererMixin
 			double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
 			
 			// Setup for sky rendering.
-			//runnable.run();
 			Vec3d vec3d = starrySky ? new Vec3d(0.0f, 0.0f, 0.0f) : this.world.getSkyColor(this.client.gameRenderer.getCamera().getPos(), tickDelta);
 			float skyR = (float) vec3d.x;
 			float skyG = (float) vec3d.y;
@@ -120,7 +119,7 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float milkyWayFactor = 0.5f;
+				float milkyWayFactor = 0.6f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
@@ -132,7 +131,6 @@ public abstract class WorldRendererMixin
 				StarflightModClient.stars.bind();
 				StarflightModClient.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
-				//runnable.run();
 			}
 			
 			matrices.pop();

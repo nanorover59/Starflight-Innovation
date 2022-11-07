@@ -140,7 +140,6 @@ public class StarflightModClient implements ClientModInitializer
 		
 		// Client Tick Event
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			
 			PlanetRenderList.updateRenderers();
 			
 			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
@@ -179,7 +178,6 @@ public class StarflightModClient implements ClientModInitializer
 				buffer.writeInt(yawState);
 				ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
 			}
-			
 		});
 	}
 	
@@ -289,7 +287,7 @@ public class StarflightModClient implements ClientModInitializer
 			double d = random.nextFloat() * 2.0f - 1.0f;
 			double e = random.nextFloat() * 2.0f - 1.0f;
 			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.8f - (frame * 0.15f) + random.nextFloat() * 0.1f; // Star size.
+			double g = 0.8f - (frame * 0.1f) + random.nextFloat() * 0.1f; // Star size.
 			double h = d * d + e * e + f * f;
 
 			if(!(h < 1.0) || !(h > 0.01))

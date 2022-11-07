@@ -19,6 +19,7 @@ import net.minecraft.entity.ai.goal.PounceAtTargetGoal;
 import net.minecraft.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.ai.goal.SitGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.ai.goal.TemptGoal;
 import net.minecraft.entity.ai.goal.TrackOwnerAttackerGoal;
 import net.minecraft.entity.ai.goal.UniversalAngerGoal;
 import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
@@ -36,6 +37,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
@@ -72,7 +74,8 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 		this.goalSelector.add(5, new MeleeAttackGoal(this, 1.0, true));
 		this.goalSelector.add(6, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
 		this.goalSelector.add(7, new AnimalMateGoal(this, 1.0));
-		this.goalSelector.add(8, new WanderAroundFarGoal(this, 1.0));
+		this.goalSelector.add(8, new TemptGoal(this, 1.0, Ingredient.ofItems(StarflightItems.CHEESE), false));
+		this.goalSelector.add(9, new WanderAroundFarGoal(this, 1.0));
 		this.goalSelector.add(10, new LookAtEntityGoal(this, PlayerEntity.class, 12.0f));
 		this.goalSelector.add(10, new LookAroundGoal(this));
 		this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
@@ -230,7 +233,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 		}
 		else if(!this.isTamed() && this.isBreedingItem(itemStack))
 		{
-			if(this.random.nextInt(4) == 0)
+			if(this.random.nextBoolean())
 			{
 				this.setOwner(player);
 				this.navigation.stop();

@@ -42,6 +42,11 @@ public class FrameBlock extends Block implements Waterloggable
 	{
 		return BlockRenderType.MODEL;
 	}
+	
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
+	{
+		return SHAPE;
+	}
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)

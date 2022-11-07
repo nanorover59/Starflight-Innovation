@@ -45,8 +45,10 @@ public class StarflightEffects
 	{
 		BlockPos pos = buffer.readBlockPos();
 		
-		if(client.world != null)
-			client.world.playSound(pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f, false);
+		client.execute(() -> {
+			if(client.world != null)
+				client.world.playSound(pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f, false);
+		});
 	}
 	
 	public static void sendOutgas(WorldAccess world, BlockPos pos1, BlockPos pos2, boolean sound)
@@ -63,25 +65,28 @@ public class StarflightEffects
 	
 	public static void receiveOutgas(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.createLocal();
 		BlockPos pos1 = buffer.readBlockPos();
 		BlockPos pos2 = buffer.readBlockPos();
 		boolean sound = buffer.readBoolean();
-		Vec3i unitVector = pos2.subtract(pos1);
-		int particleCount = 10 + random.nextInt(6);
 		
-		if(client.world == null)
-			return;
-		
-		if(sound)
-			client.world.playSound(pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, false);
-		
-		for(int i = 0; i < particleCount; i++)
-		{
-			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-			Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
-			client.world.addParticle(ParticleTypes.POOF, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
-		}
+		client.execute(() -> {
+			Random random = Random.createLocal();
+			Vec3i unitVector = pos2.subtract(pos1);
+			int particleCount = 10 + random.nextInt(6);
+			
+			if(client.world == null)
+				return;
+			
+			if(sound)
+				client.world.playSound(pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, false);
+			
+			for(int i = 0; i < particleCount; i++)
+			{
+				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
+				client.world.addParticle(ParticleTypes.POOF, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+			}
+		});
 	}
 	
 	public static void sendJet(WorldAccess world, Vec3d sourcePos, Vec3d velocity)
@@ -101,23 +106,26 @@ public class StarflightEffects
 	
 	public static void receiveJet(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		Random random = Random.createLocal();
 		double px = buffer.readDouble();
 		double py = buffer.readDouble();
 		double pz = buffer.readDouble();
-		Vec3d sourcePos = new Vec3d(px, py, pz);
 		double vx = buffer.readDouble();
 		double vy = buffer.readDouble();
 		double vz = buffer.readDouble();
-		Vec3d velocity = new Vec3d(vx, vy, vz);
-		int particleCount = 2 + random.nextInt(2);
 		
-		for(int i = 0; i < particleCount; i++)
-		{
-			Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-			offset.add(-random.nextDouble(), -random.nextDouble(), -random.nextDouble());
-			offset = offset.multiply(0.25);
-			client.world.addParticle(ParticleTypes.POOF, sourcePos.getX() + offset.getX(), sourcePos.getY() + offset.getY(), sourcePos.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
-		}
+		client.execute(() -> {
+			Vec3d sourcePos = new Vec3d(px, py, pz);
+			Vec3d velocity = new Vec3d(vx, vy, vz);
+			Random random = Random.createLocal();
+			int particleCount = 2 + random.nextInt(2);
+			
+			for(int i = 0; i < particleCount; i++)
+			{
+				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+				offset.add(-random.nextDouble(), -random.nextDouble(), -random.nextDouble());
+				offset = offset.multiply(0.25);
+				client.world.addParticle(ParticleTypes.POOF, sourcePos.getX() + offset.getX(), sourcePos.getY() + offset.getY(), sourcePos.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+			}
+		});
 	}
 }

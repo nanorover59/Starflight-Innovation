@@ -6,7 +6,6 @@
   "client": [
     "LevelPropertiesMixin",
     "WorldRendererMixin",
-    "BackgroundRendererMixin",
     "BlockModelRendererMixin",
     "CameraMixin",
     "InGameHudMixin"

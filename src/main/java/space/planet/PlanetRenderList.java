@@ -16,23 +16,16 @@ public class PlanetRenderList
 {
 	private static ArrayList<PlanetRenderer> planetList = new ArrayList<PlanetRenderer>();
 	private static ArrayList<PlanetRenderer> planetListUnsorted = new ArrayList<PlanetRenderer>();
-	private static ArrayList<PlanetRenderer> planetListTemporary = new ArrayList<PlanetRenderer>();
+	private static ArrayList<DynamicData> dataBuffer = new ArrayList<DynamicData>();
 	private static PlanetRenderer viewpoint;
-	private static PlanetRenderer viewpointTemporary;
 	private static boolean inOrbit;
-	private static boolean inOrbitTemporary;
-	private static boolean updateInProgress = false;
 	
 	public static void receivePlanetListUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-		if(updateInProgress)
-			return;
-		
-		planetListTemporary.clear();
-		viewpointTemporary = null;
+		ArrayList<DynamicData> receivedData = new ArrayList<DynamicData>();
 		int count = buffer.readInt();
 		int viewpointIndex = buffer.readInt();
-		inOrbitTemporary = buffer.readBoolean();
+		inOrbit = buffer.readBoolean();
 		
 		for(int i = 0; i < count; i++)
 		{
@@ -52,60 +45,78 @@ public class PlanetRenderList
 			Vec3d position = new Vec3d(positionX, positionY, positionZ);
 			Vec3d surfaceViewpoint = new Vec3d(surfaceViewpointX, surfaceViewpointY, surfaceViewpointZ);
 			Vec3d parkingOrbitViewpoint = new Vec3d(parkingOrbitViewpointX, parkingOrbitViewpointY, parkingOrbitViewpointZ);
-			
-			// Get constant values from the PlanetList class.
-			Planet planet = PlanetList.getPlanets().get(i);
-			String name = planet.getName();
-			double obliquity = planet.getObliquity();
-			double radius = planet.getRadius();
-			double surfacePressure = planet.getSurfacePressure();
-			boolean hasLowClouds = planet.hasLowClouds();
-			boolean hasCloudCover = planet.hasCloudCover();
-			boolean hasWeather = planet.hasWeather();
-			boolean simpleTexture = planet.hasSimpleTexture();
-			boolean drawClouds = planet.drawClouds();
-			
-			// Create the updated PlanetRenderer instance.
-			PlanetRenderer planetRenderer = new PlanetRenderer(name, position, surfaceViewpoint, parkingOrbitViewpoint, obliquity, precession, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds, cloudRotation, cloudLevel);
-			planetRenderer.setPositionPrevious(position);
-			planetRenderer.setSurfaceViewpointPrevious(surfaceViewpoint);
-			planetRenderer.setParkingOrbitViewpointPrevious(parkingOrbitViewpoint);
-			planetListTemporary.add(planetRenderer);
-			
-			if(i == viewpointIndex)
-				viewpointTemporary = planetRenderer;
+			receivedData.add(new DynamicData(position, surfaceViewpoint, parkingOrbitViewpoint, precession, cloudRotation, cloudLevel, i == viewpointIndex));
 		}
+		
+		client.execute(() -> {
+			dataBuffer.clear();
+			dataBuffer.addAll(receivedData);
+		});
 	}
 	
 	public static void updateRenderers()
 	{
-		updateInProgress = true;
-		planetList.clear();
-		
-		for(int i = 0; i < planetListTemporary.size(); i++)
+		if(planetListUnsorted.size() != dataBuffer.size())
 		{
-			PlanetRenderer planetRenderer = planetListTemporary.get(i);
-			PlanetRenderer planetRendererPrevious = planetListTemporary.size() == planetListUnsorted.size() ? planetListUnsorted.get(i) : null;
+			planetList.clear();
+			planetListUnsorted.clear();
 			
-			if(planetRendererPrevious != null)
+			for(int i = 0; i < dataBuffer.size(); i++)
 			{
-				planetRenderer.setPositionPrevious(planetRendererPrevious.getPosition());
-				planetRenderer.setSurfaceViewpointPrevious(planetRendererPrevious.getSurfaceViewpoint());
-				planetRenderer.setParkingOrbitViewpointPrevious(planetRendererPrevious.getParkingOrbitViewpoint());
+				// Get constant values from the PlanetList class.
+				Planet planet = PlanetList.getPlanets().get(i);
+				String name = planet.getName();
+				double obliquity = planet.getObliquity();
+				double radius = planet.getRadius();
+				double surfacePressure = planet.getSurfacePressure();
+				boolean hasLowClouds = planet.hasLowClouds();
+				boolean hasCloudCover = planet.hasCloudCover();
+				boolean hasWeather = planet.hasWeather();
+				boolean simpleTexture = planet.hasSimpleTexture();
+				boolean drawClouds = planet.drawClouds();
+				
+				// Create the PlanetRenderer instance.
+				DynamicData data = dataBuffer.get(i);
+				PlanetRenderer planetRenderer = new PlanetRenderer(name, obliquity, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds);
+				planetRenderer.setPosition(data.position);
+				planetRenderer.setSurfaceViewpoint(data.surfaceViewpoint);
+				planetRenderer.setParkingOrbitViewpoint(data.parkingOrbitViewpoint);
+				planetRenderer.setPositionPrevious(data.position);
+				planetRenderer.setSurfaceViewpointPrevious(data.surfaceViewpoint);
+				planetRenderer.setParkingOrbitViewpointPrevious(data.parkingOrbitViewpoint);
+				planetRenderer.setCloudRotation(data.cloudRotation);
+				planetRenderer.setCloudLevel(data.cloudLevel);
+				planetList.add(planetRenderer);
+				
+				if(data.isViewpoint)
+					viewpoint = planetRenderer;
 			}
 			
-			planetList.add(planetRenderer);
-		}
-		
-		planetListUnsorted.clear();
-		viewpoint = viewpointTemporary == null ? null : viewpointTemporary;
-		inOrbit = inOrbitTemporary;
-		planetListUnsorted.addAll(planetList);
-		
-		if(viewpoint != null)
+			planetListUnsorted.addAll(planetList);
 			Collections.sort(planetList);
-		
-		updateInProgress = false;
+		}
+		else
+		{
+			for(int i = 0; i < dataBuffer.size(); i++)
+			{
+				DynamicData data = dataBuffer.get(i);
+				PlanetRenderer planetRenderer = planetListUnsorted.get(i);
+				planetRenderer.setPositionPrevious(planetRenderer.getPosition());
+				planetRenderer.setSurfaceViewpointPrevious(planetRenderer.getSurfaceViewpoint());
+				planetRenderer.setParkingOrbitViewpointPrevious(planetRenderer.getParkingOrbitViewpoint());
+				planetRenderer.setPosition(data.position);
+				planetRenderer.setSurfaceViewpoint(data.surfaceViewpoint);
+				planetRenderer.setParkingOrbitViewpoint(data.parkingOrbitViewpoint);
+				planetRenderer.setCloudRotation(data.cloudRotation);
+				planetRenderer.setCloudLevel(data.cloudLevel);
+				
+				if(data.isViewpoint)
+				{
+					viewpoint = planetRenderer;
+					Collections.sort(planetList);
+				}
+			}
+		}
 	}
 	
 	public static ArrayList<PlanetRenderer> getRenderers(boolean sorted)
@@ -122,4 +133,6 @@ public class PlanetRenderList
 	{
 		return inOrbit;
 	}
+	
+	private record DynamicData(Vec3d position, Vec3d surfaceViewpoint, Vec3d parkingOrbitViewpoint, double precession, double cloudRotation, int cloudLevel, boolean isViewpoint) {}
 }
