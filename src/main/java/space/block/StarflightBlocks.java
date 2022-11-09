@@ -267,7 +267,7 @@ public class StarflightBlocks
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(powerOutput))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(powerOutput))).append("kJ/s").formatted(Formatting.GOLD));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
 	
@@ -275,7 +275,7 @@ public class StarflightBlocks
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(powerInput))).append("kJ/s").formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(powerInput))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
 	

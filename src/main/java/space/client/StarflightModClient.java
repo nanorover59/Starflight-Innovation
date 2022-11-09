@@ -277,17 +277,17 @@ public class StarflightModClient implements ClientModInitializer
 		Random random = Random.create(20844L);
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
-		for(int i = 0; i < 4000; i++)
+		for(int i = 0; i < 4500; i++)
 		{
 			int frame = 0;
 
-			while(random.nextFloat() < 0.4 && frame < 3)
+			while(random.nextFloat() < 0.3 && frame < 3)
 				frame++;
 			
 			double d = random.nextFloat() * 2.0f - 1.0f;
 			double e = random.nextFloat() * 2.0f - 1.0f;
 			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.8f - (frame * 0.1f) + random.nextFloat() * 0.1f; // Star size.
+			double g = 0.6f - (frame * 0.05f) + random.nextFloat() * 0.1f; // Star size.
 			double h = d * d + e * e + f * f;
 
 			if(!(h < 1.0) || !(h > 0.01))

@@ -119,7 +119,7 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float milkyWayFactor = 0.6f;
+				float milkyWayFactor = 0.45f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);

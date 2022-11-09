@@ -349,7 +349,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 				else
 				{
-					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.9f);
 					RenderSystem.setShader(GameRenderer::getPositionTexShader);
 					RenderSystem.setShaderTexture(0, SUN_HAZE_0);
 					bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
@@ -358,7 +357,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 					bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 					bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
 					BufferRenderer.drawWithShader(bufferBuilder.end());
-					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 				}
 			}
 			else

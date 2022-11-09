@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
@@ -26,24 +27,33 @@ public class CraterGenerator
 {
 	public static void addPieces(Structure.Context context, BlockPos pos, StructurePiecesHolder holder)
 	{
-		if(!checkEvenTerrain(context, pos))
-			return;
-		
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		ChunkRandom random = context.random();
 		NoiseConfig noiseConfig = context.noiseConfig();
 		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(),noiseConfig);
-		int depth = 12 + random.nextInt(20);
+		int depth = 8 + random.nextInt(24);
 		BlockPos center = pos.add(random.nextInt(16), surfaceY - depth, random.nextInt(16));
 		float widthFactor = (depth / 3) + random.nextFloat();
-		int chunkRadius = (((int) Math.ceil(widthFactor * Math.sqrt(depth))) >> 4) + 1;
+		boolean followTerrain = random.nextInt(3) == 0;
+		int chunkRadius = (((int) Math.ceil(widthFactor * Math.sqrt(depth) * 1.5)) >> 4) + 2;
+		
+		if(!checkEvenTerrain(context, pos))
+		{
+			if(random.nextBoolean())
+				followTerrain = true;
+			else
+				return;
+		}
 		
 		for(int x = -chunkRadius; x <= chunkRadius; x++)
 		{
 			for(int z = -chunkRadius; z <= chunkRadius; z++)
 			{
-				BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
-				holder.addPiece(new Piece(startPos, center, surfaceY, widthFactor));
+				if(MathHelper.hypot(x, z) <= chunkRadius)
+				{
+					BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
+					holder.addPiece(new Piece(startPos, center, surfaceY, 1, followTerrain, widthFactor));
+				}
 			}
 		}
 	}
@@ -68,13 +78,17 @@ public class CraterGenerator
 	{
 		private final BlockPos center;
 		private final int surfaceY;
+		private final int shape;
+		private final boolean followTerrain;
 		private final float widthFactor;
 
-		public Piece(BlockPos start, BlockPos center, int surfaceY, float widthFactor)
+		public Piece(BlockPos start, BlockPos center, int surfaceY,  int shape, boolean followTerrain, float widthFactor)
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, 0, new BlockBox(start));
 			this.center = center;
 			this.surfaceY = surfaceY;
+			this.shape = shape;
+			this.followTerrain = followTerrain;
 			this.widthFactor = widthFactor;
 		}
 
@@ -83,6 +97,8 @@ public class CraterGenerator
 			super(StarflightWorldGeneration.CRATER_PIECE, nbt);
 			this.center = new BlockPos(nbt.getInt("centerX"), nbt.getInt("centerY"), nbt.getInt("centerZ"));
 			this.surfaceY = nbt.getInt("surfaceY");
+			this.shape = nbt.getInt("shape");
+			this.followTerrain = nbt.getBoolean("followTerrain");
 			this.widthFactor = nbt.getFloat("widthFactor");
 		}
 
@@ -93,6 +109,8 @@ public class CraterGenerator
 			nbt.putInt("centerY", center.getY());
 			nbt.putInt("centerZ", center.getZ());
 			nbt.putInt("surfaceY", surfaceY);
+			nbt.putInt("shape", shape);
+			nbt.putBoolean("followTerrain", followTerrain);
 			nbt.putFloat("widthFactor", widthFactor);
 		}
 		
@@ -117,19 +135,16 @@ public class CraterGenerator
 					mutable.setY(localSurfaceY);
 					BlockState surfaceState = world.getBlockState(mutable);
 					
-					while((surfaceState.isAir() || world.containsFluid(new Box(mutable))) && mutable.getY() > 0)
-					{
-						mutable.move(0, -1, 0);
-						surfaceState = world.getBlockState(mutable);
-					}
+					if(!followTerrain)
+						localSurfaceY = surfaceY;
 					
 					double xzd = Math.pow(mutable.getX() - center.getX(), 2) + Math.pow(mutable.getZ() - center.getZ(), 2);
-					int maxDepth = surfaceY - center.getY();
-					int depth = maxDepth - (int) Math.round(xzd / (widthFactor * widthFactor));
+					int maxDepth = localSurfaceY - center.getY();
+					int depth = depthFunction(Math.sqrt(xzd), maxDepth);
 
 					for(int y = maxDepth; y > -depth; y--)
 					{
-						mutable.setY(surfaceY + y);
+						mutable.setY(localSurfaceY + y);
 						
 						if((!world.getBlockState(mutable).isAir() && !world.containsFluid(new Box(mutable))) || world.getFluidState(mutable).getFluid() == Fluids.WATER)
 						{
@@ -140,6 +155,24 @@ public class CraterGenerator
 						}
 					}
 				}
+			}
+		}
+		
+		private int depthFunction(double radius, int maxDepth)
+		{
+			double wfs = widthFactor * widthFactor;
+			
+			if(radius < 8.0)
+				radius = 8.0;
+			
+			switch(shape)
+			{
+				case 1:
+					return maxDepth - (int) Math.round(Math.pow(wfs / 3.0 - radius, 2.0) / wfs);
+				case 2:
+					return maxDepth - (int) Math.round(Math.pow(wfs / 4.0 - radius, 2.0) / wfs);
+				default:
+					return maxDepth - (int) Math.round(Math.pow(radius, 2.0) / wfs);
 			}
 		}
 	}
