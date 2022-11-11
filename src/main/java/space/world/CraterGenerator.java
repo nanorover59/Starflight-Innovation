@@ -52,7 +52,7 @@ public class CraterGenerator
 				if(MathHelper.hypot(x, z) <= chunkRadius)
 				{
 					BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
-					holder.addPiece(new Piece(startPos, center, surfaceY, 1, followTerrain, widthFactor));
+					holder.addPiece(new Piece(startPos, center.getX(), center.getZ(), 0, depth, surfaceY, false));
 				}
 			}
 		}
@@ -76,42 +76,44 @@ public class CraterGenerator
 
 	public static class Piece extends StructurePiece
 	{
-		private final BlockPos center;
+		private final int centerX;
+		private final int centerZ;
+		private final int radius;
+		private final int depth;
 		private final int surfaceY;
-		private final int shape;
-		private final boolean followTerrain;
-		private final float widthFactor;
-
-		public Piece(BlockPos start, BlockPos center, int surfaceY,  int shape, boolean followTerrain, float widthFactor)
+		private boolean followTerrain;
+		
+		public Piece(BlockPos start, int x, int z, int radius, int depth, int surfaceY, boolean folowTerrain)
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, 0, new BlockBox(start));
-			this.center = center;
+			this.centerX = x;
+			this.centerZ = z;
+			this.radius = radius;
+			this.depth = depth;
 			this.surfaceY = surfaceY;
-			this.shape = shape;
-			this.followTerrain = followTerrain;
-			this.widthFactor = widthFactor;
+			this.followTerrain = folowTerrain;
 		}
 
 		public Piece(StructureContext context, NbtCompound nbt)
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, nbt);
-			this.center = new BlockPos(nbt.getInt("centerX"), nbt.getInt("centerY"), nbt.getInt("centerZ"));
+			this.centerX  = nbt.getInt("x");
+			this.centerZ = nbt.getInt("z");
+			this.radius = nbt.getInt("radius");
+			this.depth = nbt.getInt("depth");
 			this.surfaceY = nbt.getInt("surfaceY");
-			this.shape = nbt.getInt("shape");
 			this.followTerrain = nbt.getBoolean("followTerrain");
-			this.widthFactor = nbt.getFloat("widthFactor");
 		}
 
 		@Override
 		protected void writeNbt(StructureContext context, NbtCompound nbt)
 		{
-			nbt.putInt("centerX", center.getX());
-			nbt.putInt("centerY", center.getY());
-			nbt.putInt("centerZ", center.getZ());
-			nbt.putInt("surfaceY", surfaceY);
-			nbt.putInt("shape", shape);
+			nbt.putInt("x", this.centerX);
+			nbt.putInt("z", this.centerZ);
+			nbt.putInt("radius", radius);
+			nbt.putInt("depth", depth);
+			nbt.putInt("surfaceY", radius);
 			nbt.putBoolean("followTerrain", followTerrain);
-			nbt.putFloat("widthFactor", widthFactor);
 		}
 		
 		@Override
@@ -138,42 +140,26 @@ public class CraterGenerator
 					if(!followTerrain)
 						localSurfaceY = surfaceY;
 					
-					double xzd = Math.pow(mutable.getX() - center.getX(), 2) + Math.pow(mutable.getZ() - center.getZ(), 2);
-					int maxDepth = localSurfaceY - center.getY();
-					int depth = depthFunction(Math.sqrt(xzd), maxDepth);
-
-					for(int y = maxDepth; y > -depth; y--)
+					double ds = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ);
+					
+					if(ds < 8.0)
+						ds = 8.0;
+					
+					int offset = (int) (Math.pow(depth / 2.0 - ds, 2.0) / depth);
+					int bottomY = localSurfaceY - depth + offset;
+					int y = bottomY;
+					mutable.setY(y);
+					
+					while(y < localSurfaceY || !world.getBlockState(mutable).isAir())
 					{
-						mutable.setY(localSurfaceY + y);
-						
-						if((!world.getBlockState(mutable).isAir() && !world.containsFluid(new Box(mutable))) || world.getFluidState(mutable).getFluid() == Fluids.WATER)
-						{
-							if(y == -depth + 1)
-								world.setBlockState(mutable.down(), surfaceState, Block.NOTIFY_LISTENERS);
+						if(y == bottomY + 1 && world.getBlockState(mutable.down()).getMaterial().blocksMovement())
+							world.setBlockState(mutable.down(), surfaceState, Block.NOTIFY_LISTENERS);
 
-							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
-						}
+						world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+						mutable.setY(++y);
 					}
 				}
-			}
-		}
-		
-		private int depthFunction(double radius, int maxDepth)
-		{
-			double wfs = widthFactor * widthFactor;
-			
-			if(radius < 8.0)
-				radius = 8.0;
-			
-			switch(shape)
-			{
-				case 1:
-					return maxDepth - (int) Math.round(Math.pow(wfs / 3.0 - radius, 2.0) / wfs);
-				case 2:
-					return maxDepth - (int) Math.round(Math.pow(wfs / 4.0 - radius, 2.0) / wfs);
-				default:
-					return maxDepth - (int) Math.round(Math.pow(radius, 2.0) / wfs);
-			}
+			} 
 		}
 	}
 }
