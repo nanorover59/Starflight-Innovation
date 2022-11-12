@@ -42,7 +42,6 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private int cloudLevel;
 	
 	private static final Identifier PLANET_SHADING = new Identifier(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");
-	private static final Identifier SUN_HAZE_0 = new Identifier(StarflightMod.MOD_ID, "textures/environment/sun_haze_0.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
 	public PlanetRenderer(String name_, double obliquity_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_)
@@ -349,14 +348,16 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 				else
 				{
+					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 					RenderSystem.setShader(GameRenderer::getPositionTexShader);
-					RenderSystem.setShaderTexture(0, SUN_HAZE_0);
+					RenderSystem.setShaderTexture(0, getTexture(name));
 					bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 					bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
 					bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 					bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 					bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
 					BufferRenderer.drawWithShader(bufferBuilder.end());
+					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 				}
 			}
 			else
@@ -374,16 +375,16 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 				
 				float lightingFactor = brightness * (float) (Math.abs(phaseAngle - Math.PI) / Math.PI);
 				RenderSystem.setShaderColor(lightingFactor, lightingFactor, lightingFactor, 1.0f);
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderTexture(0, getTexture(name));
+				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
+				BufferRenderer.drawWithShader(bufferBuilder.end());
 			}
-
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderTexture(0, getTexture(name));
-			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
-			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
-			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-			BufferRenderer.drawWithShader(bufferBuilder.end());
+			
 			matrices.pop();
 		}
 		else
