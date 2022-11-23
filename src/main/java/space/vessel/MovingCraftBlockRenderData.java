@@ -32,7 +32,6 @@ import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
@@ -95,7 +94,7 @@ public class MovingCraftBlockRenderData
 		}
 	}
 	
-	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, float craftYaw)
+	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
 	{
 		// Plume effects for rocket thrusters.
 		if(entity instanceof RocketEntity)
@@ -188,7 +187,6 @@ public class MovingCraftBlockRenderData
         matrixStack.push();
         matrixStack.translate(position.getX() - 0.5, position.getY(), position.getZ() - 0.5);
         long seed = blockState.getRenderingSeed(position.add(centerBlockPosInitial));
-        BlockPos.Mutable mutable = position.add(centerBlockPos).mutableCopy();
         
         for(Direction direction : DIRECTIONS)
         {
@@ -198,19 +196,14 @@ public class MovingCraftBlockRenderData
             if(list.isEmpty() || !canRenderSide(direction))
             	continue;
             
-            mutable.set((Vec3i) position.add(centerBlockPos), direction);
-            int light = WorldRenderer.getLightmapCoordinates(world, blockState, mutable);
-            ((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, light, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
+            ((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
         }
         
         random.setSeed(seed);
         List<BakedQuad> list = model.getQuads(blockState, null, random);
         
         if(!list.isEmpty())
-        {
-        	int light = WorldRenderer.getLightmapCoordinates(world, blockState, centerBlockPos);
-        	((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, light, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
-        }
+        	((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
         
         matrixStack.pop();
 	}

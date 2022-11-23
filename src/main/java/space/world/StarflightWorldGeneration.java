@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.MultifaceGrowthBlock;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.structure.StructurePieceType;
 import net.minecraft.structure.rule.BlockMatchRuleTest;
 import net.minecraft.structure.rule.RuleTest;
@@ -45,12 +46,15 @@ import net.minecraft.world.gen.feature.OreFeatureConfig;
 import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraft.world.gen.feature.PlacedFeatures;
 import net.minecraft.world.gen.feature.SimpleBlockFeatureConfig;
+import net.minecraft.world.gen.feature.SpringFeature;
+import net.minecraft.world.gen.feature.SpringFeatureConfig;
 import net.minecraft.world.gen.feature.TreeFeatureConfig;
 import net.minecraft.world.gen.feature.UndergroundConfiguredFeatures;
 import net.minecraft.world.gen.feature.VegetationPatchFeatureConfig;
 import net.minecraft.world.gen.feature.VegetationPlacedFeatures;
 import net.minecraft.world.gen.feature.size.TwoLayersFeatureSize;
 import net.minecraft.world.gen.foliage.BlobFoliagePlacer;
+import net.minecraft.world.gen.heightprovider.VeryBiasedToBottomHeightProvider;
 import net.minecraft.world.gen.placementmodifier.BiomePlacementModifier;
 import net.minecraft.world.gen.placementmodifier.CountPlacementModifier;
 import net.minecraft.world.gen.placementmodifier.EnvironmentScanPlacementModifier;
@@ -72,22 +76,35 @@ public class StarflightWorldGeneration
 	public static final TagKey<Biome> IS_CRATERED = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "is_cratered"));
 	public static final TagKey<Biome> MORE_SCATTER = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "more_scatter"));
 	public static final TagKey<Biome> LIQUID_WATER = TagKey.of(Registry.BIOME_KEY, new Identifier(StarflightMod.MOD_ID, "liquid_water"));
-
 	public static final RuleTest FERRIC_STONE_ORE_REPLACEABLES = new BlockMatchRuleTest(StarflightBlocks.FERRIC_STONE);
 	public static final RuleTest FRIGID_STONE_ORE_REPLACEABLES = new BlockMatchRuleTest(StarflightBlocks.FRIGID_STONE);
 
+	// Impact Crater Structure
 	public static final StructurePieceType CRATER_PIECE = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "crater_piece"), CraterGenerator.Piece::new);
-	 public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
+	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
 	public static final RegistryEntry<Structure> CRATER = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater")), new CraterStructure(createConfig(IS_CRATERED, StructureTerrainAdaptation.NONE)));
 	
+	// Surface Rock Feature
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SURFACE_ROCK_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK);
-	public static final RegistryEntry<PlacedFeature> SURFACE_ROCK_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK_CONFIGURED_FEATURE, CountPlacementModifier.of(4), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
+	public static final RegistryEntry<PlacedFeature> SURFACE_ROCK_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
 
+	// Rock Patch Feature
+	public static final Feature<DefaultFeatureConfig> ROCK_PATCH = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "rock_patch"), new RockPatchFeature(DefaultFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> ROCK_PATCH_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "rock_patch").toString(), ROCK_PATCH);
+	public static final RegistryEntry<PlacedFeature> ROCK_PATCH_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "rock_patch").toString(), ROCK_PATCH_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
+	
+	// Underground Lava Spring Feature
+	public static final Feature<SpringFeatureConfig> UNDERGROUND_LAVA_SPRING = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "underground_lava_spring"), new SpringFeature(SpringFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<SpringFeatureConfig, ?>> UNDERGROUND_LAVA_SPRING_CONFIGURED_FEATURE = ConfiguredFeatures.register("underground_lava_spring", UNDERGROUND_LAVA_SPRING, new SpringFeatureConfig(Fluids.LAVA.getDefaultState(), true, 4, 1, RegistryEntryList.of(Block::getRegistryEntry, Blocks.STONE, Blocks.DEEPSLATE, Blocks.SMOOTH_BASALT, Blocks.TUFF, StarflightBlocks.FERRIC_STONE)));
+	public static final RegistryEntry<PlacedFeature> UNDERGROUND_LAVA_SPRING_PLACED_FEATURE = PlacedFeatures.register("underground_lava_spring", UNDERGROUND_LAVA_SPRING_CONFIGURED_FEATURE, CountPlacementModifier.of(20), SquarePlacementModifier.of(), HeightRangePlacementModifier.of(VeryBiasedToBottomHeightProvider.create(YOffset.getBottom(), YOffset.fixed(0), 8)), BiomePlacementModifier.of());
+	
+	// Moon "Ice Blade" Feature
 	public static final Feature<DefaultFeatureConfig> ICE_BLADE = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "ice_blade"), new IceBladeFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> ICE_BLADE_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE);
 	public static final RegistryEntry<PlacedFeature> ICE_BLADE_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
 
+	// Mars Underground Features
 	public static final Feature<VegetationPatchFeatureConfig> MARS_PATCH = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "mars_patch"), new MarsPatchFeature(VegetationPatchFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<MultifaceGrowthFeatureConfig, ?>> MARS_GLOW_LICHEN_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "mars_glow_lichen").toString(), Feature.MULTIFACE_GROWTH, new MultifaceGrowthFeatureConfig((MultifaceGrowthBlock)Blocks.GLOW_LICHEN, 20, false, true, true, 0.5f, RegistryEntryList.of(Block::getRegistryEntry, StarflightBlocks.FERRIC_STONE, StarflightBlocks.REDSLATE)));
 	public static final RegistryEntry<ConfiguredFeature<BlockColumnFeatureConfig, ?>> LYCOPHYTE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "lycophyte").toString(), Feature.BLOCK_COLUMN, new BlockColumnFeatureConfig(List.of(BlockColumnFeatureConfig.createLayer(new WeightedListIntProvider(DataPool.of(UniformIntProvider.create(1, 8))), BlockStateProvider.of(StarflightBlocks.LYCOPHYTE_STEM)), BlockColumnFeatureConfig.createLayer(ConstantIntProvider.create(1), BlockStateProvider.of((BlockState) StarflightBlocks.LYCOPHYTE_TOP.getDefaultState()))), Direction.UP, BlockPredicate.IS_AIR_OR_WATER, true));
@@ -100,15 +117,17 @@ public class StarflightWorldGeneration
 	public static final RegistryEntry<PlacedFeature> ARES_MOSS_PATCH_CEILING_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "ares_moss_patch_ceiling").toString(), ARES_MOSS_PATCH_CEILING_CONFIGURED_FEATURE, CountPlacementModifier.of(125), SquarePlacementModifier.of(), PlacedFeatures.BOTTOM_TO_120_RANGE, EnvironmentScanPlacementModifier.of(Direction.UP, BlockPredicate.solid(), BlockPredicate.IS_AIR, 12), RandomOffsetPlacementModifier.vertically(ConstantIntProvider.create(-1)), BiomePlacementModifier.of());
 	public static final RegistryEntry<PlacedFeature> MARS_CAVE_POOL_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "mars_cave_pool").toString(), MARS_CAVE_POOL_CONFIGURED_FEATURE, CountPlacementModifier.of(62), SquarePlacementModifier.of(), PlacedFeatures.BOTTOM_TO_120_RANGE, EnvironmentScanPlacementModifier.of(Direction.DOWN, BlockPredicate.solid(), BlockPredicate.IS_AIR, 12), RandomOffsetPlacementModifier.vertically(ConstantIntProvider.create(1)), BiomePlacementModifier.of());
 	
+	// Earth Ores
 	public static final RegistryEntry<PlacedFeature> BAUXITE_ORE = orePlacedFeature("bauxite_ore", 10, 8, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.BAUXITE_ORE.getDefaultState(), Blocks.STONE);
 	public static final RegistryEntry<PlacedFeature> BAUXITE_ORE_DEEPSLATE = orePlacedFeature("bauxite_ore_deepslate", 10, 8, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.DEEPSLATE_BAUXITE_ORE.getDefaultState(), Blocks.DEEPSLATE);
 	public static final RegistryEntry<PlacedFeature> BAUXITE_ORE_FERRIC = orePlacedFeature("bauxite_ore_ferric", 10, 8, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.FERRIC_BAUXITE_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
-
 	public static final RegistryEntry<PlacedFeature> SULFUR_ORE = orePlacedFeature("sulfur_ore", 10, 6, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.BAUXITE_ORE.getDefaultState(), Blocks.STONE);
 	public static final RegistryEntry<PlacedFeature> SULFUR_ORE_DEEPSLATE = orePlacedFeature("sulfur_ore_deepslate", 10, 6, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.DEEPSLATE_BAUXITE_ORE.getDefaultState(), Blocks.DEEPSLATE);
-
+	
+	// Moon Ores
 	public static final RegistryEntry<PlacedFeature> LESS_COPPER_ORE = orePlacedFeature("less_copper_ore", 8, 6, YOffset.BOTTOM, YOffset.fixed(112), Blocks.COPPER_ORE.getDefaultState(), Blocks.STONE);
 	
+	// Mars Ores
 	public static final RegistryEntry<PlacedFeature> REDSLATE_FERRIC = orePlacedFeature("redslate_ferric", 64, 12, YOffset.fixed(16), YOffset.TOP, StarflightBlocks.REDSLATE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> BASALT_FERRIC = orePlacedFeature("basalt_ferric", 32, 8, YOffset.BOTTOM, YOffset.TOP, Blocks.SMOOTH_BASALT.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> IRON_ORE_FERRIC = orePlacedFeature("iron_ore_ferric", 12, 24, YOffset.BOTTOM, YOffset.TOP, StarflightBlocks.FERRIC_IRON_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
@@ -119,6 +138,7 @@ public class StarflightWorldGeneration
 	public static final RegistryEntry<PlacedFeature> SULFUR_ORE_FERRIC = orePlacedFeature("sulfur_ore_ferric", 10, 6, YOffset.BOTTOM, YOffset.fixed(128), StarflightBlocks.FERRIC_SULFUR_ORE.getDefaultState(), StarflightBlocks.FERRIC_STONE);
 	public static final RegistryEntry<PlacedFeature> HEMATITE_ORE = orePlacedFeature("hematite_ore", 12, 32, 0.5f, YOffset.BOTTOM, YOffset.fixed(256), StarflightBlocks.HEMATITE_ORE.getDefaultState(), StarflightBlocks.REDSLATE);
 
+	// Tree Features
 	public static final RegistryEntry<ConfiguredFeature<TreeFeatureConfig, ?>> RUBBER_TREE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "rubber_tree").toString(), Feature.TREE, new TreeFeatureConfig.Builder(BlockStateProvider.of(StarflightBlocks.RUBBER_LOG), new StraightTrunkPlacer(5, 1, 2), BlockStateProvider.of(StarflightBlocks.RUBBER_LEAVES), new BlobFoliagePlacer(ConstantIntProvider.create(2), ConstantIntProvider.create(0), 3), new TwoLayersFeatureSize(1, 0, 1)).build());
 	public static final RegistryEntry<PlacedFeature> RUBBER_TREE_CHECKED = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "rubber_tree_checked").toString(), RUBBER_TREE, VegetationPlacedFeatures.modifiersWithWouldSurvive(PlacedFeatures.createCountExtraModifier(0, 0.1f, 1), StarflightBlocks.RUBBER_SAPLING));
 	public static final RegistryEntry<ConfiguredFeature<TreeFeatureConfig, ?>> TALL_RUBBER_TREE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "tall_rubber_tree").toString(), Feature.TREE, new TreeFeatureConfig.Builder(BlockStateProvider.of(StarflightBlocks.RUBBER_LOG), new StraightTrunkPlacer(7, 1, 2), BlockStateProvider.of(StarflightBlocks.RUBBER_LEAVES), new BlobFoliagePlacer(ConstantIntProvider.create(3), ConstantIntProvider.create(0), 3), new TwoLayersFeatureSize(1, 0, 1)).build());

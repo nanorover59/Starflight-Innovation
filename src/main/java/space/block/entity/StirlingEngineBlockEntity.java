@@ -186,54 +186,57 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 		return this.burnTime > 0;
 	}
 
+	@Override
 	public void readNbt(NbtCompound nbt)
 	{
 		super.readNbt(nbt);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		Inventories.readNbt(nbt, this.inventory);
-		this.burnTime = nbt.getShort("BurnTime");
-		this.fuelTime = this.getFuelTime((ItemStack) this.inventory.get(0));
+		this.burnTime = nbt.getInt("burnTime");
+		this.fuelTime = nbt.getInt("fuelTime");
 	}
 
+	@Override
 	public void writeNbt(NbtCompound nbt)
 	{
 		super.writeNbt(nbt);
-		nbt.putShort("BurnTime", (short) this.burnTime);
 		Inventories.writeNbt(nbt, this.inventory);
+		nbt.putInt("burnTime", this.burnTime);
+		nbt.putInt("fuelTime", this.fuelTime);
 	}
 
 	public static void serverTick(World world, BlockPos pos, BlockState state, StirlingEngineBlockEntity blockEntity)
 	{
+		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
 		boolean bl = blockEntity.isBurning();
-		boolean bl2 = false;
-
+		
 		if(blockEntity.isBurning())
 		{
 			blockEntity.burnTime--;
 			blockEntity.powerState = 1;
+			world.markDirty(pos);
 		}
 		else
 			blockEntity.powerState = 0;
-
-		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
-		if(blockEntity.isBurning() || !itemStack.isEmpty() && !((ItemStack) blockEntity.inventory.get(0)).isEmpty())
+		
+		if(!blockEntity.isBurning() && !itemStack.isEmpty())
 		{
-			if(!blockEntity.isBurning())
+			int itemFuelTime = blockEntity.getFuelTime(itemStack);
+			
+			if(itemFuelTime > 0)
 			{
-				blockEntity.burnTime = blockEntity.getFuelTime(itemStack);
-				blockEntity.fuelTime = blockEntity.burnTime;
-				if(blockEntity.isBurning())
+				blockEntity.fuelTime = itemFuelTime;
+				blockEntity.burnTime = itemFuelTime;
+				
+				if(blockEntity.isBurning() && !itemStack.isEmpty())
 				{
-					bl2 = true;
-					if(!itemStack.isEmpty())
+					Item item = itemStack.getItem();
+					itemStack.decrement(1);
+					
+					if(itemStack.isEmpty())
 					{
-						Item item = itemStack.getItem();
-						itemStack.decrement(1);
-						if(itemStack.isEmpty())
-						{
-							Item item2 = item.getRecipeRemainder();
-							blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
-						}
+						Item item2 = item.getRecipeRemainder();
+						blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
 					}
 				}
 			}
@@ -241,13 +244,10 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 
 		if(bl != blockEntity.isBurning())
 		{
-			bl2 = true;
 			state = (BlockState) state.with(AbstractFurnaceBlock.LIT, blockEntity.isBurning());
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);
-		}
-
-		if(bl2)
 			markDirty(world, pos, state);
+		}
 	}
 
 	protected int getFuelTime(ItemStack fuel)

@@ -91,7 +91,7 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt)
 	{
 		nbt.putBoolean("active", active);
 		nbt.putDouble("storageCapacity", storageCapacity);

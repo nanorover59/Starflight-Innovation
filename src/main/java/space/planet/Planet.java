@@ -62,6 +62,9 @@ public class Planet
 	private int cloudLevel;
 	private int cloudTimer;
 	
+	public double sunAngle;
+	public double sunAngleOrbit;
+	
 	public Planet(String name_, String parentName_, int satelliteLevel_, double mass_, double radius_, double parkingOrbitRadius_)
 	{
 		name = name_;
@@ -553,6 +556,10 @@ public class Planet
 		
 		if(isTidallyLocked)
 			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));
+		
+		// Update sky angle variables.
+		sunAngle = getSunAngleXZ(false);
+		sunAngleOrbit = getSunAngleXZ(true);
 		
 		// Update the clouds animation if this planet has one.
 		if(drawClouds)

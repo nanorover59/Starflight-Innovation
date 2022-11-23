@@ -19,6 +19,7 @@ import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -29,12 +30,14 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.ElectrolyzerBlockEntity;
 import space.client.StarflightModClient;
 import space.energy.EnergyNet;
+import space.util.StarflightEffects;
 
 public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, FluidUtilityBlock
 {
@@ -59,7 +62,7 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
+		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.electrolyzer.description_1"), Text.translatable("block.space.electrolyzer.description_2"));
 	}
 	
@@ -113,6 +116,20 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 		
 		for(Direction direction : Direction.values())
 			checkWater(world, position.offset(direction), checkList, limit);
+	}
+	
+	@Override
+	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
+	{
+		if((Boolean) state.get(LIT))
+		{
+			double d = (double) pos.getX() + 0.5;
+			double e = (double) pos.getY();
+			double f = (double) pos.getZ() + 0.5;
+			
+			if(random.nextDouble() < 0.1)
+				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
+		}
 	}
 	
 	@Override

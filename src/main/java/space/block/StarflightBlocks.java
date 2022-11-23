@@ -84,7 +84,7 @@ public class StarflightBlocks
 	public static final Block STRIPPED_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.OAK_TAN);
 	public static final Block RUBBER_LEAVES = createLeavesBlock(BlockSoundGroup.WET_GRASS);
 	public static final Block RUBBER_SAPLING = new RubberSaplingBlock(new RubberSaplingGenerator(), FabricBlockSettings.copyOf(Blocks.OAK_SAPLING));
-	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.of(Material.ORGANIC_PRODUCT).strength(2.0f, 2.0f));
+	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.of(Material.ORGANIC_PRODUCT).sounds(BlockSoundGroup.WOOL).strength(1.0f, 1.0f));
 	public static final Block REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block ICY_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_BLUE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
@@ -107,15 +107,15 @@ public class StarflightBlocks
     public static final Block LYCOPHYTE_STEM = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), false);
 	public static final Block SEARING_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(2.0f, 5.0f));
-	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(2.0f, 2.0f));
+	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
 	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.WOOL).strength(1.25f, 1.25f));
+	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(1.0f, 1.0f));
 	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block OXYGEN_PIPE = new OxygenPipeBlock(FabricBlockSettings.of(Material.METAL).requiresTool().strength(2.0f, 2.0f));
-	public static final Block HYDROGEN_PIPE = new HydrogenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(2.0f, 2.0f));
+	public static final Block OXYGEN_PIPE = new OxygenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
+	public static final Block HYDROGEN_PIPE = new HydrogenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
 	public static final Block OXYGEN_TANK = new OxygenTankBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
 	public static final Block OXYGEN_INLET_VALVE = new OxygenInletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block OXYGEN_OUTLET_VALVE = new OxygenOutletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
@@ -241,7 +241,7 @@ public class StarflightBlocks
 		initializeBlock(AIRLOCK_DOOR, "airlock_door");
 		initializeBlock(AIRLOCK_TRAPDOOR, "airlock_trapdoor");
 		initializeBlock(IRON_LADDER, "iron_ladder");
-		initializeBlock(LANDING_LEG, "landing_leg");
+		initializeBlock(LANDING_LEG, "landing_leg", null, true, List.of(), List.of(Text.translatable("block.space.landing_leg.description")));
 		initializeBlock(ROCKET_CONTROLLER, "rocket_controller", ROCKET_CONTROLLER_BLOCK_ENTITY);
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
 		
@@ -285,7 +285,7 @@ public class StarflightBlocks
 		ItemGroup itemGroup = StarflightMod.ITEM_GROUP;
 		Registry.register(Registry.BLOCK, new Identifier(mod_id, name), block);
 		
-		if(textList.isEmpty())
+		if(textList.isEmpty() && hiddenTextList.isEmpty())
 			Registry.register(Registry.ITEM, new Identifier(mod_id, name), new BlockItem(block, new FabricItemSettings().group(creativeInventory ? itemGroup : null)));
 		else
 			Registry.register(Registry.ITEM, new Identifier(mod_id, name), new DescriptiveBlockItem(block, new FabricItemSettings().group(itemGroup), textList, hiddenTextList));

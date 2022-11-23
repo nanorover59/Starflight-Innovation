@@ -1,7 +1,5 @@
 package space.world;
 
-
-
 import com.mojang.serialization.Codec;
 
 import net.minecraft.block.Block;
@@ -30,10 +28,10 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
 		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(6 + random.nextInt(8)));
-		float chance = 0.05F;
+		float chance = 0.05f;
 		
 		if(structureWorldAccess.getBiome(blockPos).isIn(StarflightWorldGeneration.MORE_SCATTER))
-			chance = 0.75F;
+			chance = 0.8f;
 		
 		// Random chance of generating a stray basalt rock.
 		if(random.nextInt(4) == 0)
@@ -74,7 +72,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NO_REDRAW);
 			}
 			
-			blockPos = blockPos.add(-1 + random.nextInt(rockSize), -random.nextInt(rockSize), -1 + random.nextInt(rockSize));
+			blockPos = blockPos.add(random.nextInt(rockSize) - random.nextInt(rockSize), -random.nextInt(rockSize) / 2, random.nextInt(rockSize) - random.nextInt(rockSize));
 		}
 		
 		return true;

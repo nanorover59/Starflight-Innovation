@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
@@ -50,6 +51,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import net.minecraft.world.event.GameEvent;
 import space.item.StarflightItems;
 
@@ -77,17 +79,17 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 		this.goalSelector.add(8, new TemptGoal(this, 1.0, Ingredient.ofItems(StarflightItems.CHEESE), false));
 		this.goalSelector.add(9, new WanderAroundFarGoal(this, 1.0));
 		this.goalSelector.add(10, new LookAtEntityGoal(this, PlayerEntity.class, 12.0f));
-		this.goalSelector.add(10, new LookAroundGoal(this));
+		this.goalSelector.add(11, new LookAroundGoal(this));
 		this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
         this.targetSelector.add(2, new AttackWithOwnerGoal(this));
-		this.targetSelector.add(3, new RevengeGoal(this, new Class[0]).setGroupRevenge(new Class[0]));
+		this.targetSelector.add(3, new RevengeGoal(this, new Class[0]));
 		this.targetSelector.add(4, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, 10, true, false, this::shouldAngerAt));
-		this.targetSelector.add(8, new UniversalAngerGoal<CeruleanEntity>(this, true));
+		this.targetSelector.add(5, new UniversalAngerGoal<CeruleanEntity>(this, true));
 	}
 
 	public static DefaultAttributeContainer.Builder createCeruleanAttributes()
 	{
-		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f).add(EntityAttributes.GENERIC_MAX_HEALTH, 16.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0);
+		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f).add(EntityAttributes.GENERIC_MAX_HEALTH, 24.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0);
 	}
 
 	@Override
@@ -128,11 +130,29 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 	{
 		return SoundEvents.BLOCK_AMETHYST_CLUSTER_BREAK;
 	}
-	
+
 	@Override
 	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
-        return (!world.isSkyVisible(getBlockPos()) && this.random.nextFloat() < 0.15f) || this.random.nextFloat() < 0.005f;
+        return this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos()) && world.getBlockState(this.getBlockPos().down()).getBlock() == Blocks.STONE;
+    }
+
+	@Override
+    public boolean canSpawn(WorldView world)
+	{
+        return this.getRandom().nextInt(4) == 0 && !world.containsFluid(this.getBoundingBox()) && world.doesNotIntersectEntities(this);
+    }
+	
+	@Override
+	public boolean canImmediatelyDespawn(double distanceSquared)
+	{
+        return !this.isTamed();
+    }
+
+	@Override
+    public boolean cannotDespawn()
+    {
+        return this.hasVehicle() || this.isTamed();
     }
 	
 	@Override

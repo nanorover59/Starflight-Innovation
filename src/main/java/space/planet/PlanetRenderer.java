@@ -344,21 +344,27 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 
 			if(name.contains("sol"))
 			{
-				if(weather)
-					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
-				else
-				{
-					RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-					RenderSystem.setShader(GameRenderer::getPositionTexShader);
-					RenderSystem.setShaderTexture(0, getTexture(name));
-					bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-					bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
-					bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
-					bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
-					bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-					BufferRenderer.drawWithShader(bufferBuilder.end());
-					RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
-				}
+				if(!weather)
+					brightness = 1.0f;
+				
+				RenderSystem.setShaderColor(brightness, brightness, brightness, 0.95f);
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderTexture(0, getTexture(name + "_haze"));
+				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
+				BufferRenderer.drawWithShader(bufferBuilder.end());
+				RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
+				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShaderTexture(0, getTexture(name));
+				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
+				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
+				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
+				BufferRenderer.drawWithShader(bufferBuilder.end());
 			}
 			else
 			{

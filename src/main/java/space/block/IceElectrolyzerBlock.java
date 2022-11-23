@@ -22,6 +22,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -36,12 +37,14 @@ import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.IceElectrolyzerBlockEntity;
 import space.client.StarflightModClient;
 import space.energy.EnergyNet;
+import space.util.StarflightEffects;
 
 public class IceElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, FluidUtilityBlock
 {
@@ -66,10 +69,11 @@ public class IceElectrolyzerBlock extends BlockWithEntity implements EnergyBlock
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
+		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.ice_electrolyzer.description_1"), Text.translatable("block.space.ice_electrolyzer.description_2"));
 	}
 	
+	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
 		if(!world.isClient)
@@ -82,13 +86,27 @@ public class IceElectrolyzerBlock extends BlockWithEntity implements EnergyBlock
 
 		return ActionResult.SUCCESS;
 	}
-
+	
 	public void openScreen(World world, BlockPos pos, PlayerEntity player)
 	{
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if(blockEntity instanceof IceElectrolyzerBlockEntity)
 			player.openHandledScreen((IceElectrolyzerBlockEntity) blockEntity);
+	}
+	
+	@Override
+	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
+	{
+		if((Boolean) state.get(LIT))
+		{
+			double d = (double) pos.getX() + 0.5;
+			double e = (double) pos.getY();
+			double f = (double) pos.getZ() + 0.5;
+			
+			if(random.nextDouble() < 0.1)
+				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
+		}
 	}
 
 	public BlockState getPlacementState(ItemPlacementContext ctx)

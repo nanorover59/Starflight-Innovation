@@ -9,7 +9,7 @@
       "biomes" : [ {
         "biome" : "space:moon_lowlands",
         "parameters" : {
-          "temperature" : [ -0.5, 1 ],
+          "temperature" : [ -0.75, 1 ],
           "humidity" : [ 0, 0 ],
           "continentalness" : [ -1, -0.25 ],
           "erosion" : [ 0, 1 ],
@@ -20,9 +20,9 @@
       }, {
         "biome" : "space:moon_midlands",
         "parameters" : {
-          "temperature" : [ -0.5, 1 ],
+          "temperature" : [ -0.75, 1 ],
           "humidity" : [ 0, 0 ],
-          "continentalness" : [ -0.25, 0.5 ],
+          "continentalness" : [ -0.25, 0.75 ],
           "erosion" : [ 0, 1 ],
           "weirdness" : [ -0.5, 1 ],
           "depth" : 0,
@@ -31,9 +31,9 @@
       }, {
         "biome" : "space:moon_highlands",
         "parameters" : {
-          "temperature" : [ -0.5, 1 ],
+          "temperature" : [ -0.75, 1 ],
           "humidity" : [ 0, 0 ],
-          "continentalness" : [ 0.5, 1 ],
+          "continentalness" : [ 0.75, 1 ],
           "erosion" : [ -1, 0 ],
           "weirdness" : [ 0, 1 ],
           "depth" : 0,
@@ -42,9 +42,9 @@
       }, {
         "biome" : "space:moon_ice",
         "parameters" : {
-          "temperature" : [ -1, -0.25 ],
+          "temperature" : [ -1, -0.75 ],
           "humidity" : [ 0, 1 ],
-          "continentalness" : [ -0.5, 0.5 ],
+          "continentalness" : [ -0.25, 0.5 ],
           "erosion" : [ -0.5, 0.5 ],
           "weirdness" : [ 0, 1 ],
           "depth" : 0,
@@ -54,9 +54,9 @@
       {
         "biome" : "space:moon_rocks",
         "parameters" : {
-          "temperature" : [ -1, 1 ],
+          "temperature" : [ -0.75, 1 ],
           "humidity" : [ -1, 1 ],
-          "continentalness" : [ 0, 0.25 ],
+          "continentalness" : [ 0, 0.5 ],
           "erosion" : [ 0, 0.5 ],
           "weirdness" : [ 0.25, 1 ],
           "depth" : 0,

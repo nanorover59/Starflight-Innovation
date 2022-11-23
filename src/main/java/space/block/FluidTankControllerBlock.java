@@ -1,6 +1,9 @@
 package space.block;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -8,7 +11,9 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -16,11 +21,13 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.FluidTankInterfaceBlockEntity;
+import space.client.StarflightModClient;
 import space.util.StarflightEffects;
 
 public class FluidTankControllerBlock extends BlockWithEntity
@@ -31,6 +38,12 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	{
 		super(settings);
 		this.capacity = fluidTankCapacity;
+	}
+	
+	@Override
+	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+	{
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.fluid_tank.description_1"), Text.translatable("block.space.fluid_tank.description_2"));
 	}
 
 	@Override

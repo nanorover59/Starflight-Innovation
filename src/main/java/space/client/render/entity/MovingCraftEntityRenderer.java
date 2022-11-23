@@ -5,7 +5,9 @@ import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.texture.SpriteAtlasTexture;
@@ -69,12 +71,13 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		
 		ArrayList<MovingCraftBlockRenderData> blockList = MovingCraftRenderList.getBlocksForEntity(entityUUID);
 		World world = entity.getEntityWorld();
+		Random random = world.getRandom();
 		BlockPos centerBlockPos = entity.getBlockPos();
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
-		Random random = world.getRandom();
+		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, rotationYaw);
+			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, rotationYaw);
 	}
 
 	@SuppressWarnings("deprecation")

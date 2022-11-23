@@ -23,7 +23,7 @@ public class DimensionEffectsMixin
 		MinecraftClient client = MinecraftClient.getInstance();
 		RegistryKey<World> worldKey = client.world.getRegistryKey();
 		
-		if(PlanetList.isOrbit(worldKey) || PlanetList.getPlanetForWorld(worldKey).getSurfacePressure() < 0.1)
+		if(PlanetList.isOrbit(worldKey) || PlanetList.getPlanetForWorld(worldKey).getSurfacePressure() == 0.0)
 		{
 			info.setReturnValue(null);
 			info.cancel();

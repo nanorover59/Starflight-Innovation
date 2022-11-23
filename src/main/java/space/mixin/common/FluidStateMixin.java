@@ -63,7 +63,20 @@ public abstract class FluidStateMixin
 							if(blockState.getBlock() instanceof Waterloggable)
 								world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
 							else
-								world.setBlockState(pos, Blocks.ICE.getDefaultState());
+							{
+								int i = 0;
+								
+								for(Direction d2 : Direction.values())
+					        	{
+									if(d2 != Direction.UP && world.getFluidState(pos.offset(d2)).getFluid() == Fluids.WATER)
+										i++;
+					        	}
+								
+								if(i < 5)
+									world.setBlockState(pos, Blocks.ICE.getDefaultState());
+								else
+									world.setBlockState(pos.up(), Blocks.ICE.getDefaultState());
+							}
 						}
 						else if(temperature >= Planet.TEMPERATE)
 						{

@@ -113,7 +113,7 @@ public class CraterGenerator
 		{
 			final BlockPos.Mutable mutable = new BlockPos.Mutable();
 			BlockPos startPos = chunkPos.getBlockPos(0, surfaceY, 0);
-
+			
 			for(int x = 0; x < 16; x++)
 			{
 				for(int z = 0; z < 16; z++)

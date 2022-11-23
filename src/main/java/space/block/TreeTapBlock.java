@@ -1,11 +1,16 @@
 package space.block;
 
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.WallMountedBlock;
 import net.minecraft.block.Waterloggable;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
@@ -15,6 +20,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,6 +32,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
+import space.client.StarflightModClient;
 import space.item.StarflightItems;
 
 public class TreeTapBlock extends WallMountedBlock implements Waterloggable
@@ -41,6 +48,12 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	{
 		super(settings);
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH).with(RUBBER_SAP, false).with(WATERLOGGED, false)));
+	}
+	
+	@Override
+	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+	{
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.tree_tap.description"));
 	}
 
 	@Override

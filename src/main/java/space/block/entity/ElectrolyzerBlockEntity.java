@@ -93,6 +93,10 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements PoweredBlock
 		else if(world.getBlockEntity(position) instanceof HydrogenInletValveBlockEntity || world.getBlockEntity(position) instanceof OxygenInletValveBlockEntity)
 		{
 			FluidTankControllerBlockEntity blockEntity = ((FluidTankInterfaceBlockEntity) world.getBlockEntity(position)).getFluidTankController();
+			
+			if(blockEntity == null)
+				return toSpread;
+			
 			double capacity = blockEntity.getStorageCapacity();
 			double fluid = blockEntity.getStoredFluid();
 			checkList.add(position);

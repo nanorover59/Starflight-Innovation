@@ -169,8 +169,8 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.GOLD));
-		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.GOLD));
 		tooltip.addAll(textList);
 	}
 }

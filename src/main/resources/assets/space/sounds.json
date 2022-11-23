@@ -1,4 +1,11 @@
 {
+  "current": {
+    "subtitle": "subtitles.space.current",
+    "sounds": [
+      "space:current0",
+      "space:current1"
+    ]
+  },
   "thruster": {
     "subtitle": "subtitles.space.thruster",
     "sounds": [

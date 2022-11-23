@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -31,10 +32,12 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.ElectricFurnaceBlockEntity;
 import space.energy.EnergyNet;
+import space.util.StarflightEffects;
 
 public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 {
@@ -54,11 +57,13 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 		stateManager.add(LIT);
 	}
 
+	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new ElectricFurnaceBlockEntity(pos, state);
 	}
 
+	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
 		if(!world.isClient)
@@ -78,6 +83,20 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 		
 		if(blockEntity instanceof ElectricFurnaceBlockEntity)
 			player.openHandledScreen((ElectricFurnaceBlockEntity) blockEntity);
+	}
+	
+	@Override
+	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
+	{
+		if((Boolean) state.get(LIT))
+		{
+			double d = (double) pos.getX() + 0.5;
+			double e = (double) pos.getY();
+			double f = (double) pos.getZ() + 0.5;
+			
+			if(random.nextDouble() < 0.05)
+				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.1f, 0.5f - 0.1f * random.nextFloat(), true);
+		}
 	}
 
 	public BlockState getPlacementState(ItemPlacementContext ctx)

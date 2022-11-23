@@ -417,8 +417,12 @@ public class RocketEntity extends MovingCraftEntity
 		setThrottle((float) throttle);
 		int yCheck = world.getTopY();
 		
+		// Monitor the current altitude.
 		while(!world.getBlockState(new BlockPos(getX(), yCheck, getZ())).getMaterial().blocksMovement() && yCheck > world.getBottomY())
 			yCheck--;
+		
+		if(gravity == 0.0 && yCheck < arrivalPos.getY())
+			yCheck = arrivalPos.getY();
 		
 		setUserInput(userInput);
 		setAltitude((float) (getY() - lowerHeight - yCheck));
@@ -519,7 +523,9 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		else
 		{
-			double maxG = (gravity / 0.0025) * 2.0 > 20.0 ? (gravity / 0.0025) * 2.0 : 20.0; // The maximum G-force a rocket is allowed to experience during launch. Used to lower the throttle if necessary.
+			// The maximum G-force a rocket is allowed to experience during launch. Used to lower the throttle if necessary.
+			// A lower constraint of 4m/s^2 is applied.
+			double maxG = (gravity / 0.0025) * 2.0 < 4.0 ? 4.0 : (gravity / 0.0025) * 2.0;
 			
 			if((changedDimension ? nominalThrustEnd : nominalThrustStart) / craftMass > maxG)
 				throttle = changedDimension ? (craftMass * maxG) / nominalThrustEnd : (craftMass * maxG) / nominalThrustStart;
@@ -661,7 +667,7 @@ public class RocketEntity extends MovingCraftEntity
 		for(Entity passenger : this.getPassengerList())
 		{
 			updatePassengerPosition(passenger);
-			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
+			passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
 			passenger.fallDistance = 0.0f;
