@@ -116,7 +116,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 	protected static int initializeFluidTank(World world, BlockPos position, String fluidName, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
-		int limit = 2048;
+		int limit = 8192;
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
 		fluidTankController.setStoredFluid(0);

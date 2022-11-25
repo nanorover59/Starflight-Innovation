@@ -3,6 +3,8 @@ package space.mixin.client;
 import java.util.ArrayList;
 
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -114,7 +116,7 @@ public abstract class WorldRendererMixin
 			
 			float rainGradient = starrySky ? 0.0f : this.world.getRainGradient(tickDelta);
 			float s = cloudySky ? 0.0f : (1.0f - rainGradient);
-			float starFactor = starrySky ? 0.8f : this.world.method_23787(tickDelta) * s * 1.6f;
+			float starFactor = starrySky ? 1.0f : this.world.method_23787(tickDelta) * s * 1.8f;
 
 			if(starFactor > 0.0f)
 			{

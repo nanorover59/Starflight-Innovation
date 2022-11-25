@@ -2,7 +2,6 @@
   "type" : "space:mars",
   "generator" : {
     "type" : "minecraft:noise",
-    "seed" : 2066,
     "settings" : "space:mars",
     "biome_source" : {
       "type" : "minecraft:multi_noise",

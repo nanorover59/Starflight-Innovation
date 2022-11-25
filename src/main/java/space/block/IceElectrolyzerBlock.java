@@ -195,13 +195,13 @@ public class IceElectrolyzerBlock extends BlockWithEntity implements EnergyBlock
 	}
 
 	@Override
-	public double getPowerOutput(WorldAccess world, BlockPos pos, BlockState state)
+	public double getPowerOutput(World world, BlockPos pos, BlockState state)
 	{
 		return 0;
 	}
 
 	@Override
-	public double getPowerDraw(WorldAccess world, BlockPos pos, BlockState state)
+	public double getPowerDraw(World world, BlockPos pos, BlockState state)
 	{
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		

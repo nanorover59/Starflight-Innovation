@@ -17,19 +17,18 @@ import space.planet.PlanetList;
 @Mixin(World.class)
 public abstract class WorldMixin implements WorldAccess, AutoCloseable
 {
+	@Shadow @Final MutableWorldProperties properties;
 	@Shadow RegistryKey<World> registryKey;
-	@Shadow @Final protected MutableWorldProperties properties;
 	
-	@Inject(method = "getSkyAngle(F)F", at = @At("HEAD"), cancellable = true)
-	public void getSkyAngleInject(CallbackInfoReturnable<Float> info)
+	@Override
+	public float getSkyAngle(float f)
 	{
 		Planet p = PlanetList.getPlanetForWorld(registryKey);
 		
 		if(p != null)
-		{
-			info.setReturnValue((float) ((PlanetList.isOrbit(registryKey) ? p.sunAngleOrbit : p.sunAngle) / (Math.PI * 2.0)));
-			info.cancel();
-		}
+			return (float) ((PlanetList.isOrbit(registryKey) ? p.sunAngleOrbit : p.sunAngle) / (Math.PI * 2.0));
+		
+		return this.getDimension().getSkyAngle(this.getLunarTime());
 	}
 	
 	@Inject(method = "getTimeOfDay()J", at = @At("HEAD"), cancellable = true)

@@ -274,14 +274,15 @@ public class StarflightModClient implements ClientModInitializer
 	 */
 	private static BuiltBuffer renderStars(BufferBuilder buffer)
 	{
-		Random random = Random.create(20844L);
+		Random random = Random.create(2048L);
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+		int count = 0;
 
-		for(int i = 0; i < 4500; i++)
+		for(int i = 0; i < 4600; i++)
 		{
 			int frame = 0;
 
-			while(random.nextFloat() < 0.3 && frame < 3)
+			while(random.nextFloat() < 0.2 && frame < 3)
 				frame++;
 			
 			double d = random.nextFloat() * 2.0f - 1.0f;
@@ -323,8 +324,11 @@ public class StarflightModClient implements ClientModInitializer
 				double ah = ac * n + ae * o;
 				buffer.vertex(j + af, k + ad, l + ah).texture(v == 0 || v == 3 ? endFrame : startFrame, v < 2 ? 0.0f : 1.0f).next();
 			}
+			
+			count++;
 		}
 		
+		System.out.println("Stars:" + count);
 		return buffer.end();
 	}
 }

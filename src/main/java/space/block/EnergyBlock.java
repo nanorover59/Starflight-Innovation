@@ -8,9 +8,9 @@ import net.minecraft.world.WorldAccess;
 
 public interface EnergyBlock
 {
-	double getPowerOutput(WorldAccess world, BlockPos pos, BlockState state);
+	double getPowerOutput(World world, BlockPos pos, BlockState state);
 	
-	double getPowerDraw(WorldAccess world, BlockPos pos, BlockState state);
+	double getPowerDraw(World world, BlockPos pos, BlockState state);
 	
 	boolean isSideInput(WorldAccess world, BlockPos pos, BlockState state, Direction direction);
 	

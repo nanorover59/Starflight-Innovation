@@ -2,7 +2,6 @@
   "type" : "space:moon",
   "generator" : {
     "type" : "minecraft:noise",
-    "seed" : 3633,
     "settings" : "space:moon",
     "biome_source" : {
       "type" : "minecraft:multi_noise",

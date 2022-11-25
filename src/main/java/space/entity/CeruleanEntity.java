@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
@@ -45,14 +44,10 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
-import net.minecraft.world.event.GameEvent;
 import space.item.StarflightItems;
 
 public class CeruleanEntity extends TameableEntity implements Angerable
@@ -267,57 +262,5 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 		}
 		
 		return ActionResult.SUCCESS;
-	}
-
-	@Override
-	protected void mobTick()
-	{
-		if(this.world.isDay() && this.world.isSkyVisible(this.getBlockPos()) && this.random.nextFloat() < 0.005f)
-		{
-			this.setTarget(null);
-			this.teleportRandomly();
-		}
-
-		super.mobTick();
-	}
-
-	protected boolean teleportRandomly()
-	{
-		if(this.world.isClient || this.isTamed())
-			return false;
-
-		double x = this.getX() + (this.random.nextDouble() - 0.5) * 64.0;
-		double y = this.getY() + (double) (this.random.nextInt(128) - 64);
-		double z = this.getZ() + (this.random.nextDouble() - 0.5) * 64.0;
-		return this.teleportTo(x, y, z);
-	}
-
-	private boolean teleportTo(double x, double y, double z)
-	{
-		BlockPos.Mutable mutable = new BlockPos.Mutable(x, y, z);
-
-		while(mutable.getY() > this.world.getBottomY() && this.world.getBlockState(mutable).getMaterial().blocksMovement())
-			mutable.move(Direction.DOWN);
-
-		BlockState blockState = this.world.getBlockState(mutable);
-
-		if(blockState.getMaterial().blocksMovement())
-			return false;
-
-		Vec3d vec3d = this.getPos();
-		boolean bl = this.teleport(x, y, z, true);
-
-		if(bl)
-		{
-			this.world.emitGameEvent(GameEvent.TELEPORT, vec3d, GameEvent.Emitter.of(this));
-
-			if(!this.isSilent())
-			{
-				this.world.playSound(null, this.prevX, this.prevY, this.prevZ, SoundEvents.ENTITY_ENDERMAN_TELEPORT, this.getSoundCategory(), 1.0f, 1.0f);
-				this.playSound(SoundEvents.ENTITY_ENDERMAN_TELEPORT, 1.0f, 1.0f);
-			}
-		}
-
-		return bl;
 	}
 }

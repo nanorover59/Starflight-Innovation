@@ -132,7 +132,7 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 	}
 	
 	@Override
-	public double getPowerOutput(WorldAccess world, BlockPos pos, BlockState state)
+	public double getPowerOutput(World world, BlockPos pos, BlockState state)
 	{
 		if(!world.getDimension().hasSkyLight() || !world.isSkyVisible(pos.up()))
 			return 0;
@@ -156,7 +156,7 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 	}
 
 	@Override
-	public double getPowerDraw(WorldAccess world, BlockPos pos, BlockState state)
+	public double getPowerDraw(World world, BlockPos pos, BlockState state)
 	{
 		return 0;
 	}
