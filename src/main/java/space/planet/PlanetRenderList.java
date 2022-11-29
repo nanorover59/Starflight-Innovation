@@ -93,7 +93,9 @@ public class PlanetRenderList
 			}
 			
 			planetListUnsorted.addAll(planetList);
-			Collections.sort(planetList);
+			
+			if(viewpoint != null)
+				Collections.sort(planetList);
 		}
 		else
 		{

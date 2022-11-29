@@ -116,7 +116,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 	protected static int initializeFluidTank(World world, BlockPos position, String fluidName, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
-		int limit = 8192;
+		int limit = 4096;
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
 		fluidTankController.setStoredFluid(0);
@@ -200,9 +200,12 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 	private static void checkInterior(WorldAccess world, BlockPos position, ArrayList<BlockPos> checkList, ArrayList<BlockPos> actionList, int limit)
 	{
+		if(checkList.size() > limit || checkList.contains(position) || actionList.contains(position))
+			return;
+		
 		BlockEntity blockEntity = world.getBlockEntity(position);
 
-		if(blockEntity != null && !actionList.contains(position) && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof FluidTankInterfaceBlockEntity))
+		if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof FluidTankInterfaceBlockEntity))
 		{
 			actionList.add(position);
 			return;
@@ -210,9 +213,6 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			return;
 
 		checkList.add(position);
-
-		if(checkList.size() >= limit)
-			return;
 
 		for(Direction direction : Direction.values())
 			checkInterior(world, position.offset(direction), checkList, actionList, limit);

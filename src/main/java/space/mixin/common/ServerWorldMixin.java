@@ -41,10 +41,13 @@ public abstract class ServerWorldMixin extends World
 		super(properties, registryRef, dimension, profiler, isClient, debugWorld, seed, maxChainedNeighborUpdates);
 	}
 	
+	/**
+	 * Inject into the getSeed() function to ensure a unique world generation seed for each dimension.
+	 */
 	@Inject(method = "getSeed()J", at = @At("HEAD"), cancellable = true)
 	private void getSeedInject(CallbackInfoReturnable<Long> info)
 	{
-		if(!seedStored)
+		if(!seedStored && getRegistryKey() != OVERWORLD)
 		{
 			OptionalLong newSeedOptional = GeneratorOptions.parseSeed(getRegistryKey().getValue().getPath()); 
 			worldSeed = BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed() + newSeedOptional.getAsLong());

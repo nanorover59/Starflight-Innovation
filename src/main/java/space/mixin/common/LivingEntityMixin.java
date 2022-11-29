@@ -32,6 +32,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.entity.StarflightEntities;
 import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 import space.planet.Planet;
@@ -148,7 +149,13 @@ public abstract class LivingEntityMixin extends Entity
 				double oxygenUsed = 0.0;
 				
 				if(spaceSuitCheck < 4 && !(thisEntity.isSubmergedInWater() || habitableAir) && !creativePlayer)
-					thisEntity.damage(DamageSource.GENERIC, 0.5f);
+				{
+					if(!thisEntity.isInLava())
+						thisEntity.setFireTicks(0);
+					
+					if(!thisEntity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
+						thisEntity.damage(DamageSource.GENERIC, 0.5f);
+				}
 				else if(spaceSuitCheck == 4 && (thisEntity.isSubmergedInWater() || !habitableAir) && !creativePlayer)
 					oxygenUsed += 4.0 / 24000.0; // 4kg of oxygen should last for 20 minutes (24000 ticks) without using maneuvering jets.
 				

@@ -35,7 +35,7 @@ public class StarflightItems
 	public static final Item ARRIVAL_CARD = new ArrivalCardItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item WAND = new MovingCraftWandItem(new FabricItemSettings());
 	
-	// Space Suit Armor Items
+	// Armor Items
     public static final ArmorMaterial SPACE_SUIT_ARMOR_MATERIAL = new SpaceSuitArmorMaterial();
     public static final Item SPACE_SUIT_HELMET = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.HEAD, new Item.Settings().group(StarflightMod.ITEM_GROUP));
     public static final Item SPACE_SUIT_CHESTPLATE = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, EquipmentSlot.CHEST, new Item.Settings().group(StarflightMod.ITEM_GROUP));
@@ -51,10 +51,13 @@ public class StarflightItems
 	
 	// Item Tags
 	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(Registry.ITEM_KEY, new Identifier(StarflightMod.MOD_ID, "no_oxygen_fuel"));
+	public static final TagKey<Item> COMBUSTION_ITEM_TAG = TagKey.of(Registry.ITEM_KEY, new Identifier(StarflightMod.MOD_ID, "combustion"));
     
 	public static void initializeItems()
 	{
 		String mod_id = StarflightMod.MOD_ID;
+		
+		// Items
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "aluminum_ingot"), ALUMINUM_INGOT);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "bauxite"), BAUXITE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "sulfur"), SULFUR);
@@ -74,13 +77,16 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "arrival_card"), ARRIVAL_CARD);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "item_wand"), WAND);
 		
+		// Armor Items
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_helmet"), SPACE_SUIT_HELMET);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_chestplate"), SPACE_SUIT_CHESTPLATE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_leggings"), SPACE_SUIT_LEGGINGS);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "space_suit_boots"), SPACE_SUIT_BOOTS);
 		
+		// Structure Placer Items
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "rocket_1"), ROCKET_1);
 		
+		// Spawn Egg Items
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "cerulean_spawn_egg"), CERULEAN_SPAWN_EGG);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "dust_spawn_egg"), DUST_SPAWN_EGG);
 	}

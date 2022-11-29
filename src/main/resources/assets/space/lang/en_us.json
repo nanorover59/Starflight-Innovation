@@ -134,6 +134,7 @@
 	"item.space.structure_placer.description": "Places a pre-built structure.",
 	"item.space.structure_placer.size": "Size: ",
 	"item.space.structure_placer.obstructed": "The construction volume is not empty.",
+	"item.space.combustion.message": "You attempt to start a fire with no oxygen.",
 	"block.space.hydrogen_container.level": "H2: ",
 	"block.space.oxygen_container.level": "O2: ",
 	"block.space.battery.level": "Charge: ",

@@ -1,8 +1,14 @@
 package space.client;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+
+import com.google.gson.JsonSyntaxException;
+import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
@@ -17,6 +23,7 @@ import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderEffect;
 import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.BufferBuilder;
@@ -73,7 +80,6 @@ public class StarflightModClient implements ClientModInitializer
 	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_LEFT, "key.category.space"));
 	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT, "key.category.space"));
 	
-	//public static final KeyBinding TOOLTIP_KEY = KeyBindingHelper.registerKeyBinding(new StickyKeyBinding("key.space.tooltip", GLFW.GLFW_KEY_LEFT_CONTROL, "key.category.space", () -> true));
 	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
 	public static final ScreenHandlerType<StirlingEngineScreenHandler> STIRLING_ENGINE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "stirling_engine"), StirlingEngineScreenHandler::new);
 	public static final ScreenHandlerType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "electric_furnace"), ElectricFurnaceScreenHandler::new);
@@ -86,6 +92,8 @@ public class StarflightModClient implements ClientModInitializer
 	
 	public static VertexBuffer stars;
 	public static VertexBuffer milkyWay;
+	
+	@Nullable public static ShaderEffect bloomShader;
 	
 	@Override
 	public void onInitializeClient()
@@ -209,6 +217,31 @@ public class StarflightModClient implements ClientModInitializer
 			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
 	}
 	
+	public static void loadBloomShader(MinecraftClient client)
+	{
+		if(bloomShader != null)
+			bloomShader.close();
+		
+		Logger logger = LogUtils.getLogger();
+        Identifier identifier = new Identifier("shaders/post/bloom.json");
+        
+        try
+        {
+        	bloomShader = new ShaderEffect(client.getTextureManager(), client.getResourceManager(), client.getFramebuffer(), identifier);
+        	bloomShader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
+        }
+        catch (IOException iOException)
+        {
+        	logger.warn("Failed to load shader: {}", (Object) identifier, (Object) iOException);
+            bloomShader = null;
+        }
+        catch (JsonSyntaxException jsonSyntaxException)
+        {
+        	logger.warn("Failed to parse shader: {}", (Object) identifier, (Object) jsonSyntaxException);
+            bloomShader = null;
+        }
+	}
+	
 	public static void initializeBuffers()
 	{
 		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
@@ -276,9 +309,8 @@ public class StarflightModClient implements ClientModInitializer
 	{
 		Random random = Random.create(2048L);
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-		int count = 0;
 
-		for(int i = 0; i < 4600; i++)
+		for(int i = 0; i < 4000; i++)
 		{
 			int frame = 0;
 
@@ -324,11 +356,8 @@ public class StarflightModClient implements ClientModInitializer
 				double ah = ac * n + ae * o;
 				buffer.vertex(j + af, k + ad, l + ah).texture(v == 0 || v == 3 ? endFrame : startFrame, v < 2 ? 0.0f : 1.0f).next();
 			}
-			
-			count++;
 		}
 		
-		System.out.println("Stars:" + count);
 		return buffer.end();
 	}
 }

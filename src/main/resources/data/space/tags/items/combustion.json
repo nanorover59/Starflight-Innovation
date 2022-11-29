@@ -1,0 +1,13 @@
+{
+    "replace": false,
+    "values": [
+        "minecraft:flint_and_steel",
+        "minecraft:fire_charge",
+        "minecraft:torch",
+        "minecraft:soul_torch",
+        "minecraft:lantern",
+        "minecraft:soul_lantern",
+        "minecraft:campfire",
+        "minecraft:soul_campfire"
+    ]
+}

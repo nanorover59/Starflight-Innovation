@@ -162,6 +162,7 @@ public class StarflightBlocks
 	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
 	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
 	public static final TagKey<Block> NO_RECURSIVE_SEARCH_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "no_recursive_search_blocks"));
+	public static final TagKey<Block> INSTANT_REMOVE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "instant_remove_blocks"));
 	
 	// Fluid Storage Values
 	public static final double HYDROGEN_TANK_CAPACITY = 64.0;

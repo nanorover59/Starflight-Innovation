@@ -437,7 +437,6 @@ public class MovingCraftEntity extends Entity
 		// Snap the rotation of this entity into place and then dismount all passengers.
 		this.setCraftRoll(0.0f);
 		this.setCraftPitch(0.0f);
-		//this.setCraftYaw(rotationSteps * (float) (Math.PI / 2.0));
 		
 		for(Entity passenger : this.getPassengerList())
 		{

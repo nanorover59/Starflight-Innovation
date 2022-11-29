@@ -3,8 +3,6 @@ package space.mixin.client;
 import java.util.ArrayList;
 
 import org.jetbrains.annotations.Nullable;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL20;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -30,6 +28,7 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
@@ -121,7 +120,7 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
-				float milkyWayFactor = 0.45f;
+				float milkyWayFactor = 0.4f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
@@ -200,9 +199,17 @@ public abstract class WorldRendererMixin
 				matrices.pop();
 			}
 			
+			// Apply the bloom shader effect for player's with fabulous graphics.
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.0f)
+			{
+				StarflightModClient.bloomShader.render(tickDelta);
+				client.getFramebuffer().beginWrite(false);
+			}
+			
 			// End of custom sky rendering.
 			RenderSystem.enableTexture();
 			RenderSystem.depthMask(true);
+			RenderSystem.disableBlend();
 			info.cancel();
 		}
 	}
@@ -214,9 +221,22 @@ public abstract class WorldRendererMixin
 			info.cancel();
 	}
 	
-	@Inject(method = "renderStars()V", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "renderStars()V", at = @At("HEAD"))
 	public void renderStarsInject(CallbackInfo info)
 	{
 		StarflightModClient.initializeBuffers();
+	}
+	
+	@Inject(method = "reload(Lnet/minecraft/resource/ResourceManager;)V", at = @At("TAIL"))
+	public void reloadInject(ResourceManager manager, CallbackInfo info)
+	{
+		StarflightModClient.loadBloomShader(client);
+	}
+	
+	@Inject(method = "onResized(II)V", at = @At("TAIL"))
+	public void onResizedInject(int width, int height, CallbackInfo info)
+	{
+		if(StarflightModClient.bloomShader != null)
+			StarflightModClient.bloomShader.setupDimensions(width, height);
 	}
 }

@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
+import space.planet.Planet;
 import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,8 +23,9 @@ public class DimensionEffectsMixin
 	{
 		MinecraftClient client = MinecraftClient.getInstance();
 		RegistryKey<World> worldKey = client.world.getRegistryKey();
+		Planet planet = PlanetList.getPlanetForWorld(worldKey);
 		
-		if(PlanetList.isOrbit(worldKey) || PlanetList.getPlanetForWorld(worldKey).getSurfacePressure() == 0.0)
+		if(planet != null && (PlanetList.isOrbit(worldKey) || planet.getSurfacePressure() == 0.0))
 		{
 			info.setReturnValue(null);
 			info.cancel();

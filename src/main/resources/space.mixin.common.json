@@ -23,9 +23,9 @@
     "EntityMixin",
     "FluidStateMixin",
     "FallingBlockMixin",
-    "CampfireBlockMixin",
     "AbstractFurnaceBlockEntityMixin",
-    "AbstractFurnaceBlockEntityAccessorMixin"
+    "AbstractFurnaceBlockEntityAccessorMixin",
+    "ServerPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 0

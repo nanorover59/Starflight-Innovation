@@ -450,7 +450,7 @@ public class Planet
 		Vec3d viewpoint = fromOrbit ? parkingOrbitViewpoint : surfaceViewpoint;
 		double azimuthOfViewpoint = Math.atan2(viewpoint.getZ() - absolutePosition.getZ(), viewpoint.getX() - absolutePosition.getX());
 		double azimuthOfStar = Math.atan2(starPosition.getZ() - absolutePosition.getZ(), starPosition.getX() - absolutePosition.getX());
-		double trueAzimuth = azimuthOfStar - azimuthOfViewpoint;
+		double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
 		
 		if(trueAzimuth < 0.0)
 			trueAzimuth += Math.PI * 2.0;

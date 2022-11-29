@@ -17,7 +17,6 @@ import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidContainerBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
-import space.entity.StarflightEntities;
 import space.planet.Planet;
 import space.planet.PlanetList;
 
@@ -50,10 +49,7 @@ public class AirUtil
 		if(currentPlanet == null)
 			return true;
 		
-		if(entity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
-			return true;
-		
-		if(currentPlanet.getSurfacePressure() > 0.6 && currentPlanet.hasOxygen() && !PlanetList.isOrbit(world.getRegistryKey()))
+		if(currentPlanet.getSurfacePressure() > 0.5 && currentPlanet.hasOxygen() && !PlanetList.isOrbit(world.getRegistryKey()))
 			return true;
 		
 		for(Direction direction : Direction.values())
@@ -102,21 +98,29 @@ public class AirUtil
 	 */
 	public static void recursiveRemove(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
 	{
-		if(world.getBlockState(position).getBlock() != StarflightBlocks.HABITABLE_AIR || checkList.contains(position))
+		if(checkList.size() >= limit || checkList.contains(position) || world.getBlockState(position).getBlock() != StarflightBlocks.HABITABLE_AIR)
 			return;
 		
 		checkList.add(position);
 		world.setBlockState(position, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 		
-		if(checkList.size() >= limit)
-			return;
-		
 		for(Direction direction : Direction.values())
 		{
-			if(world.getBlockState(position.offset(direction)).getBlock() != StarflightBlocks.HABITABLE_AIR)
-				world.updateNeighbor(position.offset(direction), Blocks.AIR, position);
+			BlockPos offset = position.offset(direction);
+			BlockState blockState = world.getBlockState(offset);
+			
+			if(blockState.getBlock() != StarflightBlocks.HABITABLE_AIR)
+			{
+				world.updateNeighbor(offset, Blocks.AIR, position);
+				
+				if(blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
+				{
+					world.removeBlock(offset, false);
+					Block.dropStacks(blockState, world, offset, world.getBlockEntity(offset));
+				}
+			}
 			else
-				recursiveRemove(world, position.offset(direction), checkList, limit);
+				recursiveRemove(world, offset, checkList, limit);
 		}
 	}
 	
