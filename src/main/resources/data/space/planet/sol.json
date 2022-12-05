@@ -1,0 +1,20 @@
+{
+    "name": "sol",
+    "parentName": "null",
+    "mass": 1.98847e30,
+    "radius": 696.34e6,
+    "parkingOrbitRadius": 1000e6,
+    "periapsis": 0,
+    "apoapsis": 0,
+    "argumentOfPeriapsis": 0,
+    "trueAnomaly": 0,
+    "ascendingNode": 0,
+    "inclination": 0,
+    "isTidallyLocked": false,
+    "obliquity": -0.1265364,
+    "rotationRate": 2.9089e-6,
+    "simpleTexture": true,
+    "drawClouds": false,
+    "cloudRotationRate": 0,
+    "dimensionData": []
+}

@@ -10,7 +10,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.projectile.thrown.ThrownEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -30,19 +30,19 @@ public abstract class ThrownEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
-			if(currentPlanet != null)
+			if(data != null && data.overridePhysics())
 			{
 				Vec3d position = this.getPos();
 				Vec3d velocity = this.getVelocity();
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = this.isTouchingWater() ? 0.8f : 1.0 / (1.0 + (0.01 * airMultiplier));
 				this.setVelocity(velocity.multiply(d));
 
 				if(!this.hasNoGravity())
 				{
-					double gravity = PlanetList.isOrbit(this.world.getRegistryKey()) ? 0.0f : (float) (0.04 * currentPlanet.getSurfaceGravity());
+					double gravity = data.isOrbit() ? 0.0f : (float) (0.04 * data.getPlanet().getSurfaceGravity());
 					this.addVelocity(0.0, -gravity, 0.0);
 				}
 				

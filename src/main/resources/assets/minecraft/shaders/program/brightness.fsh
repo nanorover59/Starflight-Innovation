@@ -2,8 +2,6 @@
 
 uniform sampler2D DiffuseSampler;
 
-uniform vec2 InSize;
-
 in vec2 texCoord;
 
 out vec4 fragColor;

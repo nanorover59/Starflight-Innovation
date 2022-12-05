@@ -35,7 +35,7 @@ import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 import space.item.StarflightItems;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.StirlingEngineScreenHandler;
 
@@ -254,9 +254,9 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	{
 		if(world != null && !fuel.isIn(StarflightItems.NO_OXYGEN_FUEL_ITEM_TAG))
 		{
-			Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
-			if((planet != null && !planet.hasOxygen()) || PlanetList.isOrbit(world.getRegistryKey()))
+			if((data != null && !data.hasOxygen()) || data.isOrbit())
 				return 0;
 		}
 		

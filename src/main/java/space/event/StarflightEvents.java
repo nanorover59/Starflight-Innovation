@@ -31,6 +31,7 @@ public class StarflightEvents
 	    	if(planetFile.exists())
 	    		planetData = ESSHelper.readCompound(planetFile);
 	    	
+	    	PlanetList.initialize(server.getResourceManager());
 	    	PlanetList.loadData(planetData);
 	    	
 	    	File energyFile = new File(server.getSavePath(WorldSavePath.ROOT).toString() + "/space/energy.dat");

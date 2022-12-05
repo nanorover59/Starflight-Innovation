@@ -3,7 +3,6 @@
 uniform sampler2D DiffuseSampler;
 uniform sampler2D BloomSampler;
 
-uniform vec2 InSize;
 uniform float BloomIntensity;
 
 in vec2 texCoord;

@@ -15,7 +15,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.world.World;
 import space.item.StarflightItems;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -25,9 +25,9 @@ public class ServerPlayerInteractionManagerMixin
 	@Inject(method = "interactBlock(Lnet/minecraft/server/network/ServerPlayerEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/Hand;Lnet/minecraft/util/hit/BlockHitResult;)Lnet/minecraft/util/ActionResult;", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;useOnBlock(Lnet/minecraft/item/ItemUsageContext;)Lnet/minecraft/util/ActionResult;"), cancellable = true)
 	private void interactBlockInject(ServerPlayerEntity player, World world, ItemStack stack, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> info)
 	{
-		Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 		
-		if(planet != null && stack.isIn(StarflightItems.COMBUSTION_ITEM_TAG) && !AirUtil.canEntityBreathe(player, planet))
+		if(data != null && data.overridePhysics() && stack.isIn(StarflightItems.COMBUSTION_ITEM_TAG) && !AirUtil.canEntityBreathe(player, data))
 		{
 			MutableText text = Text.translatable("item.space.combustion.message");
 			player.sendMessage(text, true);

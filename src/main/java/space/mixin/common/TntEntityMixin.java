@@ -9,7 +9,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -29,10 +29,10 @@ public abstract class TntEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
-			if(currentPlanet != null)
-				velocity = velocity.add(0.0, 0.04 - 0.04 * (PlanetList.isOrbit(this.world.getRegistryKey()) ? 0.0 : currentPlanet.getSurfaceGravity()), 0.0);
+			if(data != null && data.overridePhysics())
+				velocity = velocity.add(0.0, 0.04 - 0.04 * (data.isOrbit() ? 0.0 : data.getPlanet().getSurfaceGravity()), 0.0);
 		}
 		
 		return velocity;
@@ -43,11 +43,11 @@ public abstract class TntEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
-			if(currentPlanet != null && !this.onGround)
+			if(data != null && data.overridePhysics() && !this.onGround)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = 1.0 / (1.0 + (0.02 * airMultiplier));
 				velocity = this.getVelocity().multiply(d);
 			}

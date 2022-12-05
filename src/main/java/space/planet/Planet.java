@@ -51,10 +51,6 @@ public class Planet
 	private Vec3d parkingOrbitViewpoint;
 	private int temperatureCategory;
 	private double surfacePressure;
-	private boolean hasOxygen;
-	private boolean hasLowClouds;
-	private boolean hasCloudCover;
-	private boolean hasWeather;
 	private boolean simpleTexture;
 	private boolean drawClouds;
 	private double cloudRotation;
@@ -65,11 +61,14 @@ public class Planet
 	public double sunAngle;
 	public double sunAngleOrbit;
 	
-	public Planet(String name_, String parentName_, int satelliteLevel_, double mass_, double radius_, double parkingOrbitRadius_)
+	private PlanetDimensionData orbit;
+	private PlanetDimensionData surface1;
+	private PlanetDimensionData surface2;
+	
+	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_)
 	{
 		name = name_;
 		parentName = parentName_;
-		satelliteLevel = satelliteLevel_;
 		mass = mass_;
 		radius = radius_;
 		parkingOrbitRadius = radius + parkingOrbitRadius_;
@@ -118,16 +117,6 @@ public class Planet
 		parkingOrbitAngle = 0.0;
 	}
 	
-	public void setAtmosphereParameters(int temperatureCategory_, double surfacePressure_, boolean hasOxygen_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_)
-	{
-		temperatureCategory = temperatureCategory_;
-		surfacePressure = surfacePressure_;
-		hasOxygen = hasOxygen_;
-		hasLowClouds = hasLowClouds_;
-		hasCloudCover = hasCloudCover_;
-		hasWeather = hasWeather_;
-	}
-	
 	public void setDecorativeParameters(boolean simpleTexture_, boolean drawClouds_, double cloudRotationRate_)
 	{
 		simpleTexture = simpleTexture_;
@@ -138,11 +127,46 @@ public class Planet
 		cloudTimer = 6000;
 	}
 	
+	public PlanetDimensionData getOrbit()
+	{
+		return orbit;
+	}
+
+	public void setOrbit(PlanetDimensionData orbit)
+	{
+		this.orbit = orbit.forPlanet(this);
+	}
+
+	public PlanetDimensionData getSurface1()
+	{
+		return surface1;
+	}
+
+	public void setSurface1(PlanetDimensionData surface1)
+	{
+		this.surface1 = surface1.forPlanet(this);
+	}
+
+	public PlanetDimensionData getSurface2()
+	{
+		return surface2;
+	}
+
+	public void setSurface2(PlanetDimensionData surface2)
+	{
+		this.surface2 = surface2.forPlanet(this);
+	}
+	
+	public void setSatelliteLevel(int level)
+	{
+		this.satelliteLevel = level;
+	}
+	
 	public void linkSatellites()
 	{
 		for(Planet p : PlanetList.getPlanets())
 		{
-			if(p.parentName == name)
+			if(p.parentName.equals(name))
 			{
 				satellites.add(p);
 				p.parent = this;
@@ -173,6 +197,8 @@ public class Planet
 	{
 		if(!data.hasName(name) || checkList.contains(name))
 			return;
+		
+		System.out.println("Loading: " + name + " " + satelliteLevel + " " + satellites.size());
 		
 		DataCompound planetData = data.getDataCompound(name);
 		position = new Vec3d(planetData.getDouble("positionX"), planetData.getDouble("positionY"), planetData.getDouble("positionZ"));
@@ -379,32 +405,36 @@ public class Planet
 		return temperatureCategory;
 	}
 	
-	/**
-	 * Get the surface atmospheric pressure of this object in multiples of Earth's surface pressure at sea level.
-	 */
 	public double getSurfacePressure()
 	{
-		return surfacePressure;
-	}
-	
-	public boolean hasOxygen()
-	{
-		return hasOxygen;
+		if(surface1 != null)
+			return surface1.getPressure();
+		else
+			return 1.0;
 	}
 	
 	public boolean hasLowClouds()
 	{
-		return hasLowClouds;
+		if(surface1 != null)
+			return surface1.hasLowClouds();
+		else
+			return true;
 	}
 	
 	public boolean hasCloudCover()
 	{
-		return hasCloudCover;
+		if(surface1 != null)
+			return surface1.isCloudy();
+		else
+			return false;
 	}
 	
 	public boolean hasWeather()
 	{
-		return hasWeather;
+		if(surface1 != null)
+			return surface1.hasWeather();
+		else
+			return true;
 	}
 	
 	public boolean hasSimpleTexture()
@@ -437,7 +467,7 @@ public class Planet
 		
 		double d = getPosition().length();
 		d /= 1.496e11; // Convert the distance from meters to astronomical units.
-		return (1.0 / Math.pow(d, 2.0)) * (hasCloudCover ? 0.5 : 1.0);
+		return (1.0 / Math.pow(d, 2.0)) * (hasCloudCover() ? 0.5 : 1.0);
 	}
 	
 	/**
@@ -478,6 +508,8 @@ public class Planet
 	{
 		if(checkList.contains(name))
 			return;
+		
+		System.out.println(name + " " + satelliteLevel);
 		
 		if(satelliteLevel > 0)
 		{
@@ -642,7 +674,7 @@ public class Planet
 		
 		for(Planet s : getSatellites())
 		{
-			if(s == target)
+			if(s.equals(target))
 				b = true;
 			else if(!s.satellites.isEmpty())
 				b = s.recursiveSearch(target, searchList);
@@ -670,7 +702,7 @@ public class Planet
 		
 		while(true)
 		{
-			if(p == other)
+			if(p.equals(other))
 				return p.dVTransfer(orbitRadius, p.parkingOrbitRadius, esc1, 0) + dvEsc1;
 			
 			ArrayList<Planet> searchList = new ArrayList<Planet>();

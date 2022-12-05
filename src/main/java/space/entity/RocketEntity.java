@@ -37,7 +37,7 @@ import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.HydrogenTankBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 import space.util.StarflightEffects;
@@ -104,8 +104,10 @@ public class RocketEntity extends MovingCraftEntity
 		BlockPos max = new BlockPos(blockPosList.get(0));
 		
 		// Define maximum thrust values for the atmospheric pressure in the start dimension and the end dimension.
-    	double atmosphereStart = PlanetList.isOrbit(world.getRegistryKey()) ? 0.0 : PlanetList.getPlanetForWorld(world.getRegistryKey()).getSurfacePressure();
-    	double atmosphereEnd = PlanetList.isOrbit(nextDimension) ? 0.0 : PlanetList.getPlanetForWorld(nextDimension).getSurfacePressure();
+		PlanetDimensionData dataStart = PlanetList.getDimensionDataForWorld(world);
+		PlanetDimensionData dataEnd = PlanetList.getDimensionDataForWorld(world.getServer().getWorld(nextDimension));
+    	double atmosphereStart = dataStart.isOrbit() ? 0.0 : dataStart.getPressure();
+    	double atmosphereEnd = dataEnd.isOrbit() ? 0.0 : dataEnd.getPressure();
     	double massFlowSumStart = 0;
     	double massFlowSumEnd = 0;
     	
@@ -343,6 +345,7 @@ public class RocketEntity extends MovingCraftEntity
 		move(MovementType.SELF, getVelocity());
 		setBoundingBox(calculateBoundingBox());
 		fallDistance = 0.0f;
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 		
 		// Move to the next dimension when a high enough altitude is reached.
 		if(this.getBlockPos().getY() > TRAVEL_CEILING && !changedDimension)
@@ -353,7 +356,7 @@ public class RocketEntity extends MovingCraftEntity
 			hydrogenSupply *= factor;
 			oxygenSupply *= factor;
 			craftMass -= fuelToUse;
-			setVelocity(0.0, PlanetList.isOrbit(nextDimension) ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
+			setVelocity(0.0, data.isOrbit() ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
 			changedDimension = true;
 			userInput = false;
 			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
@@ -373,7 +376,7 @@ public class RocketEntity extends MovingCraftEntity
 			{
 				BlockPos bottom = getBlockPos().add(0, -lowerHeight, 0);
 				float power = Math.min(craftSpeed / 5.0f, 10.0f);
-				boolean fire = !PlanetList.isOrbit(world.getRegistryKey()) && PlanetList.getPlanetForWorld(world.getRegistryKey()).hasOxygen();
+				boolean fire = !data.isOrbit() && data.hasOxygen();
 				int count = random.nextBetween(4, 5);
 				
 				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, fire, DestructionType.DESTROY);
@@ -413,7 +416,7 @@ public class RocketEntity extends MovingCraftEntity
 			sendRenderData(false);
 		
 		// Update thruster state tracked data.
-		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, PlanetList.getPlanetForWorld(world.getRegistryKey()), getBlockPos()) > 0.25);
+		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, PlanetList.getDimensionDataForWorld(world), getBlockPos()) > 0.25);
 		setThrottle((float) throttle);
 		int yCheck = world.getTopY();
 		
@@ -495,18 +498,17 @@ public class RocketEntity extends MovingCraftEntity
 	 */
 	public void storeGravity()
 	{
-		if(PlanetList.isOrbit(world.getRegistryKey()))
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		
+		if(data == null)
+			gravity = 9.80665 * 0.0025;
+		else if(data.isOrbit())
 		{
 			gravity = 0.0;
 			return;
 		}
-		
-		Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
-		
-		if(planet != null)
-			gravity = 9.80665 * 0.0025 * planet.getSurfaceGravity();
 		else
-			gravity = 9.80665 * 0.0025;
+			gravity = 9.80665 * 0.0025 * data.getPlanet().getSurfaceGravity();
 	}
 	
 	private void launchAnimation()

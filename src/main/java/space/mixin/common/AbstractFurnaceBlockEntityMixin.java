@@ -11,7 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.item.StarflightItems;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Mixin(AbstractFurnaceBlockEntity.class)
@@ -27,9 +27,9 @@ public abstract class AbstractFurnaceBlockEntityMixin
 		
 		if(((AbstractFurnaceBlockEntityAccessorMixin) blockEntity).getBurnTime() <= 1 && !fuel.isEmpty() && !fuel.isIn(StarflightItems.NO_OXYGEN_FUEL_ITEM_TAG))
 		{
-			Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
-			if((planet != null && !planet.hasOxygen()) || PlanetList.isOrbit(world.getRegistryKey()))
+			if((data != null && !data.hasOxygen()) || data.isOrbit())
 			{
 				((AbstractFurnaceBlockEntityAccessorMixin) blockEntity).setBurnTime(0);
 				info.cancel();

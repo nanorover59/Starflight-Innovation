@@ -9,9 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DimensionEffects;
-import net.minecraft.util.registry.RegistryKey;
-import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
@@ -22,10 +20,9 @@ public class DimensionEffectsMixin
 	private void getFogColorOverrideInject(float skyAngle, float tickDelta, CallbackInfoReturnable<float[]> info)
 	{
 		MinecraftClient client = MinecraftClient.getInstance();
-		RegistryKey<World> worldKey = client.world.getRegistryKey();
-		Planet planet = PlanetList.getPlanetForWorld(worldKey);
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
 		
-		if(planet != null && (PlanetList.isOrbit(worldKey) || planet.getSurfacePressure() == 0.0))
+		if(data != null && data.overrideSky() && (data.isOrbit() || data.getPressure() == 0.0))
 		{
 			info.setReturnValue(null);
 			info.cancel();

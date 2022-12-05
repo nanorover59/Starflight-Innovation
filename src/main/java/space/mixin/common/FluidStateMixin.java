@@ -17,6 +17,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.StarflightEffects;
 import space.world.StarflightWorldGeneration;
@@ -32,69 +33,66 @@ public abstract class FluidStateMixin
 	@Inject(method = "onScheduledTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V", at = @At("HEAD"), cancellable = true)
 	public void onScheduledTickInject(World world, BlockPos pos, CallbackInfo info)
 	{
-		if(world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER && world.getRegistryKey() != World.END)
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		
+		if(world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER && world.getRegistryKey() != World.END && data != null && data.overridePhysics() && this.getFluid() == Fluids.WATER && (world.getFluidState(pos).isStill() || world.getFluidState(pos).getLevel() == 0))
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(world.getRegistryKey());
-			
-			if(currentPlanet != null && this.getFluid() == Fluids.WATER && (world.getFluidState(pos).isStill() || world.getFluidState(pos).getLevel() == 0))
+			int temperature = data.getPlanet().getTemperatureCategory(world.getSkyAngle(1.0f), data.isOrbit());
+
+			if(temperature != Planet.TEMPERATE && !world.getBiome(pos).isIn(StarflightWorldGeneration.LIQUID_WATER))
 			{
-				int temperature = currentPlanet.getTemperatureCategory(world.getSkyAngle(1.0f), PlanetList.isOrbit(world.getRegistryKey()));
-				
-		        if(temperature != Planet.TEMPERATE && !world.getBiome(pos).isIn(StarflightWorldGeneration.LIQUID_WATER))
-		        {
-		        	boolean air = false;
-		        	float chance = temperature == Planet.EXTRA_COLD ? 0.5f : 0.05f;
-		        	
-		        	for(Direction d1 : Direction.values())
-		        	{
-		        		if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR && (world.getFluidState(pos.offset(d1, -1)).getFluid() != Fluids.WATER || world.getBlockState(pos.up()).getBlock() == Blocks.AIR))
-		        		{
-		        			air = true;
-		        			break;
-		        		}
-		        	}
-		        	
-		        	if(air)
-		        	{
-		        		BlockState blockState = world.getBlockState(pos);
-		        		
-						if(temperature < Planet.TEMPERATE && world.getRandom().nextFloat() < chance)
-						{
-							if(blockState.getBlock() instanceof Waterloggable)
-								world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
-							else
-							{
-								int i = 0;
-								
-								for(Direction d2 : Direction.values())
-					        	{
-									if(d2 != Direction.UP && world.getFluidState(pos.offset(d2)).getFluid() == Fluids.WATER)
-										i++;
-					        	}
-								
-								if(i < 5)
-									world.setBlockState(pos, Blocks.ICE.getDefaultState());
-								else
-									world.setBlockState(pos.up(), Blocks.ICE.getDefaultState());
-							}
-						}
-						else if(temperature >= Planet.TEMPERATE)
-						{
-							if(blockState.getBlock() instanceof Waterloggable)
-								world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
-							else
-								world.setBlockState(pos, Blocks.AIR.getDefaultState());
-							
-							StarflightEffects.sendOutgas(world, pos, pos.up(), true);
-						}
+				boolean air = false;
+				float chance = temperature == Planet.EXTRA_COLD ? 0.5f : 0.05f;
+
+				for(Direction d1 : Direction.values())
+				{
+					if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR && (world.getFluidState(pos.offset(d1, -1)).getFluid() != Fluids.WATER || world.getBlockState(pos.up()).getBlock() == Blocks.AIR))
+					{
+						air = true;
+						break;
+					}
+				}
+
+				if(air)
+				{
+					BlockState blockState = world.getBlockState(pos);
+
+					if(temperature < Planet.TEMPERATE && world.getRandom().nextFloat() < chance)
+					{
+						if(blockState.getBlock() instanceof Waterloggable)
+							world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
 						else
-							world.createAndScheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 5);
-		        	}
-		        }
+						{
+							int i = 0;
+
+							for(Direction d2 : Direction.values())
+							{
+								if(d2 != Direction.UP && world.getFluidState(pos.offset(d2)).getFluid() == Fluids.WATER)
+									i++;
+							}
+
+							if(i < 5)
+								world.setBlockState(pos, Blocks.ICE.getDefaultState());
+							else
+								world.setBlockState(pos.up(), Blocks.ICE.getDefaultState());
+						}
+					}
+					else if(temperature >= Planet.TEMPERATE)
+					{
+						if(blockState.getBlock() instanceof Waterloggable)
+							world.setBlockState(pos, blockState.with(Properties.WATERLOGGED, false));
+						else
+							world.setBlockState(pos, Blocks.AIR.getDefaultState());
+
+						StarflightEffects.sendOutgas(world, pos, pos.up(), true);
+					}
+					else
+						world.createAndScheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 5);
+				}
 			}
 		}
-		
-		if(PlanetList.isOrbit(world.getRegistryKey()))
+
+		if(data != null && data.overridePhysics() && data.isOrbit())
 			info.cancel();
 	}
 }

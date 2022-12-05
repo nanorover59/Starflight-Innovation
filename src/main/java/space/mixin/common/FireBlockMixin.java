@@ -13,7 +13,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Mixin(FireBlock.class)
@@ -22,9 +22,9 @@ public abstract class FireBlockMixin
 	@Inject(method = "scheduledTick(Lnet/minecraft/block/BlockState;Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/random/Random;)V", at = @At("HEAD"), cancellable = true)
 	public void scheduledTickInject(BlockState state, ServerWorld world, BlockPos pos, Random random, CallbackInfo info)
 	{
-		Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 		
-		if(planet != null && world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER && world.getRegistryKey() != World.END)
+		if(data != null && data.overridePhysics() && world.getRegistryKey() != World.OVERWORLD && world.getRegistryKey() != World.NETHER && world.getRegistryKey() != World.END)
 		{
 			boolean b = false;
 			
@@ -37,7 +37,7 @@ public abstract class FireBlockMixin
 				}
 			}
 			
-			if((PlanetList.isOrbit(world.getRegistryKey()) || !planet.hasOxygen()) && !b)
+			if((data.isOrbit() || !data.hasOxygen()) && !b)
 			{
 				world.removeBlock(pos, false);
 				info.cancel();

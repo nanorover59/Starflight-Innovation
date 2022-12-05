@@ -9,7 +9,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -29,15 +29,15 @@ public abstract class FallingBlockEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-			if(currentPlanet != null)
+			if(data != null && data.overridePhysics())
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				this.setVelocity(this.getVelocity().multiply(1.0 / 0.98));
 				
 				if(!this.hasNoGravity() && !this.onGround)
-		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * currentPlanet.getSurfaceGravity()), 0.0));
+		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getPlanet().getSurfaceGravity()), 0.0));
 				
 				this.setVelocity(this.getVelocity().multiply((float) (1.0 / (1.0 + (0.02 * airMultiplier)))));
 			}

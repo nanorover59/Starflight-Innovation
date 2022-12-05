@@ -27,7 +27,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 import space.client.StarflightModClient;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.CubicHermiteSpline;
 
@@ -154,12 +154,12 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		
 		if(client.player != null)
 		{
-			Planet planet = PlanetList.getPlanetForWorld(client.player.getWorld().getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.player.getWorld());
 			
-			if(planet == null)
-				planet = PlanetList.getByName("earth");
+			if(data == null)
+				p = 1.0;
 			
-			p = planet.getSurfacePressure();
+			p = data.getPressure();
 		}
 		
 		ArrayList<Text> textList = new ArrayList<Text>();

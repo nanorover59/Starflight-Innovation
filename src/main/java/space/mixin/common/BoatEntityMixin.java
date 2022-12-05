@@ -11,7 +11,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.entity.vehicle.BoatEntity.Location;
 import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -39,16 +39,16 @@ public abstract class BoatEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-			if(currentPlanet != null && this.location == Location.IN_AIR)
+			if(data != null && data.overridePhysics() && this.location == Location.IN_AIR)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = (float) ((1.0 / this.velocityDecay) * (1.0 / (1.0 + ((1.0 - this.velocityDecay) * airMultiplier))));
 				this.setVelocity(this.getVelocity().x * d, this.getVelocity().y, this.getVelocity().z * d);
 				
-				if(!(this.hasNoGravity() || PlanetList.isOrbit(this.world.getRegistryKey())))
-		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * currentPlanet.getSurfaceGravity()), 0.0));
+				if(!(this.hasNoGravity() || data.isOrbit()))
+		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getPlanet().getSurfaceGravity()), 0.0));
 				
 				this.yawVelocity *= d;
 			}
@@ -60,9 +60,9 @@ public abstract class BoatEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-			if(currentPlanet != null && this.location == Location.IN_AIR)
+			if(data != null && data.overridePhysics() && this.location == Location.IN_AIR)
 			{
 				this.setPaddleMovings(this.pressingRight && !this.pressingLeft || this.pressingForward, this.pressingLeft && !this.pressingRight || this.pressingForward);
 				info.cancel();

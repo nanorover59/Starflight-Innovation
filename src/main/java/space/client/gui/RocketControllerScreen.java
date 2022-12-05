@@ -24,6 +24,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import space.StarflightMod;
 import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 public class RocketControllerScreen extends HandledScreen<ScreenHandler>
@@ -59,15 +60,16 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 	{
 		boolean mousePressed = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		MinecraftClient client = MinecraftClient.getInstance();
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		int x = (width - backgroundWidth) / 2;
 		int y = (height - backgroundHeight) / 2;
 		drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
-		boolean inOrbit = PlanetList.isOrbit(client.world.getRegistryKey());
+		boolean inOrbit = data.isOrbit();
 		double ttw = 0;
-		Planet currentPlanet = PlanetList.getPlanetForWorld(client.world.getRegistryKey());
+		Planet currentPlanet = data.getPlanet();
 		Planet targetPlanet = PlanetList.getByName(targetName);
 		DecimalFormat df = new DecimalFormat("#.#");
 		MutableText massText = Text.translatable("block.space.mass").append(df.format(mass / 1000.0)).append("t");

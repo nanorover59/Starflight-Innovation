@@ -18,7 +18,7 @@ import space.block.EnergyCableBlock;
 import space.block.SolarPanelBlock;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.PoweredBlockEntity;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 public class EnergyNet
@@ -151,11 +151,11 @@ public class EnergyNet
 		{
 			ArrayList<BlockPos> removalListProducers = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> removalListConsumers = new ArrayList<BlockPos>();
-			Planet p = PlanetList.getPlanetForWorld(world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			double solarMultiplier = 1.0;
 			
-			if(p != null)
-				solarMultiplier = p.getSolarMultiplier() * (1.0f - ((p.hasWeather() && !PlanetList.isOrbit(world.getRegistryKey())) ? world.getRainGradient(1.0f) : 0.0f));
+			if(data != null)
+				solarMultiplier = data.getPlanet().getSolarMultiplier() * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit()) ? world.getRainGradient(1.0f) : 0.0f));
 			else
 				solarMultiplier = 1.0f - world.getRainGradient(1.0f);
 			

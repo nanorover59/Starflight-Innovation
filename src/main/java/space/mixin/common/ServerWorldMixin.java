@@ -24,7 +24,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.source.BiomeAccess;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.gen.GeneratorOptions;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Mixin(ServerWorld.class)
@@ -47,10 +47,16 @@ public abstract class ServerWorldMixin extends World
 	@Inject(method = "getSeed()J", at = @At("HEAD"), cancellable = true)
 	private void getSeedInject(CallbackInfoReturnable<Long> info)
 	{
-		if(!seedStored && getRegistryKey() != OVERWORLD)
+		if(!seedStored)
 		{
-			OptionalLong newSeedOptional = GeneratorOptions.parseSeed(getRegistryKey().getValue().getPath()); 
-			worldSeed = BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed() + newSeedOptional.getAsLong());
+			if(getRegistryKey() == OVERWORLD)
+				worldSeed = server.getSaveProperties().getGeneratorOptions().getSeed();
+			else
+			{
+				OptionalLong newSeedOptional = GeneratorOptions.parseSeed(getRegistryKey().getValue().getPath()); 
+				worldSeed = BiomeAccess.hashSeed(server.getSaveProperties().getGeneratorOptions().getSeed() + newSeedOptional.getAsLong());
+			}
+			
 			seedStored = true;
 		}
 		
@@ -91,10 +97,10 @@ public abstract class ServerWorldMixin extends World
 			}
 		}
 		
-		Planet planet = PlanetList.getPlanetForWorld(selectedWorldKey);
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(server.getWorld(selectedWorldKey));
 		
-		if(planet != null)
-			PlanetList.skipToMorning(PlanetList.getPlanetForWorld(selectedWorldKey));
+		if(data != null)
+			PlanetList.skipToMorning(data.getPlanet());
 		else
 			PlanetList.skipToMorning(PlanetList.getByName("earth"));
 	}

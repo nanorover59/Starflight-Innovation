@@ -1,96 +1,223 @@
 package space.planet;
 
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.HashMap;
+
+import com.google.gson.stream.JsonReader;
 
 import net.darkhax.ess.DataCompound;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import space.StarflightMod;
+import space.mixin.common.WorldInvokerMixin;
 
 public class PlanetList
 {
 	private static ArrayList<Planet> planetList = new ArrayList<Planet>();
-	private static HashMap<Planet, RegistryKey<World>> planetWorldKeys = new HashMap<Planet, RegistryKey<World>>();
-	private static HashMap<Planet, RegistryKey<World>> parkingOrbitWorldKeys = new HashMap<Planet, RegistryKey<World>>();
 	private static int timeSteps = 1;
 	
 	/**
 	 * Register all planets.
 	 */
-	public static void initialize()
+	public static void initialize(ResourceManager manager)
 	{
-		timeSteps = 1;
 		planetList.clear();
-		planetWorldKeys.clear();
-		parkingOrbitWorldKeys.clear();
-		
-		Planet sol = new Planet("sol", "null", 0, 1.98847e30, 696.34e6, 1000e6);
-		sol.setOrbitParameters(0.0, 0.0, 0.0, 0.0, 0.0, 0.0);
-		sol.setRotationParameters(false, -0.1265364d, 2.9089e-6, 0);
-		sol.setAtmosphereParameters(Planet.EXTRA_HOT, 0.0, false, false, false, false);
-		sol.setDecorativeParameters(true, false, 0);
-		planetList.add(sol);
-		 
-		Planet earth = new Planet("earth", "sol", 1, Planet.EARTH_MASS, Planet.EARTH_RADIUS, 500e3);
-		earth.setOrbitParameters(1.4710e11, 1.5210e11, 5.0282936, 0.0, 3.0525809, 0.0);
-		earth.setRotationParameters(false, -0.40910518, 7.2921150e-5, 7.663e-12);
-		earth.setAtmosphereParameters(Planet.TEMPERATE, 1.0, true, true, false, true);
-		earth.setDecorativeParameters(false, true, 7.2921150e-5);
-		planetList.add(earth);
-		planetWorldKeys.put(earth, World.OVERWORLD);
-		parkingOrbitWorldKeys.put(earth, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "earth_orbit")));
-		 
-		Planet moon = new Planet("moon", "earth", 2, 7.34767309e22, 1.7381e6, 200e3);
-		moon.setOrbitParameters(3.633e8, 4.055e8, 5.55276502, 0.0, 2.18305783, 0.09005899);
-		moon.setRotationParameters(true, -0.1164135, 0.0, 0.0);
-		moon.setAtmosphereParameters(Planet.TEMPERATE, 0.0, false, false, false, false);
-		moon.setDecorativeParameters(false, false, 0);
-		planetList.add(moon);
-		planetWorldKeys.put(moon, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "moon")));
-		parkingOrbitWorldKeys.put(moon, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "moon_orbit")));
-		
-		Planet mars = new Planet("mars", "sol", 1, 0.64171e24, 3.3962e6, 500e3);
-		mars.setOrbitParameters(2.06617e11, 2.49229e11, 5.86501907915, 0.0, 0.86530876133, 0.03229923767);
-		mars.setRotationParameters(false, -0.43964844, 7.088218e-5, 1.1385e-12);
-		mars.setAtmosphereParameters(Planet.COLD, 0.00602, false, false, false, true);
-		mars.setDecorativeParameters(false, true, 7.088218e-5);
-		planetList.add(mars);
-		planetWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars")));
-		parkingOrbitWorldKeys.put(mars, RegistryKey.of(Registry.WORLD_KEY, new Identifier(StarflightMod.MOD_ID, "mars_orbit")));
-		
-		Planet phobos = new Planet("phobos", "mars", 2, 1.0659e16, 11.2667e3, 0);
-		phobos.setOrbitParameters(9.23442e6, 9.51758e6, 3.7751472, 0.0, 2.9530971, 0.019076449);
-		phobos.setRotationParameters(true, 0.0, 0.0, 0.0);
-		phobos.setAtmosphereParameters(Planet.COLD, 0.0, false, false, false, false);
-		phobos.setDecorativeParameters(true, false, 0);
-		planetList.add(phobos);
-		
-		Planet deimos = new Planet("deimos", "mars", 2, 1.4762e15, 6.38e3, 0);
-		deimos.setOrbitParameters(2.34555e7, 2.34709e7, 0.0, 0.0, 0.9494591, 0.0314159);
-		deimos.setRotationParameters(true, 0.0, 0.0, 0.0);
-		deimos.setAtmosphereParameters(Planet.COLD, 0.0, false, false, false, false);
-		deimos.setDecorativeParameters(true, false, 0);
-		planetList.add(deimos);
-		
+
+		for(Identifier id : manager.findResources("planet", path -> path.getPath().endsWith(".json")).keySet())
+		{
+			System.out.println(id.getPath());
+
+			try(InputStream stream = manager.getResource(id).get().getInputStream())
+			{
+				JsonReader reader = new JsonReader(new InputStreamReader(stream));
+				String name = "null";
+				String parentName = "null";
+				double mass = 0.0;
+				double radius = 0.0;
+				double parkingOrbitRadius = 0.0;
+				double periapsis = 0.0;
+				double apoapsis = 0.0;
+				double argumentOfPeriapsis = 0.0;
+				double trueAnomaly = 0.0;
+				double ascendingNode = 0.0;
+				double inclination = 0.0;
+				boolean isTidallyLocked = false;
+				double obliquity = 0.0;
+				double rotationRate = 0.0;
+				boolean simpleTexture = false;
+				boolean drawClouds = false;
+				double cloudRotationRate = 0.0;
+				PlanetDimensionData orbit = null;
+				PlanetDimensionData surface1 = null;
+				PlanetDimensionData surface2 = null;
+				reader.beginObject();
+
+				while(reader.hasNext())
+				{
+					String tagName = reader.nextName();
+
+					if(tagName.equals("name"))
+						name = reader.nextString();
+					else if(tagName.equals("parentName"))
+						parentName = reader.nextString();
+					else if(tagName.equals("mass"))
+						mass = reader.nextDouble();
+					else if(tagName.equals("radius"))
+						radius = reader.nextDouble();
+					else if(tagName.equals("parkingOrbitRadius"))
+						parkingOrbitRadius = reader.nextDouble();
+					else if(tagName.equals("periapsis"))
+						periapsis = reader.nextDouble();
+					else if(tagName.equals("apoapsis"))
+						apoapsis = reader.nextDouble();
+					else if(tagName.equals("argumentOfPeriapsis"))
+						argumentOfPeriapsis = reader.nextDouble();
+					else if(tagName.equals("trueAnomaly"))
+						trueAnomaly = reader.nextDouble();
+					else if(tagName.equals("ascendingNode"))
+						ascendingNode = reader.nextDouble();
+					else if(tagName.equals("inclination"))
+						inclination = reader.nextDouble();
+					else if(tagName.equals("isTidallyLocked"))
+						isTidallyLocked = reader.nextBoolean();
+					else if(tagName.equals("obliquity"))
+						obliquity = reader.nextDouble();
+					else if(tagName.equals("rotationRate"))
+						rotationRate = reader.nextDouble();
+					else if(tagName.equals("simpleTexture"))
+						simpleTexture = reader.nextBoolean();
+					else if(tagName.equals("drawClouds"))
+						drawClouds = reader.nextBoolean();
+					else if(tagName.equals("cloudRotationRate"))
+						cloudRotationRate = reader.nextDouble();
+					else if(tagName.equals("dimensionData"))
+					{
+						reader.beginArray();
+
+						while(reader.hasNext())
+						{
+							String name1 = "null";
+							String dimensionID = "null";
+							boolean overridePhysics = false;
+							boolean overrideSky = false;
+							boolean isCloudy = false;
+							boolean hasLowClouds = false;
+							boolean hasWeather = false;
+							boolean hasOxygen = false;
+							int temperatureCategory = 2;
+							double pressure = 0.0;
+							reader.beginObject();
+
+							while(reader.hasNext())
+							{
+								String tagName1 = reader.nextName();
+
+								if(tagName1.equals("name"))
+									name1 = reader.nextString();
+								else if(tagName1.equals("dimensionID"))
+									dimensionID = reader.nextString();
+								else if(tagName1.equals("overridePhysics"))
+									overridePhysics = reader.nextBoolean();
+								else if(tagName1.equals("overrideSky"))
+									overrideSky = reader.nextBoolean();
+								else if(tagName1.equals("isCloudy"))
+									isCloudy = reader.nextBoolean();
+								else if(tagName1.equals("hasLowClouds"))
+									hasLowClouds = reader.nextBoolean();
+								else if(tagName1.equals("hasWeather"))
+									hasWeather = reader.nextBoolean();
+								else if(tagName1.equals("hasOxygen"))
+									hasOxygen = reader.nextBoolean();
+								else if(tagName1.equals("temperatureCategory"))
+									temperatureCategory = reader.nextInt();
+								else if(tagName1.equals("pressure"))
+									pressure = reader.nextDouble();
+								else
+									reader.skipValue();
+							}
+
+							reader.endObject();
+							Identifier identifier = new Identifier(dimensionID);
+							boolean isOrbit = name1.equals("orbit");
+							boolean isSurface2 = name1.equals("surface2");
+							PlanetDimensionData dimensionData = new PlanetDimensionData(identifier, isOrbit, isSurface2, overridePhysics, overrideSky, isCloudy, hasLowClouds, hasWeather, hasOxygen, temperatureCategory, pressure);
+
+							if(name1.equals("orbit"))
+								orbit = dimensionData;
+							else if(name1.equals("surface1"))
+								surface1 = dimensionData;
+							else if(name1.equals("surface2"))
+								surface2 = dimensionData;
+						}
+
+						reader.endArray();
+					}
+					else
+						reader.skipValue();
+
+				}
+
+				reader.endObject();
+
+				if(!name.equals("null"))
+				{
+					Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius);
+					planet.setOrbitParameters(periapsis, apoapsis, argumentOfPeriapsis, trueAnomaly, ascendingNode, inclination);
+					planet.setRotationParameters(isTidallyLocked, obliquity, rotationRate, 0.0);
+					planet.setDecorativeParameters(simpleTexture, drawClouds, cloudRotationRate);
+
+					if(orbit != null)
+						planet.setOrbit(orbit);
+
+					if(surface1 != null)
+						planet.setSurface1(surface1);
+
+					if(surface2 != null)
+						planet.setSurface2(surface2);
+
+					planetList.add(planet);
+				}
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+			}
+		}
+
 		linkSatellites();
+		timeSteps = 1;
 	}
 	
 	/**
-	 * Find and set the parent body of each planet from the string name provided.
+	 * Find and set the parent body of each planet from the string name provided then assign satellite level indicators.
 	 */
 	private static void linkSatellites()
 	{
 		for(Planet p : planetList)
 			p.linkSatellites();
+		
+		for(Planet p1 : planetList)
+		{
+			int level = 0;
+			Planet p2 = p1.getParent();
+			
+			while(p2 != null)
+			{
+				level++;
+				p2 = p2.getParent();
+			}
+			
+			p1.setSatelliteLevel(level);
+		}
 	}
 	
 	public static void setTimeSteps(int i)
@@ -128,10 +255,7 @@ public class PlanetList
 	 */
 	public static RegistryKey<World> getPlanetWorldKey(Planet p)
 	{
-		if(planetWorldKeys.containsKey(p))
-			return planetWorldKeys.get(p);
-		
-		return null;
+		return p.getSurface1().getWorldKey();
 	}
 	
 	/**
@@ -139,43 +263,16 @@ public class PlanetList
 	 */
 	public static RegistryKey<World> getParkingOrbitWorldKey(Planet p)
 	{
-		if(parkingOrbitWorldKeys.containsKey(p))
-			return parkingOrbitWorldKeys.get(p);
-		
-		return null;
+		return p.getOrbit().getWorldKey();
 	}
 	
 	/**
 	 * Get the Planet instance associated with the given world key.
 	 */
-	public static Planet getPlanetForWorld(RegistryKey<World> world)
+	public static PlanetDimensionData getDimensionDataForWorld(World world)
 	{
-		if(planetWorldKeys.containsValue(world))
-		{
-			for(Planet p : planetWorldKeys.keySet())
-			{
-				if(planetWorldKeys.get(p) == world)
-					return p;
-			}
-		}
-		else if(parkingOrbitWorldKeys.containsValue(world))
-		{
-			for(Planet p : parkingOrbitWorldKeys.keySet())
-			{
-				if(parkingOrbitWorldKeys.get(p) == world)
-					return p;
-			}
-		}
-		
-		return null;
-	}
-	
-	/**
-	 * Return true if the given world key is for a planet's parking orbit dimension.
-	 */
-	public static boolean isOrbit(RegistryKey<World> world)
-	{
-		return parkingOrbitWorldKeys.containsValue(world);
+		WorldInvokerMixin invoker = (WorldInvokerMixin) world;
+		return invoker.callGetPlanetDimensionData();
 	}
 	
 	/**
@@ -183,7 +280,7 @@ public class PlanetList
 	 */
 	public static boolean hasOrbit(Planet planet)
 	{
-		return parkingOrbitWorldKeys.containsKey(planet);
+		return planet.getOrbit() != null;
 	}
 	
 	/**
@@ -191,7 +288,7 @@ public class PlanetList
 	 */
 	public static boolean hasSurface(Planet planet)
 	{
-		return planetWorldKeys.containsKey(planet);
+		return planet.getSurface1() != null;
 	}
 	
 	/**
@@ -214,8 +311,7 @@ public class PlanetList
 	 */
 	public static void loadData(DataCompound data)
 	{
-		initialize();
-		Planet centerPlanet = planetList.get(0);
+		Planet centerPlanet = getByName("sol");
 		ArrayList<String> checkList = new ArrayList<String>();
 		
 		if(data != null && data.hasName("planetCount"))
@@ -224,7 +320,6 @@ public class PlanetList
 				centerPlanet.setInitialPositionAndVelocity(checkList);
 			else
 			{
-				System.out.println("Loading Data");
 				timeSteps = data.getInt("timeSteps");
 				centerPlanet.loadData(data, checkList);
 			}
@@ -241,22 +336,26 @@ public class PlanetList
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
 		{
 			PacketByteBuf buffer = PacketByteBufs.create();
-			RegistryKey<World> worldKey = player.world.getRegistryKey();
-			Planet planet = getPlanetForWorld(worldKey);
+			PlanetDimensionData data = getDimensionDataForWorld(player.world);
 			buffer.writeInt(planetList.size());
 			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.
 			
-			for(int i = 0; i < planetList.size(); i++)
+			if(data != null && data.overrideSky())
 			{
-				if(planetList.get(i) == planet)
+				Planet planet = data.getPlanet();
+				
+				for(int i = 0; i < planetList.size(); i++)
 				{
-					viewpointIndex = i;
-					break;
+					if(planetList.get(i).equals(planet))
+					{
+						viewpointIndex = i;
+						break;
+					}
 				}
 			}
 			
 			buffer.writeInt(viewpointIndex);
-			buffer.writeBoolean(isOrbit(worldKey));
+			buffer.writeBoolean(data.isOrbit());
 			
 			for(int i = 0; i < planetList.size(); i++)
 			{

@@ -35,6 +35,7 @@ import space.entity.RocketEntity;
 import space.inventory.ImplementedInventory;
 import space.item.StarflightItems;
 import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.RocketControllerScreenHandler;
 import space.vessel.BlockMass;
@@ -151,11 +152,11 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         	}
         	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock)
         	{
-        		Planet planet = PlanetList.getPlanetForWorld(world.getRegistryKey());
+        		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
         		double pressure = 0.0;
         		
-        		if(planet != null && !PlanetList.isOrbit(world.getRegistryKey()))
-        			pressure = planet.getSurfacePressure();
+        		if(data != null && !data.isOrbit())
+        			pressure = data.getPressure();
         		
         		thrust += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(pressure);
         		thrustVacuum += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(0.0);
@@ -184,9 +185,10 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	 */
 	public void runDeltaVCalculations()
 	{
-		Planet currentPlanet = PlanetList.getPlanetForWorld(getWorld().getRegistryKey());
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		Planet currentPlanet = data.getPlanet();
         
-        if(PlanetList.isOrbit(getWorld().getRegistryKey()))
+        if(data.isOrbit())
         {
         	requiredDeltaV1 = currentPlanet.dVOrbitToSurface();
         	
@@ -237,8 +239,9 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 				// Button 2 Initiates a transfer to orbit around the planet specified by the navigation card.
 				if(buttonID == 1 || buttonID == 2)
 				{
-					Planet planet = PlanetList.getPlanetForWorld(worldKey);
-					RegistryKey<World> nextWorld = PlanetList.isOrbit(worldKey) ? PlanetList.getPlanetWorldKey(planet) : PlanetList.getParkingOrbitWorldKey(planet);
+					PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+					//Planet currentPlanet = data.getPlanet();
+					RegistryKey<World> nextWorld = data.isOrbit() ? PlanetList.getPlanetWorldKey(data.getPlanet()) : PlanetList.getParkingOrbitWorldKey(data.getPlanet());
 					
 					if(buttonID == 2 && !navigationCard.isEmpty() && navigationCard.hasNbt())
 					{

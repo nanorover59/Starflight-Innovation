@@ -17,8 +17,7 @@ import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidContainerBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
-import space.planet.Planet;
-import space.planet.PlanetList;
+import space.planet.PlanetDimensionData;
 
 public class AirUtil
 {
@@ -27,29 +26,29 @@ public class AirUtil
 	/**
 	 * Get the air resistance multiplier for the atmospheric conditions at the given location.
 	 */
-	public static double getAirResistanceMultiplier(World world, Planet currentPlanet, BlockPos pos)
+	public static double getAirResistanceMultiplier(World world, PlanetDimensionData data, BlockPos pos)
 	{
-		if(currentPlanet == null)
+		if(data == null)
 			return 1.0;
 		
 		if(world.getBlockState(pos).getBlock() == StarflightBlocks.HABITABLE_AIR)
 			return 0.9;
 		
-		return PlanetList.isOrbit(world.getRegistryKey()) ? 0.0 : currentPlanet.getSurfacePressure();
+		return data.isOrbit() ? 0.0 : data.getPressure();
 	}
 	
 	/**
 	 * Return true if the given entity can breathe in its current location.
 	 */
-	public static boolean canEntityBreathe(LivingEntity entity, Planet currentPlanet)
+	public static boolean canEntityBreathe(LivingEntity entity, PlanetDimensionData data)
 	{
 		World world = entity.getWorld();
 		BlockPos pos = entity.getBlockPos();
 		
-		if(currentPlanet == null)
+		if(data == null)
 			return true;
 		
-		if(currentPlanet.getSurfacePressure() > 0.5 && currentPlanet.hasOxygen() && !PlanetList.isOrbit(world.getRegistryKey()))
+		if(data.getPressure() > 0.5 && data.hasOxygen() && !data.isOrbit())
 			return true;
 		
 		for(Direction direction : Direction.values())

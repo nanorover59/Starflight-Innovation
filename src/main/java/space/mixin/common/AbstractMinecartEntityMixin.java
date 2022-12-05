@@ -13,7 +13,7 @@ import net.minecraft.entity.vehicle.AbstractMinecartEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 
@@ -35,12 +35,12 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-			if(currentPlanet != null && !this.onGround && !(this.hasNoGravity() || PlanetList.isOrbit(this.world.getRegistryKey())))
+			if(data != null && !this.onGround && data.overridePhysics() && !(this.hasNoGravity() || data.isOrbit()))
 			{
 				double d = this.isTouchingWater() ? 0.005 : 0.04;
-				this.setVelocity(this.getVelocity().add(0.0, d - (d * currentPlanet.getSurfaceGravity()), 0.0));
+				this.setVelocity(this.getVelocity().add(0.0, d - (d * data.getPlanet().getSurfaceGravity()), 0.0));
 			}
 		}
 	}
@@ -50,11 +50,11 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 	{
 		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
 		{
-			Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-			if(currentPlanet != null && !this.onGround)
+			if(data != null && data.overridePhysics() && !this.onGround)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, currentPlanet, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = Math.min(this.getMaxSpeed() / (airMultiplier + Double.MIN_VALUE), 20.0);
 				Vec3d vec3d = this.getVelocity();
 				this.setVelocity(MathHelper.clamp(vec3d.x, -d, d), vec3d.y, MathHelper.clamp(vec3d.z, -d, d));

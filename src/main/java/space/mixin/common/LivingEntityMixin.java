@@ -35,7 +35,7 @@ import net.minecraft.world.World;
 import space.entity.StarflightEntities;
 import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
-import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
 import space.util.StarflightEffects;
@@ -59,11 +59,10 @@ public abstract class LivingEntityMixin extends Entity
 	@Inject(method = "baseTick()V", at = @At("TAIL"), cancellable = true)
 	public void baseTickInject(CallbackInfo info)
 	{
-		Planet currentPlanet = PlanetList.getPlanetForWorld(this.world.getRegistryKey());
-		boolean inOrbit = PlanetList.isOrbit(this.world.getRegistryKey());
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 		
 		// Update the gravity and air resistance multiplier variables.
-		if(currentPlanet != null)
+		if(data != null && data.overridePhysics())
 		{
 			// Ignore custom physics for creative mode flight.
 			if((Entity) this instanceof PlayerEntity && ((PlayerEntity) ((Entity) this)).getAbilities().flying)
@@ -73,8 +72,8 @@ public abstract class LivingEntityMixin extends Entity
 			}
 			else
 			{
-				gravity = inOrbit || this.hasNoGravity() ? 0.0 : currentPlanet.getSurfaceGravity();
-				airMultiplier = (float) AirUtil.getAirResistanceMultiplier(this.world, currentPlanet, this.getBlockPos());
+				gravity = data.isOrbit() || this.hasNoGravity() ? 0.0 : data.getPlanet().getSurfaceGravity();
+				airMultiplier = (float) AirUtil.getAirResistanceMultiplier(this.world, data, this.getBlockPos());
 			}
 		}
 		else
@@ -129,7 +128,7 @@ public abstract class LivingEntityMixin extends Entity
 			if(thisEntity != null)
 			{
 				int spaceSuitCheck = 0;
-				boolean habitableAir = AirUtil.canEntityBreathe(thisEntity, currentPlanet);
+				boolean habitableAir = AirUtil.canEntityBreathe(thisEntity, data);
 				boolean creativePlayer = (thisEntity instanceof PlayerEntity && ((PlayerEntity) thisEntity).isCreative());
 				boolean creativeFlying = creativePlayer && ((PlayerEntity) thisEntity).getAbilities().flying;
 				ItemStack chestplate = null;
@@ -164,7 +163,7 @@ public abstract class LivingEntityMixin extends Entity
 					NbtCompound nbt = chestplate.getNbt();
 					
 					// Use space suit thrust jets when sneaking.
-					if(thisEntity.isSneaking() && !creativeFlying && inOrbit)
+					if(thisEntity.isSneaking() && !creativeFlying && data.isOrbit())
 					{
 						oxygenUsed += 0.05 * 0.05;
 						Vec3d deltaV = thisEntity.getRotationVector().multiply(0.1 * 0.05);
