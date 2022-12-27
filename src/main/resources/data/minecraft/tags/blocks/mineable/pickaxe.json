@@ -53,6 +53,8 @@
     "space:iron_ladder",
     "space:landing_leg",
     "space:rocket_controller",
-    "space:thruster_small"
+    "space:thruster_small",
+    "space:thruster_vacuum",
+    "space:aerospike"
   ]
 }

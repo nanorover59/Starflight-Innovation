@@ -77,7 +77,6 @@ public class MovingCraftEntity extends Entity
     public float clientCraftRollPrevious;
     public float clientCraftPitchPrevious;
     public float clientCraftYawPrevious;
-    
     private double clientXVelocity;
     private double clientYVelocity;
     private double clientZVelocity;
@@ -203,6 +202,8 @@ public class MovingCraftEntity extends Entity
     	this.dataTracker.set(TRACKED_VY, velocity.getY());
     	this.dataTracker.set(TRACKED_VZ, velocity.getZ());
     }
+    
+    
 
     public BlockPos getInitialBlockPos()
     {
@@ -233,6 +234,8 @@ public class MovingCraftEntity extends Entity
     {
     	return new Vec3f(this.dataTracker.get(TRACKED_VX).floatValue(), this.dataTracker.get(TRACKED_VY).floatValue(), this.dataTracker.get(TRACKED_VZ).floatValue());
     }
+    
+    
     
     public void setClientCraftRotation(float roll, float pitch, float yaw)
     {

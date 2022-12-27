@@ -65,13 +65,14 @@ public class Planet
 	private PlanetDimensionData surface1;
 	private PlanetDimensionData surface2;
 	
-	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_)
+	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_, double surfacePressure_)
 	{
 		name = name_;
 		parentName = parentName_;
 		mass = mass_;
 		radius = radius_;
 		parkingOrbitRadius = radius + parkingOrbitRadius_;
+		surfacePressure = surfacePressure_;
 		surfaceGravity = ((G * mass) / (radius * radius) / ((G * EARTH_MASS) / (EARTH_RADIUS * EARTH_RADIUS)));
 		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(parkingOrbitRadius, 3.0));
 		position = new Vec3d(0.0, 0.0, 0.0);

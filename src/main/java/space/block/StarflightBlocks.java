@@ -137,7 +137,9 @@ public class StarflightBlocks
 	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), 0.1e6, 330, 300, 12.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0), 0.1e6, 320, 280, 12.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, -32.0, 1.0, 15.0, 16.0, 15.0), 0.05e6, 360, 80, 4.0);
+	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 16.0, 15.0), 0.075e6, 340, 320, 20.0);
 	
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
@@ -245,6 +247,8 @@ public class StarflightBlocks
 		initializeBlock(LANDING_LEG, "landing_leg", null, true, List.of(), List.of(Text.translatable("block.space.landing_leg.description")));
 		initializeBlock(ROCKET_CONTROLLER, "rocket_controller", ROCKET_CONTROLLER_BLOCK_ENTITY);
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
+		initializeBlock(THRUSTER_VACUUM, "thruster_vacuum");
+		initializeBlock(AEROSPIKE, "aerospike");
 		
 		// Setup extra block behavior.
 		FireBlockInvokerMixin fireBlock = (FireBlockInvokerMixin) Blocks.FIRE;

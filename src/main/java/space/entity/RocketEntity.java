@@ -63,6 +63,10 @@ public class RocketEntity extends MovingCraftEntity
 	private RegistryKey<World> nextDimension;
 	private BlockPos arrivalPos;
 	private int arrivalDirection;
+	private int throttleState;
+	private int rollState;
+	private int pitchState;
+	private int yawState;
 	private boolean changedDimension;
 	private boolean userInput;
 	private double craftMass;
@@ -82,6 +86,9 @@ public class RocketEntity extends MovingCraftEntity
 	private double maxWidth;
 	public double throttle;
 	public float throttlePrevious;
+	private float rollSpeed;
+	private float pitchSpeed;
+	private float yawSpeed;
 	private int soundEffectTimer;
 	
 	public RocketEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
@@ -330,7 +337,7 @@ public class RocketEntity extends MovingCraftEntity
 				arrivalPos = new BlockPos(arrivalPos.getX(), 64, arrivalPos.getZ());
 		}
 		
-		// Automatically control thrust according to either launch or landing behavior.
+		// Automatically control thrust according to either launch or landing behavior. Otherwise, apply manual control from the player.
 		if(!userInput)
 		{
 			if(changedDimension)
@@ -338,6 +345,8 @@ public class RocketEntity extends MovingCraftEntity
 			else
 				launchAnimation();
 		}
+		else
+			applyUserInput();
 		
 		applyGravity();
 		applyThrust();
@@ -491,6 +500,66 @@ public class RocketEntity extends MovingCraftEntity
         double factor = (hydrogenSupply + oxygenSupply - totalMassFlow) / (hydrogenSupply + oxygenSupply);
 		hydrogenSupply *= factor;
 		oxygenSupply *= factor;
+	}
+	
+	/**
+	 * Change the throttle and rotation according to user input.
+	 */
+	private void applyUserInput()
+	{
+		if(throttleState == 1)
+			throttle += 0.01;
+		else if(throttleState == -1)
+			throttle -= 0.01;
+		else if(throttleState == 2)
+			throttle = 1.0;
+		else if(throttleState == -2)
+			throttle = 0.0;
+		
+		if(throttle < 0.0)
+			throttle = 0.0;
+		else if(throttle > 1.0)
+			throttle = 1.0;
+		
+		// Invert the controls for north and west front directions.
+		float rotationRate = 0.001f;
+		float rollRate = rotationRate;
+		float pitchRate = (getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH) ? -rotationRate : rotationRate;
+		float yawRate = 2.0f * ((getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.WEST) ? -rotationRate : rotationRate);
+		
+		if(rollState == 1)
+			rollSpeed += rollRate;
+		else if(rollState == -1)
+			rollSpeed -= rollRate;
+		else
+			rollSpeed *= 0.9f;
+		
+		if(pitchState == 1)
+			pitchSpeed += pitchRate;
+		else if(pitchState == -1)
+			pitchSpeed -= pitchRate;
+		else
+			pitchSpeed *= 0.9f;
+		
+		if(yawState == 1)
+			yawSpeed += yawRate;
+		else if(yawState == -1)
+			yawSpeed -= yawRate;
+		else
+			yawSpeed *= 0.9f;
+		
+		if(MathHelper.abs(rollSpeed) < 0.0001f)
+			rollSpeed = 0.0f;
+			
+		if(MathHelper.abs(pitchSpeed) < 0.0001f)
+			pitchSpeed = 0.0f;
+		
+		if(MathHelper.abs(yawSpeed) < 0.0001f)
+			yawSpeed = 0.0f;
+		
+		setCraftRoll(getCraftRoll() + rollSpeed);
+		setCraftPitch(getCraftPitch() + pitchSpeed);
+		setCraftYaw(getCraftYaw() + yawSpeed);
 	}
 	
 	/**
@@ -740,6 +809,9 @@ public class RocketEntity extends MovingCraftEntity
 		nbt.putInt("arrivalDirection", arrivalDirection);
 		nbt.putBoolean("arrived", changedDimension);
 		nbt.putBoolean("userInput", userInput);
+		nbt.putFloat("rollSpeed", rollSpeed);
+		nbt.putFloat("pitchSpeed", pitchSpeed);
+		nbt.putFloat("yawSpeed", yawSpeed);
 		nbt.putDouble("mass", craftMass);
 		nbt.putDouble("massInitial", craftMassInitial);
 		nbt.putDouble("gravity", gravity);
@@ -784,6 +856,9 @@ public class RocketEntity extends MovingCraftEntity
 		arrivalDirection = nbt.getInt("arrivalDirection");
 		changedDimension = nbt.getBoolean("arrived");
 		userInput = nbt.getBoolean("userInput");
+		rollSpeed = nbt.getFloat("rollSpeed");
+		pitchSpeed = nbt.getFloat("pitchSpeed");
+		yawSpeed = nbt.getFloat("yawSpeed");
 		craftMass = nbt.getDouble("mass");
 		craftMassInitial = nbt.getDouble("massInitial");
 		gravity = nbt.getDouble("gravity");
@@ -813,6 +888,7 @@ public class RocketEntity extends MovingCraftEntity
 	public static void receiveInput(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
 	{
 		int throttleState = buffer.readInt();
+		int rollState = buffer.readInt();
 		int pitchState = buffer.readInt();
 		int yawState = buffer.readInt();
 		Entity entity = player.getVehicle();
@@ -820,44 +896,12 @@ public class RocketEntity extends MovingCraftEntity
 		if(entity instanceof RocketEntity)
 		{
 			RocketEntity rocketEntity = (RocketEntity) entity;
-			float craftPitch = rocketEntity.getCraftPitch();
-			float craftYaw = rocketEntity.getCraftYaw();
-			float rotationRate = (float) (Math.PI / 360.0);
+			rocketEntity.throttleState = throttleState;
+			rocketEntity.rollState = rollState;
+			rocketEntity.pitchState = pitchState;
+			rocketEntity.yawState = yawState;
 			
-			if(rocketEntity.userInput)
-			{
-				if(throttleState == 1)
-					rocketEntity.throttle += 0.01;
-				else if(throttleState == -1)
-					rocketEntity.throttle -= 0.01;
-				else if(throttleState == 2)
-					rocketEntity.throttle = 1.0;
-				else if(throttleState == -2)
-					rocketEntity.throttle = 0.0;
-				
-				if(rocketEntity.throttle < 0.0)
-					rocketEntity.throttle = 0.0;
-				else if(rocketEntity.throttle > 1.0)
-					rocketEntity.throttle = 1.0;
-				
-				// Invert the controls for north and west front directions.
-				float pitchRate = (rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.SOUTH) ? -rotationRate : rotationRate;
-				float yawRate = 2.0f * ((rocketEntity.getForwardDirection() == Direction.NORTH || rocketEntity.getForwardDirection() == Direction.WEST) ? -rotationRate : rotationRate);
-				
-				if(pitchState == 1)
-					craftPitch += pitchRate;
-				else if(pitchState == -1)
-					craftPitch -= pitchRate;
-				
-				if(yawState == 1)
-					craftYaw += yawRate;
-				else if(yawState == -1)
-					craftYaw -= yawRate;
-				
-				rocketEntity.setCraftPitch(craftPitch);
-				rocketEntity.setCraftYaw(craftYaw);
-			}
-			else if((throttleState != 0 || pitchState != 0 || yawState != 0) && rocketEntity.gravity > 0.0)
+			if((throttleState != 0 || rollState != 0 || pitchState != 0 || yawState != 0) && rocketEntity.gravity > 0.0)
 				rocketEntity.userInput = true;
 		}
 	}

@@ -34,8 +34,6 @@ public class PlanetList
 
 		for(Identifier id : manager.findResources("planet", path -> path.getPath().endsWith(".json")).keySet())
 		{
-			System.out.println(id.getPath());
-
 			try(InputStream stream = manager.getResource(id).get().getInputStream())
 			{
 				JsonReader reader = new JsonReader(new InputStreamReader(stream));
@@ -44,6 +42,7 @@ public class PlanetList
 				double mass = 0.0;
 				double radius = 0.0;
 				double parkingOrbitRadius = 0.0;
+				double surfacePressure = 0.0;
 				double periapsis = 0.0;
 				double apoapsis = 0.0;
 				double argumentOfPeriapsis = 0.0;
@@ -150,11 +149,14 @@ public class PlanetList
 							boolean isOrbit = name1.equals("orbit");
 							boolean isSurface2 = name1.equals("surface2");
 							PlanetDimensionData dimensionData = new PlanetDimensionData(identifier, isOrbit, isSurface2, overridePhysics, overrideSky, isCloudy, hasLowClouds, hasWeather, hasOxygen, temperatureCategory, pressure);
-
+							
 							if(name1.equals("orbit"))
 								orbit = dimensionData;
 							else if(name1.equals("surface1"))
+							{
 								surface1 = dimensionData;
+								surfacePressure = pressure;
+							}
 							else if(name1.equals("surface2"))
 								surface2 = dimensionData;
 						}
@@ -170,7 +172,7 @@ public class PlanetList
 
 				if(!name.equals("null"))
 				{
-					Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius);
+					Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius, surfacePressure);
 					planet.setOrbitParameters(periapsis, apoapsis, argumentOfPeriapsis, trueAnomaly, ascendingNode, inclination);
 					planet.setRotationParameters(isTidallyLocked, obliquity, rotationRate, 0.0);
 					planet.setDecorativeParameters(simpleTexture, drawClouds, cloudRotationRate);

@@ -1,5 +1,6 @@
 package space.client.gui;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 
 import org.lwjgl.glfw.GLFW;
@@ -40,7 +41,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/planetarium.png");
 	private Planet selectedPlanet = null;
 	private boolean mouseHold = false;
-	private int buttonCooldown = 0;
+	private boolean viewData = false;
 	private double scaleFactor = 1.5e-10;
 
 	public PlanetariumScreen(ScreenHandler handler, PlayerInventory inventory, Text title)
@@ -85,54 +86,57 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		
 		// Render the displayed planets.
 		
-		for(Planet p : selectedPlanet.getSatellites())
+		if(!viewData)
 		{
-			// Draw the planet's orbit in the GUI.
-			float px = (float) (x + 99.0);
-			float py = (float) (y + 71.0);
-			drawOrbitEllipse(matrices.peek().getPositionMatrix(), p, px, py, 256);
-		}
-		
-		for(int i = 0; i < planetList.size(); i++)
-		{
-			Planet planet = planetList.get(i);
-			PlanetRenderer planetRenderer = PlanetRenderList.getRenderers(false).get(i);
-			
-			if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
-				continue;
-			
-			int renderType = planet.getName() == "sol" ? 1 : 0;
-			float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor));
-			float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
-			float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
-			
-			if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
-				continue;
-			
-			int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mousePressed);
-			RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
-			
-			if(renderType == 1)
-				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
-			else if(planet.hasSimpleTexture())
-				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
-			else
-				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
-			
-			if(mouseHold || planet == selectedPlanet)
-				continue;
-			
-			if(selection > 0)
+			for(Planet p : selectedPlanet.getSatellites())
 			{
-				RenderSystem.setShaderTexture(0, SELECTION_TEXTURE);
-				drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth * 1.5f);
+				// Draw the planet's orbit in the GUI.
+				float px = (float) (x + 99.0);
+				float py = (float) (y + 71.0);
+				drawOrbitEllipse(matrices.peek().getPositionMatrix(), p, px, py, 256);
+			}
+			
+			for(int i = 0; i < planetList.size(); i++)
+			{
+				Planet planet = planetList.get(i);
+				PlanetRenderer planetRenderer = PlanetRenderList.getRenderers(false).get(i);
 				
-				if(selection > 1)
+				if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
+					continue;
+				
+				int renderType = planet.getName() == "sol" ? 1 : 0;
+				float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor));
+				float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
+				float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
+				
+				if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
+					continue;
+				
+				int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mousePressed);
+				RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
+				
+				if(renderType == 1)
+					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+				else if(planet.hasSimpleTexture())
+					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+				else
+					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
+				
+				if(mouseHold || planet == selectedPlanet)
+					continue;
+				
+				if(selection > 0)
 				{
-					selectedPlanet = planet;
-					mouseHold = true;
-					nothingSelected = false;
-					scaleFactor = getInitialScaleFactor(selectedPlanet);
+					RenderSystem.setShaderTexture(0, SELECTION_TEXTURE);
+					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth * 1.5f);
+					
+					if(selection > 1)
+					{
+						selectedPlanet = planet;
+						mouseHold = true;
+						nothingSelected = false;
+						scaleFactor = getInitialScaleFactor(selectedPlanet);
+					}
 				}
 			}
 		}
@@ -149,38 +153,55 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		int button2X = x + 7;
 		int button2Y = y + 59;
 		boolean button2Hover = mouseX >= button2X && mouseX < button2X + 18 && mouseY >= button2Y && mouseY < button2Y + 18;
-		drawTexture(matrices, button2X, button2Y, button2Hover ? 72 : 54, 222, 18, 18);
+		drawTexture(matrices, button2X, button2Y, canSelectPlanet ? (button2Hover ? 90 : 72) : 54, 222, 18, 18);
 		int button3X = x + 7;
 		int button3Y = y + 79;
 		boolean button3Hover = mouseX >= button3X && mouseX < button3X + 18 && mouseY >= button3Y && mouseY < button3Y + 18;
-		drawTexture(matrices, button3X, button3Y, button3Hover ? 108 : 90, 222, 18, 18);
+		drawTexture(matrices, button3X, button3Y, button3Hover ? 126 : 108, 222, 18, 18);
+		int button4X = x + 7;
+		int button4Y = y + 99;
+		boolean button4Hover = mouseX >= button4X && mouseX < button4X + 18 && mouseY >= button4Y && mouseY < button4Y + 18;
+		drawTexture(matrices, button4X, button4Y, button4Hover ? 162 : 144, 222, 18, 18);
 		MutableText text = Text.translatable("planet.space." + selectedPlanet.getName());
 		drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 20, 0x55FF55);
 		
+		if(viewData)
+		{
+			DecimalFormat df = new DecimalFormat("#.#");
+			Planet currentPlanet = PlanetList.getDimensionDataForWorld(client.world).getPlanet();
+			text = Text.translatable("block.space.rocket_controller.transfer").append(" " + df.format(currentPlanet.dVToPlanet(selectedPlanet)) + "m/s");
+			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 33, 0x55FF55);
+			text = Text.translatable("block.space.deltav_to_orbit").append(" " + df.format(selectedPlanet.dVSurfaceToOrbit()) + "m/s");
+			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 46, 0x55FF55);
+			text = Text.translatable("block.space.deltav_to_surface").append(" " + df.format(selectedPlanet.dVOrbitToSurface()) + "m/s");
+			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 59, 0x55FF55);
+		}
+		
 		// Select planets in the GUI.
-		if(nothingSelected && !mouseHold && mouseX >= x + 30 && mouseX < x + 167 && mouseY >= y + 18 && mouseY < y + 123 && selectedPlanet.getParent() != null)
+		if(nothingSelected && !viewData && !mouseHold && mouseX >= x + 30 && mouseX < x + 167 && mouseY >= y + 18 && mouseY < y + 123 && selectedPlanet.getParent() != null)
 		{
 			selectedPlanet = selectedPlanet.getParent();
 			scaleFactor = getInitialScaleFactor(selectedPlanet);
 			mouseHold = true;
 		}
 		
-		// Write the selected planet to a navigation card if the green button is pressed while ensuring a time delay before the next press.
-		if(buttonCooldown > 0)
-			buttonCooldown--;
-		
 		if(mousePressed)
 		{
-			if(button1Hover && canSelectPlanet && buttonCooldown == 0)
+			if(button1Hover && canSelectPlanet && !mouseHold)
 			{
 				int planetId = PlanetList.getPlanets().indexOf(selectedPlanet);
 				client.interactionManager.clickButton(((PlanetariumScreenHandler)handler).syncId, planetId);
 				client.player.playSound(SoundEvents.UI_BUTTON_CLICK, 0.5F, 1.0f);
-				buttonCooldown = 20;
+				mouseHold = true;
 			}
-			else if(button2Hover && selectedPlanet.getRadius() * scaleFactor < 32.0)
+			else if(button2Hover && canSelectPlanet && !mouseHold)
+			{
+				viewData = !viewData;
+				mouseHold = true;
+			}
+			else if(button3Hover && selectedPlanet.getRadius() * scaleFactor < 32.0)
 				scaleFactor *= 1.025;
-			else if(button3Hover)
+			else if(button4Hover)
 				scaleFactor *= 0.975;
 		}
 	}

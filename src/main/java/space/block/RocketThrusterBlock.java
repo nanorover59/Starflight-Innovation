@@ -34,7 +34,6 @@ import space.util.CubicHermiteSpline;
 public class RocketThrusterBlock extends Block implements Waterloggable
 {
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	protected static final VoxelShape SHAPE = Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0);
 	private final double standardGravity = 9.80665;
 	private final double massFlow;
 	private final double vacuumThrust;
@@ -44,11 +43,13 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	private final double maxExitPressure;
 	private final CubicHermiteSpline splineISP1;
 	private final CubicHermiteSpline splineISP2;
+	private VoxelShape shape;
 	
-	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
+	public RocketThrusterBlock(Settings settings, VoxelShape shape, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
 	{
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+		this.shape = shape;
 		this.vacuumThrust = vacuumThrust;
 		this.vacuumISP = vacuumISP;
 		this.atmISP = atmISP;
@@ -74,19 +75,19 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	@Override
 	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
 	{
-		return SHAPE;
+		return shape;
 	}
 
 	@Override
 	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
 	{
-		return SHAPE;
+		return shape;
 	}
 
 	@Override
 	public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos)
 	{
-		return SHAPE;
+		return shape;
 	}
 	
 	@Override
