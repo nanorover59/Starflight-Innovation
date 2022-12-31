@@ -14,8 +14,7 @@ import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.entity.MovingCraftEntity;
@@ -39,7 +38,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		if(!MovingCraftRenderList.hasBlocksForEntity(entityUUID))
 			return;
 		
-		float rotationRoll = lerpAngleRadians(g, entity.clientCraftRollPrevious, entity.clientCraftRoll);
+		/*float rotationRoll = lerpAngleRadians(g, entity.clientCraftRollPrevious, entity.clientCraftRoll);
 		float rotationPitch = lerpAngleRadians(g, entity.clientCraftPitchPrevious, entity.clientCraftPitch);
 		float rotationYaw = lerpAngleRadians(g, entity.clientCraftYawPrevious, entity.clientCraftYaw);
 		
@@ -56,7 +55,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 			matrixStack.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
 			break;
 		case SOUTH:
-			matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
+			matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw).);
 			matrixStack.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
 			matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
 			break;
@@ -67,7 +66,18 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 			break;
 		default:
 			break;
+		}*/
+		
+		if(entity.clientQuaternionPrevious != null && entity.clientQuaternion != null && !entity.clientQuaternionPrevious.equals(entity.clientQuaternion))
+		{
+			Quaternion quaternion = interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g);
+			
+			System.out.println(quaternion.toString());
+			
+			matrixStack.multiply(quaternion);
 		}
+		else if(entity.clientQuaternion != null)
+			matrixStack.multiply(entity.clientQuaternion);
 		
 		ArrayList<MovingCraftBlockRenderData> blockList = MovingCraftRenderList.getBlocksForEntity(entityUUID);
 		World world = entity.getEntityWorld();
@@ -77,7 +87,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, rotationYaw);
+			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getCraftYaw());
 	}
 
 	@SuppressWarnings("deprecation")
@@ -87,18 +97,23 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
 	}
 	
-	private float lerpAngleRadians(float delta, float start, float end)
+	private Quaternion interpolate(Quaternion q0, Quaternion q1, float t)
 	{
-		float d = end - start;
+		float dot = q0.getX() * q1.getX() + q0.getY() * q1.getY() + q0.getZ() * q1.getZ() + q0.getW() * q1.getW();
 		
-		if(Math.abs(d) > MathHelper.PI)
+		// Ensure that the interpolation is taking the shortest path.
+		if(dot < 0.0f)
 		{
-			if(start > end)
-				d += MathHelper.PI * 2.0f;
-			else
-				d -= MathHelper.PI * 2.0f;
+			q1 = new Quaternion(-q1.getX(), -q1.getY(), -q1.getZ(), -q1.getW());
+			dot = -dot;
 		}
 		
-        return start + delta * d;
-    }
+		float theta = (float) Math.acos(dot);
+		float sinTheta = (float) Math.sin(theta);
+		float x = (q0.getX() * (float)Math.sin((1 - t) * theta) + q1.getX() * (float)Math.sin(t * theta)) / sinTheta;
+		float y = (q0.getY() * (float)Math.sin((1 - t) * theta) + q1.getY() * (float)Math.sin(t * theta)) / sinTheta;
+		float z = (q0.getZ() * (float)Math.sin((1 - t) * theta) + q1.getZ() * (float)Math.sin(t * theta)) / sinTheta;
+		float w = (q0.getW() * (float)Math.sin((1 - t) * theta) + q1.getW() * (float)Math.sin(t * theta)) / sinTheta;
+		return new Quaternion(x, y, z, w);
+	}
 }

@@ -2,6 +2,7 @@ package space.block;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -24,8 +25,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import space.client.StarflightModClient;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -87,6 +90,12 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	@Override
 	public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos)
 	{
+		return VoxelShapes.empty();
+	}
+	
+	@Override
+	public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos)
+	{
 		return shape;
 	}
 	
@@ -103,6 +112,34 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos)
 	{
 		return !(Boolean) state.get(WATERLOGGED);
+	}
+	
+	@Override
+	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos)
+	{
+		Iterator<BlockState> iterator = world.getStatesInBox(shape.getBoundingBox().offset(pos)).iterator();
+		int nonAir = 0;
+
+		while(iterator.hasNext())
+		{
+			BlockState iteratorBlockState = iterator.next();
+			
+			if(!iteratorBlockState.isAir())
+				nonAir++;
+		}
+		
+		if(nonAir <= 1 && !(shape.getBoundingBox().minY < 0.0 && world.getBlockState(pos.down()).getMaterial().blocksMovement()))
+			return true;
+		else
+		{
+			if(world.isClient())
+			{
+				MinecraftClient client = MinecraftClient.getInstance();
+				client.player.sendMessage(Text.translatable("block.space.thruster.error"), true);
+			}
+			
+			return false;
+		}
 	}
 	
 	@Override

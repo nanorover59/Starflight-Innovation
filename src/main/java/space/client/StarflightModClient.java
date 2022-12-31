@@ -151,7 +151,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
 		
 		// Client Tick Event
-		ClientTickEvents.END_CLIENT_TICK.register(client -> {
+		ClientTickEvents.START_CLIENT_TICK.register(client -> {
 			PlanetRenderList.updateRenderers();
 			
 			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
@@ -161,35 +161,37 @@ public class StarflightModClient implements ClientModInitializer
 				int pitchState = 0;
 				int yawState = 0;
 				
-				if(throttleUp.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT))
 					throttleState++;
 
-				if(throttleDown.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL))
 					throttleState--;
 				
-				if(throttleMax.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_Z))
 					throttleState = 2;
 				
-				if(throttleMin.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_X))
 					throttleState = -2;
 
-				if(rollCCW.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_A))
 					rollState++;
 
-				if(rollCW.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_D))
 					rollState--;
 				
-				if(pitchUp.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_W))
 					pitchState++;
 
-				if(pitchDown.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_S))
 					pitchState--;
 
-				if(yawLeft.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_Q))
 					yawState++;
 
-				if(yawRight.isPressed())
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_E))
 					yawState--;
+				
+				KeyBinding.unpressAll();
 				
 				PacketByteBuf buffer = PacketByteBufs.create();
 				buffer.writeInt(throttleState);

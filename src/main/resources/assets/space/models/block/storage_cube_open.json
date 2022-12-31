@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/storage_cube_side",
+    "side": "space:block/storage_cube_side",
+    "top": "space:block/storage_cube_top_open"
+  }
+}

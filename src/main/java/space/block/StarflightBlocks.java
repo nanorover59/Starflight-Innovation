@@ -58,6 +58,7 @@ import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.PlanetariumBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
+import space.block.entity.StorageCubeBlockEntity;
 import space.block.sapling.RubberSaplingGenerator;
 import space.item.DescriptiveBlockItem;
 import space.mixin.common.FireBlockInvokerMixin;
@@ -132,13 +133,14 @@ public class StarflightBlocks
 	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.of(Material.AIR).air());
+	public static final Block STORAGE_CUBE = new StorageCubeBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0), 0.1e6, 320, 280, 12.0);
-	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, -32.0, 1.0, 15.0, 16.0, 15.0), 0.05e6, 360, 80, 4.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 16.0, 16.0), 0.05e6, 360, 80, 4.0);
 	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 16.0, 15.0), 0.075e6, 340, 320, 20.0);
 	
 	// Block Entities
@@ -159,6 +161,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<ElectrolyzerBlockEntity> ELECTROLYZER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectrolyzerBlockEntity::new, ELECTROLYZER).build(null);
 	public static final BlockEntityType<IceElectrolyzerBlockEntity> ICE_ELECTROLYZER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(IceElectrolyzerBlockEntity::new, ICE_ELECTROLYZER).build(null);
 	public static final BlockEntityType<RocketControllerBlockEntity> ROCKET_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(RocketControllerBlockEntity::new, ROCKET_CONTROLLER).build(null);
+	public static final BlockEntityType<StorageCubeBlockEntity> STORAGE_CUBE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StorageCubeBlockEntity::new, STORAGE_CUBE).build(null);
 	
 	// Block Tags
 	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
@@ -241,6 +244,7 @@ public class StarflightBlocks
 		initializeBlock(OXYGEN_DISPENSER, "oxygen_dispenser");
 		initializeBlock(ATMOSPHERE_GENERATOR, "atmosphere_generator");
 		initializeBlock(HABITABLE_AIR, "habitable_air", null, false, List.of(), List.of());
+		initializeBlock(STORAGE_CUBE, "storage_cube", STORAGE_CUBE_BLOCK_ENTITY);
 		initializeBlock(AIRLOCK_DOOR, "airlock_door");
 		initializeBlock(AIRLOCK_TRAPDOOR, "airlock_trapdoor");
 		initializeBlock(IRON_LADDER, "iron_ladder");

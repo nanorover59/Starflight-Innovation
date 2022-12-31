@@ -24,6 +24,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
@@ -106,6 +107,7 @@ public class RocketEntity extends MovingCraftEntity
 		this.arrivalPos = arrivalPos;
 		this.arrivalDirection = arrivalDirection;
 		setForwardDirection(forward.getHorizontal());
+		setQuaternion(Vec3f.POSITIVE_Y.getRadialQuaternion((float) (forward.asRotation() * (Math.PI / 180.0))));
 		Vec3d centerOfMass = Vec3d.ZERO;
 		BlockPos min = new BlockPos(blockPosList.get(0));
 		BlockPos max = new BlockPos(blockPosList.get(0));
@@ -296,14 +298,11 @@ public class RocketEntity extends MovingCraftEntity
 			if(getThrottle() > 0.0f)
 				spawnThrusterParticles();
 			
-			this.clientCraftRollPrevious = this.clientCraftRoll;
-	        this.clientCraftPitchPrevious = this.clientCraftPitch;
-	        this.clientCraftYawPrevious = this.clientCraftYaw;
+			this.clientQuaternionPrevious = this.clientQuaternion;
+			this.clientQuaternion = this.getCraftQuaternion();
 	        this.throttlePrevious = (float) this.throttle;
-	        this.clientCraftRoll = this.getCraftRoll();
-	    	this.clientCraftPitch = this.getCraftPitch();
-	    	this.clientCraftYaw = this.getCraftYaw();
 			this.throttle = this.getThrottle();
+			updateEulerAngles();
 			return;
 		}
 		
@@ -336,6 +335,8 @@ public class RocketEntity extends MovingCraftEntity
 			if(noBlocks)
 				arrivalPos = new BlockPos(arrivalPos.getX(), 64, arrivalPos.getZ());
 		}
+		
+		updateEulerAngles();
 		
 		// Automatically control thrust according to either launch or landing behavior. Otherwise, apply manual control from the player.
 		if(!userInput)
@@ -462,7 +463,7 @@ public class RocketEntity extends MovingCraftEntity
 		double force = changedDimension ? nominalThrustEnd * throttle : nominalThrustStart * throttle;
 		double acc = (force / craftMass) * 0.0025;
 		Vec3f direction = Vec3f.POSITIVE_Y.copy();
-		float rotationRoll = getCraftRoll();
+		/*float rotationRoll = getCraftRoll();
 		float rotationPitch = getCraftPitch();
 		float rotationYaw = getCraftYaw();
 		
@@ -490,8 +491,10 @@ public class RocketEntity extends MovingCraftEntity
 			break;
 		default:
 			break;
-		}
-        
+		}*/
+		
+		Quaternion quaternion = getCraftQuaternion();
+		direction.rotate(quaternion);
         this.addVelocity(direction.getX() * acc, direction.getY() * acc, direction.getZ() * acc);
         
         // Decrease mass and fuel supply.
@@ -550,16 +553,30 @@ public class RocketEntity extends MovingCraftEntity
 		
 		if(MathHelper.abs(rollSpeed) < 0.0001f)
 			rollSpeed = 0.0f;
-			
+		
 		if(MathHelper.abs(pitchSpeed) < 0.0001f)
 			pitchSpeed = 0.0f;
 		
 		if(MathHelper.abs(yawSpeed) < 0.0001f)
 			yawSpeed = 0.0f;
 		
-		setCraftRoll(getCraftRoll() + rollSpeed);
-		setCraftPitch(getCraftPitch() + pitchSpeed);
-		setCraftYaw(getCraftYaw() + yawSpeed);
+		Quaternion quaternion = getCraftQuaternion();
+		Quaternion speedQuaternion = Quaternion.fromEulerXyz(rollSpeed, pitchSpeed, yawSpeed);
+		quaternion.hamiltonProduct(speedQuaternion);
+		setQuaternion(quaternion);
+		
+		/*if(rollSpeed != 0.0f || pitchSpeed != 0.0f || yawSpeed != 0.0f)
+		{
+			quaternion.hamiltonProduct(speedQuaternion);
+			setQuaternion(quaternion);
+		}
+		else
+		{
+			System.out.println(quaternion.toString());
+			System.out.println(speedQuaternion.toString());
+		}*/
+		
+		System.out.println(quaternion.toString());
 	}
 	
 	/**
@@ -634,9 +651,9 @@ public class RocketEntity extends MovingCraftEntity
 		ArrayList<BlockPos> thrusterOffsets = new ArrayList<BlockPos>();
 		ArrayList<Vec3f> thrusterOffsetsRotated = new ArrayList<Vec3f>();
 		Vec3f upAxis = new Vec3f(0.0f, 1.0f, 0.0f);
-        float rotationRoll = getCraftRoll();
-		float rotationPitch = getCraftPitch();
-		float rotationYaw = getCraftYaw();
+        //float rotationRoll = getCraftRoll();
+		//float rotationPitch = getCraftPitch();
+		//float rotationYaw = getCraftYaw();
 		
 		for(MovingCraftBlockRenderData block : blocks)
 		{
@@ -644,7 +661,7 @@ public class RocketEntity extends MovingCraftEntity
 				thrusterOffsets.add(block.getPosition());
 		}
 		
-		switch(getForwardDirection())
+		/*switch(getForwardDirection())
 		{
 		case NORTH:
 			upAxis.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
@@ -704,6 +721,16 @@ public class RocketEntity extends MovingCraftEntity
 			break;
 		default:
 			break;
+		}*/
+		
+		Quaternion quaternion = getCraftQuaternion();
+		upAxis.rotate(quaternion);
+		
+		for(BlockPos pos : thrusterOffsets)
+		{
+			Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+			rotated.rotate(quaternion);
+			thrusterOffsetsRotated.add(rotated);
 		}
 		
 		Vec3f velocity = upAxis.copy();
@@ -731,10 +758,8 @@ public class RocketEntity extends MovingCraftEntity
 		BlockRotation rotation = BlockRotation.NONE;
 		
 		// Snap the rotation of this entity into place and then dismount all passengers.
-		this.setCraftRoll(0.0f);
-		this.setCraftPitch(0.0f);
-		this.setCraftYaw(rotationSteps * (float) (Math.PI / 2.0));
-
+		this.fromEulerAngles(0.0f, 0.0f, rotationSteps * (float) (Math.PI / 2.0));
+		
 		for(Entity passenger : this.getPassengerList())
 		{
 			updatePassengerPosition(passenger);
