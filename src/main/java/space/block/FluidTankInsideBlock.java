@@ -1,6 +1,7 @@
 package space.block;
 
 import java.util.ArrayList;
+import java.util.function.BiPredicate;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -17,6 +18,7 @@ import net.minecraft.world.WorldAccess;
 import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.FluidTankInterfaceBlockEntity;
+import space.util.BlockSearch;
 import space.util.StarflightEffects;
 
 public class FluidTankInsideBlock extends Block
@@ -47,85 +49,52 @@ public class FluidTankInsideBlock extends Block
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
 	{
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		int limit = 2048;
-		
-		for(Direction checkDirection : Direction.values())
-			checkAir(world, pos.offset(checkDirection), checkList, limit);
-		
-		if(checkList.size() >= limit)
+		if(neighborState.getBlock() == Blocks.AIR)
 		{
-			checkList.clear();
-			checkFluidTankBlocks(world, pos, pos, neighborPos, checkList, 4096);
+			BiPredicate<WorldAccess, BlockPos> include = (w, p) -> {
+				BlockState b = w.getBlockState(p);
+				return b.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE || b.getBlock() instanceof FluidTankControllerBlock || b.getBlock() instanceof FluidUtilityBlock;
+			};
+			
+			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();	
+			BlockSearch.search(world, pos, checkList, include, BlockSearch.MAX_VOLUME, true);
 			
 			for(BlockPos fluidTankBlockPos : checkList)
 			{
 				if(world.getBlockState(fluidTankBlockPos).getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
 					world.setBlockState(fluidTankBlockPos, Blocks.AIR.getDefaultState(), Block.FORCE_STATE);
+				else if(world.getBlockState(fluidTankBlockPos).getBlock() instanceof FluidTankControllerBlock)
+				{
+					BlockEntity blockEntity = world.getBlockEntity(fluidTankBlockPos);
+					
+					if(blockEntity != null)
+					{
+						if(blockEntity instanceof FluidTankControllerBlockEntity)
+						{
+							FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
+							
+							if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_PIPE_CAPACITY)
+								StarflightEffects.sendOutgas(world, pos, neighborPos, true);
+							
+							if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_TANK_CAPACITY)
+								blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, DestructionType.DESTROY);
+							
+							fluidTankController.setActive(false);
+							fluidTankController.setStorageCapacity(0);
+							fluidTankController.setStoredFluid(0);
+							fluidTankController.setCenterOfMass(new BlockPos(0, 0, 0));
+						}
+						else if(blockEntity instanceof FluidTankInterfaceBlockEntity)
+						{
+							FluidTankInterfaceBlockEntity fluidTankInterface = (FluidTankInterfaceBlockEntity) blockEntity;
+							fluidTankInterface.setActive(false);
+							fluidTankInterface.setControllerPosition(new BlockPos(0, 0, 0));
+						}
+					}
+				}
 			}
 		}
 		
 		return state;
-	}
-	
-	private void checkAir(WorldAccess world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
-	{
-		if(world.getBlockState(position).getBlock() != Blocks.AIR || checkList.contains(position))
-			return;
-		
-		checkList.add(position);
-		
-		if(checkList.size() >= limit)
-			return;
-		
-		for(Direction direction : Direction.values())
-			checkAir(world, position.offset(direction), checkList, limit);
-	}
-	
-	private void checkFluidTankBlocks(WorldAccess world, BlockPos position, BlockPos pos1, BlockPos pos2, ArrayList<BlockPos> checkList, int limit)
-	{
-		if(checkList.contains(position))
-			return;
-		else if(world.getBlockState(position).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG))
-		{
-			BlockEntity blockEntity = world.getBlockEntity(position);
-			
-			if(blockEntity != null)
-			{
-				if(blockEntity instanceof FluidTankControllerBlockEntity)
-				{
-					FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
-					
-					if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_PIPE_CAPACITY)
-						StarflightEffects.sendOutgas(world, pos1, pos2, true);
-					
-					if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_TANK_CAPACITY)
-						blockEntity.getWorld().createExplosion(null, pos1.getX() + 0.5, pos1.getY() + 0.5, pos1.getZ() + 0.5, 2.0f, DestructionType.DESTROY);
-					
-					fluidTankController.setActive(false);
-					fluidTankController.setStorageCapacity(0);
-					fluidTankController.setStoredFluid(0);
-					fluidTankController.setCenterOfMass(new BlockPos(0, 0, 0));
-				}
-				else if(blockEntity instanceof FluidTankInterfaceBlockEntity)
-				{
-					FluidTankInterfaceBlockEntity fluidTankInterface = (FluidTankInterfaceBlockEntity) blockEntity;
-					fluidTankInterface.setActive(false);
-					fluidTankInterface.setControllerPosition(new BlockPos(0, 0, 0));
-				}
-			}
-			
-			return;
-		}
-		else if(world.getBlockState(position).getBlock() != StarflightBlocks.FLUID_TANK_INSIDE)
-			return;
-		
-		checkList.add(position);
-		
-		if(checkList.size() >= limit)
-			return;
-		
-		for(Direction direction : Direction.values())
-			checkFluidTankBlocks(world, position.offset(direction), pos1, pos2, checkList, limit);
 	}
 }

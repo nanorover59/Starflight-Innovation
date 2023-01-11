@@ -148,6 +148,13 @@ public abstract class WorldRendererMixin
 			
 			RenderSystem.disableTexture();
 			
+			// Apply the bloom shader effect for players with fabulous graphics.
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.1f)
+			{
+				StarflightModClient.bloomShader.render(tickDelta);
+				client.getFramebuffer().beginWrite(false);
+			}
+			
 			// Apply the sky color on atmospheric planets.
 			if(!starrySky)
 			{
@@ -197,13 +204,6 @@ public abstract class WorldRendererMixin
 
 				BufferRenderer.drawWithShader(bufferBuilder.end());
 				matrices.pop();
-			}
-			
-			// Apply the bloom shader effect for player's with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.0f)
-			{
-				StarflightModClient.bloomShader.render(tickDelta);
-				client.getFramebuffer().beginWrite(false);
 			}
 			
 			// End of custom sky rendering.

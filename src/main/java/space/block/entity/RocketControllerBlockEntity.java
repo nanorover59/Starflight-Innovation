@@ -30,7 +30,6 @@ import space.StarflightMod;
 import space.block.RocketControllerBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
-import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.inventory.ImplementedInventory;
 import space.item.StarflightItems;
@@ -38,6 +37,7 @@ import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.RocketControllerScreenHandler;
+import space.util.BlockSearch;
 import space.vessel.BlockMass;
 
 public class RocketControllerBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory
@@ -119,11 +119,14 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		positionList.clear();
 		
 		// Detect blocks to be included in the craft construction.
-		int limit = 4096;
-		MovingCraftEntity.searchForBlocks(world, getPos(), positionList, limit);
-        
-        if(positionList.size() >= limit)
+        ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
+        BlockSearch.movingCraftSearch(world, getPos(), positionList, BlockSearch.MAX_VOLUME);
+		
+        if(positionList.size() >= BlockSearch.MAX_VOLUME)
+        {
+        	positionList.clear();
         	return;
+        }
         
         // Update the rocket's mass, fuel supply, and thrust data.
         double massFlowSum = 0;
@@ -240,7 +243,6 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 				if(buttonID == 1 || buttonID == 2)
 				{
 					PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
-					//Planet currentPlanet = data.getPlanet();
 					RegistryKey<World> nextWorld = data.isOrbit() ? PlanetList.getPlanetWorldKey(data.getPlanet()) : PlanetList.getParkingOrbitWorldKey(data.getPlanet());
 					
 					if(buttonID == 2 && !navigationCard.isEmpty() && navigationCard.hasNbt())
@@ -249,10 +251,11 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 						nextWorld = PlanetList.getParkingOrbitWorldKey(PlanetList.getByName(planetName));
 					}
 					
+					// Detect blocks to be included in the craft construction.
 			        ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
-			        MovingCraftEntity.searchForBlocks(world, position, positionList, 4096);
+			        BlockSearch.movingCraftSearch(world, position, positionList, BlockSearch.MAX_VOLUME);
 			        
-			        if(positionList.size() < 8192)
+			        if(positionList.size() < BlockSearch.MAX_VOLUME)
 			        {
 			        	double requiredDeltaV = buttonID == 1 ? rocketController.requiredDeltaV1 : rocketController.requiredDeltaV2;
 			        	double finalMass = rocketController.mass * Math.exp(-requiredDeltaV / rocketController.averageVEVacuum);

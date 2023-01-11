@@ -1,6 +1,7 @@
 package space.util;
 
 import java.util.ArrayList;
+import java.util.function.BiPredicate;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -61,23 +62,15 @@ public class AirUtil
 	}
 	
 	/**
-	 * Recursively find a closed volume that can be filled with habitable air.
+	 * Find a closed volume that can be filled with habitable air.
 	 */
-	public static void recursiveVolume(World world, BlockPos position, ArrayList<BlockPos> checkList, ArrayList<BlockPos> foundList, int limit)
+	public static void findVolume(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
 	{
-		if(position.getY() <= world.getBottomY() || position.getY() >= world.getTopY() || checkList.contains(position) || airBlocking(world, position))
-			return;
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			return !airBlocking(w, p);
+		};
 		
-		if(world.getBlockState(position).getBlock() == Blocks.AIR)
-			foundList.add(position);
-		
-		checkList.add(position);
-		
-		if(checkList.size() >= limit)
-			return;
-		
-		for(Direction direction : Direction.values())
-			recursiveVolume(world, position.offset(direction), checkList, foundList, limit);
+		BlockSearch.search(world, position, checkList, include, limit, true);
 	}
 	
 	/**
@@ -93,33 +86,35 @@ public class AirUtil
 	}
 	
 	/**
-	 * Recursively remove habitable air blocks.
+	 * Remove habitable air blocks.
 	 */
-	public static void recursiveRemove(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
+	public static void remove(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
 	{
-		if(checkList.size() >= limit || checkList.contains(position) || world.getBlockState(position).getBlock() != StarflightBlocks.HABITABLE_AIR)
-			return;
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			return w.getBlockState(p).getBlock() == StarflightBlocks.HABITABLE_AIR;
+		};
 		
-		checkList.add(position);
-		world.setBlockState(position, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+		BlockSearch.search(world, position, checkList, include, limit, true);
 		
-		for(Direction direction : Direction.values())
+		for(BlockPos pos : checkList)
 		{
-			BlockPos offset = position.offset(direction);
-			BlockState blockState = world.getBlockState(offset);
+			BlockState blockState = world.getBlockState(pos);
 			
-			if(blockState.getBlock() != StarflightBlocks.HABITABLE_AIR)
+			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 			{
-				world.updateNeighbor(offset, Blocks.AIR, position);
+				world.removeBlock(pos, false);
 				
-				if(blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
+				for(Direction direction : Direction.values())
 				{
-					world.removeBlock(offset, false);
-					Block.dropStacks(blockState, world, offset, world.getBlockEntity(offset));
+					BlockPos offset = pos.offset(direction);
+					
+					if(world.getBlockState(offset).isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
+					{
+						world.removeBlock(offset, false);
+						Block.dropStacks(blockState, world, offset, world.getBlockEntity(offset));
+					}
 				}
 			}
-			else
-				recursiveRemove(world, offset, checkList, limit);
 		}
 	}
 	
@@ -153,12 +148,11 @@ public class AirUtil
 		if(world.getBlockState(pos).getBlock() == activeBlock)
 		{
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			double supply = recursiveSearchSupply(world, pos, checkList, 32768, activeBlock);
+			double supply = searchSupply(world, pos, checkList, BlockSearch.MAX_VOLUME, activeBlock);
 			
 			if(supply >= required)
 			{
-				checkList.clear();
-				recursiveUseSupply(world, pos, checkList, 32768, required, activeBlock);
+				useSupply(world, checkList, required);
 				return true;
 			}
 			else
@@ -169,109 +163,81 @@ public class AirUtil
 	}
 	
 	/**
-	 * Recursively find the total amount of oxygen available from connected pipes and tanks in kilograms.
+	 * Find the total amount of oxygen available from connected pipes and tanks in kilograms.
 	 */
-	public static double recursiveSearchSupply(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit, Block activeBlock)
+	public static double searchSupply(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit, Block activeBlock)
 	{
-		if(checkList.contains(position))
-			return 0;
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			BlockState blockState = world.getBlockState(p);
+			return blockState.getBlock() instanceof OxygenPipeBlock || blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE || blockState.getBlock() == activeBlock;
+		};
 		
-		BlockState blockState = world.getBlockState(position);
+		BlockSearch.search(world, position, checkList, include, BlockSearch.MAX_VOLUME, false);
 		double oxygen = 0;
 		
-		if(blockState.getBlock() == activeBlock && checkList.isEmpty())
+		for(BlockPos pos : checkList)
 		{
-			for(Direction direction : Direction.values())
-				oxygen += recursiveSearchSupply(world, position.offset(direction), checkList, limit, activeBlock);
+			BlockState blockState = world.getBlockState(pos);
 			
-			return oxygen;
+			if(blockState.getBlock() instanceof OxygenPipeBlock)
+			{
+				FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(pos);
+				oxygen += blockEntity.getStoredFluid();
+			}
+			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
+			{
+				OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(pos);
+				
+				if(blockEntity.getFluidTankController() != null)
+					oxygen += blockEntity.getFluidTankController().getStoredFluid();
+			}
 		}
-		
-		if(blockState.getBlock() instanceof OxygenPipeBlock)
-		{
-			FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(position);
-			oxygen += blockEntity.getStoredFluid();
-		}
-		else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
-		{
-			OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(position);
-			
-			if(blockEntity.getFluidTankController() != null)
-				oxygen += blockEntity.getFluidTankController().getStoredFluid();
-		}
-		
-		if(!(world.getBlockState(position).getBlock() instanceof OxygenPipeBlock))
-			return oxygen;
-		
-		checkList.add(position);
-		
-		if(checkList.size() >= limit)
-			return oxygen;
-		
-		for(Direction direction : Direction.values())
-			oxygen += recursiveSearchSupply(world, position.offset(direction), checkList, limit, activeBlock);
 		
 		return oxygen;
 	}
 	
 	/**
-	 * Recursively deplete the required amount of oxygen from connected pipes and tanks.
+	 * Deplete the required amount of oxygen from connected pipes and tanks.
 	 */
-	public static void recursiveUseSupply(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit, double toUse, Block activeBlock)
+	public static void useSupply(World world, ArrayList<BlockPos> actionList, double toUse)
 	{
-		if(checkList.contains(position))
-			return;
-		
-		BlockState blockState = world.getBlockState(position);
-		
-		if(blockState.getBlock() == activeBlock && checkList.isEmpty())
+		for(BlockPos pos : actionList)
 		{
-			for(Direction direction : Direction.values())
-				recursiveUseSupply(world, position.offset(direction), checkList, limit, toUse, activeBlock);
+			BlockState blockState = world.getBlockState(pos);
 			
-			return;
-		}
-		
-		if(blockState.getBlock() instanceof OxygenPipeBlock)
-		{
-			FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(position);
-			
-			if(toUse < blockEntity.getStoredFluid())
+			if(blockState.getBlock() instanceof OxygenPipeBlock)
 			{
-				blockEntity.changeStoredFluid(-toUse);
-				return;
-			}
-			else
-			{
-				toUse -= blockEntity.getStoredFluid();
-				blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
-			}
-		}
-		else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
-		{
-			OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(position);
-			
-			if(blockEntity.getFluidTankController() != null)
-			{
-				if(toUse < blockEntity.getFluidTankController().getStoredFluid())
+				FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(pos);
+				
+				if(toUse < blockEntity.getStoredFluid())
 				{
-					blockEntity.getFluidTankController().changeStoredFluid(-toUse);
+					blockEntity.changeStoredFluid(-toUse);
 					return;
 				}
 				else
 				{
-					toUse -= blockEntity.getFluidTankController().getStoredFluid();
-					blockEntity.getFluidTankController().setStoredFluid(0.0);
+					toUse -= blockEntity.getStoredFluid();
+					blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
+				}
+			}
+			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
+			{
+				OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(pos);
+				
+				if(blockEntity.getFluidTankController() != null)
+				{
+					if(toUse < blockEntity.getFluidTankController().getStoredFluid())
+					{
+						blockEntity.getFluidTankController().changeStoredFluid(-toUse);
+						return;
+					}
+					else
+					{
+						toUse -= blockEntity.getFluidTankController().getStoredFluid();
+						blockEntity.getFluidTankController().setStoredFluid(0.0);
+					}
 				}
 			}
 		}
-		
-		checkList.add(position);
-		
-		if(!(world.getBlockState(position).getBlock() instanceof OxygenPipeBlock) || checkList.size() >= limit)
-			return;
-		
-		for(Direction direction : Direction.values())
-			recursiveUseSupply(world, position.offset(direction), checkList, limit, toUse, activeBlock);
 	}
 }

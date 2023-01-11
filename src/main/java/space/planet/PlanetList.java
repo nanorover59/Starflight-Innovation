@@ -339,10 +339,14 @@ public class PlanetList
 		{
 			PacketByteBuf buffer = PacketByteBufs.create();
 			PlanetDimensionData data = getDimensionDataForWorld(player.world);
+			
+			if(data == null)
+				continue;
+			
 			buffer.writeInt(planetList.size());
 			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.
 			
-			if(data != null && data.overrideSky())
+			if(data.overrideSky())
 			{
 				Planet planet = data.getPlanet();
 				

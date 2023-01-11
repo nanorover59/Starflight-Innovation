@@ -7,7 +7,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BarrelBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -79,8 +78,8 @@ public class StorageCubeBlock extends BlockWithEntity
 	{
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 
-		if(blockEntity instanceof BarrelBlockEntity)
-			((BarrelBlockEntity) blockEntity).tick();
+		if(blockEntity instanceof StorageCubeBlockEntity)
+			((StorageCubeBlockEntity) blockEntity).tick();
 	}
 
 	@Override

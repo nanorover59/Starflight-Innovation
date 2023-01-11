@@ -1,6 +1,5 @@
 package space.block.entity;
 
-import net.minecraft.block.BarrelBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.LootableContainerBlockEntity;
@@ -15,13 +14,14 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
+import space.block.StorageCubeBlock;
+import space.util.StarflightEffects;
 
 public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 {
@@ -31,14 +31,14 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 		@Override
 		protected void onContainerOpen(World world, BlockPos pos, BlockState state)
 		{
-			StorageCubeBlockEntity.this.playSound(state, SoundEvents.BLOCK_BARREL_OPEN);
+			StorageCubeBlockEntity.this.playSound(state, StarflightEffects.STORAGE_CUBE_SOUND_EVENT);
 			StorageCubeBlockEntity.this.setOpen(state, true);
 		}
 
 		@Override
 		protected void onContainerClose(World world, BlockPos pos, BlockState state)
 		{
-			StorageCubeBlockEntity.this.playSound(state, SoundEvents.BLOCK_BARREL_CLOSE);
+			StorageCubeBlockEntity.this.playSound(state, StarflightEffects.STORAGE_CUBE_SOUND_EVENT);
 			StorageCubeBlockEntity.this.setOpen(state, false);
 		}
 
@@ -136,12 +136,12 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 
 	void setOpen(BlockState state, boolean open)
 	{
-		this.world.setBlockState(this.getPos(), (BlockState) state.with(BarrelBlock.OPEN, open), Block.NOTIFY_ALL);
+		this.world.setBlockState(this.getPos(), (BlockState) state.with(StorageCubeBlock.OPEN, open), Block.NOTIFY_ALL);
 	}
 
 	void playSound(BlockState state, SoundEvent soundEvent)
 	{
-		Vec3i vec3i = state.get(BarrelBlock.FACING).getVector();
+		Vec3i vec3i = state.get(StorageCubeBlock.FACING).getVector();
 		double d = (double) this.pos.getX() + 0.5 + (double) vec3i.getX() / 2.0;
 		double e = (double) this.pos.getY() + 0.5 + (double) vec3i.getY() / 2.0;
 		double f = (double) this.pos.getZ() + 0.5 + (double) vec3i.getZ() / 2.0;

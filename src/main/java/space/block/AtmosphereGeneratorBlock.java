@@ -103,13 +103,12 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 		if(world.isReceivingRedstonePower(pos) && !state.get(LIT) && !fromPos.equals(frontPos) && frontState.getBlock() == Blocks.AIR)
 		{
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			double supply = AirUtil.recursiveSearchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
-			checkList.clear();
 			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
-			AirUtil.recursiveVolume(world, frontPos, checkList, foundList, AirUtil.MAX_VOLUME);
+			double supply = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
+			AirUtil.findVolume(world, frontPos, foundList, AirUtil.MAX_VOLUME);
 			double required = foundList.size() * HabitableAirBlock.DENSITY;
 			
-			if(required > supply)
+			if(required == 0 || required > supply)
 			{
 				PlayerEntity player = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 32.0, false);
 				MutableText text = Text.translatable("block.space.atmosphere_generator.error");
@@ -117,14 +116,13 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 			}
 			else
 			{
-				checkList = new ArrayList<BlockPos>();
-				AirUtil.recursiveUseSupply(world, pos, checkList, AirUtil.MAX_VOLUME, required, StarflightBlocks.ATMOSPHERE_GENERATOR);
+				AirUtil.useSupply(world, checkList, required);
 				AirUtil.fillVolume(world, foundList);
-				world.setBlockState(pos, (BlockState) state.with(ElectrolyzerBlock.LIT, true), Block.NOTIFY_ALL);
+				world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
 				StarflightEffects.sendOutgas(world, pos, frontPos, true);
 			}
 		}
 		else if(frontState.getBlock() == Blocks.AIR)
-			world.setBlockState(pos, (BlockState) state.with(ElectrolyzerBlock.LIT, false), Block.NOTIFY_ALL);
+			world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, false), Block.NOTIFY_ALL);
     }
 }

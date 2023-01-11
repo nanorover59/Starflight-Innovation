@@ -6,6 +6,12 @@
       "space:current1"
     ]
   },
+  "storage_cube": {
+    "subtitle": "subtitles.space.storage_cube",
+    "sounds": [
+      "space:storage_cube"
+    ]
+  },
   "thruster": {
     "subtitle": "subtitles.space.thruster",
     "sounds": [

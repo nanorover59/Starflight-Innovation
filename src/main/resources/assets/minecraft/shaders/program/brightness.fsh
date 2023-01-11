@@ -8,7 +8,7 @@ out vec4 fragColor;
 
 void main() 
 {
-	float threshold = 0.01;
+	float threshold = 0.1;
 	vec3 color = texture(DiffuseSampler, texCoord).rgb;
     float brightness = dot(color, vec3(0.2126, 0.7152, 0.0722));
     float intensity = max(0.0, pow((brightness - 0.25) / threshold, 2.0));

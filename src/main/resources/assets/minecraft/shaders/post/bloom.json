@@ -10,62 +10,24 @@
             "outtarget": "0"
         },
         {
-            "name": "blur",
+            "name": "7x7_blur",
             "intarget": "0",
             "outtarget": "1",
             "uniforms": [
                 {
                     "name": "BlurDir",
                     "values": [ 1.0, 0.0 ]
-                },
-                {
-                    "name": "Radius",
-                    "values": [ 2.0 ]
                 }
             ]
         },
         {
-            "name": "blur",
+            "name": "7x7_blur",
             "intarget": "1",
             "outtarget": "0",
             "uniforms": [
                 {
                     "name": "BlurDir",
                     "values": [ 0.0, 1.0 ]
-                },
-                {
-                    "name": "Radius",
-                    "values": [ 2.0 ]
-                }
-            ]
-        },
-        {
-            "name": "blur",
-            "intarget": "0",
-            "outtarget": "1",
-            "uniforms": [
-                {
-                    "name": "BlurDir",
-                    "values": [ 1.0, 0.0 ]
-                },
-                {
-                    "name": "Radius",
-                    "values": [ 2.0 ]
-                }
-            ]
-        },
-        {
-            "name": "blur",
-            "intarget": "1",
-            "outtarget": "0",
-            "uniforms": [
-                {
-                    "name": "BlurDir",
-                    "values": [ 0.0, 1.0 ]
-                },
-                {
-                    "name": "Radius",
-                    "values": [ 2.0 ]
                 }
             ]
         },

@@ -193,11 +193,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		if(client.player != null)
 		{
 			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.player.getWorld());
-			
-			if(data == null)
-				p = 1.0;
-			
-			p = data.getPressure();
+			p = data == null ? 1.0 : data.getPressure();
 		}
 		
 		ArrayList<Text> textList = new ArrayList<Text>();

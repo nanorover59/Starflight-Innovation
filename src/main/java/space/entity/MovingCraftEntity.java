@@ -35,7 +35,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -46,16 +45,13 @@ import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.StarflightMod;
-import space.block.FluidTankControllerBlock;
 import space.block.StarflightBlocks;
-import space.block.entity.FluidTankControllerBlockEntity;
 import space.inventory.ImplementedInventory;
 import space.mixin.common.EntityMixin;
 import space.vessel.MovingCraftBlockData;
 
 public class MovingCraftEntity extends Entity
 {
-	private static final Direction[] DIRECTIONS = Direction.values();
 	private static final TrackedData<BlockPos> INITIAL_BLOCK_POS = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.BLOCK_POS);
 	private static final TrackedData<Integer> FORWARD = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	private static final TrackedData<Float> CRAFT_QX = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.FLOAT);
@@ -148,40 +144,12 @@ public class MovingCraftEntity extends Entity
     	this.dataTracker.set(FORWARD, d);
     }
     
-    public void fromEulerAngles(float roll, float pitch, float yaw)
-    {
-    	float x = (float) (Math.cos(roll / 2.0) * Math.cos(pitch / 2.0) * Math.cos(yaw / 2.0) + Math.sin(roll / 2.0) * Math.sin(pitch / 2.0) * Math.sin(yaw / 2.0));
-    	float y = (float) (Math.sin(roll / 2.0) * Math.cos(pitch / 2.0) * Math.cos(yaw / 2.0) + Math.cos(roll / 2.0) * Math.sin(pitch / 2.0) * Math.sin(yaw / 2.0));
-    	float z = (float) (Math.cos(roll / 2.0) * Math.sin(pitch / 2.0) * Math.cos(yaw / 2.0) + Math.sin(roll / 2.0) * Math.cos(pitch / 2.0) * Math.sin(yaw / 2.0));
-    	float w = (float) (Math.cos(roll / 2.0) * Math.cos(pitch / 2.0) * Math.sin(yaw / 2.0) + Math.sin(roll / 2.0) * Math.sin(pitch / 2.0) * Math.cos(yaw / 2.0));
-    	setQuaternion(x, y, z, w);
-    }
-    
     public void updateEulerAngles()
     {
-    	Quaternion quaternion = getCraftQuaternion();
-    	float x = quaternion.getX();
-    	float y = quaternion.getY();
-    	float z = quaternion.getZ();
-    	float w = quaternion.getW();
-    	
-    	craftPitch = (float) Math.asin(2.0 * (x * z + y * w));
-    	
-    	if(craftPitch == Math.PI / 2.0)
-    	{
-    		craftRoll = 0.0f;
-    		craftYaw = (float) (-2.0 * Math.atan2(y, x));
-    	}
-    	else if(craftPitch == -Math.PI / 2.0)
-    	{
-    		craftRoll = 0.0f;
-    		craftYaw = (float) (2.0 * Math.atan2(y, x));
-    	}
-    	else
-    	{
-    		craftRoll = (float) Math.atan2(2.0 * (x * y + z * w), x * x - y * y - z * z + w * w);
-    		craftYaw = (float) Math.atan2(2.0 * (x * w + y * z), x * x + y * y - z * z - w * w);
-    	}
+    	Vec3f angles = getCraftQuaternion().toEulerXyz();
+    	this.craftPitch = angles.getX();
+    	this.craftYaw = angles.getY();
+    	this.craftRoll = angles.getZ();
     }
     
     public void setQuaternion(float x, float y, float z, float w)
@@ -249,11 +217,11 @@ public class MovingCraftEntity extends Entity
     {
     	double yaw = getCraftYaw();
     	
-    	if(yaw > Math.PI * 2.0 * (1.0 / 8.0) && yaw <= Math.PI * 2.0 * (3.0 / 8.0))
+    	if(yaw < Math.PI * -0.25 && yaw >= Math.PI * -0.75)
     		return 1;
-    	else if(yaw > Math.PI * 2.0 * (3.0 / 8.0) && yaw <= Math.PI * 2.0 * (5.0 / 8.0))
+    	else if(yaw > Math.PI * 0.75 || yaw < Math.PI * -0.75)
     		return 2;
-    	else if(yaw > Math.PI * 2.0 * (5.0 / 8.0) && yaw <= Math.PI * 2.0 * (7.0 / 8.0))
+    	else if(yaw > Math.PI * 0.25 && yaw <= Math.PI * 0.75)
     		return 3;
     	else
     		return 0;
@@ -309,36 +277,6 @@ public class MovingCraftEntity extends Entity
         Quaternion quaternion = getCraftQuaternion();
         Vec3f offset = new Vec3f(pos.getX(), pos.getY() - 0.5f, pos.getZ());
         offset.rotate(quaternion);
-        /*float rotationRoll = getCraftRoll();
-		float rotationPitch = getCraftPitch();
-		float rotationYaw = getCraftYaw();
-
-		switch(getForwardDirection())
-		{
-		case NORTH:
-			offset.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationRoll));
-			offset.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationPitch));
-			offset.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
-			break;
-		case EAST:
-			offset.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationRoll));
-			offset.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationPitch));
-			offset.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
-			break;
-		case SOUTH:
-			offset.rotate(Vec3f.POSITIVE_Z.getRadialQuaternion(rotationRoll));
-			offset.rotate(Vec3f.POSITIVE_X.getRadialQuaternion(rotationPitch));
-			offset.rotate(Vec3f.POSITIVE_Y.getRadialQuaternion(rotationYaw));
-			break;
-		case WEST:
-			offset.rotate(Vec3f.NEGATIVE_X.getRadialQuaternion(rotationRoll));
-			offset.rotate(Vec3f.NEGATIVE_Z.getRadialQuaternion(rotationPitch));
-			offset.rotate(Vec3f.NEGATIVE_Y.getRadialQuaternion(rotationYaw));
-			break;
-		default:
-			break;
-		}*/
-
         passenger.setPosition(this.getX() + offset.getX(), this.getY() + offset.getY(), this.getZ() + offset.getZ());
         passenger.fallDistance = 0.0f;
 	}
@@ -404,91 +342,6 @@ public class MovingCraftEntity extends Entity
 		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
 	}
 	
-	public static void searchForBlocks(World world, BlockPos pos, ArrayList<BlockPos> positionList, int limit)
-	{
-		if(positionList.size() > limit || positionList.contains(pos) || !isBlockAllowed(world, pos))
-			return;
-		
-		positionList.add(pos);
-		
-		if(world.getBlockState(pos).isIn(StarflightBlocks.NO_RECURSIVE_SEARCH_TAG))
-			return;
-		
-		for(Direction direction : DIRECTIONS)
-			searchForBlocks(world, pos.offset(direction), positionList, limit);
-	}
-	
-	private static boolean isBlockAllowed(World world, BlockPos pos)
-	{
-		if(world.getBlockState(pos).getBlock() == Blocks.AIR)
-			return false;
-		else if(world.getBlockState(pos).isIn(StarflightBlocks.EXCLUDED_BLOCK_TAG))
-			return false;
-		else
-			return true;
-	}
-	
-	protected void releaseBlocks()
-	{
-		int rotationSteps = getRotationSteps();
-		ArrayList<MovingCraftBlockData> toPlaceFirst = new ArrayList<MovingCraftBlockData>();
-		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
-		
-		// Snap the rotation of this entity into place and then dismount all passengers.
-		this.fromEulerAngles(0.0f, 0.0f, rotationSteps * (float) (Math.PI / 2.0));
-		
-		for(Entity passenger : this.getPassengerList())
-		{
-			updatePassengerPosition(passenger);
-			passenger.setPosition(passenger.getPos().add(0.0, 0.75, 0.0));
-			passenger.setVelocity(Vec3d.ZERO);
-			passenger.velocityModified = true;
-			passenger.fallDistance = 0.0f;
-			passenger.stopRiding();
-		}
-		
-		// Place all blocks back into the world.
-		for(MovingCraftBlockData blockData : blockDataList)
-		{
-			if(blockData.placeFirst())
-				toPlaceFirst.add(blockData);
-			else
-				toPlaceLast.add(blockData);
-		}
-		
-		for(MovingCraftBlockData blockData : toPlaceFirst)
-			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
-		
-		for(MovingCraftBlockData blockData : toPlaceLast)
-			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
-		
-		for(MovingCraftBlockData blockData : toPlaceFirst)
-		{
-			if(blockData.getStoredFluid() > 0)
-			{
-				BlockRotation rotation = BlockRotation.NONE;
-				
-				for(int i = 0; i < rotationSteps; i++)
-					rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
-				
-				BlockPos blockPos = this.getBlockPos().add(blockData.getPosition().rotate(rotation));
-				BlockEntity blockEntity = world.getBlockEntity(blockPos);
-				
-				if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-				{
-					FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
-					
-					if(blockData.getBlockState().getBlock() instanceof FluidTankControllerBlock)
-						((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(world, blockPos, fluidTank);
-					
-					fluidTank.setStoredFluid(blockData.getStoredFluid());
-				}
-			}
-		}
-		
-		this.setRemoved(RemovalReason.DISCARDED);
-	}
-	
 	public void pickUpEntity(Entity passenger)
 	{
 		pickUpEntity(passenger, new BlockPos(Math.floor(passenger.getX()), Math.floor(passenger.getY()), Math.floor(passenger.getZ())).subtract(getInitialBlockPos()));
@@ -517,7 +370,7 @@ public class MovingCraftEntity extends Entity
 		if(!(this.world instanceof ServerWorld) || this.isRemoved())
 			return;
 		
-		this.fromEulerAngles(0.0f, 0.0f, arrivalYaw);
+		this.setQuaternion(Quaternion.fromEulerXyz(0.0f, arrivalYaw, 0.0f));
 		this.setPosition(arrivalLocation);
 		
 		ArrayList<Entity> passengerList = Lists.newArrayList(this.getPassengerList());
@@ -550,7 +403,7 @@ public class MovingCraftEntity extends Entity
 			if(movingCraft instanceof RocketEntity)
 			{
 				((RocketEntity) movingCraft).storeGravity();
-				((RocketEntity) movingCraft).fromEulerAngles(0.0f, 0.0f, arrivalYaw);
+				((RocketEntity) movingCraft).setQuaternion(Quaternion.fromEulerXyz(0.0f, arrivalYaw, 0.0f));
 			}
 		}
 	}

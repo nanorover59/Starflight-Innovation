@@ -191,6 +191,14 @@ public class StarflightModClient implements ClientModInitializer
 				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_E))
 					yawState--;
 				
+				//client.options.dropKey.setPressed(false);
+				//client.options.inventoryKey.setPressed(false);
+				//client.options.sneakKey.setPressed(false);
+				//client.options.sprintKey.setPressed(false);
+				
+				//KeyBinding.setKeyPressed(client.options.dropKey.getDefaultKey(), false);
+				//KeyBinding.setKeyPressed(client.options.inventoryKey.getDefaultKey(), false);
+				//KeyBinding.setKeyPressed(client.options.sneakKey.getDefaultKey(), false);
 				KeyBinding.unpressAll();
 				
 				PacketByteBuf buffer = PacketByteBufs.create();

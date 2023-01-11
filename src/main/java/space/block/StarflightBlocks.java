@@ -139,9 +139,9 @@ public class StarflightBlocks
 	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0), 0.1e6, 320, 280, 12.0);
-	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 16.0, 16.0), 0.05e6, 360, 80, 4.0);
-	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 16.0, 15.0), 0.075e6, 340, 320, 20.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 16.0, 15.0), 0.15e6, 320, 280, 12.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 16.0, 16.0), 0.075e6, 380, 80, 4.0);
+	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 16.0, 15.0), 0.15e6, 340, 320, 20.0);
 	
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
@@ -166,7 +166,7 @@ public class StarflightBlocks
 	// Block Tags
 	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
 	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
-	public static final TagKey<Block> NO_RECURSIVE_SEARCH_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "no_recursive_search_blocks"));
+	public static final TagKey<Block> EDGE_CASE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "edge_case__blocks"));
 	public static final TagKey<Block> INSTANT_REMOVE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "instant_remove_blocks"));
 	
 	// Fluid Storage Values

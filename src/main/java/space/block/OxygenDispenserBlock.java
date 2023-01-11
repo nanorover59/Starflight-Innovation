@@ -90,7 +90,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 			return ActionResult.PASS;
 
 		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		double availableOxygen = AirUtil.recursiveSearchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
+		double availableOxygen = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
 		
 		// Do effects and transfer oxygen.
 		if(availableOxygen >= requiredOxygen)
@@ -113,7 +113,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 				}
 			}
 
-			AirUtil.recursiveUseSupply(world, pos, checkList, AirUtil.MAX_VOLUME, requiredOxygen, StarflightBlocks.OXYGEN_DISPENSER);
+			AirUtil.useSupply(world, checkList, requiredOxygen);
 			return ActionResult.SUCCESS;
 		}
 		

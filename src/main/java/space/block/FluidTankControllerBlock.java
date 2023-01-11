@@ -2,6 +2,7 @@ package space.block;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -28,6 +29,7 @@ import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.FluidTankInterfaceBlockEntity;
 import space.client.StarflightModClient;
+import space.util.BlockSearch;
 import space.util.StarflightEffects;
 
 public class FluidTankControllerBlock extends BlockWithEntity
@@ -116,7 +118,6 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 	protected static int initializeFluidTank(World world, BlockPos position, String fluidName, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
-		int limit = 4096;
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
 		fluidTankController.setStoredFluid(0);
@@ -125,10 +126,46 @@ public class FluidTankControllerBlock extends BlockWithEntity
 		{
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
 			ArrayList<BlockPos> actionList = new ArrayList<BlockPos>(); // List of all fluid tank controller and interface blocks found.
-			checkInterior(world, position.offset(direction), checkList, actionList, limit);
-
-			if(checkList.size() > 0 && checkList.size() < limit)
+			
+			BiPredicate<WorldAccess, BlockPos> include = (w, p) -> {
+				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
+			};
+			
+			BlockSearch.search(world, position.offset(direction), checkList, include, BlockSearch.MAX_VOLUME, true);
+			
+			if(checkList.size() > 0 && checkList.size() < BlockSearch.MAX_VOLUME)
 			{
+				double cx = 0;
+				double cy = 0;
+				double cz = 0;
+				int count = 0;
+
+				for(BlockPos p : checkList)
+				{
+					if(world.getBlockState(p).getMaterial() == Material.AIR)
+					{
+						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
+						fluidTankController.setStorageCapacity(fluidTankController.getStorageCapacity() + capacity);
+						cx += p.getX();
+						cy += p.getY();
+						cz += p.getZ();
+						count++;
+						
+						for(Direction direction1 : Direction.values())
+						{
+							BlockPos offset = p.offset(direction1);
+							BlockEntity blockEntity = world.getBlockEntity(offset);
+
+							if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof FluidTankInterfaceBlockEntity))
+								actionList.add(offset);
+						}
+					}
+				}
+				
+				cx /= count;
+				cy /= count;
+				cz /= count;
+				
 				// Check for excess fluid tank controllers and a minimum of one inlet and one outlet valve.
 				boolean inlet = false;
 				boolean outlet = false;
@@ -167,54 +204,12 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					}
 				}
 				
-				// Finish defining the fluid tank arrangement.
-				double cx = 0;
-				double cy = 0;
-				double cz = 0;
-				int count = 0;
-
-				for(BlockPos p : checkList)
-				{
-					if(world.getBlockState(p).getMaterial() == Material.AIR)
-					{
-						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
-						fluidTankController.setStorageCapacity(fluidTankController.getStorageCapacity() + capacity);
-						cx += p.getX();
-						cy += p.getY();
-						cz += p.getZ();
-						count++;
-					}
-				}
-				
-				cx /= count;
-				cy /= count;
-				cz /= count;
-				valid = true;
 				fluidTankController.setCenterOfMass(new BlockPos(cx, cy, cz));
 				fluidTankController.setActive(true);
+				valid = true;
 			}
 		}
 
 		return valid ? 0 : 1;
-	}
-
-	private static void checkInterior(WorldAccess world, BlockPos position, ArrayList<BlockPos> checkList, ArrayList<BlockPos> actionList, int limit)
-	{
-		if(checkList.size() > limit || checkList.contains(position) || actionList.contains(position))
-			return;
-		
-		BlockEntity blockEntity = world.getBlockEntity(position);
-
-		if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof FluidTankInterfaceBlockEntity))
-		{
-			actionList.add(position);
-			return;
-		} else if(world.getBlockState(position).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG) || checkList.contains(position))
-			return;
-
-		checkList.add(position);
-
-		for(Direction direction : Direction.values())
-			checkInterior(world, position.offset(direction), checkList, actionList, limit);
 	}
 }

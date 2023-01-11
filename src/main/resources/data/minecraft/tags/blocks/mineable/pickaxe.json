@@ -48,6 +48,7 @@
     "space:ice_electrolyzer",
     "space:oxygen_dispenser",
     "space:atmosphere_generator",
+    "space:storage_cube",
     "space:airlock_door",
     "space:airlock_trapdoor",
     "space:iron_ladder",
