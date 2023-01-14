@@ -9,7 +9,8 @@
     "DimensionEffectsMixin",
     "BlockModelRendererMixin",
     "CameraMixin",
-    "InGameHudMixin"
+    "InGameHudMixin",
+    "KeyBindingMixin"
   ],
   "injectors": {
     "defaultRequire": 0

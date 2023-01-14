@@ -327,6 +327,7 @@ public class MovingCraftEntity extends Entity
 			}
 		}
 		
+		
 		for(BlockPos pos : positionList)
 		{
 			if(isBlockSolid(world, pos))

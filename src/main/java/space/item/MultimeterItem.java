@@ -114,7 +114,7 @@ public class MultimeterItem extends Item
         }
         
         if(text != Text.EMPTY)
-        {
+        {	
         	player.sendMessage(text, true);
         	return ActionResult.success(world.isClient);
         }

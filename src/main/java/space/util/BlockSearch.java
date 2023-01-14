@@ -3,6 +3,8 @@ package space.util;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.BiPredicate;
 
 import net.minecraft.block.BlockState;
@@ -16,7 +18,7 @@ import space.block.StarflightBlocks;
 public class BlockSearch
 {
 	public static final int MAX_VOLUME = 16384;
-	public static final int MAX_DISTANCE = 256;
+	public static final int MAX_DISTANCE = 128;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	
 	/**
@@ -25,18 +27,19 @@ public class BlockSearch
 	public static void search(World world, BlockPos pos, ArrayList<BlockPos> positionList, BiPredicate<World, BlockPos> include, int limit, boolean distanceLimit)
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
 		
 		if(include.test(world, pos))
 			stack.push(pos);
 		
-		while(stack.size() > 0 && positionList.size() < limit)
+		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			positionList.add(blockPos);
+			set.add(blockPos);
 			
 			if(distanceLimit && tooFar(pos, blockPos))
 			{
-				positionList.clear();
+				set.clear();
 				return;
 			}
 				
@@ -44,10 +47,12 @@ public class BlockSearch
 			{
 				BlockPos offset = blockPos.offset(direction);
 				
-				if(!stack.contains(offset) && !positionList.contains(offset) && include.test(world, offset))
+				if(!set.contains(offset) && include.test(world, offset))
 					stack.push(offset);
 			}
 		}
+		
+		positionList.addAll(set);
 	}
 	
 	/**
@@ -56,18 +61,19 @@ public class BlockSearch
 	public static void search(WorldAccess world, BlockPos pos, ArrayList<BlockPos> positionList, BiPredicate<WorldAccess, BlockPos> include, int limit, boolean distanceLimit)
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
 		
 		if(include.test(world, pos))
 			stack.push(pos);
 		
-		while(stack.size() > 0 && positionList.size() < limit)
+		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			positionList.add(blockPos);
+			set.add(blockPos);
 			
 			if(distanceLimit && tooFar(pos, blockPos))
 			{
-				positionList.clear();
+				set.clear();
 				return;
 			}
 			
@@ -75,10 +81,12 @@ public class BlockSearch
 			{
 				BlockPos offset = blockPos.offset(direction);
 				
-				if(!stack.contains(offset) && !positionList.contains(offset) && include.test(world, offset))
+				if(!set.contains(offset) && include.test(world, offset))
 					stack.push(offset);
 			}
 		}
+		
+		positionList.addAll(set);
 	}
 	
 	/**
@@ -87,34 +95,37 @@ public class BlockSearch
 	public static void search(World world, BlockPos pos, ArrayList<BlockPos> positionList, BiPredicate<World, BlockPos> include, BiPredicate<World, BlockPos> edgeCase, int limit, boolean distanceLimit)
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
 		
 		if(include.test(world, pos))
 			stack.push(pos);
 		
-		while(stack.size() > 0 && positionList.size() < limit)
+		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			positionList.add(blockPos);
+			set.add(blockPos);
 			
 			if(distanceLimit && tooFar(pos, blockPos))
 			{
-				positionList.clear();
+				set.clear();
 				return;
 			}
-				
+			
 			for(Direction direction : DIRECTIONS)
 			{
 				BlockPos offset = blockPos.offset(direction);
 				
-				if(!stack.contains(offset) && !positionList.contains(offset))
+				if(!set.contains(offset))
 				{
 					if(include.test(world, offset))
 						stack.push(offset);
 					else if(edgeCase.test(world, offset))
-						positionList.add(offset);
+						set.add(offset);
 				}
 			}
 		}
+		
+		positionList.addAll(set);
 	}
 	
 	public static void movingCraftSearch(World world, BlockPos blockPos, ArrayList<BlockPos> positionList, int limit)

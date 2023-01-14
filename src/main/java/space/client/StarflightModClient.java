@@ -25,6 +25,7 @@ import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderEffect;
 import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
@@ -59,6 +60,7 @@ import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
+import space.mixin.client.KeyBindingMixin;
 import space.planet.PlanetRenderList;
 import space.screen.BatteryScreenHandler;
 import space.screen.ElectricFurnaceScreenHandler;
@@ -199,7 +201,10 @@ public class StarflightModClient implements ClientModInitializer
 				//KeyBinding.setKeyPressed(client.options.dropKey.getDefaultKey(), false);
 				//KeyBinding.setKeyPressed(client.options.inventoryKey.getDefaultKey(), false);
 				//KeyBinding.setKeyPressed(client.options.sneakKey.getDefaultKey(), false);
-				KeyBinding.unpressAll();
+				//KeyBinding.unpressAll();
+				
+				GameOptions o = client.options;
+				unpressKeys(o.dropKey, o.inventoryKey, o.sneakKey, o.sprintKey, o.forwardKey, o.backKey, o.leftKey, o.rightKey);
 				
 				PacketByteBuf buffer = PacketByteBufs.create();
 				buffer.writeInt(throttleState);
@@ -237,6 +242,12 @@ public class StarflightModClient implements ClientModInitializer
 		}
 		else
 			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
+	}
+	
+	public static void unpressKeys(KeyBinding ... keyBindings)
+	{
+		for(KeyBinding key : keyBindings)
+			((KeyBindingMixin) key).callReset();
 	}
 	
 	public static void loadBloomShader(MinecraftClient client)
