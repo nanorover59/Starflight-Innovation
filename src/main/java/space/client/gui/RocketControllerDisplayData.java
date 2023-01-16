@@ -13,5 +13,4 @@ public class RocketControllerDisplayData
 	public static double oxygenCapacity;
 	public static double deltaV;
 	public static double requiredDeltaV;
-	
 }

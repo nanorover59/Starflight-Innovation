@@ -12,7 +12,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import space.screen.BatteryScreenHandler;
 
-@Environment(value = EnvType.CLIENT)
+@Environment(EnvType.CLIENT)
 public class BatteryScreen extends HandledScreen<BatteryScreenHandler>
 {
 	private static final Identifier TEXTURE = new Identifier("textures/gui/container/hopper.png");

@@ -29,6 +29,7 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import space.StarflightMod;
 import space.planet.Planet;
+import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.planet.PlanetRenderList;
 import space.planet.PlanetRenderer;
@@ -164,12 +165,12 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		drawTexture(matrices, button4X, button4Y, button4Hover ? 162 : 144, 222, 18, 18);
 		MutableText text = Text.translatable("planet.space." + selectedPlanet.getName());
 		drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 20, 0x55FF55);
+		PlanetDimensionData currentPlanetData = PlanetList.getDimensionDataForWorld(client.world);
 		
 		if(viewData)
 		{
 			DecimalFormat df = new DecimalFormat("#.#");
-			Planet currentPlanet = PlanetList.getDimensionDataForWorld(client.world).getPlanet();
-			text = Text.translatable("block.space.rocket_controller.transfer").append(" " + df.format(currentPlanet.dVToPlanet(selectedPlanet)) + "m/s");
+			text = Text.translatable("block.space.rocket_controller.transfer").append(" " + currentPlanetData != null ? (df.format(currentPlanetData.getPlanet().dVToPlanet(selectedPlanet)) + "m/s") : "NA");
 			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 33, 0x55FF55);
 			text = Text.translatable("block.space.deltav_to_orbit").append(" " + df.format(selectedPlanet.dVSurfaceToOrbit()) + "m/s");
 			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 46, 0x55FF55);

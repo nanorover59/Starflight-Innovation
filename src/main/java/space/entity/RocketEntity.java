@@ -18,6 +18,7 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -50,6 +51,7 @@ import space.vessel.MovingCraftRenderList;
 public class RocketEntity extends MovingCraftEntity
 {
 	private static final int TRAVEL_CEILING = 1024;
+	private static final int TRAVEL_CEILING_ORBIT = 512;
 	private static final double ZERO_G_SPEED = 2.0;
 	private static final double SG = 9.80665; // Standard gravity for ISP calculations.
 	
@@ -356,9 +358,10 @@ public class RocketEntity extends MovingCraftEntity
 		setBoundingBox(calculateBoundingBox());
 		fallDistance = 0.0f;
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		int travelCeiling = data.isOrbit() ? TRAVEL_CEILING_ORBIT : TRAVEL_CEILING;
 		
 		// Move to the next dimension when a high enough altitude is reached.
-		if(this.getBlockPos().getY() > TRAVEL_CEILING && !changedDimension)
+		if(this.getBlockPos().getY() > travelCeiling && !changedDimension)
 		{
 			// Use hydrogen and oxygen at the 1:8 ratio for water.
 			fuelToUse -= craftMassInitial - craftMass;
@@ -366,11 +369,13 @@ public class RocketEntity extends MovingCraftEntity
 			hydrogenSupply *= factor;
 			oxygenSupply *= factor;
 			craftMass -= fuelToUse;
-			setVelocity(0.0, data.isOrbit() ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
+			ServerWorld next = world.getServer().getWorld(nextDimension);
+			PlanetDimensionData nextData = PlanetList.getDimensionDataForWorld(next);
+			setVelocity(0.0, nextData.isOrbit() ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
 			changedDimension = true;
 			userInput = false;
 			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
-			this.changeDimension(world.getServer().getWorld(nextDimension), new Vec3d(arrivalPos.getX() + 0.5, getY(), arrivalPos.getZ() + 0.5), arrivalYaw);
+			this.changeDimension(next, new Vec3d(arrivalPos.getX() + 0.5, nextData.isOrbit() ? TRAVEL_CEILING_ORBIT : TRAVEL_CEILING, arrivalPos.getZ() + 0.5), arrivalYaw);
 			return;
 		}
 		
@@ -652,6 +657,11 @@ public class RocketEntity extends MovingCraftEntity
 		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
 		BlockRotation rotation = BlockRotation.NONE;
 		
+		for(int i = 0; i < rotationSteps; i++)
+			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
+		
+		setQuaternion(Quaternion.fromEulerXyz(0.0f, (float) (rotationSteps * (Math.PI / 2.0)), 0.0f));
+		
 		for(Entity passenger : this.getPassengerList())
 		{
 			updatePassengerPosition(passenger);
@@ -659,11 +669,7 @@ public class RocketEntity extends MovingCraftEntity
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
 			passenger.fallDistance = 0.0f;
-			passenger.dismountVehicle();
 		}
-		
-		for(int i = 0; i < rotationSteps; i++)
-			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
 		
 		for(MovingCraftBlockData blockData : blockDataList)
 		{

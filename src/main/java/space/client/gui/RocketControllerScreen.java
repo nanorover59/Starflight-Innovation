@@ -6,6 +6,8 @@ import org.lwjgl.glfw.GLFW;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -27,6 +29,7 @@ import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
+@Environment(EnvType.CLIENT)
 public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 {
 	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/rocket_controller.png");
@@ -67,9 +70,9 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 		int x = (width - backgroundWidth) / 2;
 		int y = (height - backgroundHeight) / 2;
 		drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
-		boolean inOrbit = data.isOrbit();
+		boolean inOrbit = data != null ? data.isOrbit() : false;
 		double ttw = 0;
-		Planet currentPlanet = data.getPlanet();
+		Planet currentPlanet = data != null ? data.getPlanet() : null;
 		Planet targetPlanet = PlanetList.getByName(targetName);
 		DecimalFormat df = new DecimalFormat("#.#");
 		MutableText massText = Text.translatable("block.space.mass").append(df.format(mass / 1000.0)).append("t");
