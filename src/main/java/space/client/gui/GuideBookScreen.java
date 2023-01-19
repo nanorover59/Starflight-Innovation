@@ -7,12 +7,24 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.ButtonWidget.TooltipSupplier;
+import net.minecraft.client.gui.widget.PageTurnWidget;
+import net.minecraft.client.gui.widget.PressableWidget;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sound.SoundManager;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.ScreenTexts;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 @Environment(EnvType.CLIENT)
 public class GuideBookScreen extends Screen
@@ -20,25 +32,40 @@ public class GuideBookScreen extends Screen
 	public static final Identifier BOOK_TEXTURE = new Identifier("space:textures/gui/guide/guide_book_screen.png");
 	protected static final int WIDTH = 256;
     protected static final int HEIGHT = 180;
-    private ArrayList<GuideBookPage> pageList = new ArrayList<GuideBookPage>();
+    private ArrayList<GuideBookSection> sectionList = new ArrayList<GuideBookSection>();
+    private ArrayList<GuideBookButtonWidget> buttonList = new ArrayList<GuideBookButtonWidget>();
+    private PageTurnWidget nextPageButton;
+    private PageTurnWidget previousPageButton;
+    private int sectionIndex;
 	private int pageIndex;
 	
 	public GuideBookScreen()
 	{
 		super(NarratorManager.EMPTY);
-		pageList.add(new GuideBookPage().addText("machines_0_0", 0).addText("machines_0_1", 1));
+		sectionList.add(new GuideBookSection("machines", 1).addText(0, 1));
+		sectionIndex = -1;
 		pageIndex = 0;
 	}
 	
 	@Override
     protected void init()
 	{
+		int x = (this.width - WIDTH) / 2;
+        int y = (this.height - HEIGHT) / 2;
+        this.clearChildren();
+		this.addDrawableChild(new ButtonWidget(this.width / 2 - 100, y + 184, 200, 20, ScreenTexts.DONE, button -> this.client.setScreen(null)));
+		nextPageButton = this.addDrawableChild(new PageTurnWidget(x + 200, y + 154, true, button -> this.goToNextPage(), true));
+		previousPageButton = this.addDrawableChild(new PageTurnWidget(x + 24, y + 154, false, button -> this.goToPreviousPage(), true));
 		
+		for(int i = 0; i < 4; i++)
+			buttonList.add(this.addDrawableChild(new GuideBookButtonWidget(x + 32, y + 12 * i, 200, 12, Text.translatable("guide_book.menu_" + i), this, i)));
+		
+		updatePageButtons();
 	}
 
 	@Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta)
-	{	
+	{
         this.renderBackground(matrices);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
@@ -47,15 +74,15 @@ public class GuideBookScreen extends Screen
         int y = (this.height - HEIGHT) / 2;
         this.drawTexture(matrices, x, y, 0, 0, WIDTH, HEIGHT);
         
-        if(pageIndex >= 0 && pageIndex < pageList.size())
+        if(sectionIndex >= 0 && sectionIndex < sectionList.size())
         {
-	        GuideBookPage page = pageList.get(pageIndex);
+	        GuideBookSection section = sectionList.get(pageIndex);
 	        
-	        for(int i : page.textList.keySet())
+	        for(int i : section.textList.keySet())
 			{
 		        boolean lhs = i < 14;
-		        int textY = y + (lhs ? this.textRenderer.fontHeight * i : (this.textRenderer.fontHeight * i) - this.textRenderer.fontHeight * 13);
-				this.textRenderer.draw(matrices, page.textList.get(i), x, textY, 0);
+		        int textY = 14 + y + (lhs ? this.textRenderer.fontHeight * i : (this.textRenderer.fontHeight * i) - this.textRenderer.fontHeight * 13);
+				this.textRenderer.draw(matrices, section.textList.get(i), 14 + x, textY, 0);
 			}
         }
         else
@@ -65,28 +92,103 @@ public class GuideBookScreen extends Screen
         
         super.render(matrices, mouseX, mouseY, delta);
 	}
+
+	protected void goToPreviousPage()
+	{
+		if(pageIndex > 0)
+			pageIndex--;
+		else
+			sectionIndex = -1;
+		
+		updatePageButtons();
+	}
+
+	protected void goToNextPage()
+	{
+		if(pageIndex < sectionList.get(pageIndex).pageCount - 1)
+			pageIndex++;
+		
+		updatePageButtons();
+	}
+
+	private void updatePageButtons()
+	{
+		//nextPageButton.visible = pageIndex < sectionList.get(pageIndex).pageCount - 1;
+		//previousPageButton.visible = pageIndex > 0;
+		
+		for(GuideBookButtonWidget button : buttonList)
+			button.visible = sectionIndex == -1;
+	}
 	
 	@Environment(EnvType.CLIENT)
-	public static class GuideBookPage
+	public static class GuideBookSection
 	{
 		public HashMap<Integer, Text> textList = new HashMap<Integer, Text>();
 		public HashMap<Integer, Identifier> imageList = new HashMap<Integer, Identifier>();
+		public String name;
+		public int pageCount;
 		
-		public GuideBookPage()
+		public GuideBookSection(String name, int pageCount)
 		{
-			
+			this.name = name;
+			this.pageCount = pageCount;
 		}
 		
-		public GuideBookPage addText(String translationKey, int position)
+		public GuideBookSection addText(int start, int end)
 		{
-			textList.put(position, Text.translatable("guide_book." + translationKey));
+			for(int i = start; i <= end; i++)
+				textList.put(i, Text.translatable("guide_book." + name + "_" + i));
+					
 			return this;
 		}
 		
-		public GuideBookPage addImage(String image, int position)
+		public GuideBookSection addImage(String image, int position)
 		{
 			imageList.put(position, new Identifier("space:textures/gui/guide/" + image + ".png"));
 			return this;
+		}
+	}
+	
+	@Environment(EnvType.CLIENT)
+	public static class GuideBookButtonWidget extends PressableWidget
+	{
+		public static final TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {};
+		private final GuideBookScreen screen;
+		private final int section;
+
+		public GuideBookButtonWidget(int x, int y, int width, int height, Text message, GuideBookScreen screen, int section)
+		{
+			super(x, y, width, height, message);
+			this.screen = screen;
+			this.section = section;
+			this.setMessage(message);
+		}
+
+		@Override
+		public void onPress()
+		{
+			screen.sectionIndex = section;
+			screen.updatePageButtons();
+		}
+
+		@Override
+		public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta)
+		{
+			MinecraftClient minecraftClient = MinecraftClient.getInstance();
+			TextRenderer textRenderer = minecraftClient.textRenderer;
+			int j = this.isHovered() ? 0x229954 : 0x196F3D;
+			textRenderer.draw(matrices, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0f) << 24);
+		}
+		
+		@Override
+		public void playDownSound(SoundManager soundManager)
+		{
+			soundManager.play(PositionedSoundInstance.master(SoundEvents.ITEM_BOOK_PAGE_TURN, 1.0f));
+		}
+
+		@Override
+		public void appendNarrations(NarrationMessageBuilder var1)
+		{
 		}
 	}
 }
