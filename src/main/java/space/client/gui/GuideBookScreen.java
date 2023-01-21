@@ -9,6 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -42,7 +43,7 @@ public class GuideBookScreen extends Screen
 	public GuideBookScreen()
 	{
 		super(NarratorManager.EMPTY);
-		sectionList.add(new GuideBookSection("machines", 1).addText(0, 1));
+		sectionList.add(new GuideBookSection("machines", 2).addText(0, 1).addText(27, 28));
 		sectionIndex = -1;
 		pageIndex = 0;
 	}
@@ -58,7 +59,7 @@ public class GuideBookScreen extends Screen
 		previousPageButton = this.addDrawableChild(new PageTurnWidget(x + 24, y + 154, false, button -> this.goToPreviousPage(), true));
 		
 		for(int i = 0; i < 4; i++)
-			buttonList.add(this.addDrawableChild(new GuideBookButtonWidget(x + 32, y + 12 * i, 200, 12, Text.translatable("guide_book.menu_" + i), this, i)));
+			buttonList.add(this.addDrawableChild(new GuideBookButtonWidget(x + 38, y + 14 + (12 * i), 200, 12, Text.translatable("guide_book.menu_" + i), this, i)));
 		
 		updatePageButtons();
 	}
@@ -76,14 +77,15 @@ public class GuideBookScreen extends Screen
         
         if(sectionIndex >= 0 && sectionIndex < sectionList.size())
         {
-	        GuideBookSection section = sectionList.get(pageIndex);
+	        GuideBookSection section = sectionList.get(sectionIndex);
 	        
 	        for(int i : section.textList.keySet())
 			{
-		        boolean lhs = i < 14;
-		        int textY = 14 + y + (lhs ? this.textRenderer.fontHeight * i : (this.textRenderer.fontHeight * i) - this.textRenderer.fontHeight * 13);
-				this.textRenderer.draw(matrices, section.textList.get(i), 14 + x, textY, 0);
+	        	if(i >= pageIndex * 28.0 && (i - pageIndex * 28.0) / 28 < pageIndex + 1)
+	        		this.textRenderer.draw(matrices, section.textList.get(i), (i % 28) < 14 ? (x + 14) : (x + 138), y + 14 + (i % 14) * this.textRenderer.fontHeight, 0);
 			}
+	        
+	        //DrawableHelper.drawTexture(matrices, x, y, this.zOffset, u, v, width, height, 256, 256);
         }
         else
         {
@@ -105,7 +107,7 @@ public class GuideBookScreen extends Screen
 
 	protected void goToNextPage()
 	{
-		if(pageIndex < sectionList.get(pageIndex).pageCount - 1)
+		if(pageIndex < sectionList.get(sectionIndex).pageCount)
 			pageIndex++;
 		
 		updatePageButtons();
@@ -113,8 +115,8 @@ public class GuideBookScreen extends Screen
 
 	private void updatePageButtons()
 	{
-		//nextPageButton.visible = pageIndex < sectionList.get(pageIndex).pageCount - 1;
-		//previousPageButton.visible = pageIndex > 0;
+		nextPageButton.visible = sectionIndex >= 0 && pageIndex < sectionList.get(sectionIndex).pageCount;
+		previousPageButton.visible = pageIndex >= 0;
 		
 		for(GuideBookButtonWidget button : buttonList)
 			button.visible = sectionIndex == -1;
@@ -169,6 +171,7 @@ public class GuideBookScreen extends Screen
 		{
 			screen.sectionIndex = section;
 			screen.updatePageButtons();
+			this.changeFocus(true);
 		}
 
 		@Override
