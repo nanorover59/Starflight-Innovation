@@ -11,6 +11,9 @@
         "space:structural_aluminum",
         "space:riveted_aluminum",
         "minecraft:iron_block",
-        "minecraft:gold_block"
+        "minecraft:gold_block",
+        "minecraft:copper_block",
+        "minecraft:cut_copper",
+        "minecraft:cut_copper"
     ]
 }
