@@ -1,4 +1,4 @@
-package space.world;
+package space.world.surface;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -9,10 +9,12 @@ import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.BlockColumn;
 import space.block.StarflightBlocks;
+import space.world.CustomSurfaceBuilder;
+import space.world.StarflightBiomes;
 
 public class MarsSurfaceBuilder extends CustomSurfaceBuilder
 {
-	MarsSurfaceBuilder()
+	public MarsSurfaceBuilder()
 	{
 		applyToBiome(StarflightBiomes.MARS_LOWLANDS);
 		applyToBiome(StarflightBiomes.MARS_MIDLANDS);

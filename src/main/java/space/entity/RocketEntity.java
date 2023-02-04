@@ -14,7 +14,6 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -39,6 +38,7 @@ import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.HydrogenTankBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
+import space.client.particle.StarflightParticles;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
@@ -391,10 +391,9 @@ public class RocketEntity extends MovingCraftEntity
 			{
 				BlockPos bottom = getBlockPos().add(0, -lowerHeight, 0);
 				float power = Math.min(craftSpeed / 5.0f, 10.0f);
-				boolean fire = !data.isOrbit() && data.hasOxygen();
 				int count = random.nextBetween(4, 5);
 				
-				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, fire, DestructionType.DESTROY);
+				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, false, DestructionType.DESTROY);
 				
 				/*for(int i = 0; i < count; i++)
 				{
@@ -631,9 +630,10 @@ public class RocketEntity extends MovingCraftEntity
 			thrusterOffsetsRotated.add(rotated);
 		}
 		
-		Vec3f velocity = upAxis.copy();
-		velocity.scale(-4.0f + (this.random.nextFloat() * 0.5f));
-		velocity.add((float) getVelocity().getX(), (float) getVelocity().getY(), (float) getVelocity().getZ());
+		Vec3d velocity = new Vec3d(-upAxis.getX(), -upAxis.getY(), -upAxis.getZ());
+		Vec3f craftVelocity = getTrackedVelocity();
+		velocity = velocity.multiply(2.0 + this.random.nextDouble());
+		velocity = velocity.add(craftVelocity.getX(), craftVelocity.getY(), craftVelocity.getZ());
 		
 		for(Vec3f pos : thrusterOffsetsRotated)
 		{
@@ -641,8 +641,8 @@ public class RocketEntity extends MovingCraftEntity
 			
 			for(int i = 0; i < 4; i++)
 			{
-				world.addParticle(ParticleTypes.POOF, true, pos.getX(), pos.getY(), pos.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
-				pos.add((this.random.nextFloat() - this.random.nextFloat()) * 0.1f, 0.0f, (this.random.nextFloat() - this.random.nextFloat()) * 0.1f);
+				world.addParticle(StarflightParticles.THRUSTER, true, pos.getX(), pos.getY(), pos.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+				pos.add((this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f);
 			}
 		}
 	}
@@ -665,7 +665,8 @@ public class RocketEntity extends MovingCraftEntity
 		for(Entity passenger : this.getPassengerList())
 		{
 			updatePassengerPosition(passenger);
-			passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
+			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
+			//passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
 			passenger.fallDistance = 0.0f;

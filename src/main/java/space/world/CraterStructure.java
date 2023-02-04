@@ -18,17 +18,17 @@ public class CraterStructure extends Structure
 	{
 		super(config);
 	}
+	
+	@Override
+	public StructureType<?> getType()
+	{
+		return StarflightWorldGeneration.CRATER_TYPE;
+	}
 
 	@Override
 	public Optional<Structure.StructurePosition> getStructurePosition(Structure.Context context)
 	{
 		return CraterStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE_WG, collector -> CraterStructure.addPieces((StructurePiecesCollector) collector, context));
-	}
-
-	@Override
-	public StructureType<?> getType()
-	{
-		return StarflightWorldGeneration.CRATER_TYPE;
 	}
 
 	private static void addPieces(StructurePiecesCollector collector, Structure.Context context)

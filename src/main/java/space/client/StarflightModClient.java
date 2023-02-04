@@ -11,11 +11,14 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -51,6 +54,8 @@ import space.client.gui.IceElectrolyzerScreen;
 import space.client.gui.PlanetariumScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
+import space.client.particle.StarflightParticles;
+import space.client.particle.ThrusterParticle;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
@@ -71,6 +76,7 @@ import space.screen.StirlingEngineScreenHandler;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftRenderList;
 
+@Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
 {
 	private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
@@ -142,6 +148,9 @@ public class StarflightModClient implements ClientModInitializer
 		ScreenRegistry.register(ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
 		ScreenRegistry.register(BATTERY_SCREEN_HANDLER, BatteryScreen::new);
 		ScreenRegistry.register(ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
+		
+		// Particles
+		ParticleFactoryRegistry.getInstance().register(StarflightParticles.THRUSTER, ThrusterParticle.Factory::new);
 		
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));

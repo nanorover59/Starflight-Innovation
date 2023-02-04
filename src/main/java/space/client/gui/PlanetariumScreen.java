@@ -170,11 +170,11 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		if(viewData)
 		{
 			DecimalFormat df = new DecimalFormat("#.#");
-			text = Text.translatable("block.space.rocket_controller.transfer").append(" " + currentPlanetData != null ? (df.format(currentPlanetData.getPlanet().dVToPlanet(selectedPlanet)) + "m/s") : "NA");
+			text = Text.translatable("block.space.rocket_controller.transfer").append(": " + (currentPlanetData != null && currentPlanetData.getPlanet() != selectedPlanet ? (df.format(currentPlanetData.getPlanet().dVToPlanet(selectedPlanet)) + "m/s") : "NA"));
 			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 33, 0x55FF55);
-			text = Text.translatable("block.space.deltav_to_orbit").append(" " + df.format(selectedPlanet.dVSurfaceToOrbit()) + "m/s");
+			text = Text.translatable("block.space.deltav_to_orbit").append(df.format(selectedPlanet.dVSurfaceToOrbit()) + "m/s");
 			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 46, 0x55FF55);
-			text = Text.translatable("block.space.deltav_to_surface").append(" " + df.format(selectedPlanet.dVOrbitToSurface()) + "m/s");
+			text = Text.translatable("block.space.deltav_to_surface").append(df.format(selectedPlanet.dVOrbitToSurface()) + "m/s");
 			drawTextWithShadow(matrices, textRenderer, text, (int) x + 32, (int) y + 59, 0x55FF55);
 		}
 		

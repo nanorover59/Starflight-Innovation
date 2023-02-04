@@ -8,6 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import space.block.StarflightBlocks;
 import space.block.entity.RocketControllerBlockEntity;
+import space.client.particle.StarflightParticles;
 import space.command.StarflightCommands;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
@@ -28,6 +29,7 @@ public class StarflightMod implements ModInitializer
 		StarflightBlocks.initializeBlocks();
 		StarflightItems.initializeItems();
 		StarflightEntities.initializeEntities();
+		StarflightParticles.initializeParticles();
 		StarflightBiomes.initializeBiomes();
 		StarflightWorldGeneration.initializeWorldGeneration();
 		StarflightEvents.registerServerEvents();

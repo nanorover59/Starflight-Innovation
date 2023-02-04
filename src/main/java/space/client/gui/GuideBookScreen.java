@@ -67,7 +67,7 @@ public class GuideBookScreen extends Screen
 		for(int i = 0; i < 4; i++)
 			buttonList.add(this.addDrawableChild(new GuideBookButtonWidget(x + 172, y + 14 + (12 * i), Text.translatable("guide_book.menu_" + i).formatted(Formatting.BOLD), this, i)));
 		
-		updatePage();
+		this.updatePage();
 	}
 
 	@Override
@@ -118,6 +118,7 @@ public class GuideBookScreen extends Screen
 		else
 			sectionIndex = -1;
 		
+		this.clearAndInit();
 		updatePage();
 	}
 
@@ -126,6 +127,7 @@ public class GuideBookScreen extends Screen
 		if(pageIndex < sectionList.get(sectionIndex).pageCount)
 			pageIndex++;
 		
+		this.clearAndInit();
 		updatePage();
 	}
 
@@ -193,7 +195,7 @@ public class GuideBookScreen extends Screen
 		{
 			screen.sectionIndex = section;
 			screen.updatePage();
-			this.changeFocus(true);
+			//this.changeFocus(true);
 		}
 
 		@Override

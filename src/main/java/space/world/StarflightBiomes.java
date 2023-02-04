@@ -24,6 +24,8 @@ import net.minecraft.world.gen.feature.UndergroundPlacedFeatures;
 import space.StarflightMod;
 import space.entity.StarflightEntities;
 import space.util.StarflightEffects;
+import space.world.surface.MarsSurfaceBuilder;
+import space.world.surface.MoonSurfaceBuilder;
 
 public class StarflightBiomes
 {

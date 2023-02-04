@@ -84,6 +84,13 @@ public class StarflightWorldGeneration
 	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
 	public static final RegistryEntry<Structure> CRATER = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater")), new CraterStructure(createConfig(IS_CRATERED, StructureTerrainAdaptation.NONE)));
 	
+	// Moonshaft Structure 
+	public static final StructurePieceType MOONSHAFT_CORRIDOR = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_corridor"), MoonshaftGenerator.MoonshaftCorridor::new);
+    public static final StructurePieceType MOONSHAFT_CROSSING = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_crossing"), MoonshaftGenerator.MoonshaftCrossing::new);
+    public static final StructurePieceType MOONSHAFT_ROOM = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_room"), MoonshaftGenerator.MoonshaftRoom::new);
+	public static final StructureType<MoonshaftStructure> MOONSHAFT_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "moonshaft"), () -> MoonshaftStructure.CODEC);
+	public static final RegistryEntry<Structure> MOONSHAFT = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "moonshaft")), new MoonshaftStructure(createConfig(IS_CRATERED, StructureTerrainAdaptation.NONE)));
+	
 	// Surface Rock Feature
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SURFACE_ROCK_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK);

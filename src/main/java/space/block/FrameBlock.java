@@ -23,7 +23,7 @@ import net.minecraft.world.WorldAccess;
 public class FrameBlock extends Block implements Waterloggable
 {
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99);
+	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 16.0, 15.99);
 
 	public FrameBlock(AbstractBlock.Settings settings)
 	{
