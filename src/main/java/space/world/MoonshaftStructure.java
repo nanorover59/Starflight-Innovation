@@ -6,6 +6,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.structure.StructurePiecesCollector;
+import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.random.ChunkRandom;
@@ -48,7 +49,13 @@ public class MoonshaftStructure extends Structure
 		MoonshaftRoom moonshaftRoom = new MoonshaftGenerator.MoonshaftRoom(0, chunkRandom, chunkPos.getOffsetX(2), chunkPos.getOffsetZ(2));
 		collector.addPiece(moonshaftRoom);
 		moonshaftRoom.fillOpenings(moonshaftRoom, collector, chunkRandom);
-		int i = chunkGenerator.getSeaLevel();
-		return collector.shiftInto(i, chunkGenerator.getMinimumY(), chunkRandom, 10);
+		int topY = 50;
+		int baseY = chunkGenerator.getMinimumY();
+		BlockBox blockBox = collector.getBoundingBox();
+        int i = topY - baseY + 1 - blockBox.getBlockCountY();
+        int j = i > 1 ? baseY + chunkRandom.nextInt(i) : baseY;
+        int k = j - blockBox.getMinY();
+        collector.shift(k);
+        return k;
 	}
 }

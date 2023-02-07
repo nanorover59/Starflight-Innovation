@@ -41,13 +41,14 @@ import space.block.StarflightBlocks;
 public class MoonshaftGenerator
 {
 	private static final Logger LOGGER = LogUtils.getLogger();
-	private static final Block SUPPORT_BLOCK = StarflightBlocks.RIVETED_ALUMINUM;
+	private static final Block SOLID_BLOCK = StarflightBlocks.RIVETED_ALUMINUM;
+	private static final Block FRAME_BLOCK = StarflightBlocks.ALUMINUM_FRAME;
 	
 	private static MoonshaftGenerator.MoonshaftPart pickPiece(StructurePiecesHolder holder, Random random, int x, int y, int z, @Nullable Direction orientation, int chainLength)
 	{
 		int i = random.nextInt(100);
 		
-		if(i >= 80)
+		if(i >= 90)
 		{
 			BlockBox blockBox = MoonshaftCrossing.getBoundingBox(holder, random, x, y, z, orientation);
 			
@@ -96,7 +97,8 @@ public class MoonshaftGenerator
 		@Override
 		protected boolean canAddBlock(WorldView world, int x, int y, int z, BlockBox box)
 		{
-			return true;
+			Block block = this.getBlockAt(world, x, y, z, box).getBlock();
+			return !block.equals(SOLID_BLOCK) && !block.equals(FRAME_BLOCK);
 		}
 
 		@Override
@@ -146,7 +148,7 @@ public class MoonshaftGenerator
 
 			for(int o = i; o <= l; o++)
 			{
-				for(int p = k; p <= m; p++)
+				for(int p = j; p <= m; p++)
 				{
 					if(world.getBlockState(mutable.set(o, p, k)).getMaterial().isLiquid())
 						return true;
@@ -158,9 +160,9 @@ public class MoonshaftGenerator
 				}
 			}
 
-			for(int o = i; o <= n; o++)
+			for(int o = k; o <= n; o++)
 			{
-				for(int p = k; p <= m; p++)
+				for(int p = j; p <= m; p++)
 				{
 					if(world.getBlockState(mutable.set(i, p, o)).getMaterial().isLiquid())
 						return true;
@@ -403,7 +405,7 @@ public class MoonshaftGenerator
 			for(i = 0; i <= 2; i++)
 			{
 				for(int j = 0; j <= i; j++)
-					this.tryPlaceFloor(world, chunkBox, SUPPORT_BLOCK.getDefaultState(), i, -1, j);
+					this.tryPlaceFloor(world, chunkBox, SOLID_BLOCK.getDefaultState(), i, -1, j);
 			}
 			
 			this.fillSupportBeam(world, chunkBox, 0, -1, 2);
@@ -429,11 +431,11 @@ public class MoonshaftGenerator
 
 		private void fillSupportBeam(StructureWorldAccess world, BlockBox box, int x, int y, int z)
 		{
-			if(this.getBlockAt(world, x, y, z, box).isOf(SUPPORT_BLOCK))
-				this.fillSupportBeam(world, StarflightBlocks.ALUMINUM_FRAME.getDefaultState(), x, y, z, box);
+			if(this.getBlockAt(world, x, y, z, box).isOf(SOLID_BLOCK))
+				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x, y, z, box);
 			
-			if(this.getBlockAt(world, x + 2, y, z, box).isOf(SUPPORT_BLOCK))
-				this.fillSupportBeam(world, StarflightBlocks.ALUMINUM_FRAME.getDefaultState(), x + 2, y, z, box);
+			if(this.getBlockAt(world, x + 2, y, z, box).isOf(SOLID_BLOCK))
+				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x + 2, y, z, box);
 		}
 
 		@Override
@@ -531,10 +533,10 @@ public class MoonshaftGenerator
 			if(!this.isSolidCeiling(world, boundingBox, minX, maxX, maxY, z))
 				return;
 			
-			this.fillWithOutline(world, boundingBox, minX, minY - 1, z, maxX, minY - 1, z, SUPPORT_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, minX, maxY + 1, z, maxX, maxY + 1, z, SUPPORT_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, minX - 1, minY, z, minX - 1, maxY, z, SUPPORT_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, maxX + 1, minY, z, maxX + 1, maxY, z, SUPPORT_BLOCK.getDefaultState(), AIR, false);
+			this.fillWithOutline(world, boundingBox, minX, minY - 1, z, maxX, minY - 1, z, SOLID_BLOCK.getDefaultState(), AIR, false);
+			this.fillWithOutline(world, boundingBox, minX, maxY + 1, z, maxX, maxY + 1, z, SOLID_BLOCK.getDefaultState(), AIR, false);
+			this.fillWithOutline(world, boundingBox, minX - 1, minY, z, minX - 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, false);
+			this.fillWithOutline(world, boundingBox, maxX + 1, minY, z, maxX + 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, false);
 		}
 	}
 
@@ -589,36 +591,38 @@ public class MoonshaftGenerator
 		public void fillOpenings(StructurePiece start, StructurePiecesHolder holder, Random random)
 		{
 			int i = this.getChainLength();
+			
 			switch(this.direction)
 			{
-			default:
-			{
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
-				break;
+				default:
+				{
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+					break;
+				}
+				case SOUTH:
+				{
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+					break;
+				}
+				case WEST:
+				{
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
+					break;
+				}
+				case EAST:
+				{
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+				}
 			}
-			case SOUTH:
-			{
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
-				break;
-			}
-			case WEST:
-			{
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
-				break;
-			}
-			case EAST:
-			{
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
-			}
-			}
+			
 			if(this.twoFloors)
 			{
 				if(random.nextBoolean())
@@ -641,10 +645,10 @@ public class MoonshaftGenerator
 			if(this.cannotGenerate(world, chunkBox))
 				return;
 			
-			if(this.twoFloors)
+			/*if(this.twoFloors)
 			{
-				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY() + 3 - 1, this.boundingBox.getMaxZ(), AIR, AIR, false);
-				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX(), this.boundingBox.getMinY() + 3 - 1, this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY() + 2, this.boundingBox.getMaxZ(), AIR, AIR, false);
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX(), this.boundingBox.getMinY() + 2, this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMaxY() - 2, this.boundingBox.getMinZ(), this.boundingBox.getMaxX() - 1, this.boundingBox.getMaxY(), this.boundingBox.getMaxZ(), AIR, AIR, false);
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMaxY() - 2, this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX(), this.boundingBox.getMaxY(), this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + 3, this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY() + 3, this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
@@ -653,8 +657,9 @@ public class MoonshaftGenerator
 			{
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX() - 1, this.boundingBox.getMaxY(), this.boundingBox.getMaxZ(), AIR, AIR, false);
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX(), this.boundingBox.getMaxY(), this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
-			}
+			}*/
 			
+			this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX(), this.boundingBox.getMaxY(), this.boundingBox.getMaxZ(), AIR, AIR, false);
 			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
 			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 1, this.boundingBox.getMaxY());
 			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
@@ -671,7 +676,7 @@ public class MoonshaftGenerator
 		private void generateCrossingPillar(StructureWorldAccess world, BlockBox boundingBox, int x, int minY, int z, int maxY)
 		{
 			if(!this.getBlockAt(world, x, maxY + 1, z, boundingBox).isAir())
-				this.fillWithOutline(world, boundingBox, x, minY, z, x, maxY, z, StarflightBlocks.ALUMINUM_FRAME.getDefaultState(), AIR, false);
+				this.fillWithOutline(world, boundingBox, x, minY, z, x, maxY, z, FRAME_BLOCK.getDefaultState(), AIR, false);
 		}
 	}
 
