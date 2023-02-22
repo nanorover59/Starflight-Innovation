@@ -443,10 +443,15 @@ public class MovingCraftEntity extends Entity
 		for(UUID pUUID : entityOffsets.keySet())
 		{
 			BlockPos pos = entityOffsets.get(pUUID);
-			nbt.putUuid("pUUID" + i, pUUID);
-			nbt.putInt("px" + i, pos.getX());
-			nbt.putInt("py" + i, pos.getY());
-			nbt.putInt("pz" + i, pos.getZ());
+			
+			if(pos != null)
+			{
+				nbt.putUuid("pUUID" + i, pUUID);
+				nbt.putInt("px" + i, pos.getX());
+				nbt.putInt("py" + i, pos.getY());
+				nbt.putInt("pz" + i, pos.getZ());
+			}
+			
 			i++;
 		}
 	}

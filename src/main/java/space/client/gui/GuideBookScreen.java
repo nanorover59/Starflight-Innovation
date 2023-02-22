@@ -49,7 +49,7 @@ public class GuideBookScreen extends Screen
 		sectionList.add(new GuideBookSection("machines", 2).addImage("machines", 0).addImage("solar", 16));
 		sectionList.add(new GuideBookSection("electrolysis", 2).addImage("electrolysis", 0).addImage("fluid_tanks", 16));
 		sectionList.add(new GuideBookSection("r_construction", 2).addImage("rocket", 0).addImage("propulsion", 16));
-		sectionList.add(new GuideBookSection("r_flight", 2));
+		sectionList.add(new GuideBookSection("r_flight", 2).addImage("keyboard", 32));
 		sectionIndex = -1;
 		pageIndex = 0;
 	}
@@ -100,8 +100,6 @@ public class GuideBookScreen extends Screen
 	        		DrawableHelper.drawTexture(matrices, ((i % (PAGE_LENGTH * 2)) < PAGE_LENGTH ? (x + PAGE_LENGTH) : (x + 172)) + 14, y + PAGE_LENGTH + (i % PAGE_LENGTH) * this.textRenderer.fontHeight, 0, 0.0f, 0.0f, 96, 48, 96, 48);
 	        	}
 			}
-	        
-	        //DrawableHelper.drawTexture(matrices, x, y, this.zOffset, u, v, width, height, 256, 256);
         }
         else
         {
@@ -195,7 +193,6 @@ public class GuideBookScreen extends Screen
 		{
 			screen.sectionIndex = section;
 			screen.updatePage();
-			//this.changeFocus(true);
 		}
 
 		@Override

@@ -47,7 +47,6 @@ import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
 import space.item.StarflightItems;
 
 public class CeruleanEntity extends TameableEntity implements Angerable
@@ -129,13 +128,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 	@Override
 	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
-        return this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos()) && world.getBlockState(this.getBlockPos().down()).getBlock() == Blocks.STONE;
-    }
-
-	@Override
-    public boolean canSpawn(WorldView world)
-	{
-        return this.getRandom().nextInt(4) == 0 && !world.containsFluid(this.getBoundingBox()) && world.doesNotIntersectEntities(this);
+        return this.getRandom().nextInt(16) == 0 && this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos()) && world.getBlockState(this.getBlockPos().down()).getBlock() == Blocks.STONE;
     }
 	
 	@Override

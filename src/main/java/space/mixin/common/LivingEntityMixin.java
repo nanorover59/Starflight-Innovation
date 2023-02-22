@@ -179,7 +179,7 @@ public abstract class LivingEntityMixin extends Entity
 					if(thisEntity instanceof PlayerEntity)
 					{
 						PlayerEntity player = (PlayerEntity) thisEntity;
-						int percent = (int) Math.ceil((oxygen / ((SpaceSuitItem) chestplate.getItem()).getMaxOxygen()) * 100.0);
+						int percent = (int) Math.ceil((oxygen / SpaceSuitItem.MAX_OXYGEN) * 100.0);
 						MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
 						
 						if(!nbt.contains("message1"))

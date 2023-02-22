@@ -34,6 +34,9 @@ public class StarflightItems
 	public static final Item NAVIGATION_CARD = new NavigationCardItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item ARRIVAL_CARD = new ArrivalCardItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item GUIDE_BOOK = new GuideBookItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
+	public static final Item OXYGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), "oxygen");
+	public static final Item HYDROGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), "hydrogen");
+	public static final Item DIVIDER = new DividerItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item WAND = new MovingCraftWandItem(new FabricItemSettings());
 	
 	// Armor Items
@@ -77,6 +80,9 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "navigation_card"), NAVIGATION_CARD);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "arrival_card"), ARRIVAL_CARD);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "guide_book"), GUIDE_BOOK);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "oxygen_loader"), OXYGEN_LOADER);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "hydrogen_loader"), HYDROGEN_LOADER);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "divider"), DIVIDER);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "item_wand"), WAND);
 		
 		// Armor Items

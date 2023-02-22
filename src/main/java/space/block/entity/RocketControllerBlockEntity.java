@@ -255,7 +255,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 			        ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
 			        BlockSearch.movingCraftSearch(world, position, positionList, BlockSearch.MAX_VOLUME);
 			        
-			        if(positionList.size() < BlockSearch.MAX_VOLUME)
+			        if(!positionList.isEmpty() && positionList.size() < BlockSearch.MAX_VOLUME)
 			        {
 			        	double requiredDeltaV = buttonID == 1 ? rocketController.requiredDeltaV1 : rocketController.requiredDeltaV2;
 			        	double finalMass = rocketController.mass * Math.exp(-requiredDeltaV / rocketController.averageVEVacuum);

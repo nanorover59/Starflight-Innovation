@@ -79,7 +79,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 			{
 				if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
 				{
-					requiredOxygen = ((SpaceSuitItem) armorStack.getItem()).getMaxOxygen() - armorStack.getNbt().getDouble("oxygen");
+					requiredOxygen = SpaceSuitItem.MAX_OXYGEN - armorStack.getNbt().getDouble("oxygen");
 					break;
 				}
 			}
@@ -107,7 +107,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 				{
 					if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
 					{
-						armorStack.getNbt().putDouble("oxygen", ((SpaceSuitItem) armorStack.getItem()).getMaxOxygen());
+						armorStack.getNbt().putDouble("oxygen", SpaceSuitItem.MAX_OXYGEN);
 						break;
 					}
 				}

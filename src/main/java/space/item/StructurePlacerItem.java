@@ -18,6 +18,7 @@ import net.minecraft.structure.StructureTemplateManager;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -43,6 +44,7 @@ public class StructurePlacerItem extends Item
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
 	{
+		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.structure_placer.description"), Text.translatable("item.space.structure_placer.size").append("X: " + size.getX() + "  Y: " + size.getY() + "  Z: " + size.getZ()));
 	}
 	

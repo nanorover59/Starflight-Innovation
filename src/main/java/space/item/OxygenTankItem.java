@@ -60,7 +60,7 @@ public class OxygenTankItem extends Item
 			if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
 			{
 				double previousOxygen = armorStack.getNbt().getDouble("oxygen");
-				double requiredOxygen = ((SpaceSuitItem) armorStack.getItem()).getMaxOxygen() - previousOxygen;
+				double requiredOxygen = SpaceSuitItem.MAX_OXYGEN - previousOxygen;
 				
 				if(requiredOxygen > 0.0)
 				{
@@ -69,7 +69,7 @@ public class OxygenTankItem extends Item
 					itemStack.getNbt().putDouble("oxygen", availableOxygen - oxygenToTransfer);
 					armorStack.getNbt().putDouble("oxygen", previousOxygen + oxygenToTransfer);
 					MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
-					int percent = (int) Math.ceil((armorStack.getNbt().getDouble("oxygen") / ((SpaceSuitItem) armorStack.getItem()).getMaxOxygen()) * 100.0);
+					int percent = (int) Math.ceil((armorStack.getNbt().getDouble("oxygen") / SpaceSuitItem.MAX_OXYGEN) * 100.0);
 					text.append(percent + "%").formatted(Formatting.BOLD, Formatting.GREEN);
 					player.sendMessage(text, false);
 					return TypedActionResult.success(itemStack, true);

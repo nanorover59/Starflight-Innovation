@@ -485,9 +485,9 @@ public class RocketEntity extends MovingCraftEntity
 	private void applyUserInput()
 	{
 		if(throttleState == 1)
-			throttle += 0.025;
+			throttle += 0.01;
 		else if(throttleState == -1)
-			throttle -= 0.025;
+			throttle -= 0.01;
 		else if(throttleState == 2)
 			throttle = 1.0;
 		else if(throttleState == -2)
@@ -509,21 +509,21 @@ public class RocketEntity extends MovingCraftEntity
 		else if(rollState == -1)
 			rollSpeed -= rollRate;
 		else
-			rollSpeed *= 0.9f;
+			rollSpeed *= 0.8f;
 		
 		if(pitchState == 1)
 			pitchSpeed += pitchRate;
 		else if(pitchState == -1)
 			pitchSpeed -= pitchRate;
 		else
-			pitchSpeed *= 0.9f;
+			pitchSpeed *= 0.8f;
 		
 		if(yawState == 1)
 			yawSpeed += yawRate;
 		else if(yawState == -1)
 			yawSpeed -= yawRate;
 		else
-			yawSpeed *= 0.9f;
+			yawSpeed *= 0.8f;
 		
 		if(MathHelper.abs(rollSpeed) < 0.0001f)
 			rollSpeed = 0.0f;
@@ -625,7 +625,7 @@ public class RocketEntity extends MovingCraftEntity
 		
 		for(BlockPos pos : thrusterOffsets)
 		{
-			Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 1.0f, pos.getZ());
+			Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 3.0f, pos.getZ());
 			rotated.rotate(quaternion);
 			thrusterOffsetsRotated.add(rotated);
 		}

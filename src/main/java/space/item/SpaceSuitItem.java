@@ -17,6 +17,8 @@ import net.minecraft.world.World;
 
 public class SpaceSuitItem extends DyeableArmorItem
 {
+	public static final double MAX_OXYGEN = 4.0;
+	
 	public SpaceSuitItem(ArmorMaterial armorMaterial, EquipmentSlot equipmentSlot, Item.Settings settings)
 	{
 		super(armorMaterial, equipmentSlot, settings);
@@ -45,10 +47,5 @@ public class SpaceSuitItem extends DyeableArmorItem
 	{
 	      NbtCompound nbtCompound = stack.getSubNbt("display");
 	      return nbtCompound != null && nbtCompound.contains("color", 99) ? nbtCompound.getInt("color") : 0xFFFFFFF;
-	}
-	
-	public double getMaxOxygen()
-	{
-		return 4.0;
 	}
 }

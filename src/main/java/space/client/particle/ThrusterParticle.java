@@ -32,6 +32,9 @@ public class ThrusterParticle extends SpriteBillboardParticle
 		this.velocityX = vx + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityY = vy + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityZ = vz + (random.nextDouble() - random.nextDouble()) * m;
+		this.prevPosX = this.x - this.velocityX;
+		this.prevPosY = this.y - this.velocityY;
+		this.prevPosZ = this.z - this.velocityZ;
 	}
 
 	@Override
@@ -55,10 +58,10 @@ public class ThrusterParticle extends SpriteBillboardParticle
         
         this.move(this.velocityX, this.velocityY, this.velocityZ);
         
-        if(this.y == this.prevPosY)
+        if(this.onGround)
         {
-            this.velocityX *= 1.25;
-            this.velocityZ *= 1.25;
+            this.velocityX *= 2.0;
+            this.velocityZ *= 2.0;
         }
 		
 		this.setSpriteForAge(this.spriteProvider);

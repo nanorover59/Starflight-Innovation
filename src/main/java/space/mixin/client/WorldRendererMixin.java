@@ -115,7 +115,7 @@ public abstract class WorldRendererMixin
 			
 			float rainGradient = starrySky ? 0.0f : this.world.getRainGradient(tickDelta);
 			float s = cloudySky ? 0.0f : (1.0f - rainGradient);
-			float starFactor = starrySky ? 1.0f : this.world.method_23787(tickDelta) * s * 1.8f;
+			float starFactor = starrySky ? 1.0f : this.world.method_23787(tickDelta) * s * 2.0f;
 
 			if(starFactor > 0.0f)
 			{
@@ -149,7 +149,7 @@ public abstract class WorldRendererMixin
 			RenderSystem.disableTexture();
 			
 			// Apply the bloom shader effect for players with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.1f)
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.05f)
 			{
 				StarflightModClient.bloomShader.render(tickDelta);
 				client.getFramebuffer().beginWrite(false);
