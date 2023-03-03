@@ -13,17 +13,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FallingBlock;
 import net.minecraft.block.RailBlock;
+import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.block.enums.RailShape;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.loot.LootTables;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.state.property.Properties;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
 import net.minecraft.structure.StructurePieceType;
 import net.minecraft.structure.StructurePiecesHolder;
 import net.minecraft.tag.BiomeTags;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
@@ -32,10 +36,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import space.StarflightMod;
 import space.block.StarflightBlocks;
 
 public class MoonshaftGenerator
@@ -43,17 +49,19 @@ public class MoonshaftGenerator
 	private static final Logger LOGGER = LogUtils.getLogger();
 	private static final Block SOLID_BLOCK = StarflightBlocks.RIVETED_ALUMINUM;
 	private static final Block FRAME_BLOCK = StarflightBlocks.ALUMINUM_FRAME;
+	private static final Block SLAB = StarflightBlocks.STRUCTURAL_ALUMINUM_SLAB;
+	private static final Identifier LOOT_TABLE = new Identifier(StarflightMod.MOD_ID, "chests/moonshaft");
 	
-	private static MoonshaftGenerator.MoonshaftPart pickPiece(StructurePiecesHolder holder, Random random, int x, int y, int z, @Nullable Direction orientation, int chainLength)
+	private static MoonshaftGenerator.MoonshaftPart pickPiece(StructurePiecesHolder holder, Random random, int x, int y, int z, @Nullable Direction orientation, int chainLength, boolean allowCrossing)
 	{
 		int i = random.nextInt(100);
 		
-		if(i >= 90)
+		if(allowCrossing && i >= 95)
 		{
 			BlockBox blockBox = MoonshaftCrossing.getBoundingBox(holder, random, x, y, z, orientation);
 			
 			if(blockBox != null)
-				return new MoonshaftCrossing(chainLength, blockBox, orientation);
+				return new MoonshaftCrossing(chainLength, blockBox, orientation, random.nextBoolean());
 		}
 		else
 		{
@@ -65,13 +73,21 @@ public class MoonshaftGenerator
 		
 		return null;
 	}
+	
+	private static BlockState getBrickType(World world)
+	{
+		if(world.getDimensionKey().getValue().getPath().equals("mars"))
+			return StarflightBlocks.REDSLATE_BRICKS.getDefaultState();
+		
+		return Blocks.STONE_BRICKS.getDefaultState();
+	}
 
-	static MoonshaftPart pieceGenerator(StructurePiece start, StructurePiecesHolder holder, Random random, int x, int y, int z, Direction orientation, int chainLength)
+	static MoonshaftPart pieceGenerator(StructurePiece start, StructurePiecesHolder holder, Random random, int x, int y, int z, Direction orientation, int chainLength, boolean allowCrossing)
 	{
 		if(chainLength > 8 || Math.abs(x - start.getBoundingBox().getMinX()) > 80 || Math.abs(z - start.getBoundingBox().getMinZ()) > 80)
 			return null;
 		
-		MoonshaftPart moonshaftPart = MoonshaftGenerator.pickPiece(holder, random, x, y, z, orientation, chainLength + 1);
+		MoonshaftPart moonshaftPart = MoonshaftGenerator.pickPiece(holder, random, x, y, z, orientation, chainLength + 1, allowCrossing);
 		
 		if(moonshaftPart != null)
 		{
@@ -242,6 +258,7 @@ public class MoonshaftGenerator
 				
 				i--;
 			}
+			
 			return null;
 		}
 
@@ -251,6 +268,7 @@ public class MoonshaftGenerator
 			int i = this.getChainLength();
 			int j = random.nextInt(4);
 			Direction direction = this.getFacing();
+			
 			if(direction != null)
 			{
 				switch(direction)
@@ -259,60 +277,60 @@ public class MoonshaftGenerator
 					{
 						if(j <= 1)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ() - 1, direction, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, direction, i, true);
 							break;
 						}
 						if(j == 2)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ(), Direction.WEST, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), Direction.WEST, i, true);
 							break;
 						}
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ(), Direction.EAST, i);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), Direction.EAST, i, true);
 						break;
 					}
 					case SOUTH:
 					{
 						if(j <= 1)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMaxZ() + 1, direction, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, direction, i, true);
 							break;
 						}
 						if(j == 2)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMaxZ() - 3, Direction.WEST, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 3, Direction.WEST, i, true);
 							break;
 						}
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMaxZ() - 3, Direction.EAST, i);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 3, Direction.EAST, i, true);
 						break;
 					}
 					case WEST:
 					{
 						if(j <= 1)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ(), direction, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), direction, i, true);
 							break;
 						}
 						if(j == 2)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i, true);
 							break;
 						}
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, true);
 						break;
 					}
 					case EAST:
 					{
 						if(j <= 1)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ(), direction, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ(), direction, i, true);
 							break;
 						}
 						if(j == 2)
 						{
-							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() - 3, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+							MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() - 3, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i, true);
 							break;
 						}
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() - 3, this.boundingBox.getMinY() - 1 + random.nextInt(3), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() - 3, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, true);
 					}
 				}
 			}
@@ -322,34 +340,34 @@ public class MoonshaftGenerator
 
 			if(direction == Direction.NORTH || direction == Direction.SOUTH)
 			{
-				int k = this.boundingBox.getMinZ() + 3;
+				int k = this.boundingBox.getMinZ() + 7;
 				
-				while(k + 3 <= this.boundingBox.getMaxZ())
+				while(k + 7 <= this.boundingBox.getMaxZ())
 				{
 					int l = random.nextInt(5);
 					
 					if(l == 0)
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), k, Direction.WEST, i + 1);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), k, Direction.WEST, i + 1, true);
 					else if(l == 1)
-						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), k, Direction.EAST, i + 1);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), k, Direction.EAST, i + 1, true);
 					
-					k += 5;
+					k += 7;
 				}
 			}
 			else
 			{
-				int k = this.boundingBox.getMinX() + 3;
+				int k = this.boundingBox.getMinX() + 7;
 				
-				while(k + 3 <= this.boundingBox.getMaxX())
+				while(k + 7 <= this.boundingBox.getMaxX())
 				{
 					int l = random.nextInt(5);
 					
 					if(l == 0)
-						MoonshaftGenerator.pieceGenerator(start, holder, random, k, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i + 1);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, k, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i + 1, true);
 					else if(l == 1)
-						MoonshaftGenerator.pieceGenerator(start, holder, random, k, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i + 1);
+						MoonshaftGenerator.pieceGenerator(start, holder, random, k, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i + 1, true);
 					
-					k += 5;
+					k += 7;
 				}
 			}
 		}
@@ -378,10 +396,11 @@ public class MoonshaftGenerator
 			if(this.cannotGenerate(world, chunkBox))
 				return;
 			
+			BlockState brickState = getBrickType(world.toServerWorld());
 			int maxZ = this.length * 5 - 1;
 			int i;
-			
 			this.fillWithOutline(world, chunkBox, 0, 0, 0, 2, 2, maxZ, AIR, AIR, false);
+			this.fillWithOutline(world, chunkBox, 0, -1, 0, 2, -1, maxZ, brickState, brickState, false);
 			this.fillWithOutlineUnderSeaLevel(world, chunkBox, random, 0.8f, 0, 2, 0, 2, 2, maxZ, AIR, AIR, false, false);
 			
 			for(i = 0; i < this.length; i++)
@@ -390,10 +409,10 @@ public class MoonshaftGenerator
 				this.generateSupports(world, chunkBox, 0, 0, j, 2, 2, random);
 				
 				if(random.nextInt(100) == 0)
-					this.addChest(world, chunkBox, random, 2, 0, j - 1, LootTables.ABANDONED_MINESHAFT_CHEST);
+					this.addChest(world, chunkBox, random, 2, 0, j - 1, LOOT_TABLE);
 				
 				if(random.nextInt(100) == 0)
-					this.addChest(world, chunkBox, random, 0, 0, j + 1, LootTables.ABANDONED_MINESHAFT_CHEST);
+					this.addChest(world, chunkBox, random, 0, 0, j + 1, LOOT_TABLE);
 				
 				int q = j - 1 + random.nextInt(3);
 				BlockPos.Mutable blockPos = this.offsetPos(1, 0, q);
@@ -416,6 +435,7 @@ public class MoonshaftGenerator
 			if(this.hasRails)
 			{
 				BlockState blockState2 = (BlockState) Blocks.RAIL.getDefaultState().with(RailBlock.SHAPE, RailShape.NORTH_SOUTH);
+				
 				for(int j = 0; j <= i; j++)
 				{
 					BlockState blockState3 = this.getBlockAt(world, 1, -1, j, chunkBox);
@@ -533,10 +553,10 @@ public class MoonshaftGenerator
 			if(!this.isSolidCeiling(world, boundingBox, minX, maxX, maxY, z))
 				return;
 			
-			this.fillWithOutline(world, boundingBox, minX, minY - 1, z, maxX, minY - 1, z, SOLID_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, minX, maxY + 1, z, maxX, maxY + 1, z, SOLID_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, minX - 1, minY, z, minX - 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, false);
-			this.fillWithOutline(world, boundingBox, maxX + 1, minY, z, maxX + 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, false);
+			this.fillWithOutline(world, boundingBox, minX, minY - 1, z, maxX, minY - 1, z, SOLID_BLOCK.getDefaultState(), AIR, true);
+			this.fillWithOutline(world, boundingBox, minX, maxY + 1, z, maxX, maxY + 1, z, SOLID_BLOCK.getDefaultState(), AIR, true);
+			this.fillWithOutline(world, boundingBox, minX - 1, minY, z, minX - 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, true);
+			this.fillWithOutline(world, boundingBox, maxX + 1, minY, z, maxX + 1, maxY, z, SOLID_BLOCK.getDefaultState(), AIR, true);
 		}
 	}
 
@@ -544,11 +564,13 @@ public class MoonshaftGenerator
 	{
 		private final Direction direction;
 		private final boolean twoFloors;
+		private final boolean lootRoom;
 
 		public MoonshaftCrossing(StructureContext context, NbtCompound nbt)
 		{
 			super(StarflightWorldGeneration.MOONSHAFT_CROSSING, nbt);
 			this.twoFloors = nbt.getBoolean("twoFloors");
+			this.lootRoom = nbt.getBoolean("lootRoom");
 			this.direction = Direction.fromHorizontal(nbt.getInt("direction"));
 		}
 
@@ -557,20 +579,23 @@ public class MoonshaftGenerator
 		{
 			super.writeNbt(context, nbt);
 			nbt.putBoolean("twoFloors", this.twoFloors);
+			nbt.putBoolean("lootRoom", this.lootRoom);
 			nbt.putInt("direction", this.direction.getHorizontal());
 		}
 
-		public MoonshaftCrossing(int chainLength, BlockBox boundingBox, @Nullable Direction orientation)
+		public MoonshaftCrossing(int chainLength, BlockBox boundingBox, @Nullable Direction orientation, boolean lootRoom)
 		{
 			super(StarflightWorldGeneration.MOONSHAFT_CROSSING, chainLength, boundingBox);
 			this.direction = orientation;
-			this.twoFloors = boundingBox.getBlockCountY() > 3;
+			this.twoFloors = boundingBox.getBlockCountY() > 5;
+			this.lootRoom = lootRoom;
 		}
 
 		@Nullable
 		public static BlockBox getBoundingBox(StructurePiecesHolder holder, Random random, int x, int y, int z, Direction orientation)
 		{
-			int i = random.nextInt(4) == 0 ? 6 : 2;
+			int i = random.nextBoolean() ? (4 * random.nextBetween(1, 5)) : 4;
+			
 			BlockBox blockBox = switch(orientation)
 			{
 				default -> new BlockBox(-1, 0, -4, 3, i, 0);
@@ -596,46 +621,48 @@ public class MoonshaftGenerator
 			{
 				default:
 				{
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
 					break;
 				}
 				case SOUTH:
 				{
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
 					break;
 				}
 				case WEST:
 				{
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
 					break;
 				}
 				case EAST:
 				{
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
 				}
 			}
 			
 			if(this.twoFloors)
 			{
-				if(random.nextBoolean())
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + 4, this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+				int height = boundingBox.getBlockCountY();
 				
-				if(random.nextBoolean())
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + 4, this.boundingBox.getMinZ() + 1, Direction.WEST, i);
+				if(random.nextInt(4) > 2)
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
 				
-				if(random.nextBoolean())
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + 4, this.boundingBox.getMinZ() + 1, Direction.EAST, i);
+				if(random.nextInt(4) > 2)
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
 				
-				if(random.nextBoolean())
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + 4, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+				if(random.nextInt(4) > 2)
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
+				
+				if(random.nextInt(4) > 2)
+					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
 			}
 		}
 
@@ -645,17 +672,61 @@ public class MoonshaftGenerator
 			if(this.cannotGenerate(world, chunkBox))
 				return;
 			
-			this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX(), this.boundingBox.getMaxY(), this.boundingBox.getMaxZ(), AIR, AIR, false);
-			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
-			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 1, this.boundingBox.getMaxY());
-			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
-			this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 1, this.boundingBox.getMaxY());
-			int i = this.boundingBox.getMinY() - 1;
+			BlockState brickState = getBrickType(world.toServerWorld());
 			
-			for(int j = this.boundingBox.getMinX(); j <= this.boundingBox.getMaxX(); j++)
+			if(this.lootRoom)
 			{
-				for(int k = this.boundingBox.getMinZ(); k <= this.boundingBox.getMaxZ(); k++)
-					this.tryPlaceFloor(world, chunkBox, StarflightBlocks.WALKWAY.getDefaultState(), j, i, k);
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() - 3, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 3, this.boundingBox.getMaxX() + 3, this.boundingBox.getMaxY(), this.boundingBox.getMaxZ() + 3, AIR, AIR, false);
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() - 3, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 3, this.boundingBox.getMaxX() + 3, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 3, brickState, brickState, false);
+				
+				BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() - 3, this.boundingBox.getMinY() + 1, this.boundingBox.getMinZ() - 3);
+				world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState(), Block.NOTIFY_LISTENERS);
+				LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				
+				return;
+			}
+			else
+			{
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX(), this.boundingBox.getMaxY(), this.boundingBox.getMaxZ(), AIR, AIR, false);
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ(), this.boundingBox.getMaxX(), this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ(), brickState, brickState, false);
+			}
+			
+			if(this.twoFloors)
+			{
+				// Spiral Staircase
+				for(int j = this.boundingBox.getMinX(); j <= this.boundingBox.getMaxX(); j++)
+				{
+					for(int k = this.boundingBox.getMinZ(); k <= this.boundingBox.getMaxZ(); k++)
+						this.tryPlaceFloor(world, chunkBox, StarflightBlocks.WALKWAY.getDefaultState(), j, this.boundingBox.getMaxY() - 3, k);
+				}
+
+				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxX() - 1, this.boundingBox.getMaxY(), this.boundingBox.getMaxZ() - 1, AIR, AIR, false);
+
+				BlockState bottomSlab = SLAB.getDefaultState();
+				BlockState topSlab = SLAB.getDefaultState().with(Properties.SLAB_TYPE, SlabType.TOP);
+				Direction spiralDirection = this.direction;
+				BlockPos spiralOffset = new BlockPos(1, 0, 1);
+
+				for(int i = 0; i <= spiralDirection.getHorizontal(); i++)
+					spiralOffset = spiralOffset.rotate(BlockRotation.CLOCKWISE_90);
+
+				BlockPos spiralPos = new BlockPos(this.boundingBox.getMinX() + 2 - spiralOffset.getX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 2 - spiralOffset.getZ());
+				this.fillWithOutline(world, boundingBox, this.boundingBox.getMinX() + 2, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 2, this.boundingBox.getMinX() + 2, this.boundingBox.getMaxY(), this.boundingBox.getMinZ() + 2, FRAME_BLOCK.getDefaultState(), AIR, false);
+				
+				while(spiralPos.getY() < this.boundingBox.getMaxY() - 2)
+				{
+					world.setBlockState(spiralPos, bottomSlab, 0);
+					world.setBlockState(spiralPos.offset(spiralDirection, 1), topSlab, 0);
+					spiralPos = spiralPos.up().offset(spiralDirection, 2);
+					spiralDirection = spiralDirection.rotateYClockwise();
+				}
+			}
+			else
+			{
+				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
+				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 1, this.boundingBox.getMaxY());
+				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 1, this.boundingBox.getMaxY());
+				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() - 1, this.boundingBox.getMaxY());
 			}
 		}
 
@@ -672,7 +743,7 @@ public class MoonshaftGenerator
 
 		public MoonshaftRoom(int chainLength, Random random, int x, int z)
 		{
-			super(StarflightWorldGeneration.MOONSHAFT_ROOM, chainLength, new BlockBox(x, 50, z, x + 7 + random.nextInt(6), 54 + random.nextInt(6), z + 7 + random.nextInt(6)));
+			super(StarflightWorldGeneration.MOONSHAFT_ROOM, chainLength, new BlockBox(x, 50, z, x + 9, 60, z + 9));
 		}
 
 		public MoonshaftRoom(StructureContext context, NbtCompound nbt)
@@ -702,36 +773,44 @@ public class MoonshaftGenerator
 			
 			for(k = 0; k < this.boundingBox.getBlockCountX() && (k += random.nextInt(this.boundingBox.getBlockCountX())) + 3 <= this.boundingBox.getBlockCountX(); k += 4)
 			{
-				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + k, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() - 1, Direction.NORTH, i);
+				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + k, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() - 1, Direction.NORTH, i, true);
+				
 				if(mineshaftPart == null)
 					continue;
+				
 				blockBox = mineshaftPart.getBoundingBox();
 				this.entrances.add(new BlockBox(blockBox.getMinX(), blockBox.getMinY(), this.boundingBox.getMinZ(), blockBox.getMaxX(), blockBox.getMaxY(), this.boundingBox.getMinZ() + 1));
 			}
 			
 			for(k = 0; k < this.boundingBox.getBlockCountX() && (k += random.nextInt(this.boundingBox.getBlockCountX())) + 3 <= this.boundingBox.getBlockCountX(); k += 4)
 			{
-				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + k, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i);
+				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + k, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, true);
+				
 				if(mineshaftPart == null)
 					continue;
+				
 				blockBox = mineshaftPart.getBoundingBox();
 				this.entrances.add(new BlockBox(blockBox.getMinX(), blockBox.getMinY(), this.boundingBox.getMaxZ() - 1, blockBox.getMaxX(), blockBox.getMaxY(), this.boundingBox.getMaxZ()));
 			}
 			
 			for(k = 0; k < this.boundingBox.getBlockCountZ() && (k += random.nextInt(this.boundingBox.getBlockCountZ())) + 3 <= this.boundingBox.getBlockCountZ(); k += 4)
 			{
-				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() + k, Direction.WEST, i);
+				mineshaftPart = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() + k, Direction.WEST, i, true);
+				
 				if(mineshaftPart == null)
 					continue;
+				
 				blockBox = mineshaftPart.getBoundingBox();
 				this.entrances.add(new BlockBox(this.boundingBox.getMinX(), blockBox.getMinY(), blockBox.getMinZ(), this.boundingBox.getMinX() + 1, blockBox.getMaxY(), blockBox.getMaxZ()));
 			}
 			
 			for(k = 0; k < this.boundingBox.getBlockCountZ() && (k += random.nextInt(this.boundingBox.getBlockCountZ())) + 3 <= this.boundingBox.getBlockCountZ(); k += 4)
 			{
-				MoonshaftPart structurePiece = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() + k, Direction.EAST, i);
+				MoonshaftPart structurePiece = MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + random.nextInt(j) + 1, this.boundingBox.getMinZ() + k, Direction.EAST, i, true);
+				
 				if(structurePiece == null)
 					continue;
+				
 				blockBox = structurePiece.getBoundingBox();
 				this.entrances.add(new BlockBox(this.boundingBox.getMaxX() - 1, blockBox.getMinY(), blockBox.getMinZ(), this.boundingBox.getMaxX(), blockBox.getMaxY(), blockBox.getMaxZ()));
 			}

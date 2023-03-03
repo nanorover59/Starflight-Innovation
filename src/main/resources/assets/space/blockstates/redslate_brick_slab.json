@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/redslate_brick_slab"
+    },
+    "type=double": {
+      "model": "space:block/redslate_bricks"
+    },
+    "type=top": {
+      "model": "space:block/redslate_brick_slab_top"
+    }
+  }
+}

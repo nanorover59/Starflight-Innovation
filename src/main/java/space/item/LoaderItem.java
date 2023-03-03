@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
@@ -17,11 +15,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import space.block.EnergyBlock;
 import space.block.FluidTankControllerBlock;
-import space.block.FluidUtilityBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
 

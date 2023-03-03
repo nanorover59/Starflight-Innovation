@@ -92,6 +92,9 @@ public class StarflightBlocks
 	public static final Block FERRIC_SAND = new SandBlock(0xB7633D, AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.ORANGE).sounds(BlockSoundGroup.SAND).strength(0.5F));
 	public static final Block FERRIC_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
 	public static final Block REDSLATE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
+	public static final Block REDSLATE_BRICKS = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
+	public static final Block REDSLATE_BRICK_STAIRS = new StairsBlock(REDSLATE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(REDSLATE_BRICKS));
+	public static final Block REDSLATE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(REDSLATE_BRICKS));
 	public static final Block FERRIC_IRON_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_COPPER_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
 	public static final Block FERRIC_BAUXITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
@@ -203,6 +206,9 @@ public class StarflightBlocks
 		initializeBlock(FERRIC_SAND, "ferric_sand");
 		initializeBlock(FERRIC_STONE, "ferric_stone");
 		initializeBlock(REDSLATE, "redslate");
+		initializeBlock(REDSLATE_BRICKS, "redslate_bricks");
+		initializeBlock(REDSLATE_BRICK_STAIRS, "redslate_brick_stairs");
+		initializeBlock(REDSLATE_BRICK_SLAB, "redslate_brick_slab");
 		initializeBlock(FERRIC_IRON_ORE, "ferric_iron_ore");
 		initializeBlock(FERRIC_COPPER_ORE, "ferric_copper_ore");
 		initializeBlock(FERRIC_BAUXITE_ORE, "ferric_bauxite_ore");

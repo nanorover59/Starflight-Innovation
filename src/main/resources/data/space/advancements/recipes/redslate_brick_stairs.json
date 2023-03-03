@@ -2,17 +2,17 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "space:structural_aluminum"
+      "space:redslate_brick_stairs"
     ]
   },
   "criteria": {
-    "has_aluminum_frame": {
+    "has_redslate_bricks": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:aluminum_frame"
+              "space:redslate_bricks"
             ]
           }
         ]
@@ -21,13 +21,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "space:structural_aluminum"
+        "recipe": "space:redslate_brick_stairs"
       }
     }
   },
   "requirements": [
     [
-      "has_aluminum_frame",
+      "has_redslate_bricks",
       "has_the_recipe"
     ]
   ]

@@ -149,7 +149,7 @@ public abstract class WorldRendererMixin
 			RenderSystem.disableTexture();
 			
 			// Apply the bloom shader effect for players with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.05f)
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.5f)
 			{
 				StarflightModClient.bloomShader.render(tickDelta);
 				client.getFramebuffer().beginWrite(false);

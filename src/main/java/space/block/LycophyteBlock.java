@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.Fertilizable;
 import net.minecraft.block.Material;
 import net.minecraft.block.Waterloggable;
@@ -75,6 +76,9 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 
 		if(isTop && neighborState.getBlock() instanceof LycophyteBlock && neighborPos.equals(pos.up()))
 			blockState = StarflightBlocks.LYCOPHYTE_STEM.getDefaultState();
+		
+		if(!canPlaceAt(blockState, world, pos) || (!isTop && direction == Direction.UP && neighborState.isAir()))
+			blockState = Blocks.AIR.getDefaultState();
 
 		return blockState;
 	}

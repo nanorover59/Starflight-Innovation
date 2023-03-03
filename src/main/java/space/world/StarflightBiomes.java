@@ -173,7 +173,7 @@ public class StarflightBiomes
 		int fogColor = 0x000000;
 		int skyColor = 0x000000;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
-		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.CERULEAN, 1, 1, 1));
+		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.CERULEAN, 1, 0, 1));
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addMoonOres(generationSettings);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
@@ -215,7 +215,6 @@ public class StarflightBiomes
 			DefaultBiomeFeatures.addDripstone(generationSettings);
 		else if(biomeKey.getValue().getPath().contains("lush_caves"))
 		{
-			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.MARS_GLOW_LICHEN_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.ARES_MOSS_PATCH_CEILING_PLACED_FEATURE);
 			generationSettings.feature(GenerationStep.Feature.VEGETAL_DECORATION, StarflightWorldGeneration.MARS_CAVE_POOL_PLACED_FEATURE);
