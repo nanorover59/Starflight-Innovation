@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/riveted_aluminum",
+    "side": "space:block/oxygen_sensor",
+    "top": "space:block/oxygen_sensor_top"
+  }
+}

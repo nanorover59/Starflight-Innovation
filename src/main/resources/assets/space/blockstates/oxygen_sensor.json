@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,lit=false": {
+      "model": "space:block/oxygen_sensor",
+      "x": 180
+    },
+    "facing=down,lit=true": {
+      "model": "space:block/oxygen_sensor_on",
+      "x": 180
+    },
+    "facing=east,lit=false": {
+      "model": "space:block/oxygen_sensor",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "space:block/oxygen_sensor_on",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,lit=false": {
+      "model": "space:block/oxygen_sensor",
+      "x": 90
+    },
+    "facing=north,lit=true": {
+      "model": "space:block/oxygen_sensor_on",
+      "x": 90
+    },
+    "facing=south,lit=false": {
+      "model": "space:block/oxygen_sensor",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "space:block/oxygen_sensor_on",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,lit=false": {
+      "model": "space:block/oxygen_sensor"
+    },
+    "facing=up,lit=true": {
+      "model": "space:block/oxygen_sensor_on"
+    },
+    "facing=west,lit=false": {
+      "model": "space:block/oxygen_sensor",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "space:block/oxygen_sensor_on",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

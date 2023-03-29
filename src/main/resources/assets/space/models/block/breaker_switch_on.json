@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/breaker_switch_front",
+    "side": "space:block/breaker_switch_side_on",
+    "top": "space:block/breaker_switch_front"
+  }
+}
