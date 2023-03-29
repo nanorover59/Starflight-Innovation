@@ -1,16 +1,15 @@
 package space.block;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -24,14 +23,14 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.client.StarflightModClient;
+import space.block.entity.AtmosphereGeneratorBlockEntity;
+import space.energy.EnergyNet;
 import space.util.AirUtil;
 import space.util.StarflightEffects;
 
-public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements FluidUtilityBlock
+public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUtilityBlock, EnergyBlock
 {
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty LIT = Properties.LIT;
@@ -43,12 +42,6 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
-	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.atmosphere_generator.description_1"), Text.translatable("block.space.atmosphere_generator.description_2"));
-	}
-	
-	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager)
 	{
 		stateManager.add(FACING);
@@ -56,9 +49,29 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 	}
 	
 	@Override
+	public BlockEntity createBlockEntity(BlockPos blockPos, BlockState blockState)
+	{
+		return new AtmosphereGeneratorBlockEntity(blockPos, blockState);
+	}
+	
+	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
+	}
+	
+	@Override
+	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
+	{
+		if(!world.isClient())
+			addNode(world, pos);
+	}
+	
+	@Override
+	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
+	{
+		if(!world.isClient())
+			addNode(world, pos);
 	}
 	
 	@Override
@@ -125,4 +138,34 @@ public class AtmosphereGeneratorBlock extends HorizontalFacingBlock implements F
 		else if(frontState.getBlock() == Blocks.AIR)
 			world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, false), Block.NOTIFY_ALL);
     }
+
+	@Override
+	public double getPowerOutput(World world, BlockPos pos, BlockState state)
+	{
+		return 0;
+	}
+
+	@Override
+	public double getPowerDraw(World world, BlockPos pos, BlockState state)
+	{
+		return state.get(LIT) ? 5.0 : 0.0;
+	}
+
+	@Override
+	public boolean isSideInput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return direction != (Direction) state.get(FACING).getOpposite();
+	}
+
+	@Override
+	public boolean isSideOutput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return false;
+	}
+
+	@Override
+	public void addNode(World world, BlockPos pos)
+	{
+		EnergyNet.addConsumer(world, pos);
+	}
 }

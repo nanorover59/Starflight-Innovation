@@ -27,15 +27,14 @@ public class CraterGenerator
 	{
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		ChunkRandom random = context.random();
-		NoiseConfig noiseConfig = context.noiseConfig();
+		NoiseConfig noiseConfig = context.noiseConfig();	
 		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(),noiseConfig);
-		int depth = 8 + random.nextInt(12);
-		
-		if(random.nextDouble() < 0.25)
-			depth += random.nextInt(12);
-		
-		BlockPos center = pos.add(random.nextInt(16), surfaceY - depth, random.nextInt(16));
-		int chunkRadius = (((int) (depth * 2.0)) >> 4) + 2;
+		int radius = 24 + random.nextInt(24);
+		double depthFactor = 0.5 + random.nextDouble() * 0.25;
+		double rimWidth = 0.5 + random.nextDouble() * 0.15;
+		double rimSteepness = 0.25 + random.nextDouble() * 0.25;
+		BlockPos center = pos.add(random.nextInt(16), surfaceY, random.nextInt(16));
+		int chunkRadius = (((int) (radius * 2.0)) >> 4) + 2;
 		int evenTerrain = checkEvenTerrain(context, pos);
 		
 		if(surfaceY < 32 || evenTerrain > 16)
@@ -48,7 +47,7 @@ public class CraterGenerator
 				if(MathHelper.hypot(x, z) <= chunkRadius)
 				{
 					BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
-					holder.addPiece(new Piece(startPos, center.getX(), center.getZ(), 0, depth, surfaceY));
+					holder.addPiece(new Piece(startPos, center.getX(), center.getZ(), radius, depthFactor, rimWidth, rimSteepness));
 				}
 			}
 		}
@@ -72,16 +71,20 @@ public class CraterGenerator
 	{
 		private final int centerX;
 		private final int centerZ;
-		private final int depth;
-		private final int surfaceY;
+		private final int radius;
+		private final double depthFactor;
+		private final double rimWidth;
+		private final double rimSteepness;
 		
-		public Piece(BlockPos start, int x, int z, int radius, int depth, int surfaceY)
+		public Piece(BlockPos start, int x, int z, int radius, double depthFactor, double rimWidth, double rimSteepness)
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, 0, new BlockBox(start));
 			this.centerX = x;
 			this.centerZ = z;
-			this.depth = depth;
-			this.surfaceY = surfaceY;
+			this.radius = radius;
+			this.depthFactor = depthFactor;
+			this.rimWidth = rimWidth;
+			this.rimSteepness = rimSteepness;
 		}
 
 		public Piece(StructureContext context, NbtCompound nbt)
@@ -89,8 +92,10 @@ public class CraterGenerator
 			super(StarflightWorldGeneration.CRATER_PIECE, nbt);
 			this.centerX  = nbt.getInt("x");
 			this.centerZ = nbt.getInt("z");
-			this.depth = nbt.getInt("depth");
-			this.surfaceY = nbt.getInt("surfaceY");
+			this.radius = nbt.getInt("radius");
+			this.depthFactor = nbt.getDouble("depthFactor");
+			this.rimWidth = nbt.getDouble("rimWidth");
+			this.rimSteepness = nbt.getDouble("rimSteepness");
 		}
 
 		@Override
@@ -98,8 +103,10 @@ public class CraterGenerator
 		{
 			nbt.putInt("x", this.centerX);
 			nbt.putInt("z", this.centerZ);
-			nbt.putInt("depth", depth);
-			nbt.putInt("surfaceY", surfaceY);
+			nbt.putInt("radius", radius);
+			nbt.putDouble("depthFactor", depthFactor);
+			nbt.putDouble("rimWidth", rimWidth);
+			nbt.putDouble("rimSteepness", rimSteepness);
 		}
 		
 		@Override
@@ -111,8 +118,8 @@ public class CraterGenerator
 		@Override
 		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot)
 		{
-			final BlockPos.Mutable mutable = new BlockPos.Mutable();
-			BlockPos startPos = chunkPos.getBlockPos(0, surfaceY, 0);
+			BlockPos.Mutable mutable = new BlockPos.Mutable();
+			BlockPos startPos = chunkPos.getBlockPos(0, 0, 0);
 			
 			for(int x = 0; x < 16; x++)
 			{
@@ -121,47 +128,48 @@ public class CraterGenerator
 					mutable.set(startPos.getX() + x, 0, startPos.getZ() + z);
 					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).getY();
 					mutable.setY(localSurfaceY);
-					BlockState surfaceState = world.getBlockState(mutable);
-					BlockState subSurfaceState = surfaceState;
-					int subSurfaceOffset = 0;
+					BlockState surfaceState = world.getBlockState(mutable);	
+					double r = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ) / radius;
+					double parabola = r * r - 1.0;
+					double rimR = Math.min(r - rimWidth - 1.0, 0.0);
+					double rim = rimR * rimR * rimSteepness;
+					double shape = smoothMin(parabola, rim, 0.5);
+					shape = smoothMax(shape, -depthFactor, 0.5);
+					int y = localSurfaceY + (int) (shape * radius);
 					
-					while(subSurfaceState.getBlock() == surfaceState.getBlock())
+					if(y <= localSurfaceY)
 					{
-						subSurfaceOffset++;
-						subSurfaceState = world.getBlockState(mutable.down(subSurfaceOffset));
-					}
-					
-					double ds = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ);
-					
-					if(ds < 12.0)
-						ds = 12.0;
-					
-					double widthFactor = 2.0;
-					int offset = (int) (Math.pow((depth * widthFactor) / 2.0 - ds, 2.0) / (depth * widthFactor));
-					int bottomY = localSurfaceY - depth + offset;
-					int y = localSurfaceY;
-					mutable.setY(y);
-					
-					while(y >= bottomY)
-					{
-						if(y == bottomY && world.getBlockState(mutable.down()).getMaterial().blocksMovement())
+						for(int i = y; i < localSurfaceY + 6; i++)
 						{
-							world.setBlockState(mutable.down(), surfaceState, Block.NOTIFY_LISTENERS);
-							
-							if(subSurfaceState.getMaterial().blocksMovement())
-							{
-								subSurfaceOffset = world.getRandom().nextBetween(2, 4);
-								
-								for(int i = 0; i < subSurfaceOffset; i++)
-									world.setBlockState(mutable.down(i), subSurfaceState, Block.NOTIFY_LISTENERS);
-							}
+							mutable.setY(i);
+							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.REDRAW_ON_MAIN_THREAD);
 						}
-
-						world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
-						mutable.setY(--y);
+						
+						mutable.setY(y - 1);
+						world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+					}
+					else
+					{
+						for(int i = y; i > localSurfaceY; i--)
+						{
+							mutable.setY(i);
+							world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+						}
 					}
 				}
 			} 
+		}
+		
+		private double smoothMin(double a, double b, double c)
+		{
+			double h = Math.max(c - Math.abs(a - b), 0.0) / c;
+			return Math.min(a, b) - h * h * c * 0.25;
+		}
+		
+		private double smoothMax(double a, double b, double c)
+		{
+			double h = Math.max(c - Math.abs(a - b), 0.0) / c;
+			return Math.max(a, b) + h * h * c * 0.25;
 		}
 	}
 }

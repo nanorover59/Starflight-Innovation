@@ -13,6 +13,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import space.block.BatteryBlock;
+import space.block.BreakerSwitchBlock;
 import space.block.EnergyBlock;
 import space.block.EnergyCableBlock;
 import space.block.SolarPanelBlock;
@@ -211,6 +212,21 @@ public class EnergyNet
 				
 				if(state.getBlock() instanceof EnergyBlock)
 				{
+					if(!energyNode.hasSufficientPower() && !energyNode.getBreakers().isEmpty())
+					{
+						for(BlockPos breakerPos : energyNode.getBreakers())
+						{
+							BlockState breakerState = world.getBlockState(breakerPos);
+							
+							if(breakerState.getBlock() instanceof BreakerSwitchBlock)
+							{
+								world.setBlockState(breakerPos, breakerState.with(BreakerSwitchBlock.LIT, false));
+								ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+								EnergyNet.updateEnergyNodes(world, breakerPos, checkList);
+							}
+						}
+					}
+					
 					// Charge battery blocks if enough power is available.
 					if(state.getBlock() instanceof BatteryBlock && !energyNode.getInputs().isEmpty() && energyNode.hasSufficientPower())
 					{
@@ -266,7 +282,7 @@ public class EnergyNet
 			return;
 		
 		ArrayList<EnergyNode> found = new ArrayList<EnergyNode>();
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();	
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 		BlockPos position = energyNode.getPosition();
 		BlockState blockState = world.getBlockState(position);
 		energyNode.getOutputs().clear();
@@ -330,8 +346,17 @@ public class EnergyNet
 				}
 			}
 		}
-		
-		if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
+		else if(adjacentBlockState.getBlock() instanceof BreakerSwitchBlock && adjacentBlockState.get(BreakerSwitchBlock.LIT))
+		{
+			// Connect through breaker switch blocks.
+			Direction breakerDirection = adjacentBlockState.get(BreakerSwitchBlock.FACING);
+			
+			if(direction == breakerDirection)
+				checkDirectionProducer(world, adjacentPosition, breakerDirection, checkList, found, producer);
+			else if(direction == breakerDirection.getOpposite())
+				checkDirectionProducer(world, adjacentPosition, breakerDirection.getOpposite(), checkList, found, producer);
+		}
+		else if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
 		{
 			// Connect through horizontally adjacent solar panel blocks.
 			for(Direction adjacentDirection : DIRECTIONS)
@@ -376,6 +401,13 @@ public class EnergyNet
 			if(!producer.getOutputs().contains(energyNode))
 				producer.getOutputs().add(energyNode);
 		}
+		
+		// Recursively find breaker switches.
+		energyNode.getBreakers().clear();
+		checkList.clear();
+		ArrayList<BlockPos> breakerList = new ArrayList<BlockPos>();
+		findBreakerSwitches(world, position, checkList, breakerList);
+		energyNode.getBreakers().addAll(breakerList);
 	}
 	
 	public static void checkDirectionConsumer(World world, BlockPos position, Direction direction, ArrayList<BlockPos> checkList, ArrayList<EnergyNode> found, EnergyNode consumer)
@@ -414,8 +446,17 @@ public class EnergyNet
 				}
 			}
 		}
-		
-		if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
+		else if(adjacentBlockState.getBlock() instanceof BreakerSwitchBlock && adjacentBlockState.get(BreakerSwitchBlock.LIT))
+		{
+			// Connect through breaker switch blocks.
+			Direction breakerDirection = adjacentBlockState.get(BreakerSwitchBlock.FACING);
+			
+			if(direction == breakerDirection)
+				checkDirectionConsumer(world, adjacentPosition, breakerDirection, checkList, found, consumer);
+			else if(direction == breakerDirection.getOpposite())
+				checkDirectionConsumer(world, adjacentPosition, breakerDirection.getOpposite(), checkList, found, consumer);
+		}
+		else if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
 		{
 			// Connect through horizontally adjacent solar panel blocks.
 			for(Direction adjacentDirection : DIRECTIONS)
@@ -450,6 +491,8 @@ public class EnergyNet
 			
 			if(adjacentState.getBlock() instanceof EnergyCableBlock)
 				updateEnergyNodes(world, adjacentPosition, checkList);
+			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock && adjacentState.get(BreakerSwitchBlock.LIT) && (direction == adjacentState.get(BreakerSwitchBlock.FACING) || direction == adjacentState.get(BreakerSwitchBlock.FACING).getOpposite()))
+				updateEnergyNodes(world, adjacentPosition, checkList);
 			else if(adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN && direction != Direction.UP)
 			{
 				if(producer != null)
@@ -465,6 +508,28 @@ public class EnergyNet
 				if(consumer != null)
 					EnergyNet.connectConsumer(world, consumer);
 			}
+		}
+	}
+	
+	private static void findBreakerSwitches(World world, BlockPos position, ArrayList<BlockPos> checkList, ArrayList<BlockPos> breakerList)
+	{
+		if(checkList.contains(position))
+			return;
+		
+		checkList.add(position);
+		
+		for(Direction direction : Direction.values())
+		{
+			BlockPos adjacentPosition = position.offset(direction);
+			BlockState adjacentState = world.getBlockState(adjacentPosition);
+			
+			if(adjacentState == null)
+				continue;
+			
+			if(adjacentState.getBlock() instanceof EnergyCableBlock || (adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN && direction != Direction.UP))
+				findBreakerSwitches(world, adjacentPosition, checkList, breakerList);
+			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock)
+				breakerList.add(adjacentPosition);
 		}
 	}
 	

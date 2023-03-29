@@ -192,10 +192,12 @@ public class EnergyCableBlock extends Block implements Waterloggable
 		return result;
 	}
 	
-	private boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
 	{
 		if(state.getBlock() instanceof EnergyBlock)
 			return ((EnergyBlock) state.getBlock()).canSideConnect(world, pos, state, direction.getOpposite());
+		else if(state.getBlock() instanceof BreakerSwitchBlock)
+			return direction == state.get(BreakerSwitchBlock.FACING) || direction == state.get(BreakerSwitchBlock.FACING).getOpposite();
 		else
 			return state.getBlock() instanceof EnergyCableBlock;
 	}

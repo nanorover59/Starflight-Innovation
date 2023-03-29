@@ -39,7 +39,7 @@ public class StorageCubeBlock extends BlockWithEntity
 	public StorageCubeBlock(AbstractBlock.Settings settings)
 	{
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH)).with(OPEN, false));
+		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.UP)).with(OPEN, false));
 	}
 
 	@Override
@@ -94,6 +94,12 @@ public class StorageCubeBlock extends BlockWithEntity
 	{
 		return BlockRenderType.MODEL;
 	}
+	
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
+	{
+		builder.add(FACING, OPEN);
+	}
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack)
@@ -126,12 +132,6 @@ public class StorageCubeBlock extends BlockWithEntity
 	public BlockState mirror(BlockState state, BlockMirror mirror)
 	{
 		return state.rotate(mirror.getRotation(state.get(FACING)));
-	}
-
-	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
-	{
-		builder.add(FACING, OPEN);
 	}
 
 	@Override

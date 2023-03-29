@@ -14,9 +14,10 @@ import net.minecraft.world.WorldAccess;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
+import space.util.IWorldMixin;
 
 @Mixin(World.class)
-public abstract class WorldMixin implements WorldAccess, AutoCloseable
+public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMixin
 {
 	@Shadow @Final MutableWorldProperties properties;
 	@Shadow RegistryKey<World> registryKey;

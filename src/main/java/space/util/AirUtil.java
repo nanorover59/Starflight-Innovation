@@ -9,6 +9,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.block.PaneBlock;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -91,7 +92,8 @@ public class AirUtil
 	public static void remove(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {
-			return w.getBlockState(p).getBlock() == StarflightBlocks.HABITABLE_AIR;
+			BlockState blockState = w.getBlockState(p);
+			return !AirUtil.airBlocking(w, p) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR;
 		};
 		
 		BlockSearch.search(world, position, checkList, include, limit, true);
@@ -102,17 +104,21 @@ public class AirUtil
 			
 			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 			{
-				world.removeBlock(pos, false);
+				FluidState fluidState = world.getFluidState(pos);
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
 				
 				for(Direction direction : Direction.values())
 				{
 					BlockPos offset = pos.offset(direction);
+					BlockState state = world.getBlockState(offset);
 					
-					if(world.getBlockState(offset).isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
+					if(state.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
 					{
 						world.removeBlock(offset, false);
 						Block.dropStacks(blockState, world, offset, world.getBlockEntity(offset));
 					}
+					else
+						state.neighborUpdate(world, offset, StarflightBlocks.HABITABLE_AIR, pos, true);
 				}
 			}
 		}
@@ -124,6 +130,11 @@ public class AirUtil
 	public static boolean airBlocking(World world, BlockPos position)
 	{
 		BlockState blockState = world.getBlockState(position);
+		return airBlockingState(world, position, blockState);
+	}
+	
+	public static boolean airBlockingState(World world, BlockPos position, BlockState blockState)
+	{
 		Block block = blockState.getBlock();
 		
 		if(block == Blocks.AIR)
@@ -136,8 +147,8 @@ public class AirUtil
 			return true;
 		else if((block instanceof SealedTrapdoorBlock) && !(blockState.get(SealedDoorBlock.OPEN) || blockState.get(SealedDoorBlock.POWERED)))
 			return true;
-
-		return blockState.isFullCube(world, position);
+		else
+			return blockState.isFullCube(world, position);
 	}
 	
 	/**

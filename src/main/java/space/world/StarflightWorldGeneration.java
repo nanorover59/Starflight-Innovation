@@ -91,6 +91,11 @@ public class StarflightWorldGeneration
 	public static final StructureType<MoonshaftStructure> MOONSHAFT_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "moonshaft"), () -> MoonshaftStructure.CODEC);
 	public static final RegistryEntry<Structure> MOONSHAFT = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "moonshaft")), new MoonshaftStructure(createConfig(IS_CRATERED, StructureTerrainAdaptation.NONE)));
 	
+	// Impact Crater Feature
+	public static final Feature<DefaultFeatureConfig> SMALL_CRATER = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "small_crater"), new SmallCraterFeature(DefaultFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SMALL_CRATER_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "small_crater").toString(), SMALL_CRATER);
+	public static final RegistryEntry<PlacedFeature> SMALL_CRATER_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "small_crater").toString(), SMALL_CRATER_CONFIGURED_FEATURE, CountPlacementModifier.of(1), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
+	
 	// Surface Rock Feature
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SURFACE_ROCK_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "surface_rock").toString(), SURFACE_ROCK);

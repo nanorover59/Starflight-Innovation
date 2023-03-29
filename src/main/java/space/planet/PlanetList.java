@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import space.StarflightMod;
-import space.mixin.common.WorldInvokerMixin;
+import space.util.IWorldMixin;
 
 public class PlanetList
 {
@@ -273,8 +273,7 @@ public class PlanetList
 	 */
 	public static PlanetDimensionData getDimensionDataForWorld(World world)
 	{
-		WorldInvokerMixin invoker = (WorldInvokerMixin) world;
-		return invoker.callGetPlanetDimensionData();
+		return ((IWorldMixin) (Object) world).getPlanetDimensionData();
 	}
 	
 	/**

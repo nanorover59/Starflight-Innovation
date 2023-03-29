@@ -176,6 +176,7 @@ public class StarflightBiomes
 		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.CERULEAN, 1, 0, 1));
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addMoonOres(generationSettings);
+		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SMALL_CRATER_PLACED_FEATURE);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
 		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.ROCK_PATCH_PLACED_FEATURE);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, StarflightWorldGeneration.UNDERGROUND_LAVA_SPRING_PLACED_FEATURE);
@@ -204,6 +205,7 @@ public class StarflightBiomes
 		generationSettings.carver(GenerationStep.Carver.AIR, ConfiguredCarvers.CANYON);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, StarflightWorldGeneration.UNDERGROUND_LAVA_SPRING_PLACED_FEATURE);
+		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SMALL_CRATER_PLACED_FEATURE);
 		
 		if(surfaceRocks)
 		{

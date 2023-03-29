@@ -128,6 +128,51 @@ public class BlockSearch
 		positionList.addAll(set);
 	}
 	
+	/**
+	 * Search the world starting at the given coordinates for coordinates where either BiPredicate returns true, but do not continue searching past edge case coordinates.
+	 * Also add any edge case blocks to a second position list.
+	 */
+	public static void search(World world, BlockPos pos, ArrayList<BlockPos> positionList, ArrayList<BlockPos> foundList, BiPredicate<World, BlockPos> include, BiPredicate<World, BlockPos> edgeCase, int limit, boolean distanceLimit)
+	{
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		Set<BlockPos> foundSet = new HashSet<BlockPos>();
+		
+		if(include.test(world, pos))
+			stack.push(pos);
+		
+		while(stack.size() > 0 && set.size() < limit)
+		{
+			BlockPos blockPos = stack.pop();
+			set.add(blockPos);
+			
+			if(distanceLimit && tooFar(pos, blockPos))
+			{
+				set.clear();
+				return;
+			}
+			
+			for(Direction direction : DIRECTIONS)
+			{
+				BlockPos offset = blockPos.offset(direction);
+				
+				if(!set.contains(offset))
+				{
+					if(include.test(world, offset))
+						stack.push(offset);
+					else if(edgeCase.test(world, offset))
+					{
+						set.add(offset);
+						foundSet.add(offset);
+					}
+				}
+			}
+		}
+		
+		positionList.addAll(set);
+		foundList.addAll(foundSet);
+	}
+	
 	public static void movingCraftSearch(World world, BlockPos blockPos, ArrayList<BlockPos> positionList, int limit)
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {

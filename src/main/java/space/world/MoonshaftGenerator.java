@@ -17,7 +17,6 @@ import net.minecraft.block.entity.LootableContainerBlockEntity;
 import net.minecraft.block.enums.RailShape;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
-import net.minecraft.loot.LootTables;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
@@ -43,6 +42,7 @@ import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
+import space.block.StorageCubeBlock;
 
 public class MoonshaftGenerator
 {
@@ -230,7 +230,7 @@ public class MoonshaftGenerator
 		{
 			super(StarflightWorldGeneration.MOONSHAFT_CORRIDOR, chainLength, boundingBox);
 			this.setOrientation(orientation);
-			this.hasRails = random.nextInt(3) == 0;
+			this.hasRails = random.nextBoolean();
 			this.length = this.getFacing().getAxis() == Direction.Axis.Z ? boundingBox.getBlockCountZ() / 5 : boundingBox.getBlockCountX() / 5;
 		}
 
@@ -399,6 +399,7 @@ public class MoonshaftGenerator
 			BlockState brickState = getBrickType(world.toServerWorld());
 			int maxZ = this.length * 5 - 1;
 			int i;
+			boolean b = true;
 			this.fillWithOutline(world, chunkBox, 0, 0, 0, 2, 2, maxZ, AIR, AIR, false);
 			this.fillWithOutline(world, chunkBox, 0, -1, 0, 2, -1, maxZ, brickState, brickState, false);
 			this.fillWithOutlineUnderSeaLevel(world, chunkBox, random, 0.8f, 0, 2, 0, 2, 2, maxZ, AIR, AIR, false, false);
@@ -406,7 +407,11 @@ public class MoonshaftGenerator
 			for(i = 0; i < this.length; i++)
 			{
 				int j = 2 + i * 5;
-				this.generateSupports(world, chunkBox, 0, 0, j, 2, 2, random);
+				
+				if(b)
+					this.generateSupports(world, chunkBox, 0, 0, j, 2, 2, random);
+				
+				b = !b;
 				
 				if(random.nextInt(100) == 0)
 					this.addChest(world, chunkBox, random, 2, 0, j - 1, LOOT_TABLE);
@@ -679,9 +684,33 @@ public class MoonshaftGenerator
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() - 3, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 3, this.boundingBox.getMaxX() + 3, this.boundingBox.getMaxY(), this.boundingBox.getMaxZ() + 3, AIR, AIR, false);
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX() - 3, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 3, this.boundingBox.getMaxX() + 3, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 3, brickState, brickState, false);
 				
-				BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() - 3, this.boundingBox.getMinY() + 1, this.boundingBox.getMinZ() - 3);
-				world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState(), Block.NOTIFY_LISTENERS);
-				LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				for(int i = this.boundingBox.getMinX() - 3; i <= this.boundingBox.getMaxX() + 3; i += 2)
+				{
+					BlockPos blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 3);
+					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				}
+				
+				for(int i = this.boundingBox.getMinX() - 3; i <= this.boundingBox.getMaxX() + 3; i += 2)
+				{
+					BlockPos blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 3);
+					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				}
+				
+				for(int i = this.boundingBox.getMinZ() - 3; i <= this.boundingBox.getMaxZ() + 3; i += 2)
+				{
+					BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() - 3, this.boundingBox.getMinY(), i);
+					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				}
+				
+				for(int i = this.boundingBox.getMinZ() - 3; i <= this.boundingBox.getMaxZ() + 3; i += 2)
+				{
+					BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() + 3, this.boundingBox.getMinY(), i);
+					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+				}
 				
 				return;
 			}

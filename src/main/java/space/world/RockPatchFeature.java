@@ -29,7 +29,7 @@ public class RockPatchFeature extends Feature<DefaultFeatureConfig>
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
 		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(6 + random.nextInt(8)));
-		float chance = 0.1f;
+		float chance = 0.15f;
 		
 		if(structureWorldAccess.getBiome(blockPos).isIn(StarflightWorldGeneration.MORE_SCATTER))
 			chance = 0.8f;
