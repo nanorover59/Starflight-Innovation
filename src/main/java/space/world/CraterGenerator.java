@@ -128,6 +128,10 @@ public class CraterGenerator
 					mutable.set(startPos.getX() + x, 0, startPos.getZ() + z);
 					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).getY();
 					mutable.setY(localSurfaceY);
+					
+					while(!world.getBlockState(mutable).getMaterial().blocksMovement() && mutable.getY() > 0)
+						mutable.setY(mutable.getY() - 1);
+					
 					BlockState surfaceState = world.getBlockState(mutable);	
 					double r = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ) / radius;
 					double parabola = r * r - 1.0;
@@ -135,9 +139,10 @@ public class CraterGenerator
 					double rim = rimR * rimR * rimSteepness;
 					double shape = smoothMin(parabola, rim, 0.5);
 					shape = smoothMax(shape, -depthFactor, 0.5);
+					localSurfaceY = mutable.getY();
 					int y = localSurfaceY + (int) (shape * radius);
 					
-					if(y <= localSurfaceY)
+					if(y < localSurfaceY)
 					{
 						for(int i = y; i < localSurfaceY + 6; i++)
 						{
@@ -146,7 +151,9 @@ public class CraterGenerator
 						}
 						
 						mutable.setY(y - 1);
-						world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+						
+						if(world.getBlockState(mutable).getMaterial().blocksMovement())
+							world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
 					}
 					else
 					{

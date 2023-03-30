@@ -123,10 +123,13 @@ public abstract class WorldRendererMixin
 				float milkyWayFactor = 0.4f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				matrices.push();
+				matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(60.0f));
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
 				StarflightModClient.milkyWay.bind();
 				StarflightModClient.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
+				matrices.pop();
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
 				StarflightModClient.stars.bind();

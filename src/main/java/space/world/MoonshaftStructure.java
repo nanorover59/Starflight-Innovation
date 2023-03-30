@@ -49,7 +49,7 @@ public class MoonshaftStructure extends Structure
 		MoonshaftRoom moonshaftRoom = new MoonshaftGenerator.MoonshaftRoom(0, chunkRandom, chunkPos.getOffsetX(2), chunkPos.getOffsetZ(2));
 		collector.addPiece(moonshaftRoom);
 		moonshaftRoom.fillOpenings(moonshaftRoom, collector, chunkRandom);
-		int topY = 50;
+		int topY = 40;
 		int baseY = chunkGenerator.getMinimumY();
 		BlockBox blockBox = collector.getBoundingBox();
         int i = topY - baseY + 1 - blockBox.getBlockCountY();

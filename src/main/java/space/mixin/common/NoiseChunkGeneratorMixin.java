@@ -71,8 +71,8 @@ public abstract class NoiseChunkGeneratorMixin
 	                int o = chunk.sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, k, l);
 	                int p = chunk.getBottomY();
 	                mutable.setX(m).setZ(n);
-	                surfaceBuilder.buildBedrock(region, blockColumn, p);
 	                surfaceBuilder.buildSurface(region, blockColumn, p, o, m, n);
+	                surfaceBuilder.buildBedrock(region, blockColumn, p);
 	            }
 	        }
 	        

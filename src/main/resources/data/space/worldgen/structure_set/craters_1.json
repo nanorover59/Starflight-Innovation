@@ -1,0 +1,12 @@
+{
+  "structures" : [ {
+    "structure" : "space:crater_1",
+    "weight" : 1
+  } ],
+  "placement" : {
+    "salt" : 14397528,
+    "spacing" : 16,
+    "separation" : 6,
+    "type" : "minecraft:random_spread"
+  }
+}

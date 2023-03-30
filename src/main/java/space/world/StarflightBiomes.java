@@ -58,12 +58,12 @@ public class StarflightBiomes
 		createMoonBiome(MOON_ROCKS);
 		
 		// Mars Biomes
-		createMarsBiome(MARS_LOWLANDS, true);
-		createMarsBiome(MARS_MIDLANDS, true);
-		createMarsBiome(MARS_HIGHLANDS, false);
-		createMarsBiome(MARS_ICE, false);
-		createMarsBiome(MARS_DRIPSTONE, false);
-		createMarsBiome(MARS_LUSH_CAVES, false);
+		createMarsBiome(MARS_LOWLANDS);
+		createMarsBiome(MARS_MIDLANDS);
+		createMarsBiome(MARS_HIGHLANDS);
+		createMarsBiome(MARS_ICE);
+		createMarsBiome(MARS_DRIPSTONE);
+		createMarsBiome(MARS_LUSH_CAVES);
 		
 		// Surface Builders
 		surfaceBuilders.add(new MoonSurfaceBuilder());
@@ -176,9 +176,6 @@ public class StarflightBiomes
 		spawnSettings.spawn(SpawnGroup.MONSTER, new SpawnSettings.SpawnEntry(StarflightEntities.CERULEAN, 1, 0, 1));
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addMoonOres(generationSettings);
-		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SMALL_CRATER_PLACED_FEATURE);
-		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
-		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.ROCK_PATCH_PLACED_FEATURE);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, StarflightWorldGeneration.UNDERGROUND_LAVA_SPRING_PLACED_FEATURE);
 		
 		if(biomeKey.getValue().getPath().contains("ice"))
@@ -188,7 +185,7 @@ public class StarflightBiomes
 		Registry.register(BuiltinRegistries.BIOME, biomeKey, biome);
 	}
 	
-	private static void createMarsBiome(RegistryKey<Biome> biomeKey, boolean surfaceRocks)
+	private static void createMarsBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
 		float temperature = 0.5f;
@@ -205,13 +202,6 @@ public class StarflightBiomes
 		generationSettings.carver(GenerationStep.Carver.AIR, ConfiguredCarvers.CANYON);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, UndergroundPlacedFeatures.UNDERWATER_MAGMA);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_DECORATION, StarflightWorldGeneration.UNDERGROUND_LAVA_SPRING_PLACED_FEATURE);
-		generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SMALL_CRATER_PLACED_FEATURE);
-		
-		if(surfaceRocks)
-		{
-			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.SURFACE_ROCK_PLACED_FEATURE);
-			generationSettings.feature(GenerationStep.Feature.TOP_LAYER_MODIFICATION, StarflightWorldGeneration.ROCK_PATCH_PLACED_FEATURE);
-		}
 		
 		if(biomeKey.getValue().getPath().contains("dripstone"))
 			DefaultBiomeFeatures.addDripstone(generationSettings);
