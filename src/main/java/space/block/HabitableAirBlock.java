@@ -135,7 +135,7 @@ public class HabitableAirBlock extends AirBlock
 		}
     }
 	
-	private static void setUnstable(World world, BlockPos pos, BlockState state)
+	public static void setUnstable(World world, BlockPos pos, BlockState state)
 	{
 		if(!state.get(UNSTABLE))
 		{

@@ -1,7 +1,9 @@
 {
   "values": [
     "minecraft:iron_golem",
+    "minecraft:snow_golem",
     "space:dust",
-    "space:cerulean"
+    "space:cerulean",
+    "space:ancient_humanoid"
   ]
 }

@@ -27,10 +27,11 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Power
 		{
 			BlockState state = world.getBlockState(pos);
 			Direction direction = state.get(AtmosphereGeneratorBlock.FACING);
-			BlockState frontState = world.getBlockState(pos.offset(direction));
+			BlockPos frontPos = pos.offset(direction);
+			BlockState frontState = world.getBlockState(frontPos);
 			
 			if(frontState == StarflightBlocks.HABITABLE_AIR.getDefaultState())
-				world.setBlockState(pos.offset(direction), frontState.with(HabitableAirBlock.UNSTABLE, true), 0);
+				HabitableAirBlock.setUnstable(world, frontPos, frontState);
 		}
 	}
 	

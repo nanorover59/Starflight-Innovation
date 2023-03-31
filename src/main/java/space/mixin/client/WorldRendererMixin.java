@@ -112,6 +112,7 @@ public abstract class WorldRendererMixin
 			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.getPrecession()));
 			matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) viewpointPlanet.getObliquity()));
 			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) phiViewpoint));
+			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(60.0f));
 			
 			float rainGradient = starrySky ? 0.0f : this.world.getRainGradient(tickDelta);
 			float s = cloudySky ? 0.0f : (1.0f - rainGradient);
@@ -123,13 +124,10 @@ public abstract class WorldRendererMixin
 				float milkyWayFactor = 0.4f;
 				RenderSystem.enableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
-				matrices.push();
-				matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(60.0f));
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
 				StarflightModClient.milkyWay.bind();
 				StarflightModClient.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
-				matrices.pop();
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
 				StarflightModClient.stars.bind();

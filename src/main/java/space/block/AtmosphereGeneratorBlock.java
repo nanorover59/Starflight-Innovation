@@ -135,6 +135,8 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 				StarflightEffects.sendOutgas(world, pos, frontPos, true);
 			}
 		}
+		else if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)
+			world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
 		else if(frontState.getBlock() == Blocks.AIR)
 			world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, false), Block.NOTIFY_ALL);
     }

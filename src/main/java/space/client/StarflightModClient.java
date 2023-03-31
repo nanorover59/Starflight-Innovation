@@ -15,7 +15,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
@@ -56,9 +55,11 @@ import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticles;
 import space.client.particle.ThrusterParticle;
+import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.client.render.entity.model.AncientHumanoidEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.entity.MovingCraftEntity;
@@ -79,7 +80,7 @@ import space.vessel.MovingCraftRenderList;
 @Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
 {
-	private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
+	/*private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
 	private static KeyBinding throttleDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.category.space"));
 	private static KeyBinding throttleMax = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_max", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.category.space"));
 	private static KeyBinding throttleMin = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_min", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.category.space"));
@@ -90,7 +91,7 @@ public class StarflightModClient implements ClientModInitializer
 	private static KeyBinding pitchUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_U, "key.category.space"));
 	private static KeyBinding pitchDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.category.space"));
 	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "key.category.space"));
-	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
+	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));*/
 	
 	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
 	public static final ScreenHandlerType<StirlingEngineScreenHandler> STIRLING_ENGINE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "stirling_engine"), StirlingEngineScreenHandler::new);
@@ -101,6 +102,9 @@ public class StarflightModClient implements ClientModInitializer
 	
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
 	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
 	
 	public static VertexBuffer stars;
 	public static VertexBuffer milkyWay;
@@ -157,9 +161,13 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
 		
 		// Client Tick Event
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {

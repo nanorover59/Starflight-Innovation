@@ -52,6 +52,7 @@ public class StarflightItems
     // Spawn Egg Items
     public static final Item CERULEAN_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CERULEAN, 0x1485AD, 0x000000, new Item.Settings().group(StarflightMod.ITEM_GROUP));
 	public static final Item DUST_SPAWN_EGG = new SpawnEggItem(StarflightEntities.DUST, 0xBE673F, 0x82342B, new Item.Settings().group(StarflightMod.ITEM_GROUP));
+	public static final Item ANCIENT_HUMANOID_SPAWN_EGG = new SpawnEggItem(StarflightEntities.ANCIENT_HUMANOID, 0xF8F9F9, 0x154360, new Item.Settings().group(StarflightMod.ITEM_GROUP));
 	
 	// Item Tags
 	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(Registry.ITEM_KEY, new Identifier(StarflightMod.MOD_ID, "no_oxygen_fuel"));
@@ -97,5 +98,6 @@ public class StarflightItems
 		// Spawn Egg Items
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "cerulean_spawn_egg"), CERULEAN_SPAWN_EGG);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "dust_spawn_egg"), DUST_SPAWN_EGG);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "ancient_humanoid_spawn_egg"), ANCIENT_HUMANOID_SPAWN_EGG);
 	}
 }

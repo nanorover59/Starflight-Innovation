@@ -93,7 +93,7 @@ public class AirUtil
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {
 			BlockState blockState = w.getBlockState(p);
-			return !AirUtil.airBlocking(w, p) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR;
+			return blockState.getBlock() != Blocks.AIR && (!AirUtil.airBlocking(w, p) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR);
 		};
 		
 		BlockSearch.search(world, position, checkList, include, limit, true);
@@ -105,9 +105,9 @@ public class AirUtil
 			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 			{
 				FluidState fluidState = world.getFluidState(pos);
-				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+				world.setBlockState(pos, fluidState.getBlockState());
 				
-				for(Direction direction : Direction.values())
+				/*for(Direction direction : Direction.values())
 				{
 					BlockPos offset = pos.offset(direction);
 					BlockState state = world.getBlockState(offset);
@@ -119,7 +119,7 @@ public class AirUtil
 					}
 					else
 						state.neighborUpdate(world, offset, StarflightBlocks.HABITABLE_AIR, pos, true);
-				}
+				}*/
 			}
 		}
 	}
