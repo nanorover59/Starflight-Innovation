@@ -2,7 +2,7 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "space:thruster_small"
+      "space:thruster_vacuum"
     ]
   },
   "criteria": {
@@ -21,7 +21,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "space:thruster_small"
+        "recipe": "space:thruster_vacuum"
       }
     }
   },

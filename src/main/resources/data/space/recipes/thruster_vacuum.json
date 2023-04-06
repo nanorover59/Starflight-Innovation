@@ -1,7 +1,8 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " a ",
+        "bab",
+        "b b",
         "b b"
     ],
     "key": {
@@ -13,7 +14,7 @@
         }
     },
     "result": {
-        "item": "space:thruster_small",
+        "item": "space:thruster_vacuum",
         "count": 1
     }
 }

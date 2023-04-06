@@ -43,40 +43,33 @@ public class RockPatchFeature extends Feature<DefaultFeatureConfig>
 			return true;
 		
 		BlockPos corner = context.getWorld().getChunk(blockPos).getPos().getStartPos();
-		int count = random.nextBetween(4, 12);
+		int count = random.nextBetween(6, 12);
 		
 		for(int i = 0; i < count; i++)
 		{
-			BlockPos offset = corner.add(random.nextInt(16), blockPos.getY(), random.nextInt(16));
-			boolean replacingBlock = false;
+			BlockPos offset = corner.add(random.nextInt(16), blockPos.getY() + 8, random.nextInt(16));
 			
 			while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
 				blockPos = blockPos.down();
 			
-			if(random.nextBoolean())
-			{
-				blockPos = blockPos.down();
-				replacingBlock = true;
-			}
-			
 			if(structureWorldAccess.getBlockState(offset.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP))
-				structureWorldAccess.setBlockState(blockPos, getFinalBlockState(random, blockState, replacingBlock), Block.NOTIFY_NEIGHBORS);
+				structureWorldAccess.setBlockState(blockPos, getFinalBlockState(random, blockState), Block.NOTIFY_NEIGHBORS);
 		}
 		
 		return true;
 	}
 	
 	// Randomize the end result of block selection.
-	private BlockState getFinalBlockState(Random random, BlockState blockState, boolean replacingBlock)
+	private BlockState getFinalBlockState(Random random, BlockState blockState)
 	{
 		if(blockState.getBlock() == Blocks.STONE)
 		{
-			if(random.nextInt(4) == 0 && !replacingBlock)
+			if(random.nextInt(4) == 0)
 				return Blocks.STONE_SLAB.getDefaultState();
 			else if(random.nextInt(4) == 0)
 				return Blocks.COBBLESTONE.getDefaultState();
 		}
-		else if(blockState.getBlock() == Blocks.COBBLESTONE && !replacingBlock)
+		else if(blockState.getBlock() == Blocks.COBBLESTONE)
 		{
 			if(random.nextInt(4) == 0)
 				return Blocks.COBBLESTONE_SLAB.getDefaultState();

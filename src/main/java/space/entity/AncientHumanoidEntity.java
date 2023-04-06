@@ -13,10 +13,10 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import space.item.StarflightItems;
 
 public class AncientHumanoidEntity extends ZombieEntity
 {
@@ -29,6 +29,12 @@ public class AncientHumanoidEntity extends ZombieEntity
 	{
 		return AncientHumanoidEntity.canSpawnInDark(type, world, spawnReason, pos, random) && (spawnReason == SpawnReason.SPAWNER || world.isSkyVisible(pos));
 	}
+	
+	@Override
+	public boolean cannotDespawn()
+	{
+        return true;
+    }
 
 	@Override
 	protected boolean burnsInDaylight()
@@ -77,20 +83,13 @@ public class AncientHumanoidEntity extends ZombieEntity
 	@Override
 	protected void initEquipment(Random random, LocalDifficulty localDifficulty)
 	{
-		super.initEquipment(random, localDifficulty);
-		float f = random.nextFloat();
-		float f2 = this.world.getDifficulty() == Difficulty.HARD ? 0.05f : 0.01f;
-		if(f < f2)
-		{
-			int i = random.nextInt(3);
-			if(i == 0)
-			{
-				this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SWORD));
-			} else
-			{
-				this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.IRON_SHOVEL));
-			}
-		}
+		this.equipStack(EquipmentSlot.HEAD, new ItemStack(StarflightItems.SPACE_SUIT_HELMET));
+		this.equipStack(EquipmentSlot.CHEST, new ItemStack(StarflightItems.SPACE_SUIT_CHESTPLATE));
+		this.equipStack(EquipmentSlot.LEGS, new ItemStack(StarflightItems.SPACE_SUIT_LEGGINGS));
+		this.equipStack(EquipmentSlot.FEET, new ItemStack(StarflightItems.SPACE_SUIT_BOOTS));
+		
+		if(random.nextInt(4) == 0)
+			this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_PICKAXE));
 	}
 
 	@Override

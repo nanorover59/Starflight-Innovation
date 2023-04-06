@@ -24,11 +24,11 @@ public class AncientHumanoidEntityRenderer extends BipedEntityRenderer<AncientHu
 		this.addFeature(new AncientHumanoidEyesFeatureRenderer<AncientHumanoidEntity>(this));
 		this.addFeature(new ArmorFeatureRenderer<>(this, new AncientHumanoidEntityModel<AncientHumanoidEntity>(context.getPart(StarflightModClient.MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER)), new AncientHumanoidEntityModel<AncientHumanoidEntity>(context.getPart(StarflightModClient.MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER))));
 	}
-
+	
 	@Override
 	protected void scale(AncientHumanoidEntity entity, MatrixStack matrixStack, float f)
 	{
-		float g = 1.0625f;
+		float g = 1.0f;
 		matrixStack.scale(g, g, g);
 		super.scale(entity, matrixStack, f);
 	}

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        " d "
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:obsidian"
+        },
+        "b": {
+            "item": "minecraft:iron_ingot"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        },
+        "d": {
+            "item": "minecraft:flint_and_steel"
+        }
+    },
+    "result": {
+        "item": "space:rocket_core_1",
+        "count": 1
+    }
+}

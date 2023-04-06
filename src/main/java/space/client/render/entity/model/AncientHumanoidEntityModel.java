@@ -30,6 +30,8 @@ public class AncientHumanoidEntityModel<T extends AncientHumanoidEntity> extends
 	public void setAngles(T entity, float f, float g, float h, float i, float j)
 	{
 		super.setAngles(entity, f, g, h, i, j);
-		CrossbowPosing.meleeAttack(this.leftArm, this.rightArm, ((AncientHumanoidEntity) entity).isAttacking(), this.handSwingProgress, h);
+		
+		if(entity.isAttacking())
+			CrossbowPosing.meleeAttack(this.leftArm, this.rightArm, ((AncientHumanoidEntity) entity).isAttacking(), this.handSwingProgress, h);
 	}
 }

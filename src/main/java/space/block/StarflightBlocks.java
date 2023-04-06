@@ -110,7 +110,8 @@ public class StarflightBlocks
     public static final Block ARES_MOSS_BLOCK = new MossBlock(AbstractBlock.Settings.of(Material.MOSS_BLOCK, MapColor.PURPLE).strength(0.1f).sounds(BlockSoundGroup.MOSS_BLOCK));
     public static final Block LYCOPHYTE_TOP = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), true);
     public static final Block LYCOPHYTE_STEM = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), false);
-	public static final Block SEARING_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
+    public static final Block PITCH_BLACK = new Block(FabricBlockSettings.of(Material.METAL).strength(256.0f, 256.0f));
+    public static final Block SEARING_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
 	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(2.0f, 5.0f));
 	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
 	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
@@ -228,6 +229,7 @@ public class StarflightBlocks
 		initializeBlock(ARES_MOSS_BLOCK, "ares_moss_block");
 		initializeBlock(LYCOPHYTE_TOP, "lycophyte_top");
 		initializeBlock(LYCOPHYTE_STEM, "lycophyte_stem", null, false, List.of(), List.of());
+		initializeBlock(PITCH_BLACK, "pitch_black", null, false, List.of(), List.of());
 		initializeBlock(SEARING_REGOLITH, "searing_regolith");
 		initializeBlock(FRIGID_STONE, "frigid_stone");
 		initializeBlock(TREE_TAP, "tree_tap");

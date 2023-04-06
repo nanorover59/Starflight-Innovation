@@ -43,6 +43,8 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.block.StorageCubeBlock;
+import space.entity.AncientHumanoidEntity;
+import space.entity.StarflightEntities;
 
 public class MoonshaftGenerator
 {
@@ -389,6 +391,18 @@ public class MoonshaftGenerator
 			
 			return false;
 		}
+		
+		private void addMob(StructureWorldAccess world, int x, int y, int z)
+		{
+			BlockPos.Mutable blockPos = this.offsetPos(x, y, z);
+			
+			if(world.getBlockState(blockPos).isAir() && !world.getBlockState(((BlockPos) blockPos).down()).isAir())
+			{
+				AncientHumanoidEntity entity = new AncientHumanoidEntity(StarflightEntities.ANCIENT_HUMANOID, world.toServerWorld());
+				entity.setPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+				world.spawnEntity(entity);
+			}
+		}
 
 		@Override
 		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot)
@@ -418,6 +432,9 @@ public class MoonshaftGenerator
 				
 				if(random.nextInt(100) == 0)
 					this.addChest(world, chunkBox, random, 0, 0, j + 1, LOOT_TABLE);
+				
+				if(random.nextInt(80) == 0)
+					this.addMob(world, 0, 0, j);
 				
 				int q = j - 1 + random.nextInt(3);
 				BlockPos.Mutable blockPos = this.offsetPos(1, 0, q);

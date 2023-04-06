@@ -27,6 +27,8 @@ import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.ShaderEffect;
 import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.model.Dilation;
+import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.BufferBuilder;
@@ -35,6 +37,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
@@ -166,8 +169,8 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, StarflightModClient::getInnerArmorModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
 		
 		// Client Tick Event
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
@@ -227,6 +230,16 @@ public class StarflightModClient implements ClientModInitializer
 	{
 	      NbtCompound nbtCompound = stack.getSubNbt("display");
 	      return nbtCompound != null && nbtCompound.contains("color", 99) ? nbtCompound.getInt("color") : 0xFFFFFFF;
+	}
+	
+	private static TexturedModelData getInnerArmorModelData()
+	{
+		return TexturedModelData.of(BipedEntityModel.getModelData(new Dilation(0.5f), 0.0f), 64, 32);
+	}
+	
+	private static TexturedModelData getOuterArmorModelData()
+	{
+		return TexturedModelData.of(BipedEntityModel.getModelData(new Dilation(1.0f), 0.0f), 64, 32);
 	}
 	
 	public static void hiddenItemTooltip(List<Text> tooltip, Text ... texts)
@@ -360,7 +373,7 @@ public class StarflightModClient implements ClientModInitializer
 			double d = random.nextFloat() * 2.0f - 1.0f;
 			double e = random.nextFloat() * 2.0f - 1.0f;
 			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.5f - (frame * 0.025f) + random.nextFloat() * 0.1f; // Star size.
+			double g = 0.75f - (frame * 0.025f) + random.nextFloat() * 0.1f; // Star size.
 			double h = d * d + e * e + f * f;
 
 			if(h < 0.01 || h > 1.0)

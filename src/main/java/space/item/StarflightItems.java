@@ -29,6 +29,8 @@ public class StarflightItems
 	public static final Item SUBSTRATE = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item CONTROL_UNIT = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item SOLAR_CELL = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
+	public static final Item ROCKET_CORE_1 = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
+	public static final Item ROCKET_CORE_2 = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item MULTIMETER = new MultimeterItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item WRENCH = new WrenchItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item NAVIGATION_CARD = new NavigationCardItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
@@ -76,6 +78,8 @@ public class StarflightItems
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "substrate"), SUBSTRATE);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "control_unit"), CONTROL_UNIT);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "solar_cell"), SOLAR_CELL);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "rocket_core_1"), ROCKET_CORE_1);
+		Registry.register(Registry.ITEM, new Identifier(mod_id, "rocket_core_2"), ROCKET_CORE_2);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "multimeter"), MULTIMETER);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "wrench"), WRENCH);
 		Registry.register(Registry.ITEM, new Identifier(mod_id, "navigation_card"), NAVIGATION_CARD);
