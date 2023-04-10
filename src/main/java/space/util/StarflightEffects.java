@@ -26,6 +26,7 @@ public class StarflightEffects
 	public static SoundEvent STORAGE_CUBE_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "storage_cube"));
 	public static SoundEvent THRUSTER_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "thruster"));
 	public static SoundEvent MARS_WIND_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "mars_wind"));
+	public static SoundEvent NOISE_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "noise"));
 	
 	public static void initializeSounds()
 	{
@@ -33,6 +34,7 @@ public class StarflightEffects
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "storage_cube"), STORAGE_CUBE_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "thruster"), THRUSTER_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "mars_wind"), MARS_WIND_SOUND_EVENT);
+		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "noise"), NOISE_SOUND_EVENT);
 	}
 	
 	public static void sendFizz(WorldAccess world, BlockPos pos)

@@ -68,13 +68,6 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	}
 	
 	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		if(!world.isClient())
-			addNode(world, pos);
-	}
-	
-	@Override
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.MODEL;

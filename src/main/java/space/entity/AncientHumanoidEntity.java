@@ -17,6 +17,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import space.item.StarflightItems;
+import space.util.StarflightEffects;
 
 public class AncientHumanoidEntity extends ZombieEntity
 {
@@ -45,19 +46,19 @@ public class AncientHumanoidEntity extends ZombieEntity
 	@Override
 	protected SoundEvent getAmbientSound()
 	{
-		return null;
+		return StarflightEffects.NOISE_SOUND_EVENT;
 	}
 
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source)
 	{
-		return SoundEvents.ENTITY_HUSK_HURT;
+		return SoundEvents.ENTITY_ARMOR_STAND_HIT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound()
 	{
-		return SoundEvents.ENTITY_HUSK_DEATH;
+		return SoundEvents.ENTITY_ARMOR_STAND_HIT;
 	}
 
 	@Override
@@ -78,6 +79,11 @@ public class AncientHumanoidEntity extends ZombieEntity
 		}*/
 		
 		return bl;
+	}
+	
+	public void initEquipment()
+	{
+		initEquipment(this.getRandom(), this.getWorld().getLocalDifficulty(this.getBlockPos()));
 	}
 	
 	@Override

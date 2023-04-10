@@ -399,6 +399,7 @@ public class MoonshaftGenerator
 			if(world.getBlockState(blockPos).isAir() && !world.getBlockState(((BlockPos) blockPos).down()).isAir())
 			{
 				AncientHumanoidEntity entity = new AncientHumanoidEntity(StarflightEntities.ANCIENT_HUMANOID, world.toServerWorld());
+				entity.initEquipment();
 				entity.setPosition(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 				world.spawnEntity(entity);
 			}
@@ -473,10 +474,10 @@ public class MoonshaftGenerator
 
 		private void fillSupportBeam(StructureWorldAccess world, BlockBox box, int x, int y, int z)
 		{
-			if(this.getBlockAt(world, x, y, z, box).isOf(SOLID_BLOCK))
+			if(this.getBlockAt(world, x, y, z, box).getMaterial().blocksMovement())
 				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x, y, z, box);
 			
-			if(this.getBlockAt(world, x + 2, y, z, box).isOf(SOLID_BLOCK))
+			if(this.getBlockAt(world, x + 2, y, z, box).getMaterial().blocksMovement())
 				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x + 2, y, z, box);
 		}
 
@@ -670,21 +671,13 @@ public class MoonshaftGenerator
 				}
 			}
 			
-			if(this.twoFloors)
+			if(this.twoFloors && !this.lootRoom)
 			{
 				int height = boundingBox.getBlockCountY();
-				
-				if(random.nextInt(4) > 2)
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
-				
-				if(random.nextInt(4) > 2)
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
-				
-				if(random.nextInt(4) > 2)
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
-				
-				if(random.nextInt(4) > 2)
-					MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
+				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() - 1, Direction.NORTH, i, false);
+				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.WEST, i, false);
+				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMinZ() + 1, Direction.EAST, i, false);
+				MoonshaftGenerator.pieceGenerator(start, holder, random, this.boundingBox.getMinX() + 1, this.boundingBox.getMinY() + height - 3, this.boundingBox.getMaxZ() + 1, Direction.SOUTH, i, false);
 			}
 		}
 
@@ -704,29 +697,39 @@ public class MoonshaftGenerator
 				for(int i = this.boundingBox.getMinX() - 3; i <= this.boundingBox.getMaxX() + 3; i += 2)
 				{
 					BlockPos blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 3);
-					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
-					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
-				}
-				
-				for(int i = this.boundingBox.getMinX() - 3; i <= this.boundingBox.getMaxX() + 3; i += 2)
-				{
-					BlockPos blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMinZ() + 3);
-					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
-					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					
+					if(random.nextBoolean() && !world.getBlockState(blockPos).getMaterial().blocksMovement() && world.getBlockState(blockPos.add(0, 0, -1)).getMaterial().blocksMovement())
+					{
+						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					}
+					
+					blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 3);
+					
+					if(random.nextBoolean() && !world.getBlockState(blockPos).getMaterial().blocksMovement() && world.getBlockState(blockPos.add(0, 0, 1)).getMaterial().blocksMovement())
+					{
+						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					}
 				}
 				
 				for(int i = this.boundingBox.getMinZ() - 3; i <= this.boundingBox.getMaxZ() + 3; i += 2)
 				{
 					BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() - 3, this.boundingBox.getMinY(), i);
-					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
-					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
-				}
-				
-				for(int i = this.boundingBox.getMinZ() - 3; i <= this.boundingBox.getMaxZ() + 3; i += 2)
-				{
-					BlockPos blockPos = new BlockPos(this.boundingBox.getMinX() + 3, this.boundingBox.getMinY(), i);
-					world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
-					LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					
+					if(random.nextBoolean() && !world.getBlockState(blockPos).getMaterial().blocksMovement() && world.getBlockState(blockPos.add(-1, 0, 0)).getMaterial().blocksMovement())
+					{
+						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					}
+					
+					blockPos = new BlockPos(this.boundingBox.getMaxX() + 3, this.boundingBox.getMinY(), i);
+					
+					if(random.nextBoolean() && !world.getBlockState(blockPos).getMaterial().blocksMovement() && world.getBlockState(blockPos.add(1, 0, 0)).getMaterial().blocksMovement())
+					{
+						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
+						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
+					}
 				}
 				
 				return;

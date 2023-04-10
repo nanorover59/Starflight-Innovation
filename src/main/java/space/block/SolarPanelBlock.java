@@ -102,17 +102,6 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 	}
 	
 	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		if(!world.isClient())
-		{
-			addNode(world, pos);
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
-		}
-	}
-	
-	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 		if(!world.isClient())

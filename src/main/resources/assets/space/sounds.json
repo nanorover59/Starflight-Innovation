@@ -27,5 +27,14 @@
       "space:wind0",
       "space:wind1"
     ]
+  },
+  "noise": {
+    "subtitle": "subtitles.space.noise",
+    "sounds": [
+      "space:noise0",
+      "space:noise1",
+      "space:noise2",
+      "space:noise3"
+    ]
   }
 }

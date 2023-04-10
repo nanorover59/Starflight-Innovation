@@ -58,6 +58,7 @@ public class PlanetRenderList
 	{
 		if(planetListUnsorted.size() != dataBuffer.size())
 		{
+			viewpoint = null;
 			planetList.clear();
 			planetListUnsorted.clear();
 			
@@ -99,6 +100,8 @@ public class PlanetRenderList
 		}
 		else
 		{
+			viewpoint = null;
+			
 			for(int i = 0; i < dataBuffer.size(); i++)
 			{
 				DynamicData data = dataBuffer.get(i);

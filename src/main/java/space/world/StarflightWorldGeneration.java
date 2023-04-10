@@ -90,6 +90,11 @@ public class StarflightWorldGeneration
 	public static final RegistryEntry<Structure> CRATER_1 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_1")), new CraterStructure(createConfig(MEDIUM_CRATERING, StructureTerrainAdaptation.NONE)));
 	public static final RegistryEntry<Structure> CRATER_2 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_2")), new CraterStructure(createConfig(HEAVY_CRATERING, StructureTerrainAdaptation.NONE)));
 	
+	// Surface Outpost Structure
+	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "outpost_piece"), OutpostGenerator.Piece::new);
+	public static final StructureType<OutpostStructure> OUTPOST_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "outpost"), () -> OutpostStructure.CODEC);
+	public static final RegistryEntry<Structure> OUTPOST = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "outpost")), new OutpostStructure(createConfig(OUTPOST_STRUCTURES, StructureTerrainAdaptation.BURY)));
+	
 	// Moonshaft Structure 
 	public static final StructurePieceType MOONSHAFT_CORRIDOR = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_corridor"), MoonshaftGenerator.MoonshaftCorridor::new);
     public static final StructurePieceType MOONSHAFT_CROSSING = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_crossing"), MoonshaftGenerator.MoonshaftCrossing::new);

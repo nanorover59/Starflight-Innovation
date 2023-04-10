@@ -67,7 +67,7 @@
         },
         {
           "type": "minecraft:empty",
-          "weight": 5
+          "weight": 10
         }
       ],
       "rolls": {
@@ -361,6 +361,10 @@
               "add": false
             }
           ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 20
         }
       ]
     }

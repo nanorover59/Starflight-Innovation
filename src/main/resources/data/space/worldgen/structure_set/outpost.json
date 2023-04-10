@@ -1,0 +1,12 @@
+{
+  "structures" : [ {
+    "structure" : "space:outpost",
+    "weight" : 1
+  } ],
+  "placement" : {
+    "salt" : 87396248,
+    "spacing" : 16,
+    "separation" : 12,
+    "type" : "minecraft:random_spread"
+  }
+}

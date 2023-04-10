@@ -212,7 +212,19 @@ public class EnergyNet
 				
 				if(state.getBlock() instanceof EnergyBlock)
 				{
-					if(!energyNode.hasSufficientPower() && !energyNode.getBreakers().isEmpty())
+					// Trip breaker switch blocks.
+					boolean overloaded = false;
+					
+					for(EnergyNode producer : energyNode.getInputs())
+					{
+						if(producer.isPowerSourceOverloaded())
+						{
+							overloaded = true;
+							break;
+						}
+					}
+					
+					if(overloaded && !energyNode.getBreakers().isEmpty())
 					{
 						for(BlockPos breakerPos : energyNode.getBreakers())
 						{
@@ -493,20 +505,28 @@ public class EnergyNet
 				updateEnergyNodes(world, adjacentPosition, checkList);
 			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock && adjacentState.get(BreakerSwitchBlock.LIT) && (direction == adjacentState.get(BreakerSwitchBlock.FACING) || direction == adjacentState.get(BreakerSwitchBlock.FACING).getOpposite()))
 				updateEnergyNodes(world, adjacentPosition, checkList);
-			else if(adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN && direction != Direction.UP)
+			else if(adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN)
 			{
 				if(producer != null)
 					EnergyNet.connectProducer(world, producer);
+				else
+					((EnergyBlock) adjacentState.getBlock()).addNode(world, adjacentPosition);
 				
 				updateEnergyNodes(world, adjacentPosition, checkList);
 			}
-			else
+			else if(adjacentState.getBlock() instanceof EnergyBlock)
 			{
+				EnergyBlock energyBlock = (EnergyBlock) adjacentState.getBlock();
+				
 				if(producer != null)
 					EnergyNet.connectProducer(world, producer);
+				else if(energyBlock.isSideOutput(world, adjacentPosition, adjacentState, direction.getOpposite()))
+					energyBlock.addNode(world, adjacentPosition);
 				
 				if(consumer != null)
 					EnergyNet.connectConsumer(world, consumer);
+				else if(energyBlock.isSideInput(world, adjacentPosition, adjacentState, direction.getOpposite()))
+					energyBlock.addNode(world, adjacentPosition);
 			}
 		}
 	}
@@ -526,7 +546,7 @@ public class EnergyNet
 			if(adjacentState == null)
 				continue;
 			
-			if(adjacentState.getBlock() instanceof EnergyCableBlock || (adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN && direction != Direction.UP))
+			if(adjacentState.getBlock() instanceof EnergyCableBlock || (adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN))
 				findBreakerSwitches(world, adjacentPosition, checkList, breakerList);
 			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock)
 				breakerList.add(adjacentPosition);

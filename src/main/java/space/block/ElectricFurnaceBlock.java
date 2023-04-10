@@ -118,13 +118,6 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 		if(!world.isClient())
 			addNode(world, pos);
 	}
-	
-	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		if(!world.isClient())
-			addNode(world, pos);
-	}
 
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)

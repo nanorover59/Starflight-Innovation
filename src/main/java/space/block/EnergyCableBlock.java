@@ -110,23 +110,6 @@ public class EnergyCableBlock extends Block implements Waterloggable
 	}
 	
 	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		Direction[] directions = new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN};
-		
-		for(Direction d : directions)
-			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
-		
-		world.setBlockState(pos, state);
-		
-		if(!world.isClient())
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
-		}
-	}
-	
-	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 		if(!world.isClient())

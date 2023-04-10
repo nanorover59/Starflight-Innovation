@@ -64,13 +64,6 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 			addNode(world, pos);
 	}
 	
-	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		if(!world.isClient())
-			addNode(world, pos);
-	}
-	
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing());

@@ -76,13 +76,6 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	}
 	
 	@Override
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify)
-	{
-		if(!world.isClient())
-			addNode(world, pos);
-	}
-	
-	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
 	{
 		updateWaterState((World) world, pos, (Direction) state.get(FACING));
