@@ -1,16 +1,13 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "ba ",
+        " a ",
         "a a",
         " a "
     ],
     "key": {
         "a": {
             "item": "space:aluminum_ingot"
-        },
-        "b": {
-            "item": "minecraft:stone_button"
         }
     },
     "result": {

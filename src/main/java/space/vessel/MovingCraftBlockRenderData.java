@@ -37,12 +37,14 @@ public class MovingCraftBlockRenderData
 	private static final Direction[] DIRECTIONS = Direction.values();
 	private BlockState blockState;
 	private BlockPos position;
+	private boolean redstone;
 	private boolean[] sidesShowing = new boolean[6];
 	
-	public MovingCraftBlockRenderData(BlockState blockState, BlockPos position, boolean[] sidesShowing)
+	public MovingCraftBlockRenderData(BlockState blockState, BlockPos position, boolean redstone, boolean[] sidesShowing)
 	{
 		this.blockState = blockState;
 		this.position = position;
+		this.redstone = redstone;
 		
 		for(int i = 0; i < 6; i++)
 			this.sidesShowing[i] = sidesShowing[i];
@@ -56,6 +58,11 @@ public class MovingCraftBlockRenderData
 	public BlockPos getPosition()
 	{
 		return position;
+	}
+	
+	public boolean redstonePower()
+	{
+		return redstone;
 	}
 	
 	public boolean canRenderSide(Direction direction)

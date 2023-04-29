@@ -25,7 +25,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.energy.EnergyNet;
 
-public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
+public class SolarPanelBlock extends Block implements Waterloggable
 {
 	public static double NOMINAL_OUTPUT = 2.5;
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
@@ -95,9 +95,9 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 	{
 		if(!world.isClient())
 		{
-			addNode(world, pos);
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			EnergyNet.updateEnergyNodes(world, pos, checkList);
+			SolarHubBlock.updateSolarPanels(world, pos);
 		}
 	}
 	
@@ -108,6 +108,7 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 		{
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			EnergyNet.updateEnergyNodes(world, pos, checkList);
+			SolarHubBlock.updateSolarPanels(world, pos);
 		}
 	}
 	
@@ -118,53 +119,5 @@ public class SolarPanelBlock extends Block implements EnergyBlock, Waterloggable
 			world.createAndScheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 
 		return state;
-	}
-	
-	@Override
-	public double getPowerOutput(World world, BlockPos pos, BlockState state)
-	{
-		if(!world.getDimension().hasSkyLight() || !world.isSkyVisible(pos.up()))
-			return 0;
-		else
-		{
-			// Calculate the output of this solar panel at Earth's distance to to the sun taking the sky angle into account.
-			float f = world.getSkyAngle(1.0f);
-			float highLimit1 = 0.05f;
-			float highLimit2 = 1.0f - highLimit1;
-			float lowLimit1 = 0.25f;
-			float lowLimit2 = 1.0f - lowLimit1;
-			
-			if(f < highLimit1 || f > highLimit2)
-				return NOMINAL_OUTPUT;
-			else if(f < lowLimit1)
-				return NOMINAL_OUTPUT * Math.pow(1.0 - ((f - highLimit1) / (lowLimit1 - highLimit1)), 1.0 / 3.0);
-			else if(f > lowLimit2)
-				return NOMINAL_OUTPUT * Math.pow(1.0 - ((f - highLimit2) / (lowLimit2 - highLimit2)), 1.0 / 3.0);
-			return 0.0;
-		}
-	}
-
-	@Override
-	public double getPowerDraw(World world, BlockPos pos, BlockState state)
-	{
-		return 0;
-	}
-
-	@Override
-	public boolean isSideInput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return false;
-	}
-
-	@Override
-	public boolean isSideOutput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction == Direction.DOWN || world.getBlockState(pos.offset(direction)).getBlock() instanceof SolarPanelBlock || world.getBlockState(pos.offset(direction)).isFullCube(world, pos.offset(direction));
-	}
-
-	@Override
-	public void addNode(World world, BlockPos pos)
-	{
-		EnergyNet.addProducer(world, pos);
 	}
 }

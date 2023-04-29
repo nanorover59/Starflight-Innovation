@@ -69,7 +69,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 				if(!(blockPos2.getSquaredDistance(blockPos) <= (double) (f * f)))
 					continue;
 				
-				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NO_REDRAW);
+				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NOTIFY_LISTENERS);
 			}
 			
 			blockPos = blockPos.add(random.nextInt(rockSize) - random.nextInt(rockSize), -random.nextInt(rockSize) / 2, random.nextInt(rockSize) - random.nextInt(rockSize));

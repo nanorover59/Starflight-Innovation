@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aca",
+        "bdb",
+        "aca"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "space:copper_cable"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        },
+        "d": {
+            "item": "minecraft:blue_dye"
+        }
+    },
+    "result": {
+        "item": "space:solar_hub",
+        "count": 1
+    }
+}

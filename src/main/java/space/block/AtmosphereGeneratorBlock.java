@@ -116,9 +116,13 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 			
 			if(required == 0 || required > supply)
 			{
-				PlayerEntity player = world.getClosestPlayer(pos.getX(), pos.getY(), pos.getZ(), 32.0, false);
-				MutableText text = Text.translatable("block.space.atmosphere_generator.error");
-				player.sendMessage(text, true);
+				MutableText text = Text.translatable("block.space.atmosphere_generator.error_volume");
+				
+				for(PlayerEntity player : world.getPlayers())
+				{
+		            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
+		            	player.sendMessage(text, true);
+		        }
 			}
 			else
 			{

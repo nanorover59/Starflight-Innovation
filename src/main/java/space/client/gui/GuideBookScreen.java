@@ -46,10 +46,10 @@ public class GuideBookScreen extends Screen
 	public GuideBookScreen()
 	{
 		super(NarratorManager.EMPTY);
-		sectionList.add(new GuideBookSection("machines", 2).addImage("machines", 0).addImage("solar", 16));
+		sectionList.add(new GuideBookSection("machines", 2).addImage("machines", 0).addImage("solar", 16).addImage("breakers", 48));
 		sectionList.add(new GuideBookSection("electrolysis", 2).addImage("electrolysis", 0).addImage("fluid_tanks", 16));
 		sectionList.add(new GuideBookSection("r_construction", 2).addImage("rocket", 0).addImage("propulsion", 16));
-		sectionList.add(new GuideBookSection("r_flight", 2).addImage("keyboard", 32));
+		sectionList.add(new GuideBookSection("r_flight", 2).addImage("rocket_flight", 0).addImage("keyboard", 32));
 		sectionIndex = -1;
 		pageIndex = 0;
 	}

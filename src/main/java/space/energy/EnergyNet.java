@@ -16,7 +16,7 @@ import space.block.BatteryBlock;
 import space.block.BreakerSwitchBlock;
 import space.block.EnergyBlock;
 import space.block.EnergyCableBlock;
-import space.block.SolarPanelBlock;
+import space.block.SolarHubBlock;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.PoweredBlockEntity;
 import space.planet.PlanetDimensionData;
@@ -146,7 +146,7 @@ public class EnergyNet
 	public static void doEnergyFlow(MinecraftServer server)
 	{
 		for(EnergyNode energyNode : energyProducers)
-			energyNode.setPowerSourceLoad(0.0D);
+			energyNode.setPowerSourceLoad(0.0);
 		
 		for(ServerWorld world : server.getWorlds())
 		{
@@ -179,7 +179,7 @@ public class EnergyNet
 						else
 							energyNode.setPowerOutput(BatteryBlock.POWER_OUTPUT);
 					}
-					else if(state.getBlock() instanceof SolarPanelBlock)
+					else if(state.getBlock() instanceof SolarHubBlock)
 						energyNode.setPowerOutput(((EnergyBlock) state.getBlock()).getPowerOutput(world, energyNode.getPosition(), state) * solarMultiplier);
 					else
 						energyNode.setPowerOutput(((EnergyBlock) state.getBlock()).getPowerOutput(world, energyNode.getPosition(), state));
@@ -368,17 +368,6 @@ public class EnergyNet
 			else if(direction == breakerDirection.getOpposite())
 				checkDirectionProducer(world, adjacentPosition, breakerDirection.getOpposite(), checkList, found, producer);
 		}
-		else if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
-		{
-			// Connect through horizontally adjacent solar panel blocks.
-			for(Direction adjacentDirection : DIRECTIONS)
-			{
-				if(adjacentDirection == Direction.DOWN || adjacentDirection == Direction.UP)
-					continue;
-				else if(world.getBlockState(adjacentPosition.offset(adjacentDirection)).getBlock() instanceof SolarPanelBlock)
-					checkDirectionProducer(world, adjacentPosition, adjacentDirection, checkList, found, producer);
-			}	
-		}
 	}
 	
 	public static void connectConsumer(World world, EnergyNode energyNode)
@@ -468,17 +457,6 @@ public class EnergyNet
 			else if(direction == breakerDirection.getOpposite())
 				checkDirectionConsumer(world, adjacentPosition, breakerDirection.getOpposite(), checkList, found, consumer);
 		}
-		else if(adjacentBlockState.getBlock() instanceof SolarPanelBlock)
-		{
-			// Connect through horizontally adjacent solar panel blocks.
-			for(Direction adjacentDirection : DIRECTIONS)
-			{
-				if(adjacentDirection == Direction.DOWN || adjacentDirection == Direction.UP)
-					continue;
-				else if(world.getBlockState(adjacentPosition.offset(adjacentDirection)).getBlock() instanceof SolarPanelBlock)
-					checkDirectionConsumer(world, adjacentPosition, adjacentDirection, checkList, found, consumer);
-			}	
-		}
 	}
 	
 	/**
@@ -505,15 +483,6 @@ public class EnergyNet
 				updateEnergyNodes(world, adjacentPosition, checkList);
 			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock && adjacentState.get(BreakerSwitchBlock.LIT) && (direction == adjacentState.get(BreakerSwitchBlock.FACING) || direction == adjacentState.get(BreakerSwitchBlock.FACING).getOpposite()))
 				updateEnergyNodes(world, adjacentPosition, checkList);
-			else if(adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN)
-			{
-				if(producer != null)
-					EnergyNet.connectProducer(world, producer);
-				else
-					((EnergyBlock) adjacentState.getBlock()).addNode(world, adjacentPosition);
-				
-				updateEnergyNodes(world, adjacentPosition, checkList);
-			}
 			else if(adjacentState.getBlock() instanceof EnergyBlock)
 			{
 				EnergyBlock energyBlock = (EnergyBlock) adjacentState.getBlock();
@@ -546,7 +515,7 @@ public class EnergyNet
 			if(adjacentState == null)
 				continue;
 			
-			if(adjacentState.getBlock() instanceof EnergyCableBlock || (adjacentState.getBlock() instanceof SolarPanelBlock && direction != Direction.DOWN))
+			if(adjacentState.getBlock() instanceof EnergyCableBlock)
 				findBreakerSwitches(world, adjacentPosition, checkList, breakerList);
 			else if(adjacentState.getBlock() instanceof BreakerSwitchBlock)
 				breakerList.add(adjacentPosition);

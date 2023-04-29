@@ -28,16 +28,15 @@ public class CraterGenerator
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		ChunkRandom random = context.random();
 		NoiseConfig noiseConfig = context.noiseConfig();	
-		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(),noiseConfig);
+		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(),noiseConfig);
 		int radius = 24 + random.nextInt(24);
 		double depthFactor = 0.5 + random.nextDouble() * 0.25;
 		double rimWidth = 0.5 + random.nextDouble() * 0.15;
 		double rimSteepness = 0.25 + random.nextDouble() * 0.25;
 		BlockPos center = pos.add(random.nextInt(16), surfaceY, random.nextInt(16));
 		int chunkRadius = (((int) (radius * 2.0)) >> 4) + 2;
-		int evenTerrain = checkEvenTerrain(context, pos);
 		
-		if(surfaceY < 32 || evenTerrain > 16)
+		if(surfaceY < 32)
 			return;
 		
 		for(int x = -chunkRadius; x <= chunkRadius; x++)
@@ -51,20 +50,6 @@ public class CraterGenerator
 				}
 			}
 		}
-	}
-	
-	private static int checkEvenTerrain(Structure.Context context, BlockPos pos)
-	{
-		ChunkGenerator chunkGenerator = context.chunkGenerator();
-		NoiseConfig noiseConfig = context.noiseConfig();
-		int y1 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
-		int y2 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ(), Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
-		int y3 = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
-		int y4 = chunkGenerator.getHeightOnGround(pos.getX() + 15, pos.getZ() + 15, Heightmap.Type.WORLD_SURFACE_WG, context.world(), noiseConfig);
-		int d1 = (int) Math.abs(y1 - y2);
-		int d2 = (int) Math.abs(y1 - y3);
-		int d3 = (int) Math.abs(y1 - y4);
-		return (d1 + d2 + d3) / 3;
 	}
 
 	public static class Piece extends StructurePiece
@@ -147,20 +132,20 @@ public class CraterGenerator
 						for(int i = y; i < localSurfaceY + 6; i++)
 						{
 							mutable.setY(i);
-							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.REDRAW_ON_MAIN_THREAD);
+							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 						}
 						
 						mutable.setY(y - 1);
 						
 						if(world.getBlockState(mutable).getMaterial().blocksMovement())
-							world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+							world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
 					}
 					else
 					{
 						for(int i = y; i > localSurfaceY; i--)
 						{
 							mutable.setY(i);
-							world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+							world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
 						}
 					}
 				}

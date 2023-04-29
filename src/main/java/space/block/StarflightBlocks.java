@@ -58,6 +58,7 @@ import space.block.entity.OxygenPipeBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.PlanetariumBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
+import space.block.entity.SolarHubBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.entity.StorageCubeBlockEntity;
 import space.block.sapling.RubberSaplingGenerator;
@@ -119,6 +120,7 @@ public class StarflightBlocks
 	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
+	public static final Block SOLAR_HUB = new SolarHubBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
 	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
 	public static final Block OXYGEN_PIPE = new OxygenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
@@ -154,6 +156,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
 	public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, ELECTRIC_FURNACE).build(null);
+	public static final BlockEntityType<SolarHubBlockEntity> SOLAR_HUB_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(SolarHubBlockEntity::new, SOLAR_HUB).build(null);
 	public static final BlockEntityType<BatteryBlockEntity> BATTERY_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(BatteryBlockEntity::new, BATTERY).build(null);
 	public static final BlockEntityType<OxygenPipeBlockEntity> OXYGEN_PIPE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(OxygenPipeBlockEntity::new, OXYGEN_PIPE).build(null);
 	public static final BlockEntityType<HydrogenPipeBlockEntity> HYDROGEN_PIPE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(HydrogenPipeBlockEntity::new, HYDROGEN_PIPE).build(null);
@@ -237,9 +240,10 @@ public class StarflightBlocks
 		initializeBlock(COPPER_CABLE, "copper_cable");
 		initializeEnergyProducerBlock(STIRLING_ENGINE, "stirling_engine", STIRLING_ENGINE_BLOCK_ENTITY, 10, List.of());
 		initializeEnergyConsumerBlock(ELECTRIC_FURNACE, "electric_furnace", ELECTRIC_FURNACE_BLOCK_ENTITY, 10, List.of());
-		initializeEnergyProducerBlock(SOLAR_PANEL, "solar_panel", null, SolarPanelBlock.NOMINAL_OUTPUT, List.of());
+		initializeBlock(SOLAR_PANEL, "solar_panel");
+		initializeBlock(SOLAR_HUB, "solar_hub", SOLAR_HUB_BLOCK_ENTITY);
 		initializeBlock(BATTERY, "battery", BATTERY_BLOCK_ENTITY);
-		initializeBlock(BREAKER_SWITCH, "breaker_switch");
+		initializeBlock(BREAKER_SWITCH, "breaker_switch", null, false, List.of(), List.of(Text.translatable("block.space.breaker_switch.description")));
 		initializeBlock(OXYGEN_PIPE, "oxygen_pipe", OXYGEN_PIPE_BLOCK_ENTITY);
 		initializeBlock(HYDROGEN_PIPE, "hydrogen_pipe", HYDROGEN_PIPE_BLOCK_ENTITY);
 		initializeBlock(OXYGEN_TANK, "oxygen_tank", OXYGEN_TANK_BLOCK_ENTITY);

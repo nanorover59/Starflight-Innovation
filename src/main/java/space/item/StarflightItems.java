@@ -24,7 +24,7 @@ public class StarflightItems
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE).group(StarflightMod.ITEM_GROUP));
-	public static final Item BATTERY_CELL = new BatteryCellItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), 256.0);
+	public static final Item BATTERY_CELL = new BatteryCellItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP), 2048.0);
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new FabricItemSettings().maxCount(1).group(StarflightMod.ITEM_GROUP));
 	public static final Item SUBSTRATE = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));
 	public static final Item CONTROL_UNIT = new Item(new FabricItemSettings().group(StarflightMod.ITEM_GROUP));

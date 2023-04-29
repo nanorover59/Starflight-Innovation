@@ -58,6 +58,16 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
+    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+	{
+		ArrayList<Text> textList = new ArrayList<Text>();
+		DecimalFormat df = new DecimalFormat("#.##");
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.GOLD));
+		tooltip.addAll(textList);
+	}
+	
+	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
 		if(!world.isClient())
@@ -155,15 +165,5 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	public void addNode(World world, BlockPos pos)
 	{
 		EnergyNet.addDual(world, pos);
-	}
-	
-	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
-	{
-		ArrayList<Text> textList = new ArrayList<Text>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(POWER_DRAW))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(POWER_OUTPUT))).append("kJ/s").formatted(Formatting.GOLD));
-		tooltip.addAll(textList);
 	}
 }

@@ -505,6 +505,7 @@ public class MovingCraftEntity extends Entity
 				{
 					buffer.writeNbt(NbtHelper.fromBlockState(data.getBlockState()));
 					buffer.writeBlockPos(data.getPosition());
+					buffer.writeBoolean(data.redstonePower());
 					
 					for(int i = 0; i < 6; i++)
 						buffer.writeBoolean(data.getSidesShowing()[i]);

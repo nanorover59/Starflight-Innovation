@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.RegistryEntry;
@@ -41,24 +42,23 @@ public class SmallCraterFeature extends Feature<DefaultFeatureConfig>
 		if(random.nextFloat() > chance)
 			return true;
 		
-		int radius = 4 + random.nextInt(8);
+		int radius = 3 + random.nextInt(5);
+		int gap = 7 - radius;
 		double depthFactor = 0.3 + random.nextDouble() * 0.5;
 		double rimWidth = 0.5 + random.nextDouble() * 0.15;
 		double rimSteepness = 0.25 + random.nextDouble() * 0.25;
 		BlockPos.Mutable mutable = new BlockPos.Mutable();
-		BlockPos startPos = context.getOrigin().add(random.nextInt(4) - random.nextInt(4), 0, random.nextInt(4) - random.nextInt(4));
+		ChunkPos chunkPos = new ChunkPos(context.getOrigin());
+		BlockPos startPos = chunkPos.getStartPos().add(7 + (gap > 0 ? random.nextInt(gap) - random.nextInt(gap) : 0), 0, 7 + (gap > 0 ? random.nextInt(gap) - random.nextInt(gap) : 0));
+		startPos = startPos.up(world.getTopPosition(Type.OCEAN_FLOOR, startPos).getY());
 		
 		for(int x = -16; x < 16; x++)
 		{
 			for(int z = -16; z < 16; z++)
 			{
 				mutable.set(startPos.getX() + x, 0, startPos.getZ() + z);
-				int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).getY();
+				int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR, mutable).getY() - 1;
 				mutable.setY(localSurfaceY);
-				
-				while(!world.getBlockState(mutable).getMaterial().blocksMovement() && mutable.getY() > 0)
-					mutable.setY(mutable.getY() - 1);
-				
 				BlockState surfaceState = world.getBlockState(mutable);	
 				double r = MathHelper.hypot(mutable.getX() - startPos.getX(), mutable.getZ() - startPos.getZ()) / radius;
 				double parabola = r * r - 1.0;
@@ -66,28 +66,27 @@ public class SmallCraterFeature extends Feature<DefaultFeatureConfig>
 				double rim = rimR * rimR * rimSteepness;
 				double shape = Math.min(parabola, rim);
 				shape = Math.max(shape, -depthFactor);
-				localSurfaceY = mutable.getY();
 				int y = localSurfaceY + (int) (shape * radius);
 				
 				if(y < localSurfaceY)
 				{
-					for(int i = y; i <= localSurfaceY + 5; i++)
+					for(int i = y; i <= localSurfaceY; i++)
 					{
 						mutable.setY(i);
-						world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.REDRAW_ON_MAIN_THREAD);
+						world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 					}
 					
 					mutable.setY(y - 1);
 					
 					if(world.getBlockState(mutable).getMaterial().blocksMovement())
-						world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+						world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
 				}
 				else
 				{
 					for(int i = y; i > localSurfaceY; i--)
 					{
 						mutable.setY(i);
-						world.setBlockState(mutable, surfaceState, Block.REDRAW_ON_MAIN_THREAD);
+						world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
 					}
 				}
 			}

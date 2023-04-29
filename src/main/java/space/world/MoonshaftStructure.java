@@ -9,11 +9,13 @@ import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.ChunkRandom;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.StructureType;
-import space.world.MoonshaftGenerator.MoonshaftRoom;
+import space.world.MoonshaftGenerator.MoonshaftCrossing;
 
 public class MoonshaftStructure extends Structure
 {
@@ -29,16 +31,14 @@ public class MoonshaftStructure extends Structure
 	{
 		return StarflightWorldGeneration.MOONSHAFT_TYPE;
 	}
-
+	
 	@Override
 	public Optional<Structure.StructurePosition> getStructurePosition(Structure.Context context)
 	{
-		context.random().nextDouble();
 		ChunkPos chunkPos = context.chunkPos();
-		BlockPos blockPos = new BlockPos(chunkPos.getCenterX(), 50, chunkPos.getStartZ());
-		StructurePiecesCollector structurePiecesCollector = new StructurePiecesCollector();
-		int i = this.addPieces(structurePiecesCollector, context);
-		return Optional.of(new Structure.StructurePosition(blockPos.add(0, i, 0), Either.right(structurePiecesCollector)));
+        StructurePiecesCollector structurePiecesCollector = new StructurePiecesCollector();
+        int y = this.addPieces(structurePiecesCollector, context);
+        return Optional.of(new Structure.StructurePosition(new BlockPos(chunkPos.getCenterX(), y, chunkPos.getCenterZ()), Either.right(structurePiecesCollector)));
 	}
 
 	private int addPieces(StructurePiecesCollector collector, Structure.Context context)
@@ -46,16 +46,16 @@ public class MoonshaftStructure extends Structure
 		ChunkPos chunkPos = context.chunkPos();
 		ChunkRandom chunkRandom = context.random();
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
-		MoonshaftRoom moonshaftRoom = new MoonshaftGenerator.MoonshaftRoom(0, chunkRandom, chunkPos.getOffsetX(2), chunkPos.getOffsetZ(2));
-		collector.addPiece(moonshaftRoom);
-		moonshaftRoom.fillOpenings(moonshaftRoom, collector, chunkRandom);
-		int topY = 40;
-		int baseY = chunkGenerator.getMinimumY();
-		BlockBox blockBox = collector.getBoundingBox();
-        int i = topY - baseY + 1 - blockBox.getBlockCountY();
-        int j = i > 1 ? baseY + chunkRandom.nextInt(i) : baseY;
-        int k = j - blockBox.getMinY();
-        collector.shift(k);
-        return k;
+		int x = chunkPos.getOffsetX(7);
+		int z = chunkPos.getOffsetZ(7);
+		int yMin = chunkGenerator.getMinimumY() + 16;
+		int yMax = Math.max(yMin + 16, chunkGenerator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR, context.world(), context.noiseConfig()) - 16);
+		int y = yMin + chunkRandom.nextInt(yMax - yMin);
+		Direction direction = Direction.fromHorizontal(chunkRandom.nextInt(4));
+		BlockBox blockBox = MoonshaftCrossing.getBoundingBox(collector, chunkRandom, x, y, z, direction);
+		MoonshaftCrossing moonshaftPart = new MoonshaftCrossing(0, blockBox, direction, false);
+		moonshaftPart.fillOpenings(moonshaftPart, collector, chunkRandom);
+		collector.addPiece(moonshaftPart);
+		return y;
 	}
 }

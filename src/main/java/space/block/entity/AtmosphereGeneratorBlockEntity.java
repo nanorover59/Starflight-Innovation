@@ -2,7 +2,10 @@ package space.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import space.block.AtmosphereGeneratorBlock;
@@ -30,8 +33,17 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Power
 			BlockPos frontPos = pos.offset(direction);
 			BlockState frontState = world.getBlockState(frontPos);
 			
-			if(frontState == StarflightBlocks.HABITABLE_AIR.getDefaultState())
+			if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR && !frontState.get(HabitableAirBlock.UNSTABLE))
+			{
 				HabitableAirBlock.setUnstable(world, frontPos, frontState);
+				MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
+				
+				for(PlayerEntity player : world.getPlayers())
+				{
+		            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
+		            	player.sendMessage(text, true);
+		        }
+			}
 		}
 	}
 	

@@ -20,6 +20,7 @@ import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.FluidTankInsideBlock;
+import space.block.SolarHubBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.util.BooleanByteUtil;
@@ -31,9 +32,10 @@ public class MovingCraftBlockData
 	private NbtCompound blockEntityData;
 	private boolean[] sidesShowing = new boolean[6];
 	private boolean placeFirst;
+	private boolean redstone;
 	private double storedFluid;
 	
-	private MovingCraftBlockData(BlockState blockState, BlockPos position, NbtCompound blockEntityData, boolean[] sidesShowing, boolean placeFirst, double storedFluid)
+	private MovingCraftBlockData(BlockState blockState, BlockPos position, NbtCompound blockEntityData, boolean[] sidesShowing, boolean placeFirst, boolean redstone, double storedFluid)
 	{
 		this.blockState = blockState;
 		this.position = position;
@@ -43,6 +45,7 @@ public class MovingCraftBlockData
 			this.sidesShowing[i] = sidesShowing[i];
 		
 		this.placeFirst = placeFirst;
+		this.redstone = redstone;
 		this.storedFluid = storedFluid;
 	}
 	
@@ -81,7 +84,7 @@ public class MovingCraftBlockData
 			((FluidTankControllerBlockEntity) blockEntity).setStoredFluid(0.0);
 		}
 		
-		return new MovingCraftBlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, storedFluid);
+		return new MovingCraftBlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, world.isReceivingRedstonePower(blockPos), storedFluid);
 	}
 	
 	public void toBlock(World world, BlockPos centerPos, int rotationSteps)
@@ -133,7 +136,12 @@ public class MovingCraftBlockData
 			blockEntity.readNbt(blockEntityData);
 		
 		if(blockState.getBlock() instanceof EnergyBlock)
+		{
 			((EnergyBlock) blockState.getBlock()).addNode(world, blockPos);
+			
+			if(blockState.getBlock() instanceof SolarHubBlock)
+				SolarHubBlock.updateSolarPanels(world, blockPos);
+		}
 	}
 
 	public BlockState getBlockState()
@@ -161,6 +169,11 @@ public class MovingCraftBlockData
 		return placeFirst;
 	}
 	
+	public boolean redstonePower()
+	{
+		return redstone;
+	}
+	
 	public double getStoredFluid()
 	{
 		return storedFluid;
@@ -177,6 +190,7 @@ public class MovingCraftBlockData
 		
 		localData.putByte("sidesShowing", BooleanByteUtil.toByte(sidesShowing));
 		localData.putBoolean("placeFirst", placeFirst);
+		localData.putBoolean("redstone", redstone);
 		
 		if(storedFluid > 0)
 			localData.putDouble("storedFluid", storedFluid);
@@ -197,7 +211,8 @@ public class MovingCraftBlockData
 			sidesShowing[i] = booleanArray[i];
 		
 		boolean placeFirst = data.getBoolean("placeFirst");
+		boolean redstone = data.getBoolean("redstone");
 		double storedFluid = data.contains("storedFluid") ? data.getDouble("storedFluid") : 0.0;
-		return new MovingCraftBlockData(blockState, position, blockEntityData, sidesShowing, placeFirst, storedFluid);
+		return new MovingCraftBlockData(blockState, position, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid);
 	}
 }

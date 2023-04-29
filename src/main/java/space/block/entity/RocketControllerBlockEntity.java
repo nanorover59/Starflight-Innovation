@@ -133,6 +133,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         
         for(BlockPos pos : positionList)
         {
+        	boolean redstone = world.isReceivingRedstonePower(pos);
         	mass += BlockMass.getMass(world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	
@@ -141,19 +142,29 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         		if(blockEntity instanceof HydrogenTankBlockEntity)
         		{
         			HydrogenTankBlockEntity hydrogenTank = (HydrogenTankBlockEntity) blockEntity;
-        			hydrogen += hydrogenTank.getStoredFluid();
-        			hydrogenCapacity += hydrogenTank.getStorageCapacity();
+        			
+        			if(!redstone)
+        			{
+        				hydrogen += hydrogenTank.getStoredFluid();
+            			hydrogenCapacity += hydrogenTank.getStorageCapacity();
+        			}
+        			
         			mass += hydrogenTank.getStoredFluid();
         		}
         		else if(blockEntity instanceof OxygenTankBlockEntity)
         		{
         			OxygenTankBlockEntity oxygenTank = (OxygenTankBlockEntity) blockEntity;
-        			oxygen += oxygenTank.getStoredFluid();
-        			oxygenCapacity += oxygenTank.getStorageCapacity();
+
+        			if(!redstone)
+        			{
+        				oxygen += oxygenTank.getStoredFluid();
+        				oxygenCapacity += oxygenTank.getStorageCapacity();
+        			}
+        			
         			mass += oxygenTank.getStoredFluid();
         		}
         	}
-        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock)
+        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock && !redstone)
         	{
         		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
         		double pressure = 0.0;

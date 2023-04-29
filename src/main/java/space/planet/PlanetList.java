@@ -340,7 +340,13 @@ public class PlanetList
 			PlanetDimensionData data = getDimensionDataForWorld(player.world);
 			
 			if(data == null)
+			{
+				buffer.writeInt(0);
+				buffer.writeInt(-1);
+				buffer.writeBoolean(false);
+				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "planet_data"), buffer);
 				continue;
+			}
 			
 			buffer.writeInt(planetList.size());
 			int viewpointIndex = -1; // Defaults to -1 for undefined worlds.

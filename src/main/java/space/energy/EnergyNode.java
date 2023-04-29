@@ -27,8 +27,6 @@ public class EnergyNode
 		dimension = dimension_;
 		isProducer = isProducer_;
 		isConsumer = isConsumer_;
-		
-		System.out.println("New energy node: " + position.toShortString());
 	}
 	
 	@Override

@@ -62,7 +62,6 @@ public class RocketEntity extends MovingCraftEntity
 	private static final TrackedData<Float> OXYGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> HYDROGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	
-	private ArrayList<BlockPos> activeFluidTanks = new ArrayList<BlockPos>();
 	private RegistryKey<World> nextDimension;
 	private BlockPos arrivalPos;
 	private int arrivalDirection;
@@ -143,6 +142,7 @@ public class RocketEntity extends MovingCraftEntity
 			craftMass += blockMass;
 			centerOfMass = centerOfMass.add(pos.getX() * blockMass, pos.getY() * blockMass, pos.getZ() * blockMass);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
+        	boolean redstone = world.isReceivingRedstonePower(pos);
         	
         	if(blockEntity != null)
         	{
@@ -150,8 +150,13 @@ public class RocketEntity extends MovingCraftEntity
         		{
         			HydrogenTankBlockEntity hydrogenTank = (HydrogenTankBlockEntity) blockEntity;
         			Vec3d fluidTankCenter = new Vec3d(hydrogenTank.getCenterOfMass().getX() + 0.5, hydrogenTank.getCenterOfMass().getY() + 0.5, hydrogenTank.getCenterOfMass().getZ() + 0.5);
-        			hydrogenSupply += hydrogenTank.getStoredFluid();
-        			hydrogenCapacity += hydrogenTank.getStorageCapacity();
+        			
+        			if(!redstone)
+        			{
+        				hydrogenSupply += hydrogenTank.getStoredFluid();
+        				hydrogenCapacity += hydrogenTank.getStorageCapacity();
+        			}
+        			
         			craftMass += hydrogenTank.getStoredFluid();
         			centerOfMass = centerOfMass.add(fluidTankCenter.multiply(hydrogenTank.getStoredFluid()));
         		}
@@ -159,8 +164,13 @@ public class RocketEntity extends MovingCraftEntity
         		{
         			OxygenTankBlockEntity oxygenTank = (OxygenTankBlockEntity) blockEntity;
         			Vec3d fluidTankCenter = new Vec3d(oxygenTank.getCenterOfMass().getX() + 0.5, oxygenTank.getCenterOfMass().getY() + 0.5, oxygenTank.getCenterOfMass().getZ() + 0.5);
-        			oxygenSupply += oxygenTank.getStoredFluid();
-        			oxygenCapacity += oxygenTank.getStorageCapacity();
+        			
+        			if(!redstone)
+        			{
+        				oxygenSupply += oxygenTank.getStoredFluid();
+        				oxygenCapacity += oxygenTank.getStorageCapacity();
+        			}
+        			
         			craftMass += oxygenTank.getStoredFluid();
         			centerOfMass = centerOfMass.add(fluidTankCenter.multiply(oxygenTank.getStoredFluid()));
         		}
@@ -168,7 +178,7 @@ public class RocketEntity extends MovingCraftEntity
         	
         	Block block = world.getBlockState(pos).getBlock();
         	
-        	if(block instanceof RocketThrusterBlock)
+        	if(block instanceof RocketThrusterBlock && !redstone)
         	{
         		double thrustStart = ((RocketThrusterBlock) block).getThrust(atmosphereStart);
         		double thrustEnd = ((RocketThrusterBlock) block).getThrust(atmosphereEnd);
@@ -193,15 +203,7 @@ public class RocketEntity extends MovingCraftEntity
 		this.setInitialBlockPos(centerBlockPos);
 		this.blockDataList = MovingCraftEntity.captureBlocks(world, centerBlockPos, blockPosList);
 		
-		if(!blockDataList.isEmpty())
-		{
-			for(MovingCraftBlockData blockData : blockDataList)
-			{
-				if(blockData.getBlockState().getBlock() instanceof FluidTankControllerBlock)
-					activeFluidTanks.add(blockData.getPosition());
-			}
-		}
-		else
+		if(blockDataList.isEmpty())
 			this.setRemoved(RemovalReason.DISCARDED);
 		
 		Box box = new Box(min, max.up());
@@ -616,7 +618,7 @@ public class RocketEntity extends MovingCraftEntity
 		
 		for(MovingCraftBlockRenderData block : blocks)
 		{
-			if(block.getBlockState().getBlock() instanceof RocketThrusterBlock)
+			if(block.getBlockState().getBlock() instanceof RocketThrusterBlock && !block.redstonePower())
 				thrusterOffsets.add(block.getPosition());
 		}
 		
@@ -666,7 +668,7 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			updatePassengerPosition(passenger);
 			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
-			//passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
+			passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
 			passenger.fallDistance = 0.0f;
@@ -698,15 +700,15 @@ public class RocketEntity extends MovingCraftEntity
 					FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
 					((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(world, blockPos, fluidTank);
 					
-					if(activeFluidTanks.contains(blockData.getPosition()))
+					if(blockData.redstonePower())
+						fluidTank.setStoredFluid(blockData.getStoredFluid());
+					else
 					{
 						if(blockData.getBlockState().getBlock() == StarflightBlocks.HYDROGEN_TANK)
 							fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (hydrogenSupply / hydrogenCapacity));
 						else if(blockData.getBlockState().getBlock() == StarflightBlocks.OXYGEN_TANK)
 							fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (oxygenSupply / oxygenCapacity));
 					}
-					else
-						fluidTank.setStoredFluid(blockData.getStoredFluid());
 				}
 				else if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
 					((RocketControllerBlockEntity) blockEntity).runScan();
@@ -752,23 +754,6 @@ public class RocketEntity extends MovingCraftEntity
 		nbt.putDouble("lowerHeight", lowerHeight);
 		nbt.putDouble("upperHeight", upperHeight);
 		nbt.putDouble("maxWidth", maxWidth);
-		
-		int fuelTankCount = activeFluidTanks.size();
-		nbt.putInt("fuelTankCount", fuelTankCount);
-		int[] tx = new int[fuelTankCount];
-		int[] ty = new int[fuelTankCount];
-		int[] tz = new int[fuelTankCount];
-		
-		for(int i = 0; i < fuelTankCount; i++)
-		{
-			tx[i] = activeFluidTanks.get(i).getX();
-			ty[i] = activeFluidTanks.get(i).getY();
-			tz[i] = activeFluidTanks.get(i).getZ();
-		}
-		
-		nbt.putIntArray("tx", tx);
-		nbt.putIntArray("ty", ty);
-		nbt.putIntArray("tz", tz);
 	}
 
 	@Override
@@ -799,14 +784,6 @@ public class RocketEntity extends MovingCraftEntity
 		lowerHeight = nbt.getDouble("lowerHeight");
 		upperHeight = nbt.getDouble("upperHeight");
 		maxWidth = nbt.getDouble("maxWidth");
-		
-		int fuelTankCount = nbt.getInt("fuelTankCount");
-		int[] tx = nbt.getIntArray("tx");
-		int[] ty = nbt.getIntArray("ty");
-		int[] tz = nbt.getIntArray("tz");
-		
-		for(int i = 0; i < fuelTankCount; i++)
-			activeFluidTanks.add(new BlockPos(tx[i], ty[i], tz[i]));
 	}
 	
 	public static void receiveInput(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)

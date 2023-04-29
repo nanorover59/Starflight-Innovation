@@ -87,8 +87,6 @@ public class HabitableAirBlock extends AirBlock
 			ArrayList<BlockPos> volumeList = new ArrayList<BlockPos>();
 			AirUtil.findVolume(world, fromPos, volumeList, BlockSearch.MAX_VOLUME);
 			
-			System.out.println("Volume: " + volumeList.size());
-			
 			if(!volumeList.isEmpty())
 			{
 				BiPredicate<World, BlockPos> include = (w, p) -> {
@@ -103,8 +101,6 @@ public class HabitableAirBlock extends AirBlock
 				
 				ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
 				BlockSearch.search(world, pos, checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
-				
-				System.out.println("Found:" + foundList.size());
 				
 				for(BlockPos blockPos : foundList)
 				{
@@ -142,7 +138,7 @@ public class HabitableAirBlock extends AirBlock
 			world.setBlockState(pos, state.with(UNSTABLE, true), 0);
 			
 			if(!world.getBlockTickScheduler().isQueued(pos, state.getBlock()))
-				world.createAndScheduleBlockTick(pos, state.getBlock(), 40); //200 + world.getRandom().nextInt(200));
+				world.createAndScheduleBlockTick(pos, state.getBlock(), 60); //200 + world.getRandom().nextInt(200));
 		}
 	}
 }

@@ -86,26 +86,25 @@ public class StarflightWorldGeneration
 	// Impact Crater Structure
 	public static final StructurePieceType CRATER_PIECE = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "crater_piece"), CraterGenerator.Piece::new);
 	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
-	public static final RegistryEntry<Structure> CRATER_0 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_0")), new CraterStructure(createConfig(LIGHT_CRATERING, StructureTerrainAdaptation.NONE)));
-	public static final RegistryEntry<Structure> CRATER_1 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_1")), new CraterStructure(createConfig(MEDIUM_CRATERING, StructureTerrainAdaptation.NONE)));
-	public static final RegistryEntry<Structure> CRATER_2 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_2")), new CraterStructure(createConfig(HEAVY_CRATERING, StructureTerrainAdaptation.NONE)));
+	public static final RegistryEntry<Structure> CRATER_0 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_0")), new CraterStructure(createConfig(LIGHT_CRATERING, GenerationStep.Feature.LOCAL_MODIFICATIONS, StructureTerrainAdaptation.NONE)));
+	public static final RegistryEntry<Structure> CRATER_1 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_1")), new CraterStructure(createConfig(MEDIUM_CRATERING, GenerationStep.Feature.LOCAL_MODIFICATIONS, StructureTerrainAdaptation.NONE)));
+	public static final RegistryEntry<Structure> CRATER_2 = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "crater_2")), new CraterStructure(createConfig(HEAVY_CRATERING, GenerationStep.Feature.LOCAL_MODIFICATIONS, StructureTerrainAdaptation.NONE)));
 	
 	// Surface Outpost Structure
 	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "outpost_piece"), OutpostGenerator.Piece::new);
 	public static final StructureType<OutpostStructure> OUTPOST_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "outpost"), () -> OutpostStructure.CODEC);
-	public static final RegistryEntry<Structure> OUTPOST = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "outpost")), new OutpostStructure(createConfig(OUTPOST_STRUCTURES, StructureTerrainAdaptation.BURY)));
+	public static final RegistryEntry<Structure> OUTPOST = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "outpost")), new OutpostStructure(createConfig(OUTPOST_STRUCTURES, GenerationStep.Feature.SURFACE_STRUCTURES, StructureTerrainAdaptation.NONE)));
 	
 	// Moonshaft Structure 
 	public static final StructurePieceType MOONSHAFT_CORRIDOR = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_corridor"), MoonshaftGenerator.MoonshaftCorridor::new);
     public static final StructurePieceType MOONSHAFT_CROSSING = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_crossing"), MoonshaftGenerator.MoonshaftCrossing::new);
-    public static final StructurePieceType MOONSHAFT_ROOM = Registry.register(Registry.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_room"), MoonshaftGenerator.MoonshaftRoom::new);
 	public static final StructureType<MoonshaftStructure> MOONSHAFT_TYPE = Registry.register(Registry.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "moonshaft"), () -> MoonshaftStructure.CODEC);
-	public static final RegistryEntry<Structure> MOONSHAFT = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "moonshaft")), new MoonshaftStructure(createConfig(OUTPOST_STRUCTURES, StructureTerrainAdaptation.NONE)));
+	public static final RegistryEntry<Structure> MOONSHAFT = register(RegistryKey.of(Registry.STRUCTURE_KEY, new Identifier(StarflightMod.MOD_ID, "moonshaft")), new MoonshaftStructure(createConfig(OUTPOST_STRUCTURES, GenerationStep.Feature.UNDERGROUND_STRUCTURES, StructureTerrainAdaptation.NONE)));
 	
 	// Impact Crater Feature
 	public static final Feature<DefaultFeatureConfig> SMALL_CRATER = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "small_crater"), new SmallCraterFeature(DefaultFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> SMALL_CRATER_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "small_crater").toString(), SMALL_CRATER);
-	public static final RegistryEntry<PlacedFeature> SMALL_CRATER_PLACED_FEATURE= PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "small_crater").toString(), SMALL_CRATER_CONFIGURED_FEATURE, CountPlacementModifier.of(1), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
+	public static final RegistryEntry<PlacedFeature> SMALL_CRATER_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "small_crater").toString(), SMALL_CRATER_CONFIGURED_FEATURE, CountPlacementModifier.of(1), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
 	
 	// Surface Rock Feature
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
@@ -127,6 +126,11 @@ public class StarflightWorldGeneration
 	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> ICE_BLADE_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE);
 	public static final RegistryEntry<PlacedFeature> ICE_BLADE_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "ice_blade").toString(), ICE_BLADE_CONFIGURED_FEATURE, CountPlacementModifier.of(2), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_WG_HEIGHTMAP, BiomePlacementModifier.of());
 
+	// Landing Site Feature
+	public static final Feature<DefaultFeatureConfig> LANDING_SITE = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "landing_site"), new LandingSiteFeature(DefaultFeatureConfig.CODEC));
+	public static final RegistryEntry<ConfiguredFeature<DefaultFeatureConfig, ?>> LANDING_SITE_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "landing_site").toString(), LANDING_SITE);
+	public static final RegistryEntry<PlacedFeature> LANDING_SITE_PLACED_FEATURE = PlacedFeatures.register(new Identifier(StarflightMod.MOD_ID, "landing_site").toString(), LANDING_SITE_CONFIGURED_FEATURE, CountPlacementModifier.of(1), SquarePlacementModifier.of(), PlacedFeatures.OCEAN_FLOOR_HEIGHTMAP, BiomePlacementModifier.of());
+	
 	// Mars Underground Features
 	public static final Feature<VegetationPatchFeatureConfig> MARS_PATCH = Registry.register(Registry.FEATURE, new Identifier(StarflightMod.MOD_ID, "mars_patch"), new MarsPatchFeature(VegetationPatchFeatureConfig.CODEC));
 	public static final RegistryEntry<ConfiguredFeature<MultifaceGrowthFeatureConfig, ?>> MARS_GLOW_LICHEN_CONFIGURED_FEATURE = ConfiguredFeatures.register(new Identifier(StarflightMod.MOD_ID, "mars_glow_lichen").toString(), Feature.MULTIFACE_GROWTH, new MultifaceGrowthFeatureConfig((MultifaceGrowthBlock)Blocks.GLOW_LICHEN, 20, false, true, true, 0.5f, RegistryEntryList.of(Block::getRegistryEntry, StarflightBlocks.FERRIC_STONE, StarflightBlocks.REDSLATE)));
@@ -183,11 +187,14 @@ public class StarflightWorldGeneration
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, TALL_RUBBER_TREE_CHECKED.getKey().get());
 		
 		// Small Craters
-		BiomeModifications.addFeature(BiomeSelectors.tag(LIGHT_CRATERING).or(BiomeSelectors.tag(MEDIUM_CRATERING)).or(BiomeSelectors.tag(HEAVY_CRATERING)), GenerationStep.Feature.TOP_LAYER_MODIFICATION, SMALL_CRATER_PLACED_FEATURE.getKey().get());
+		BiomeModifications.addFeature(BiomeSelectors.tag(LIGHT_CRATERING).or(BiomeSelectors.tag(MEDIUM_CRATERING)).or(BiomeSelectors.tag(HEAVY_CRATERING)), GenerationStep.Feature.LOCAL_MODIFICATIONS, SMALL_CRATER_PLACED_FEATURE.getKey().get());
 		
-		// Scatter
+		// Terrain Scatter
 		BiomeModifications.addFeature(BiomeSelectors.tag(SCATTER).or(BiomeSelectors.tag(MORE_SCATTER)), GenerationStep.Feature.VEGETAL_DECORATION, SURFACE_ROCK_PLACED_FEATURE.getKey().get());
 		BiomeModifications.addFeature(BiomeSelectors.tag(SCATTER).or(BiomeSelectors.tag(MORE_SCATTER)), GenerationStep.Feature.VEGETAL_DECORATION, ROCK_PATCH_PLACED_FEATURE.getKey().get());
+		
+		// Landing Site Feature
+		BiomeModifications.addFeature(BiomeSelectors.tag(OUTPOST_STRUCTURES), GenerationStep.Feature.SURFACE_STRUCTURES, LANDING_SITE_PLACED_FEATURE.getKey().get());
 	}
 
 	/**
@@ -223,9 +230,9 @@ public class StarflightWorldGeneration
 		return new Structure.Config(getOrCreateBiomeTag(biomeTag), spawns, featureStep, terrainAdaptation);
 	}
 
-	private static Structure.Config createConfig(TagKey<Biome> biomeTag, StructureTerrainAdaptation terrainAdaptation)
+	private static Structure.Config createConfig(TagKey<Biome> biomeTag, GenerationStep.Feature featureStep, StructureTerrainAdaptation terrainAdaptation)
 	{
-		return createConfig(biomeTag, Map.of(), GenerationStep.Feature.SURFACE_STRUCTURES, terrainAdaptation);
+		return createConfig(biomeTag, Map.of(), featureStep, terrainAdaptation);
 	}
 
 	private static RegistryEntry<Structure> register(RegistryKey<Structure> key, Structure structure)

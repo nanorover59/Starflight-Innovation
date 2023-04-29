@@ -28,7 +28,7 @@ public class OutpostStructure extends Structure
 	@Override
 	public Optional<Structure.StructurePosition> getStructurePosition(Structure.Context context)
 	{
-		return OutpostStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE_WG, collector -> OutpostStructure.addPieces((StructurePiecesCollector) collector, context));
+		return OutpostStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE, collector -> OutpostStructure.addPieces((StructurePiecesCollector) collector, context));
 	}
 
 	private static void addPieces(StructurePiecesCollector collector, Structure.Context context)

@@ -41,29 +41,30 @@ public class MovingCraftRenderList
 	
 	public static void receiveCraftListUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
-			boolean b = buffer.readBoolean(); // Load render data if the boolean value is true or remove render data if it is false.
-			UUID entityUUID = buffer.readUuid();
+		boolean b = buffer.readBoolean(); // Load render data if the boolean value is true or remove render data if it is false.
+		UUID entityUUID = buffer.readUuid();
+		
+		if(b)
+		{
+			int blockCount = buffer.readInt();
+			ArrayList<MovingCraftBlockRenderData> blockList = new ArrayList<MovingCraftBlockRenderData>();
 			
-			if(b)
+			for(int i = 0; i < blockCount; i++)
 			{
-				int blockCount = buffer.readInt();
-				ArrayList<MovingCraftBlockRenderData> blockList = new ArrayList<MovingCraftBlockRenderData>();
+				BlockState blockState = NbtHelper.toBlockState(buffer.readNbt());
+				BlockPos blockPos = buffer.readBlockPos();
+				boolean redstone = buffer.readBoolean();
+				boolean[] sidesShowing = new boolean[6];
 				
-				for(int i = 0; i < blockCount; i++)
-				{
-					BlockState blockState = NbtHelper.toBlockState(buffer.readNbt());
-					BlockPos blockPos = buffer.readBlockPos();
-					boolean[] sidesShowing = new boolean[6];
-					
-					for(int j = 0; j < 6; j++)
-						sidesShowing[j] = buffer.readBoolean();
-					
-					blockList.add(new MovingCraftBlockRenderData(blockState, blockPos, sidesShowing));
-				}
+				for(int j = 0; j < 6; j++)
+					sidesShowing[j] = buffer.readBoolean();
 				
-				client.execute(() -> craftList.put(entityUUID, blockList));
+				blockList.add(new MovingCraftBlockRenderData(blockState, blockPos, redstone, sidesShowing));
 			}
-			else
-				client.execute(() -> craftList.remove(entityUUID));
+			
+			client.execute(() -> craftList.put(entityUUID, blockList));
+		}
+		else
+			client.execute(() -> craftList.remove(entityUUID));
 	}
 }

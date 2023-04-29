@@ -32,17 +32,17 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:music_disc_otherside",
+          "name": "minecraft:music_disc_11",
           "weight": 2
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:music_disc_13",
+          "name": "minecraft:music_disc_blocks",
           "weight": 2
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:music_disc_cat",
+          "name": "minecraft:music_disc_ward",
           "weight": 2
         },
         {
@@ -67,7 +67,7 @@
         },
         {
           "type": "minecraft:empty",
-          "weight": 10
+          "weight": 15
         }
       ],
       "rolls": {
@@ -227,6 +227,26 @@
               "add": false
             }
           ]
+        },
+        {
+          "type": "minecraft:item",
+          "weight": 5,
+          "name": "minecraft:dirt",
+          "functions": [
+            {
+              "function": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 4
+              },
+              "add": false
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 15
         }
       ]
     },

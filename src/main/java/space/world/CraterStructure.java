@@ -28,7 +28,7 @@ public class CraterStructure extends Structure
 	@Override
 	public Optional<Structure.StructurePosition> getStructurePosition(Structure.Context context)
 	{
-		return CraterStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE_WG, collector -> CraterStructure.addPieces((StructurePiecesCollector) collector, context));
+		return CraterStructure.getStructurePosition(context, Heightmap.Type.OCEAN_FLOOR_WG, collector -> CraterStructure.addPieces((StructurePiecesCollector) collector, context));
 	}
 
 	private static void addPieces(StructurePiecesCollector collector, Structure.Context context)

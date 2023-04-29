@@ -29,6 +29,7 @@ public class PlanetDimensionData
 		this.overrideSky = overrideSky;
 		this.isCloudy = isCloudy;
 		this.hasLowClouds = hasLowClouds;
+		this.hasWeather = hasWeather;
 		this.hasOxygen = hasOxygen;
 		this.temperatureCategory = temperatureCategory;
 		this.pressure = pressure;
