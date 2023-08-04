@@ -95,9 +95,7 @@ public class EnergyCableBlock extends Block implements Waterloggable
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		Direction[] directions = new Direction[] {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN};
-		
-		for(Direction d : directions)
+		for(Direction d : DIRECTIONS)
 			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
 		
 		world.setBlockState(pos, state);
@@ -137,7 +135,7 @@ public class EnergyCableBlock extends Block implements Waterloggable
 		return updateStateForConnection(world, neighborPos, neighborState, state, direction);
 	}
 	
-	private BlockState updateStateForConnection(WorldAccess world, BlockPos neighborPos, BlockState neighborState, BlockState initialState, Direction direction)
+	public static BlockState updateStateForConnection(WorldAccess world, BlockPos neighborPos, BlockState neighborState, BlockState initialState, Direction direction)
 	{
 		BlockState result = initialState;
 		
@@ -175,7 +173,7 @@ public class EnergyCableBlock extends Block implements Waterloggable
 		return result;
 	}
 	
-	public boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public static boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
 	{
 		if(state.getBlock() instanceof EnergyBlock)
 			return ((EnergyBlock) state.getBlock()).canSideConnect(world, pos, state, direction.getOpposite());

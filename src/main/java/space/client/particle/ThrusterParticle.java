@@ -60,8 +60,8 @@ public class ThrusterParticle extends SpriteBillboardParticle
         
         if(this.onGround)
         {
-            this.velocityX *= 2.0;
-            this.velocityZ *= 2.0;
+            this.velocityX *= 4.0;
+            this.velocityZ *= 4.0;
         }
 		
 		this.setSpriteForAge(this.spriteProvider);

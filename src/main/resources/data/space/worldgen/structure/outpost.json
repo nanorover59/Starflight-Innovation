@@ -1,0 +1,7 @@
+{
+  "type" : "space:outpost",
+  "biomes" : "#space:moon_biomes",
+  "step" : "surface_structures",
+  "spawn_overrides" : {},
+  "terrain_adaptation" : "beard_thin"
+}

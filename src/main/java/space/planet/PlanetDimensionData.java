@@ -10,7 +10,7 @@ public class PlanetDimensionData
 	private Planet planet;
 	private RegistryKey<World> worldKey;
 	private boolean isOrbit;
-	private boolean isSurface2;
+	private boolean isSky;
 	private boolean overridePhysics;
 	private boolean overrideSky;
 	private boolean isCloudy;
@@ -20,11 +20,11 @@ public class PlanetDimensionData
 	private int temperatureCategory;
 	private double pressure;
 	
-	public PlanetDimensionData(Identifier dimensionID, boolean isOrbit, boolean isSurface2, boolean overridePhysics, boolean overrideSky, boolean isCloudy, boolean hasLowClouds, boolean hasWeather, boolean hasOxygen, int temperatureCategory, double pressure)
+	public PlanetDimensionData(Identifier dimensionID, boolean isOrbit, boolean isSky, boolean overridePhysics, boolean overrideSky, boolean isCloudy, boolean hasLowClouds, boolean hasWeather, boolean hasOxygen, int temperatureCategory, double pressure)
 	{
 		this.worldKey = RegistryKey.of(Registry.WORLD_KEY, dimensionID);
 		this.isOrbit = isOrbit;
-		this.isSurface2 = isSurface2;
+		this.isSky = isSky;
 		this.overridePhysics = overridePhysics;
 		this.overrideSky = overrideSky;
 		this.isCloudy = isCloudy;
@@ -56,9 +56,9 @@ public class PlanetDimensionData
 		return isOrbit;
 	}
 	
-	public boolean isSurface2()
+	public boolean isSky()
 	{
-		return isSurface2;
+		return isSky;
 	}
 
 	public boolean overridePhysics()

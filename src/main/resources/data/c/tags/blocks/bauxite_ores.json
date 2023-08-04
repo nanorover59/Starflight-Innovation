@@ -2,7 +2,7 @@
     "replace": false,
     "values": [
         "space:bauxite_ore",
-        "deepslate_bauxite_ore",
-        "ferric_bauxite_ore"
+        "space:deepslate_bauxite_ore",
+        "space:ferric_bauxite_ore"
     ]
 }

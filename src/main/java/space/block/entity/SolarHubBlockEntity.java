@@ -45,7 +45,7 @@ public class SolarHubBlockEntity extends BlockEntity
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt)
 	{
 		super.writeNbt(nbt);
 		nbt.putInt("panelCount", this.panelCount);

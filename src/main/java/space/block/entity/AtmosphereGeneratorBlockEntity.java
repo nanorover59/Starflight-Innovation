@@ -7,10 +7,13 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import space.block.AtmosphereGeneratorBlock;
 import space.block.HabitableAirBlock;
 import space.block.StarflightBlocks;
+import space.energy.EnergyNet;
+import space.energy.EnergyNode;
 
 public class AtmosphereGeneratorBlockEntity extends BlockEntity implements PoweredBlockEntity
 {
@@ -35,14 +38,31 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Power
 			
 			if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR && !frontState.get(HabitableAirBlock.UNSTABLE))
 			{
-				HabitableAirBlock.setUnstable(world, frontPos, frontState);
-				MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
+				EnergyNode consumer = EnergyNet.getConsumer(pos, world.getRegistryKey());
+				boolean producersLoaded = true; // Avoid powering off the atmosphere generator because sources are unloaded.
 				
-				for(PlayerEntity player : world.getPlayers())
+				for(EnergyNode producer : consumer.getInputs())
 				{
-		            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
-		            	player.sendMessage(text, true);
-		        }
+					ChunkPos chunkPos = new ChunkPos(producer.getPosition());
+					
+					if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
+					{
+						producersLoaded = false;
+						break;
+					}
+				}
+				
+				if(producersLoaded)
+				{
+					HabitableAirBlock.setUnstable(world, frontPos, frontState);
+					MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
+					
+					for(PlayerEntity player : world.getPlayers())
+					{
+			            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
+			            	player.sendMessage(text, true);
+			        }
+				}
 			}
 		}
 	}

@@ -62,8 +62,8 @@ public class Planet
 	public double sunAngleOrbit;
 	
 	private PlanetDimensionData orbit;
-	private PlanetDimensionData surface1;
-	private PlanetDimensionData surface2;
+	private PlanetDimensionData surface;
+	private PlanetDimensionData sky;
 	
 	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_, double surfacePressure_)
 	{
@@ -138,24 +138,24 @@ public class Planet
 		this.orbit = orbit.forPlanet(this);
 	}
 
-	public PlanetDimensionData getSurface1()
+	public PlanetDimensionData getSurface()
 	{
-		return surface1;
+		return surface;
 	}
 
-	public void setSurface1(PlanetDimensionData surface1)
+	public void setSurface(PlanetDimensionData surface)
 	{
-		this.surface1 = surface1.forPlanet(this);
+		this.surface = surface.forPlanet(this);
 	}
 
-	public PlanetDimensionData getSurface2()
+	public PlanetDimensionData getSky()
 	{
-		return surface2;
+		return sky;
 	}
 
-	public void setSurface2(PlanetDimensionData surface2)
+	public void setSky(PlanetDimensionData sky)
 	{
-		this.surface2 = surface2.forPlanet(this);
+		this.sky = sky.forPlanet(this);
 	}
 	
 	public void setSatelliteLevel(int level)
@@ -198,9 +198,7 @@ public class Planet
 	{
 		if(!data.hasName(name) || checkList.contains(name))
 			return;
-		
-		System.out.println("Loading: " + name + " " + satelliteLevel + " " + satellites.size());
-		
+			
 		DataCompound planetData = data.getDataCompound(name);
 		position = new Vec3d(planetData.getDouble("positionX"), planetData.getDouble("positionY"), planetData.getDouble("positionZ"));
 		velocity = new Vec3d(planetData.getDouble("velocityX"), planetData.getDouble("velocityY"), planetData.getDouble("velocityZ"));
@@ -408,32 +406,32 @@ public class Planet
 	
 	public double getSurfacePressure()
 	{
-		if(surface1 != null)
-			return surface1.getPressure();
+		if(surface != null)
+			return surface.getPressure();
 		else
 			return 1.0;
 	}
 	
 	public boolean hasLowClouds()
 	{
-		if(surface1 != null)
-			return surface1.hasLowClouds();
+		if(surface != null)
+			return surface.hasLowClouds();
 		else
 			return true;
 	}
 	
 	public boolean hasCloudCover()
 	{
-		if(surface1 != null)
-			return surface1.isCloudy();
+		if(surface != null)
+			return surface.isCloudy();
 		else
 			return false;
 	}
 	
 	public boolean hasWeather()
 	{
-		if(surface1 != null)
-			return surface1.hasWeather();
+		if(surface != null)
+			return surface.hasWeather();
 		else
 			return true;
 	}
@@ -463,12 +461,13 @@ public class Planet
 	 */
 	public double getSolarMultiplier()
 	{
-		if(getPosition().length() == 0.0)
+		double d = getPosition().lengthSquared();
+		
+		if(d == 0.0)
 			return 0.0;
 		
-		double d = getPosition().length();
-		d /= 1.496e11; // Convert the distance from meters to astronomical units.
-		return (1.0 / Math.pow(d, 2.0)) * (hasCloudCover() ? 0.5 : 1.0);
+		d /= 2.238016e22; // Convert the distance from meters to astronomical units.
+		return (1.0 / d) * (hasCloudCover() ? 0.5 : 1.0);
 	}
 	
 	/**

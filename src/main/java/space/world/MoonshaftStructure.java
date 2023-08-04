@@ -53,7 +53,7 @@ public class MoonshaftStructure extends Structure
 		int y = yMin + chunkRandom.nextInt(yMax - yMin);
 		Direction direction = Direction.fromHorizontal(chunkRandom.nextInt(4));
 		BlockBox blockBox = MoonshaftCrossing.getBoundingBox(collector, chunkRandom, x, y, z, direction);
-		MoonshaftCrossing moonshaftPart = new MoonshaftCrossing(0, blockBox, direction, false);
+		MoonshaftCrossing moonshaftPart = new MoonshaftCrossing(0, blockBox, direction);
 		moonshaftPart.fillOpenings(moonshaftPart, collector, chunkRandom);
 		collector.addPiece(moonshaftPart);
 		return y;

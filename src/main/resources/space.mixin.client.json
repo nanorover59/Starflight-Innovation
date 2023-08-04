@@ -10,7 +10,8 @@
     "BlockModelRendererMixin",
     "CameraMixin",
     "InGameHudMixin",
-    "KeyBindingMixin"
+    "KeyBindingMixin",
+    "ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 0

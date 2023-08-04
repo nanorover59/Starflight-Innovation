@@ -3,6 +3,9 @@ package space.planet;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.UUID;
 
 import com.google.gson.stream.JsonReader;
 
@@ -22,17 +25,23 @@ import space.util.IWorldMixin;
 
 public class PlanetList
 {
+	private static HashMap<String, ArrayList<String>> unlocked = new HashMap<String, ArrayList<String>>();
 	private static ArrayList<Planet> planetList = new ArrayList<Planet>();
 	private static int timeSteps = 1;
 	
 	/**
 	 * Register all planets.
 	 */
-	public static void initialize(ResourceManager manager)
+	public static void initialize(MinecraftServer server)
 	{
 		planetList.clear();
-
-		for(Identifier id : manager.findResources("planet", path -> path.getPath().endsWith(".json")).keySet())
+		
+		for(World world : server.getWorlds())
+			((IWorldMixin) (Object) world).clearPlanetDimensionData();
+		
+		ResourceManager manager = server.getResourceManager();
+		
+		for(Identifier id : manager.findResources("planets", path -> path.getPath().endsWith(".json")).keySet())
 		{
 			try(InputStream stream = manager.getResource(id).get().getInputStream())
 			{
@@ -56,8 +65,8 @@ public class PlanetList
 				boolean drawClouds = false;
 				double cloudRotationRate = 0.0;
 				PlanetDimensionData orbit = null;
-				PlanetDimensionData surface1 = null;
-				PlanetDimensionData surface2 = null;
+				PlanetDimensionData surface = null;
+				PlanetDimensionData sky = null;
 				reader.beginObject();
 
 				while(reader.hasNext())
@@ -147,18 +156,18 @@ public class PlanetList
 							reader.endObject();
 							Identifier identifier = new Identifier(dimensionID);
 							boolean isOrbit = name1.equals("orbit");
-							boolean isSurface2 = name1.equals("surface2");
-							PlanetDimensionData dimensionData = new PlanetDimensionData(identifier, isOrbit, isSurface2, overridePhysics, overrideSky, isCloudy, hasLowClouds, hasWeather, hasOxygen, temperatureCategory, pressure);
+							boolean isSky = name1.equals("sky");
+							PlanetDimensionData dimensionData = new PlanetDimensionData(identifier, isOrbit, isSky, overridePhysics, overrideSky, isCloudy, hasLowClouds, hasWeather, hasOxygen, temperatureCategory, pressure);
 							
 							if(name1.equals("orbit"))
 								orbit = dimensionData;
-							else if(name1.equals("surface1"))
+							else if(name1.equals("surface"))
 							{
-								surface1 = dimensionData;
+								surface = dimensionData;
 								surfacePressure = pressure;
 							}
-							else if(name1.equals("surface2"))
-								surface2 = dimensionData;
+							else if(name1.equals("sky"))
+								sky = dimensionData;
 						}
 
 						reader.endArray();
@@ -169,6 +178,7 @@ public class PlanetList
 				}
 
 				reader.endObject();
+				reader.close();
 
 				if(!name.equals("null"))
 				{
@@ -180,11 +190,11 @@ public class PlanetList
 					if(orbit != null)
 						planet.setOrbit(orbit);
 
-					if(surface1 != null)
-						planet.setSurface1(surface1);
+					if(surface != null)
+						planet.setSurface(surface);
 
-					if(surface2 != null)
-						planet.setSurface2(surface2);
+					if(sky != null)
+						planet.setSky(sky);
 
 					planetList.add(planet);
 				}
@@ -257,7 +267,7 @@ public class PlanetList
 	 */
 	public static RegistryKey<World> getPlanetWorldKey(Planet p)
 	{
-		return p.getSurface1().getWorldKey();
+		return p.getSurface().getWorldKey();
 	}
 	
 	/**
@@ -289,7 +299,22 @@ public class PlanetList
 	 */
 	public static boolean hasSurface(Planet planet)
 	{
-		return planet.getSurface1() != null;
+		return planet.getSurface() != null;
+	}
+	
+	/**
+	 * Unlock a planet in the planetarium for a player.
+	 */
+	public static void unlock(UUID playerUUID, String planetName)
+	{
+		String uuid = playerUUID.toString();
+		ArrayList<String> list = new ArrayList<String>();
+		
+		if(unlocked.containsKey(uuid))
+			list = unlocked.get(uuid);
+		
+		list.add(planetName);
+		unlocked.put(uuid, list);
 	}
 	
 	/**
@@ -304,6 +329,12 @@ public class PlanetList
 		
 		data.setValue("planetCount", planetList.size());
 		data.setValue("timeSteps", timeSteps);
+		DataCompound unlockedData = new DataCompound();
+		
+		for(String uuid : unlocked.keySet())
+			unlockedData.setValue(uuid, unlocked.get(uuid).toArray());
+		
+		data.setValue("unlocked", unlockedData);
 		return data;
 	}
 	
@@ -314,6 +345,7 @@ public class PlanetList
 	{
 		Planet centerPlanet = getByName("sol");
 		ArrayList<String> checkList = new ArrayList<String>();
+		unlocked.clear();
 		
 		if(data != null && data.hasName("planetCount"))
 		{
@@ -327,6 +359,17 @@ public class PlanetList
 		}
 		else
 			centerPlanet.setInitialPositionAndVelocity(checkList);
+		
+		if(data != null && data.hasName("unlocked"))
+		{
+			DataCompound unlockedData = data.getDataCompound("unlocked");
+			
+			if(unlockedData != null)
+			{
+				for(String uuid : unlockedData.getNames())
+					unlocked.put(uuid, new ArrayList<String>(Arrays.asList(unlockedData.getStringArray(uuid))));
+			}
+		}
 	}
 	
 	/**
@@ -338,6 +381,7 @@ public class PlanetList
 		{
 			PacketByteBuf buffer = PacketByteBufs.create();
 			PlanetDimensionData data = getDimensionDataForWorld(player.world);
+			ArrayList<String> unlockedPlanets = unlocked.get(player.getUuidAsString());
 			
 			if(data == null)
 			{
@@ -383,6 +427,7 @@ public class PlanetList
 				buffer.writeDouble(p.getPrecession());
 				buffer.writeDouble(p.getCloudRotation());
 				buffer.writeInt(p.getCloudLevel());
+				buffer.writeBoolean(unlockedPlanets.contains(p.getName()));
 			}
 			
 			ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "planet_data"), buffer);

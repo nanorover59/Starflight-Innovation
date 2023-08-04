@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a",
+        "a "
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        }
+    },
+    "result": {
+        "item": "space:aluminum_shaft",
+        "count": 4
+    }
+}

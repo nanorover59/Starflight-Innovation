@@ -1,0 +1,45 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+  	{
+      "rolls": 8,
+      "bonus_rolls": 8,
+      "entries": [
+        {
+          "type": "loot_table",
+          "weight": 10,
+          "name": "space:chests/equipment"
+        },
+        {
+          "type": "loot_table",
+          "weight": 20,
+          "name": "space:chests/construction"
+        },
+        {
+          "type": "loot_table",
+          "weight": 20,
+          "name": "space:chests/agriculture"
+        },
+        {
+          "type": "loot_table",
+          "weight": 20,
+          "name": "space:chests/forestry"
+        },
+        {
+          "type": "loot_table",
+          "weight": 20,
+          "name": "space:chests/crafting"
+        },
+        {
+          "type": "loot_table",
+          "weight": 1,
+          "name": "space:chests/beverages"
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 20
+        }
+      ]
+    }
+  ]
+}

@@ -85,20 +85,6 @@ public class MultimeterItem extends Item
         		if(chargeCapacity > 0)
         			text.append(String.valueOf(df.format((charge / chargeCapacity) * 100)) + "%");
         	}
-        	else if(blockState.getBlock() instanceof SolarPanelBlock)
-        	{
-        		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
-    			double solarMultiplier = 1.0;
-    			
-    			if(data != null)
-    				solarMultiplier = data.getPlanet().getSolarMultiplier() * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit() ? world.getRainGradient(1.0f) : 0.0f)));
-    			else
-    				solarMultiplier = 1.0f - world.getRainGradient(1.0f);
-    			
-        		text.append(Text.translatable("block.space.energy_producer"));
-        		text.append(String.valueOf(df.format(((EnergyBlock) blockState.getBlock()).getPowerOutput(world, position, blockState) * solarMultiplier)));
-        		text.append("kJ/s");
-        	}
         	else if(producer != null)
         	{
         		text.append(Text.translatable("block.space.energy_producer"));

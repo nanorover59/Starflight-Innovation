@@ -16,6 +16,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.StarflightBlocks;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -42,15 +43,17 @@ public abstract class FluidStateMixin
 			if(temperature != Planet.TEMPERATE && !world.getBiome(pos).isIn(StarflightWorldGeneration.LIQUID_WATER))
 			{
 				boolean air = false;
-				float chance = temperature == Planet.EXTRA_COLD ? 0.5f : 0.05f;
+				float chance = temperature == Planet.EXTRA_COLD ? 0.05f : 0.005f;
 
 				for(Direction d1 : Direction.values())
 				{
-					if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR && (world.getFluidState(pos.offset(d1, -1)).getFluid() != Fluids.WATER || world.getBlockState(pos.up()).getBlock() == Blocks.AIR))
+					if(world.getBlockState(pos.offset(d1)).getBlock() == Blocks.AIR)
 					{
 						air = true;
 						break;
 					}
+					else if(world.getBlockState(pos.offset(d1)).getBlock() == StarflightBlocks.HABITABLE_AIR)
+						break;
 				}
 
 				if(air)

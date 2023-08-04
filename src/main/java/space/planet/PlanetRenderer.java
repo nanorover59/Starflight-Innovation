@@ -40,11 +40,12 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	private boolean drawClouds;
 	private double cloudRotation;
 	private int cloudLevel;
+	private boolean unlocked;
 	
 	private static final Identifier PLANET_SHADING = new Identifier(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
-	public PlanetRenderer(String name_, double obliquity_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_)
+	public PlanetRenderer(String name_, double obliquity_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_, boolean unlocked_)
 	{
 		name = name_;
 		setObliquity(obliquity_);
@@ -55,6 +56,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setWeather(hasWeather_);
 		setSimpleTexture(simpleTexture_);
 		setDrawClouds(drawClouds_);
+		setUnlocked(unlocked_);
 	}
 	
 	public PlanetRenderer(PlanetRenderer other)
@@ -77,6 +79,7 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		setDrawClouds(other.drawClouds);
 		setCloudRotation(other.cloudRotation);
 		setCloudLevel(other.cloudLevel);
+		setUnlocked(other.unlocked);
 	}
 	
 	@Override
@@ -284,6 +287,16 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	public void setCloudLevel(int cloudLevel)
 	{
 		this.cloudLevel = cloudLevel;
+	}
+	
+	public boolean isUnlocked()
+	{
+		return unlocked;
+	}
+
+	public void setUnlocked(boolean unlocked)
+	{
+		this.unlocked = unlocked;
 	}
 	
 	/**

@@ -1,0 +1,28 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "cac",
+        "dbe"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_block"
+        },
+        "b": {
+            "item": "minecraft:obsidian"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        },
+        "d": {
+            "item": "space:oxygen_pipe"
+        },
+        "e": {
+            "item": "space:hydrogen_pipe"
+        }
+    },
+    "result": {
+        "item": "space:thruster_initial",
+        "count": 1
+    }
+}

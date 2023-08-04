@@ -25,6 +25,8 @@ import net.minecraft.world.WorldAccess;
 import space.block.entity.SolarHubBlockEntity;
 import space.client.StarflightModClient;
 import space.energy.EnergyNet;
+import space.planet.PlanetDimensionData;
+import space.planet.PlanetList;
 import space.util.BlockSearch;
 
 public class SolarHubBlock extends BlockWithEntity implements EnergyBlock
@@ -80,10 +82,17 @@ public class SolarHubBlock extends BlockWithEntity implements EnergyBlock
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		
 		if(!world.getDimension().hasSkyLight() || !(blockEntity instanceof SolarHubBlockEntity))
-			return 0;
+			return 0.0;
 		else
 		{
 			SolarHubBlockEntity solarHub = (SolarHubBlockEntity) blockEntity;
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			double solarMultiplier = 1.0;
+			
+			if(data != null)
+				solarMultiplier = data.getPlanet().getSolarMultiplier() * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit()) ? world.getRainGradient(1.0f) : 0.0f));
+			else
+				solarMultiplier = 1.0f - world.getRainGradient(1.0f);
 			
 			// Calculate the output of this solar panel at Earth's distance to to the sun taking the sky angle into account.
 			float f = world.getSkyAngle(1.0f);
@@ -91,7 +100,7 @@ public class SolarHubBlock extends BlockWithEntity implements EnergyBlock
 			float highLimit2 = 1.0f - highLimit1;
 			float lowLimit1 = 0.25f;
 			float lowLimit2 = 1.0f - lowLimit1;
-			double nominal = NOMINAL_OUTPUT * solarHub.getPanelCount() * solarHub.getPowerFraction();
+			double nominal = NOMINAL_OUTPUT * solarHub.getPanelCount() * solarHub.getPowerFraction() * solarMultiplier;
 			
 			if(f < highLimit1 || f > highLimit2)
 				return nominal;
@@ -171,6 +180,7 @@ public class SolarHubBlock extends BlockWithEntity implements EnergyBlock
 				SolarHubBlockEntity solarHub = (SolarHubBlockEntity) blockEntity;
 				solarHub.setPanelCount(panelCount);
 				solarHub.setPowerFraction(1.0 / hubList.size());
+				solarHub.markDirty();
 			}
 		}
 	}

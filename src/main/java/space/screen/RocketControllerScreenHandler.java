@@ -8,7 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import space.client.StarflightModClient;
-import space.item.StarflightItems;
+import space.item.ArrivalCardItem;
+import space.item.NavigationCardItem;
 
 public class RocketControllerScreenHandler extends ScreenHandler
 {
@@ -91,7 +92,7 @@ public class RocketControllerScreenHandler extends ScreenHandler
 
 		public static boolean matches(ItemStack stack)
 		{
-			return stack.isOf(StarflightItems.NAVIGATION_CARD) && stack.hasNbt();
+			return stack.getItem() instanceof NavigationCardItem && stack.hasNbt();
 		}
 
 		@Override
@@ -116,7 +117,7 @@ public class RocketControllerScreenHandler extends ScreenHandler
 
 		public static boolean matches(ItemStack stack)
 		{
-			return stack.isOf(StarflightItems.ARRIVAL_CARD) && stack.hasNbt();
+			return stack.getItem() instanceof ArrivalCardItem && stack.hasNbt();
 		}
 
 		@Override

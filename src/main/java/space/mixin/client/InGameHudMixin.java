@@ -26,8 +26,6 @@ import space.StarflightMod;
 import space.entity.RocketEntity;
 import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
-import space.planet.PlanetDimensionData;
-import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
 @Mixin(InGameHud.class)
@@ -91,8 +89,7 @@ public abstract class InGameHudMixin
 	            
 	            info.cancel();
 			}
-			
-			if(!client.player.getAbilities().creativeMode)
+			else if(!client.player.isCreative() && !client.player.isSpectator())
 			{
 				for(ItemStack stack : client.player.getArmorItems())
 				{

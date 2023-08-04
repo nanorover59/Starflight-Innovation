@@ -94,9 +94,9 @@ public class DustEntity extends HostileEntity
         
         if(world.isClient)
         {
-        	int maxParticles = stamina < 10 ? 8 : 4;
+        	int maxParticles = stamina < 10 ? 4 : 2;
         	
-        	for(int i = 0; i < random.nextBetween(2, maxParticles); i++)
+        	for(int i = 0; i < random.nextBetween(1, maxParticles); i++)
         	{
         		double x = getPos().getX() + random.nextDouble() - random.nextDouble();
         		double y = getPos().getY() + random.nextDouble() * 2.8;

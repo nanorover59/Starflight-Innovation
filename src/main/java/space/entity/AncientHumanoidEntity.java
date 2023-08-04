@@ -4,11 +4,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.HuskEntity;
 import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
@@ -21,10 +23,17 @@ import space.util.StarflightEffects;
 
 public class AncientHumanoidEntity extends ZombieEntity
 {
+	private static final Item[] HELD_ITEMS = {StarflightItems.TITANIUM_PICKAXE, StarflightItems.TITANIUM_SWORD, StarflightItems.WRENCH};
+	
 	public AncientHumanoidEntity(EntityType<? extends AncientHumanoidEntity> entityType, World world)
 	{
 		super((EntityType<? extends ZombieEntity>) entityType, world);
 	}
+	
+	public static DefaultAttributeContainer.Builder createSolarSpectreAttributes()
+	{
+        return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 60.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.0f).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
+    }
 
 	public static boolean canSpawn(EntityType<HuskEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
 	{
@@ -52,13 +61,13 @@ public class AncientHumanoidEntity extends ZombieEntity
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source)
 	{
-		return SoundEvents.ENTITY_ARMOR_STAND_HIT;
+		return SoundEvents.ENTITY_GENERIC_HURT;
 	}
 
 	@Override
 	protected SoundEvent getDeathSound()
 	{
-		return SoundEvents.ENTITY_ARMOR_STAND_HIT;
+		return SoundEvents.ENTITY_GENERIC_DEATH;
 	}
 
 	@Override
@@ -81,13 +90,8 @@ public class AncientHumanoidEntity extends ZombieEntity
 		return bl;
 	}
 	
-	public void initEquipment()
-	{
-		initEquipment(this.getRandom(), this.getWorld().getLocalDifficulty(this.getBlockPos()));
-	}
-	
 	@Override
-	protected void initEquipment(Random random, LocalDifficulty localDifficulty)
+	public void initEquipment(Random random, LocalDifficulty localDifficulty)
 	{
 		this.equipStack(EquipmentSlot.HEAD, new ItemStack(StarflightItems.SPACE_SUIT_HELMET));
 		this.equipStack(EquipmentSlot.CHEST, new ItemStack(StarflightItems.SPACE_SUIT_CHESTPLATE));
@@ -95,7 +99,7 @@ public class AncientHumanoidEntity extends ZombieEntity
 		this.equipStack(EquipmentSlot.FEET, new ItemStack(StarflightItems.SPACE_SUIT_BOOTS));
 		
 		if(random.nextInt(4) == 0)
-			this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(Items.DIAMOND_PICKAXE));
+			this.equipStack(EquipmentSlot.MAINHAND, new ItemStack(HELD_ITEMS[random.nextInt(HELD_ITEMS.length)]));
 	}
 
 	@Override

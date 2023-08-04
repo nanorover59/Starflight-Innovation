@@ -29,13 +29,14 @@ import net.minecraft.client.render.WorldRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.CubicSampler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import space.StarflightMod;
-import space.client.StarflightModClient;
+import space.client.render.StarflightSkyFeatures;
 import space.planet.PlanetRenderList;
 import space.planet.PlanetRenderer;
 
@@ -81,10 +82,6 @@ public abstract class WorldRendererMixin
 			double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
 			
 			// Setup for sky rendering.
-			Vec3d vec3d = starrySky ? new Vec3d(0.0f, 0.0f, 0.0f) : this.world.getSkyColor(this.client.gameRenderer.getCamera().getPos(), tickDelta);
-			float skyR = (float) vec3d.x;
-			float skyG = (float) vec3d.y;
-			float skyB = (float) vec3d.z;
 			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
 			BackgroundRenderer.setFogBlack();
 			BackgroundRenderer.clearFog();
@@ -126,12 +123,12 @@ public abstract class WorldRendererMixin
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
-				StarflightModClient.milkyWay.bind();
-				StarflightModClient.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
+				StarflightSkyFeatures.milkyWay.bind();
+				StarflightSkyFeatures.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
-				StarflightModClient.stars.bind();
-				StarflightModClient.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
+				StarflightSkyFeatures.stars.bind();
+				StarflightSkyFeatures.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexShader());
 	            VertexBuffer.unbind();
 			}
 			
@@ -150,61 +147,101 @@ public abstract class WorldRendererMixin
 			RenderSystem.disableTexture();
 			
 			// Apply the bloom shader effect for players with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightModClient.bloomShader != null && starFactor > 0.5f)
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightSkyFeatures.bloomShader != null && starFactor > 0.5f)
 			{
-				StarflightModClient.bloomShader.render(tickDelta);
+				StarflightSkyFeatures.bloomShader.render(tickDelta);
 				client.getFramebuffer().beginWrite(false);
 			}
 			
 			// Apply the sky color on atmospheric planets.
 			if(!starrySky)
 			{
+				Vec3d skyRGB = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
+				float skyR = (float) skyRGB.getX();
+				float skyG = (float) skyRGB.getY();
+				float skyB = (float) skyRGB.getZ();
+				float v = MathHelper.clamp(MathHelper.cos(world.getSkyAngle(tickDelta) * ((float)Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
+				Vec3d vec3d = client.gameRenderer.getCamera().getPos().subtract(2.0, 2.0, 2.0).multiply(0.25);
+				Vec3d fogRGB = CubicSampler.sampleColor(vec3d, (x, y, z) -> world.getDimensionEffects().adjustFogColor(Vec3d.unpackRgb(client.world.getBiomeForNoiseGen(x, y, z).value().getFogColor()), v));
+				float fogR = (float) fogRGB.getX();
+				float fogG = (float) fogRGB.getY();
+				float fogB = (float) fogRGB.getZ();
+				float rain = world.getRainGradient(tickDelta);
+				float thunder = world.getThunderGradient(tickDelta);
+				float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
+	            
+				if(rain > 0.0f)
+				{
+					float rgFactor = 1.0f - rain * 0.5f;
+					float bFactor = 1.0f - rain * 0.4f;
+					fogR *= rgFactor;
+					fogG *= rgFactor;
+					fogB *= bFactor;
+				}
+				
+				if(thunder > 0.0f)
+				{
+					float factor = 1.0f - rain * 0.5f;
+					fogR *= factor;
+					fogG *= factor;
+					fogB *= factor;
+				}
+				
 				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
-				RenderSystem.setShaderColor(skyR, skyG, skyB, 0.8f);
-				RenderSystem.setShader(GameRenderer::getPositionShader);
-				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-				bufferBuilder.vertex(projectionMatrix, -10.0f, -10.0f, 0.0f).next();
-				bufferBuilder.vertex(projectionMatrix, 10.0f, -10.0f, 0.0f).next();
-				bufferBuilder.vertex(projectionMatrix, 10.0f, 10.0f, 0.0f).next();
-				bufferBuilder.vertex(projectionMatrix, -10.0f, 10.0f, 0.0f).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
-			}
-			
-			// Render the sunset effect on atmospheric planets.
-			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-			float skyAngle = (float) trueAzimuth;
-			float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
-			float t;
-			float p;
-			float q;
-			float r;
-			
-			if(fs != null && !starrySky)
-			{
 				RenderSystem.setShader(GameRenderer::getPositionColorShader);
 				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-				matrices.push();
-				matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(90.0f));
-				s = MathHelper.sin(skyAngle) < 0.0f ? 180.0f : 0.0f;
-				matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(s));
-				matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(270.0f));
-				float k = fs[0];
-				t = fs[1];
-				float m = fs[2];
-				Matrix4f matrix4f2 = matrices.peek().getPositionMatrix();
-				bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-				bufferBuilder.vertex(matrix4f2, 0.0f, 100.0f, 0.0f).color(k, t, m, fs[3]).next();
-
-				for(int o = 0; o <= 16; o++)
+				Matrix4f matrix4f = matrices.peek().getPositionMatrix();
+		        bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+		        bufferBuilder.vertex(matrix4f, 0.0f, 16.0f, 0.0f).color(skyR, skyG, skyB, 0.8f).next();
+		        
+		        for(int i = 0; i <= 16; i++)
 				{
-					p = (float) o * 6.2831855f / 16.0f;
-					q = MathHelper.sin(p);
-					r = MathHelper.cos(p);
-					bufferBuilder.vertex(matrix4f2, q * 120.0f, r * 120.0f, -r * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).next();
+					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+					float sinTheta = MathHelper.sin(theta);
+					float cosTheta = MathHelper.cos(theta);
+		        	bufferBuilder.vertex(matrix4f, range * cosTheta, 0.0f, range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
 				}
+		        
+		        BufferRenderer.drawWithShader(bufferBuilder.end());
+		        bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+		        bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).color(fogR, fogG, fogB, 0.8f).next();
+		        
+		        for(int i = 0; i <= 16; i++)
+				{
+					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+					float sinTheta = MathHelper.sin(theta);
+					float cosTheta = MathHelper.cos(theta);
+		        	bufferBuilder.vertex(matrix4f, range * cosTheta, 0.0f, -range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
+				}
+		        
+		        BufferRenderer.drawWithShader(bufferBuilder.end());
+		        
+				// Render the sunset effect.
+				float skyAngle = (float) trueAzimuth;
+				float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
+				
+				if(fs != null)
+				{
+					RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+					matrices.push();
+					matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(90.0f));
+		            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(MathHelper.sin(this.world.getSkyAngleRadians(tickDelta)) < 0.0f ? 180.0f : 0.0f));
+		            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(90.0f));
+		            matrix4f = matrices.peek().getPositionMatrix();
+					bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+					bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(fs[0], fs[1], fs[2], fs[3]).next();
 
-				BufferRenderer.drawWithShader(bufferBuilder.end());
-				matrices.pop();
+					for(int i = 0; i <= 16; i++)
+					{
+						float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+						float sinTheta = MathHelper.sin(theta);
+						float cosTheta = MathHelper.cos(theta);
+						bufferBuilder.vertex(matrix4f, sinTheta * 120.0f, cosTheta * 120.0f, -cosTheta * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f).next();
+					}
+
+					BufferRenderer.drawWithShader(bufferBuilder.end());
+					matrices.pop();
+				}
 			}
 			
 			// End of custom sky rendering.
@@ -225,19 +262,19 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderStars()V", at = @At("HEAD"))
 	public void renderStarsInject(CallbackInfo info)
 	{
-		StarflightModClient.initializeBuffers();
+		StarflightSkyFeatures.initializeBuffers();
 	}
 	
 	@Inject(method = "reload(Lnet/minecraft/resource/ResourceManager;)V", at = @At("TAIL"))
 	public void reloadInject(ResourceManager manager, CallbackInfo info)
 	{
-		StarflightModClient.loadBloomShader(client);
+		StarflightSkyFeatures.loadBloomShader(client);
 	}
 	
 	@Inject(method = "onResized(II)V", at = @At("TAIL"))
 	public void onResizedInject(int width, int height, CallbackInfo info)
 	{
-		if(StarflightModClient.bloomShader != null)
-			StarflightModClient.bloomShader.setupDimensions(width, height);
+		if(StarflightSkyFeatures.bloomShader != null)
+			StarflightSkyFeatures.bloomShader.setupDimensions(width, height);
 	}
 }

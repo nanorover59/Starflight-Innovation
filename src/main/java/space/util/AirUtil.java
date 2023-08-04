@@ -1,6 +1,8 @@
 package space.util;
 
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.BiPredicate;
 
 import net.minecraft.block.Block;
@@ -8,22 +10,30 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.block.PaneBlock;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.AtmosphereGeneratorBlock;
 import space.block.OxygenPipeBlock;
+import space.block.OxygenSensorBlock;
 import space.block.SealedDoorBlock;
 import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidContainerBlockEntity;
+import space.block.entity.LeakBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
 import space.planet.PlanetDimensionData;
 
 public class AirUtil
 {
-	public static final int MAX_VOLUME = 4096;
+	public static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(1); // For running habitable air updates in a separate thread. 
+	public static final int MAX_VOLUME = 262144;
 	
 	/**
 	 * Get the air resistance multiplier for the atmospheric conditions at the given location.
@@ -44,8 +54,15 @@ public class AirUtil
 	 */
 	public static boolean canEntityBreathe(LivingEntity entity, PlanetDimensionData data)
 	{
+		return canEntityBreathe(entity, entity.getBlockPos(), data);
+	}
+	
+	/**
+	 * Return true if the given entity can breathe at the given location.
+	 */
+	public static boolean canEntityBreathe(LivingEntity entity, BlockPos pos, PlanetDimensionData data)
+	{
 		World world = entity.getWorld();
-		BlockPos pos = entity.getBlockPos();
 		
 		if(data == null)
 			return true;
@@ -63,64 +80,152 @@ public class AirUtil
 	}
 	
 	/**
-	 * Find a closed volume that can be filled with habitable air.
+	 * Find a closed volume that can be filled with habitable air. Return true if one is found.
 	 */
-	public static void findVolume(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
+	public static boolean findVolume(World world, BlockPos position, ArrayList<BlockPos> checkList, ArrayList<BlockPos> updateList, int limit)
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {
 			return !airBlocking(w, p);
 		};
 		
-		BlockSearch.search(world, position, checkList, include, limit, true);
+		BiPredicate<World, BlockPos> passThrough = (w, p) -> {
+			return w.getBlockState(p).getBlock() != Blocks.AIR;
+		};
+		
+		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
+			return w.getBlockState(p).getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || w.getBlockState(p).getBlock() == StarflightBlocks.OXYGEN_SENSOR;
+		};
+		
+		return BlockSearch.passThroughSearch(world, position, checkList, updateList, include, edgeCase, passThrough, limit, true);
 	}
 	
 	/**
 	 * Fill the provided list of block positions with habitable air.
 	 */
-	public static void fillVolume(World world, ArrayList<BlockPos> posList)
+	public static void fillVolume(World world, ArrayList<BlockPos> posList, ArrayList<BlockPos> updateList)
 	{
 		for(BlockPos pos : posList)
 		{
-			if(world.getBlockState(pos).getBlock() == Blocks.AIR)
-				world.setBlockState(pos, StarflightBlocks.HABITABLE_AIR.getDefaultState());
+			BlockState blockState = world.getBlockState(pos);
+			
+			if(blockState.getBlock() == Blocks.AIR)
+				world.setBlockState(pos, StarflightBlocks.HABITABLE_AIR.getDefaultState(), Block.NOTIFY_LISTENERS);		
+		}
+		
+		for(BlockPos pos : updateList)
+		{
+			BlockState blockState = world.getBlockState(pos);
+			
+			if(blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR)
+				world.setBlockState(pos, (BlockState) blockState.with(AtmosphereGeneratorBlock.LIT, true));
+			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR)
+				world.setBlockState(pos, (BlockState) blockState.with(OxygenSensorBlock.LIT, true));
 		}
 	}
 	
 	/**
 	 * Remove habitable air blocks.
 	 */
-	public static void remove(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
+	public static void remove(World world, BlockPos position, int limit)
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {
 			BlockState blockState = w.getBlockState(p);
-			return blockState.getBlock() != Blocks.AIR && (!AirUtil.airBlocking(w, p) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR);
+			return blockState.getBlock() != Blocks.AIR && (!AirUtil.airBlocking(w, p) || blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR || blockState.getBlock() == StarflightBlocks.LEAK);
 		};
 		
-		BlockSearch.search(world, position, checkList, include, limit, true);
+		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR;
+		};
+		
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+		ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
+		BlockSearch.search(world, position, checkList, foundList, include, edgeCase, limit, true);
 		
 		for(BlockPos pos : checkList)
 		{
 			BlockState blockState = world.getBlockState(pos);
+			FluidState fluidState = world.getFluidState(pos);
+			
+			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR || blockState.getBlock() == StarflightBlocks.LEAK)
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+			else if(blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
+			{
+				if(blockState.isIn(BlockTags.SAPLINGS) && world.getRandom().nextBoolean())
+				{
+					world.setBlockState(pos, Blocks.DEAD_BUSH.getDefaultState(), Block.NOTIFY_LISTENERS);
+					continue;
+				}
+				
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+				Block.dropStacks(blockState, world, pos, world.getBlockEntity(pos));
+			}
+		}
+		
+		for(BlockPos pos : foundList)
+		{
+			BlockState blockState = world.getBlockState(pos);
+			
+			if(blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR)
+				world.setBlockState(pos, (BlockState) blockState.with(AtmosphereGeneratorBlock.LIT, false));
+			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR)
+				world.setBlockState(pos, (BlockState) blockState.with(OxygenSensorBlock.LIT, false));
+		}
+	}
+	
+	/**
+	 * Remove habitable air blocks or start a leak if there is a sufficient number of them.
+	 */
+	public static void removeOrLeak(World world, BlockPos position, BlockPos leakPosition, int leakTime, int limit)
+	{
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() != Blocks.AIR && (!AirUtil.airBlocking(w, p) || blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR);
+		};
+		
+		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR;
+		};
+		
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+		ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
+		BlockSearch.search(world, position, checkList, foundList, include, edgeCase, limit, true);
+		
+		if(leakTime > 1200)
+		{
+			createLeak(world, leakPosition, leakTime);
+			return;
+		}
+		
+		for(BlockPos pos : checkList)
+		{
+			BlockState blockState = world.getBlockState(pos);
+			FluidState fluidState = world.getFluidState(pos);
 			
 			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR)
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+			else if(blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
 			{
-				FluidState fluidState = world.getFluidState(pos);
-				world.setBlockState(pos, fluidState.getBlockState());
-				
-				/*for(Direction direction : Direction.values())
+				if(blockState.isIn(BlockTags.SAPLINGS) && world.getRandom().nextBoolean())
 				{
-					BlockPos offset = pos.offset(direction);
-					BlockState state = world.getBlockState(offset);
-					
-					if(state.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
-					{
-						world.removeBlock(offset, false);
-						Block.dropStacks(blockState, world, offset, world.getBlockEntity(offset));
-					}
-					else
-						state.neighborUpdate(world, offset, StarflightBlocks.HABITABLE_AIR, pos, true);
-				}*/
+					world.setBlockState(pos, Blocks.DEAD_BUSH.getDefaultState(), Block.NOTIFY_LISTENERS);
+					continue;
+				}
+				
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+				Block.dropStacks(blockState, world, pos, world.getBlockEntity(pos));
 			}
+		}
+		
+		for(BlockPos pos : foundList)
+		{
+			BlockState blockState = world.getBlockState(pos);
+			
+			if(blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR)
+				world.setBlockState(pos, (BlockState) blockState.with(AtmosphereGeneratorBlock.LIT, false));
+			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR)
+				world.setBlockState(pos, (BlockState) blockState.with(OxygenSensorBlock.LIT, false));
 		}
 	}
 	
@@ -139,14 +244,33 @@ public class AirUtil
 		
 		if(block == Blocks.AIR)
 			return false;
-		else if(block == StarflightBlocks.HABITABLE_AIR)
+		else if(block == StarflightBlocks.HABITABLE_AIR || block == StarflightBlocks.LEAK)
 			return true;
 		else if((block instanceof PaneBlock) && blockState.getMaterial() == Material.GLASS)
 			return true;
-		else if((block instanceof SealedDoorBlock) && !(blockState.get(SealedDoorBlock.OPEN) || blockState.get(SealedDoorBlock.POWERED)))
+		else if(block instanceof SealedDoorBlock && !blockState.get(SealedDoorBlock.OPEN))
+		{
+			Direction upOrDownDirection = blockState.get(SealedDoorBlock.HALF) == DoubleBlockHalf.UPPER ? Direction.DOWN : Direction.UP;
+			Direction direction1 = blockState.get(SealedDoorBlock.FACING).rotateYClockwise();
+			Direction direction2 = blockState.get(SealedDoorBlock.FACING).rotateYCounterclockwise();
+			BlockPos upOrDownPos = blockState.get(SealedDoorBlock.HALF) == DoubleBlockHalf.UPPER ? position.up() : position.down();
+			BlockPos side1 = position.offset(direction1.getOpposite());
+			BlockPos side2 = position.offset(direction2.getOpposite());
+			return world.getBlockState(upOrDownPos).isSideSolidFullSquare(world, upOrDownPos, upOrDownDirection) && world.getBlockState(side1).isSideSolidFullSquare(world, side1, direction1) && world.getBlockState(side2).isSideSolidFullSquare(world, side2, direction2);
+		}
+		else if(block instanceof SealedTrapdoorBlock && !blockState.get(SealedTrapdoorBlock.OPEN))
+		{
+			for(int i = 0; i < 4; i++)
+			{
+				Direction direction = Direction.fromHorizontal(i);
+				BlockPos pos = position.offset(direction);
+				
+				if(!world.getBlockState(pos).isSideSolidFullSquare(world, pos, direction.getOpposite()))
+					return false;	
+			}	
+			
 			return true;
-		else if((block instanceof SealedTrapdoorBlock) && !(blockState.get(SealedDoorBlock.OPEN) || blockState.get(SealedDoorBlock.POWERED)))
-			return true;
+		}
 		else
 			return blockState.isFullCube(world, position);
 	}
@@ -189,18 +313,22 @@ public class AirUtil
 		for(BlockPos pos : checkList)
 		{
 			BlockState blockState = world.getBlockState(pos);
+			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
-			if(blockState.getBlock() instanceof OxygenPipeBlock)
+			if(blockEntity != null)
 			{
-				FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(pos);
-				oxygen += blockEntity.getStoredFluid();
-			}
-			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
-			{
-				OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(pos);
-				
-				if(blockEntity.getFluidTankController() != null)
-					oxygen += blockEntity.getFluidTankController().getStoredFluid();
+				if(blockState.getBlock() instanceof OxygenPipeBlock)
+				{
+					FluidContainerBlockEntity fluidContainerBlockEntity = (FluidContainerBlockEntity) blockEntity;
+					oxygen += fluidContainerBlockEntity.getStoredFluid();
+				}
+				else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
+				{
+					OxygenOutletValveBlockEntity oxygenOutletValveBlockEntity = (OxygenOutletValveBlockEntity) blockEntity;
+					
+					if(oxygenOutletValveBlockEntity.getFluidTankController() != null)
+						oxygen += oxygenOutletValveBlockEntity.getFluidTankController().getStoredFluid();
+				}
 			}
 		}
 		
@@ -250,5 +378,17 @@ public class AirUtil
 				}
 			}
 		}
+	}
+	
+	public static void createLeak(World world, BlockPos pos, int leakTime)
+	{
+		BlockState blockState = world.getBlockState(pos);
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+        Block.dropStacks(blockState, world, pos, blockEntity, null, ItemStack.EMPTY);
+		world.setBlockState(pos, StarflightBlocks.LEAK.getDefaultState());
+		blockEntity = world.getBlockEntity(pos);
+
+		if(blockEntity instanceof LeakBlockEntity)
+			((LeakBlockEntity) blockEntity).setLeakTime(leakTime);
 	}
 }

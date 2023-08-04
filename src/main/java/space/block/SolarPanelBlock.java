@@ -1,7 +1,5 @@
 package space.block;
 
-import java.util.ArrayList;
-
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.Block;
@@ -23,7 +21,6 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.energy.EnergyNet;
 
 public class SolarPanelBlock extends Block implements Waterloggable
 {
@@ -94,22 +91,14 @@ public class SolarPanelBlock extends Block implements Waterloggable
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
 		if(!world.isClient())
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
 			SolarHubBlock.updateSolarPanels(world, pos);
-		}
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 		if(!world.isClient())
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
 			SolarHubBlock.updateSolarPanels(world, pos);
-		}
 	}
 	
 	@Override

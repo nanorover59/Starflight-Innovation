@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:titanium_ingot_from_blasting_deepslate_ilmenite_ore"
+    ]
+  },
+  "criteria": {
+    "has_deepslate_ilmenite_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:ilmenite_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:titanium_ingot_from_blasting_deepslate_ilmenite_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_deepslate_ilmenite_ore",
+      "has_the_recipe"
+    ]
+  ]
+}

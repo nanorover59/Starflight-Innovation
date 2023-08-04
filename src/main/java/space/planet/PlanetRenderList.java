@@ -42,10 +42,11 @@ public class PlanetRenderList
 			double precession = buffer.readDouble();
 			double cloudRotation = buffer.readDouble();
 			int cloudLevel = buffer.readInt();
+			boolean unlocked = buffer.readBoolean();
 			Vec3d position = new Vec3d(positionX, positionY, positionZ);
 			Vec3d surfaceViewpoint = new Vec3d(surfaceViewpointX, surfaceViewpointY, surfaceViewpointZ);
 			Vec3d parkingOrbitViewpoint = new Vec3d(parkingOrbitViewpointX, parkingOrbitViewpointY, parkingOrbitViewpointZ);
-			receivedData.add(new DynamicData(position, surfaceViewpoint, parkingOrbitViewpoint, precession, cloudRotation, cloudLevel, i == viewpointIndex));
+			receivedData.add(new DynamicData(position, surfaceViewpoint, parkingOrbitViewpoint, precession, cloudRotation, cloudLevel, unlocked, i == viewpointIndex));
 		}
 		
 		client.execute(() -> {
@@ -78,7 +79,7 @@ public class PlanetRenderList
 				
 				// Create the PlanetRenderer instance.
 				DynamicData data = dataBuffer.get(i);
-				PlanetRenderer planetRenderer = new PlanetRenderer(name, obliquity, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds);
+				PlanetRenderer planetRenderer = new PlanetRenderer(name, obliquity, radius, surfacePressure, hasLowClouds, hasCloudCover, hasWeather, simpleTexture, drawClouds, false);
 				planetRenderer.setPosition(data.position);
 				planetRenderer.setSurfaceViewpoint(data.surfaceViewpoint);
 				planetRenderer.setParkingOrbitViewpoint(data.parkingOrbitViewpoint);
@@ -87,6 +88,7 @@ public class PlanetRenderList
 				planetRenderer.setParkingOrbitViewpointPrevious(data.parkingOrbitViewpoint);
 				planetRenderer.setCloudRotation(data.cloudRotation);
 				planetRenderer.setCloudLevel(data.cloudLevel);
+				planetRenderer.setUnlocked(data.unlocked);
 				planetList.add(planetRenderer);
 				
 				if(data.isViewpoint)
@@ -114,6 +116,7 @@ public class PlanetRenderList
 				planetRenderer.setParkingOrbitViewpoint(data.parkingOrbitViewpoint);
 				planetRenderer.setCloudRotation(data.cloudRotation);
 				planetRenderer.setCloudLevel(data.cloudLevel);
+				planetRenderer.setUnlocked(data.unlocked);
 				
 				if(data.isViewpoint)
 				{
@@ -139,5 +142,5 @@ public class PlanetRenderList
 		return inOrbit;
 	}
 	
-	private record DynamicData(Vec3d position, Vec3d surfaceViewpoint, Vec3d parkingOrbitViewpoint, double precession, double cloudRotation, int cloudLevel, boolean isViewpoint) {}
+	private record DynamicData(Vec3d position, Vec3d surfaceViewpoint, Vec3d parkingOrbitViewpoint, double precession, double cloudRotation, int cloudLevel, boolean unlocked, boolean isViewpoint) {}
 }

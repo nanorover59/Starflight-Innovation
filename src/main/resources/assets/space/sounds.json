@@ -21,6 +21,12 @@
       "space:thruster3"
     ]
   },
+  "leak": {
+    "subtitle": "subtitles.space.leak",
+    "sounds": [
+      "space:leak"
+    ]
+  },
   "mars_wind": {
     "subtitle": "subtitles.space.wind",
     "sounds": [
@@ -35,6 +41,18 @@
       "space:noise1",
       "space:noise2",
       "space:noise3"
+    ]
+  },
+  "pew": {
+    "subtitle": "subtitles.space.pew",
+    "sounds": [
+      "space:pew"
+    ]
+  },
+  "hit": {
+    "subtitle": "subtitles.space.hit",
+    "sounds": [
+      "space:hit"
     ]
   }
 }

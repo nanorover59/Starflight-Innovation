@@ -10,7 +10,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Util;
 import space.client.StarflightModClient;
-import space.item.StarflightItems;
+import space.item.NavigationCardItem;
 import space.planet.Planet;
 import space.planet.PlanetList;
 
@@ -59,7 +59,7 @@ public class PlanetariumScreenHandler extends ScreenHandler
 		if(slot.id != 0)
 			return true;
 		else
-			return itemStack.getItem() == StarflightItems.NAVIGATION_CARD;
+			return itemStack.getItem() instanceof NavigationCardItem;
 	}
 
 	@Override
@@ -99,7 +99,7 @@ public class PlanetariumScreenHandler extends ScreenHandler
 		
 		ItemStack itemStack = getSlot(0).getStack();
 		
-		if(!itemStack.isEmpty() && itemStack.getItem() == StarflightItems.NAVIGATION_CARD)
+		if(!itemStack.isEmpty() && itemStack.getItem() instanceof NavigationCardItem)
 		{
 			Planet selectedPlanet = PlanetList.getPlanets().get(id);
 			NbtCompound nbt = new NbtCompound();
@@ -119,14 +119,14 @@ public class PlanetariumScreenHandler extends ScreenHandler
 		}
 
 		@Override
-		public boolean canInsert(ItemStack stack)
+		public boolean canInsert(ItemStack itemStack)
 		{
-			return CardSlot.matches(stack);
+			return CardSlot.matches(itemStack);
 		}
 
-		public static boolean matches(ItemStack stack)
+		public static boolean matches(ItemStack itemStack)
 		{
-			return stack.isOf(StarflightItems.NAVIGATION_CARD);
+			return itemStack.getItem() instanceof NavigationCardItem;
 		}
 
 		@Override

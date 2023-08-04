@@ -1,14 +1,9 @@
 package space.client;
 
-import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
-
-import com.google.gson.JsonSyntaxException;
-import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
@@ -17,7 +12,6 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleFactoryRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -25,18 +19,12 @@ import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderEffect;
-import net.minecraft.client.gl.VertexBuffer;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
+import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
@@ -47,6 +35,9 @@ import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
@@ -57,19 +48,22 @@ import space.client.gui.PlanetariumScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticles;
-import space.client.particle.ThrusterParticle;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
+import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
 import space.mixin.client.KeyBindingMixin;
+import space.planet.PlanetDimensionData;
+import space.planet.PlanetList;
 import space.planet.PlanetRenderList;
 import space.screen.BatteryScreenHandler;
 import space.screen.ElectricFurnaceScreenHandler;
@@ -108,11 +102,9 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
+	public static final EntityModelLayer MODEL_SOLAR_SPECTRE_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "solar_spectre"), "main");
 	
-	public static VertexBuffer stars;
-	public static VertexBuffer milkyWay;
-	
-	@Nullable public static ShaderEffect bloomShader;
+	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
 	@Override
 	public void onInitializeClient()
@@ -141,11 +133,11 @@ public class StarflightModClient implements ClientModInitializer
 		
 		// Client side item properties.
 		ColorProviderRegistry.ITEM.register(
-				(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : 0xFFFFFFF,
-				StarflightItems.SPACE_SUIT_HELMET,
-				StarflightItems.SPACE_SUIT_CHESTPLATE,
-				StarflightItems.SPACE_SUIT_LEGGINGS,
-				StarflightItems.SPACE_SUIT_BOOTS
+			(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : 0xFFFFFFF,
+			StarflightItems.SPACE_SUIT_HELMET,
+			StarflightItems.SPACE_SUIT_CHESTPLATE,
+			StarflightItems.SPACE_SUIT_LEGGINGS,
+			StarflightItems.SPACE_SUIT_BOOTS
 		);
 		
 		// GUIs
@@ -156,26 +148,31 @@ public class StarflightModClient implements ClientModInitializer
 		ScreenRegistry.register(BATTERY_SCREEN_HANDLER, BatteryScreen::new);
 		ScreenRegistry.register(ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
 		
-		// Particles
-		ParticleFactoryRegistry.getInstance().register(StarflightParticles.THRUSTER, ThrusterParticle.Factory::new);
-		
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.SOLAR_SPECTRE, (context) -> new SolarSpectreEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, StarflightModClient::getInnerArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_SOLAR_SPECTRE_LAYER, SolarSpectreEntityModel::getTexturedModelData);
+		
+		// Dimension Effects
+		registerDimensionEffect(new Identifier(StarflightMod.MOD_ID, "mars"), new Mars());
 		
 		// Client Tick Event
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
+			
+			// Update the planet render list.
 			PlanetRenderList.updateRenderers();
 			
+			// Rocket user input.
 			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
 			{
 				int throttleState = 0;
@@ -222,6 +219,29 @@ public class StarflightModClient implements ClientModInitializer
 				buffer.writeInt(pitchState);
 				buffer.writeInt(yawState);
 				ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
+			}
+			
+			// Weather particle effects.
+			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)
+			{
+				PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
+				
+				if(data != null && !data.isOrbit() && data.getPlanet().getName().equals("mars"))
+				{
+					Random random = client.world.random;
+					int count = 64 + random.nextInt(64);
+					int maxDistance = 16;
+					
+					for(int i = 0; i < count; i++)
+					{
+						double x = client.player.getX() - maxDistance + random.nextInt(maxDistance * 2);
+						double y = client.player.getY() - maxDistance + random.nextInt(maxDistance * 2);
+						double z = client.player.getZ() - maxDistance + random.nextInt(maxDistance * 2);
+						
+						if(client.world.isSkyVisible(new BlockPos(x, y, z)))
+							client.world.addParticle(StarflightParticles.MARS_DUST, x, y, z, -1.0 + random.nextDouble() * 2.0, -1.0 + random.nextDouble() * 2.0, -1.0 + random.nextDouble() * 2.0);
+					}
+				}
 			}
 		});
 	}
@@ -270,147 +290,54 @@ public class StarflightModClient implements ClientModInitializer
 			((KeyBindingMixin) key).callReset();
 	}
 	
-	public static void loadBloomShader(MinecraftClient client)
+	public static void registerDimensionEffect(Identifier dimensionType, DimensionEffects dimensionEffect)
 	{
-		if(bloomShader != null)
-			bloomShader.close();
-		
-		Logger logger = LogUtils.getLogger();
-        Identifier identifier = new Identifier("shaders/post/bloom.json");
-        
-        try
-        {
-        	bloomShader = new ShaderEffect(client.getTextureManager(), client.getResourceManager(), client.getFramebuffer(), identifier);
-        	bloomShader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
-        }
-        catch (IOException iOException)
-        {
-        	logger.warn("Failed to load shader: {}", (Object) identifier, (Object) iOException);
-            bloomShader = null;
-        }
-        catch (JsonSyntaxException jsonSyntaxException)
-        {
-        	logger.warn("Failed to parse shader: {}", (Object) identifier, (Object) jsonSyntaxException);
-            bloomShader = null;
-        }
+		dimensionEffects.put(dimensionType, dimensionEffect);
 	}
 	
-	public static void initializeBuffers()
+	public static DimensionEffects getDimensionEffect(Identifier dimensionType)
 	{
-		BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-		stars = buildStars(stars, bufferBuilder);
-		milkyWay = buildMilkyWay(milkyWay, bufferBuilder);
+		return dimensionEffects.get(dimensionType);
 	}
 	
-	private static VertexBuffer buildMilkyWay(VertexBuffer vertexBuffer, BufferBuilder bufferBuilder)
+	@Environment(value = EnvType.CLIENT)
+	public static class Mars extends DimensionEffects
 	{
-		if(vertexBuffer != null)
-			vertexBuffer.close();
-		
-		vertexBuffer = new VertexBuffer();
-		BuiltBuffer builtBuffer = wrapAroundSky(bufferBuilder, 64, 100.0f, 0.125f);
-		vertexBuffer.bind();
-		vertexBuffer.upload(builtBuffer);
-		return vertexBuffer;
-	}
-	
-	/**
-	 * Used to properly render the milky way wrapped around the sky.
-	 */
-	private static BuiltBuffer wrapAroundSky(BufferBuilder bufferBuilder, int segments, float radius, float textureRatio)
-	{
-		float height = radius * (float) Math.tan(Math.PI / segments) * (float) segments * textureRatio;
-		
-		bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-		
-		for(int i = 0; i < segments; i++)
+		public Mars()
 		{
-			double theta1 = (i * Math.PI * 2.0) / segments;
-			double theta2 = ((i + 1) * Math.PI * 2.0) / segments;
-			float y1 = radius * (float) Math.cos(theta1);
-			float z1 = radius * (float) Math.sin(theta1);
-			float y2 = radius * (float) Math.cos(theta2);
-			float z2 = radius * (float) Math.sin(theta2);
-			float u1 = (float) i / segments;
-			float u2 = (float) (i + 1) / segments;
-			
-			bufferBuilder.vertex(-height, y1, z1).texture(u1, 0.0f).next();
-			bufferBuilder.vertex(height, y1, z1).texture(u1, 1.0f).next();
-			bufferBuilder.vertex(height, y2, z2).texture(u2, 1.0f).next();
-			bufferBuilder.vertex(-height, y2, z2).texture(u2, 0.0f).next();
+			super(192.0f, true, SkyType.NORMAL, false, false);
 		}
-		
-		return bufferBuilder.end();
-	}
-	
-	private static VertexBuffer buildStars(VertexBuffer vertexBuffer, BufferBuilder bufferBuilder)
-	{
-		if(vertexBuffer != null)
-			vertexBuffer.close();
-		
-		vertexBuffer = new VertexBuffer();
-		BuiltBuffer builtBuffer = renderStars(bufferBuilder);
-		vertexBuffer.bind();
-		vertexBuffer.upload(builtBuffer);
-		return vertexBuffer;
-	}
-	
-	/**
-	 * Render textured stars to a vertex buffer. Used by the sky render inject.
-	 */
-	private static BuiltBuffer renderStars(BufferBuilder buffer)
-	{
-		Random random = Random.create(2048L);
-		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
-		for(int i = 0; i < 4000; i++)
+		@Override
+		public float[] getFogColorOverride(float skyAngle, float tickDelta)
 		{
-			int frame = 0;
-
-			while(random.nextFloat() < 0.2 && frame < 3)
-				frame++;
+			float g = MathHelper.cos(skyAngle * (float) (Math.PI * 2.0));
 			
-			double d = random.nextFloat() * 2.0f - 1.0f;
-			double e = random.nextFloat() * 2.0f - 1.0f;
-			double f = random.nextFloat() * 2.0f - 1.0f;
-			double g = 0.75f - (frame * 0.025f) + random.nextFloat() * 0.1f; // Star size.
-			double h = d * d + e * e + f * f;
-
-			if(h < 0.01 || h > 1.0)
-				continue;
-
-			h = 1.0 / Math.sqrt(h);
-			double j = (d *= h) * 100.0;
-			double k = (e *= h) * 100.0;
-			double l = (f *= h) * 100.0;
-			double m = Math.atan2(d, f);
-			double n = Math.sin(m);
-			double o = Math.cos(m);
-			double p = Math.atan2(Math.sqrt(d * d + f * f), e);
-			double q = Math.sin(p);
-			double r = Math.cos(p);
-			double s = random.nextDouble() * Math.PI * 2.0;
-			double t = Math.sin(s);
-			double u = Math.cos(s);
-			
-			double interval = 1.0f / 4.0f;
-			float startFrame = (float) (frame * interval);
-			float endFrame = (float) (startFrame + interval);
-
-			for(int v = 0; v < 4; v++)
+			if(g >= -0.4f && g <= 0.4f)
 			{
-				double x = (double) ((v & 2) - 1) * g;
-				double y = (double) ((v + 1 & 2) - 1) * g;
-				double aa = x * u - y * t;
-				double ac = y * u + x * t;
-				double ad = aa * q + 0.0 * r;
-				double ae = 0.0 * q - aa * r;
-				double af = ae * n - ac * o;
-				double ah = ac * n + ae * o;
-				buffer.vertex(j + af, k + ad, l + ah).texture(v == 0 || v == 3 ? endFrame : startFrame, v < 2 ? 0.0f : 1.0f).next();
+				float i = (g - -0.0f) / 0.4f * 0.5f + 0.5f;
+				float j = 1.0f - (1.0f - MathHelper.sin(i * (float) Math.PI)) * 0.99f;
+				float[] rgba = new float[4];
+				rgba[0] = 0.3f;
+				rgba[1] = i * i * 0.7f + 0.3f;
+				rgba[2] = i * 0.3f + 0.7f;
+				rgba[3] = j * j;
+				return rgba;
 			}
+			
+			return null;
 		}
 		
-		return buffer.end();
+		@Override
+		public Vec3d adjustFogColor(Vec3d color, float sunHeight)
+		{
+			return color.multiply(sunHeight * 0.94f + 0.06f, sunHeight * 0.94f + 0.06f, sunHeight * 0.91f + 0.09f);
+		}
+
+		@Override
+		public boolean useThickFog(int camX, int camY)
+		{
+			return false;
+		}
 	}
 }

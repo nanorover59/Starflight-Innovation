@@ -2,7 +2,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
         "bcb",
-        "dad",
+        "cac",
         "bcb"
     ],
     "key": {
@@ -13,10 +13,7 @@
             "item": "space:copper_cable"
         },
         "c": {
-            "item": "minecraft:iron_ingot"
-        },
-        "d": {
-            "item": "minecraft:diamond"
+            "item": "space:titanium_ingot"
         }
     },
     "result": {

@@ -1,12 +1,14 @@
 {
-  "structures" : [ {
-    "structure" : "space:moonshaft",
-    "weight" : 1
-  } ],
+  "structures" : [
+    {
+      "structure" : "space:moonshaft",
+      "weight" : 1
+    }
+  ],
   "placement" : {
     "salt" : 87396248,
-    "spacing" : 4,
-    "separation" : 2,
+    "spacing" : 24,
+    "separation" : 16,
     "type" : "minecraft:random_spread"
   }
 }

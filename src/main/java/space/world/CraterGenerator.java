@@ -20,6 +20,7 @@ import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.noise.NoiseConfig;
 import net.minecraft.world.gen.structure.Structure;
+import space.block.StarflightBlocks;
 
 public class CraterGenerator
 {
@@ -28,7 +29,7 @@ public class CraterGenerator
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		ChunkRandom random = context.random();
 		NoiseConfig noiseConfig = context.noiseConfig();	
-		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(),noiseConfig);
+		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(), noiseConfig);
 		int radius = 24 + random.nextInt(24);
 		double depthFactor = 0.5 + random.nextDouble() * 0.25;
 		double rimWidth = 0.5 + random.nextDouble() * 0.15;
@@ -46,7 +47,7 @@ public class CraterGenerator
 				if(MathHelper.hypot(x, z) <= chunkRadius)
 				{
 					BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
-					holder.addPiece(new Piece(startPos, center.getX(), center.getZ(), radius, depthFactor, rimWidth, rimSteepness));
+					holder.addPiece(new Piece(startPos, center.getX(), center.getY(), center.getZ(), radius, depthFactor, rimWidth, rimSteepness));
 				}
 			}
 		}
@@ -55,16 +56,18 @@ public class CraterGenerator
 	public static class Piece extends StructurePiece
 	{
 		private final int centerX;
+		private final int centerY;
 		private final int centerZ;
 		private final int radius;
 		private final double depthFactor;
 		private final double rimWidth;
 		private final double rimSteepness;
 		
-		public Piece(BlockPos start, int x, int z, int radius, double depthFactor, double rimWidth, double rimSteepness)
+		public Piece(BlockPos start, int x, int y, int z, int radius, double depthFactor, double rimWidth, double rimSteepness)
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, 0, new BlockBox(start));
 			this.centerX = x;
+			this.centerY = y;
 			this.centerZ = z;
 			this.radius = radius;
 			this.depthFactor = depthFactor;
@@ -76,6 +79,7 @@ public class CraterGenerator
 		{
 			super(StarflightWorldGeneration.CRATER_PIECE, nbt);
 			this.centerX  = nbt.getInt("x");
+			this.centerY  = nbt.getInt("y");
 			this.centerZ = nbt.getInt("z");
 			this.radius = nbt.getInt("radius");
 			this.depthFactor = nbt.getDouble("depthFactor");
@@ -87,6 +91,7 @@ public class CraterGenerator
 		protected void writeNbt(StructureContext context, NbtCompound nbt)
 		{
 			nbt.putInt("x", this.centerX);
+			nbt.putInt("y", this.centerY);
 			nbt.putInt("z", this.centerZ);
 			nbt.putInt("radius", radius);
 			nbt.putDouble("depthFactor", depthFactor);
@@ -97,7 +102,7 @@ public class CraterGenerator
 		@Override
 		protected boolean canReplace(BlockState state)
 		{
-			return true;
+			return false;
 		}
 
 		@Override
@@ -105,6 +110,9 @@ public class CraterGenerator
 		{
 			BlockPos.Mutable mutable = new BlockPos.Mutable();
 			BlockPos startPos = chunkPos.getBlockPos(0, 0, 0);
+			BlockPos center = new BlockPos(centerX, centerY, centerZ);
+			boolean hasIce = world.getBiome(center).isIn(StarflightWorldGeneration.ICE_CRATERS);
+			int iceY = Math.max(36, center.getY());
 			
 			for(int x = 0; x < 16; x++)
 			{
@@ -117,22 +125,27 @@ public class CraterGenerator
 					while(!world.getBlockState(mutable).getMaterial().blocksMovement() && mutable.getY() > 0)
 						mutable.setY(mutable.getY() - 1);
 					
-					BlockState surfaceState = world.getBlockState(mutable);	
+					mutable.up();
 					double r = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ) / radius;
-					double parabola = r * r - 1.0;
-					double rimR = Math.min(r - rimWidth - 1.0, 0.0);
-					double rim = rimR * rimR * rimSteepness;
-					double shape = smoothMin(parabola, rim, 0.5);
-					shape = smoothMax(shape, -depthFactor, 0.5);
 					localSurfaceY = mutable.getY();
-					int y = localSurfaceY + (int) (shape * radius);
+					int y = localSurfaceY + getCraterDepth(r);
+					BlockState surfaceState = world.getBlockState(mutable);
+					
+					if(hasIce && y <= iceY && surfaceState.getBlock() == StarflightBlocks.REGOLITH)
+						surfaceState = StarflightBlocks.ICY_REGOLITH.getDefaultState();
 					
 					if(y < localSurfaceY)
 					{
 						for(int i = y; i < localSurfaceY + 6; i++)
 						{
 							mutable.setY(i);
-							world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+							
+							if(hasIce && i == iceY)
+								world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
+							else if(hasIce && i < iceY)
+								world.setBlockState(mutable, random.nextBoolean() ? Blocks.ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState(), Block.NOTIFY_LISTENERS);
+							else
+								world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 						}
 						
 						mutable.setY(y - 1);
@@ -150,6 +163,16 @@ public class CraterGenerator
 					}
 				}
 			} 
+		}
+		
+		private int getCraterDepth(double r)
+		{
+			double parabola = r * r - 1.0;
+			double rimR = Math.min(r - rimWidth - 1.0, 0.0);
+			double rim = rimR * rimR * rimSteepness;
+			double shape = smoothMin(parabola, rim, 0.5);
+			shape = smoothMax(shape, -depthFactor, 0.5);
+			return (int) (shape * radius);
 		}
 		
 		private double smoothMin(double a, double b, double c)

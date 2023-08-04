@@ -55,9 +55,7 @@ public class MoonSurfaceBuilder extends CustomSurfaceBuilder
 		
 		for(int y = surfaceY; y > region.getBottomY(); y--)
 		{
-			if(biome == StarflightBiomes.MOON_ICE && blockColumn.getState(y).getBlock() == Blocks.AIR && (blockColumn.getState(y - 1).getBlock() == Blocks.STONE || blockColumn.getState(y + 1).getBlock() == Blocks.STONE))
-				blockColumn.setState(y, region.getRandom().nextBoolean() ? (y > -40 ? Blocks.ICE.getDefaultState() : Blocks.AIR.getDefaultState()) : Blocks.PACKED_ICE.getDefaultState());
-			else if(blockColumn.getState(y + 1).getBlock() == Blocks.AIR && blockColumn.getState(y).getBlock() == Blocks.STONE)
+			if(blockColumn.getState(y + 1).getBlock() == Blocks.AIR && blockColumn.getState(y).getBlock() == Blocks.STONE)
 				blockColumn.setState(y, region.getRandom().nextBoolean() ? (region.getRandom().nextBoolean() ? Blocks.COBBLESTONE.getDefaultState() : Blocks.GRAVEL.getDefaultState()) : Blocks.STONE.getDefaultState());	
 		}
 	}

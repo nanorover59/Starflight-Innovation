@@ -1,6 +1,9 @@
 package space.util;
 
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 public class VectorMathUtil
 {
@@ -58,5 +61,44 @@ public class VectorMathUtil
 	    	result = 2.0d * Math.PI - result;
 		
 		return result;
+	}
+	
+	public static float lengthFloat(Vec3f v)
+	{
+		return (float) Math.sqrt(Math.pow(v.getX(), 2.0) + Math.pow(v.getY(), 2.0) + Math.pow(v.getZ(), 2.0));
+	}
+	
+	public static float difference(Quaternion q0, Quaternion q1)
+	{
+		double dot = q0.getX() * q1.getX() + q0.getY() * q1.getY() + q0.getZ() * q1.getZ() + q0.getW() * q1.getW();
+		return (float) Math.acos(2.0 * dot * dot - 1.0);
+	}
+	
+	public static Quaternion interpolate(Quaternion q0, Quaternion q1, float t)
+	{
+		float dot = q0.getX() * q1.getX() + q0.getY() * q1.getY() + q0.getZ() * q1.getZ() + q0.getW() * q1.getW();
+		dot *= MathHelper.fastInverseSqrt(q0.getX() * q0.getX() + q0.getY() * q0.getY() + q0.getZ() * q0.getZ() + q0.getW() * q0.getW());
+		dot *= MathHelper.fastInverseSqrt(q1.getX() * q1.getX() + q1.getY() * q1.getY() + q1.getZ() * q1.getZ() + q1.getW() * q1.getW());
+		
+		// Ensure that the interpolation is taking the shortest path.
+		if(dot < 0.0f)
+		{
+			q1 = new Quaternion(-q1.getX(), -q1.getY(), -q1.getZ(), -q1.getW());
+			dot = -dot;
+		}
+		
+		float theta = (float) Math.acos(dot);
+		float sinTheta = (float) Math.sin(theta);
+		
+		if(sinTheta != 0.0f)
+		{
+			float x = (q0.getX() * (float)Math.sin((1.0 - t) * theta) + q1.getX() * (float)Math.sin(t * theta)) / sinTheta;
+			float y = (q0.getY() * (float)Math.sin((1.0 - t) * theta) + q1.getY() * (float)Math.sin(t * theta)) / sinTheta;
+			float z = (q0.getZ() * (float)Math.sin((1.0 - t) * theta) + q1.getZ() * (float)Math.sin(t * theta)) / sinTheta;
+			float w = (q0.getW() * (float)Math.sin((1.0 - t) * theta) + q1.getW() * (float)Math.sin(t * theta)) / sinTheta;
+			return new Quaternion(x, y, z, w);
+		}
+		else
+			return q0;
 	}
 }

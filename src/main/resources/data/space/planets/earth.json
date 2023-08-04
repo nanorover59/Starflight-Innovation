@@ -1,0 +1,45 @@
+{
+    "name": "earth",
+    "parentName": "sol",
+    "mass": 5.97e24,
+    "radius": 6.3780e6,
+    "parkingOrbitRadius": 500e3,
+    "periapsis": 1.4710e11,
+    "apoapsis": 1.5210e11,
+    "argumentOfPeriapsis": 5.0282936,
+    "trueAnomaly": 0,
+    "ascendingNode": 3.0525809,
+    "inclination": 0,
+    "isTidallyLocked": false,
+    "obliquity": -0.40910518,
+    "rotationRate": 7.2921150e-5,
+    "simpleTexture": false,
+    "drawClouds": true,
+    "cloudRotationRate": 7.2921150e-5,
+    "dimensionData": [
+        {
+            "name": "orbit",
+            "dimensionID": "space:earth_orbit",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        },
+        {
+            "name": "surface",
+            "dimensionID": "minecraft:overworld",
+            "overridePhysics": false,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": true,
+            "hasWeather": true,
+            "hasOxygen": true,
+            "temperatureCategory": 2,
+            "pressure": 1.0
+        }
+    ]
+}

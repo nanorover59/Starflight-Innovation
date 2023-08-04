@@ -1,22 +1,25 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
-        "bab",
-        " d "
+        "bad",
+        "aea",
+        "dac"
     ],
     "key": {
         "a": {
-            "item": "minecraft:obsidian"
+            "item": "space:titanium_ingot"
         },
         "b": {
-            "item": "minecraft:iron_ingot"
+            "item": "space:oxygen_pipe"
         },
         "c": {
-            "item": "minecraft:redstone"
+            "item": "space:hydrogen_pipe"
         },
         "d": {
-            "item": "minecraft:flint_and_steel"
+            "item": "minecraft:copper_ingot"
+        },
+        "e": {
+            "item": "minecraft:redstone"
         }
     },
     "result": {

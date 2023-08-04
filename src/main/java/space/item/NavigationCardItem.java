@@ -23,6 +23,9 @@ public class NavigationCardItem extends Item
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
 	{
+		//MutableText text = Text.translatable("item.space.navigation_card.range_" + level).formatted(Formatting.ITALIC);
+		//tooltip.add(text);
+		
 		if(stack.getNbt() != null && stack.getNbt().contains("planet"))
 		{
 			String planetName = stack.getNbt().getString("planet");

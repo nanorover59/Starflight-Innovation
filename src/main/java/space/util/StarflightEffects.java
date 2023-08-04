@@ -19,12 +19,14 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.WorldAccess;
 import space.StarflightMod;
+import space.client.particle.StarflightParticles;
 
 public class StarflightEffects
 {
 	public static SoundEvent CURRENT_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "current"));
 	public static SoundEvent STORAGE_CUBE_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "storage_cube"));
 	public static SoundEvent THRUSTER_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "thruster"));
+	public static SoundEvent LEAK_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "leak"));
 	public static SoundEvent MARS_WIND_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "mars_wind"));
 	public static SoundEvent NOISE_SOUND_EVENT = new SoundEvent(new Identifier(StarflightMod.MOD_ID, "noise"));
 	
@@ -33,6 +35,7 @@ public class StarflightEffects
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "current"), CURRENT_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "storage_cube"), STORAGE_CUBE_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "thruster"), THRUSTER_SOUND_EVENT);
+		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "leak"), LEAK_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "mars_wind"), MARS_WIND_SOUND_EVENT);
 		Registry.register(Registry.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "noise"), NOISE_SOUND_EVENT);
 	}
@@ -90,7 +93,7 @@ public class StarflightEffects
 			{
 				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
 				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
-				client.world.addParticle(ParticleTypes.POOF, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+				client.world.addParticle(StarflightParticles.AIR_FILL, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 			}
 		});
 	}

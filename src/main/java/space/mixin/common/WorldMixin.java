@@ -22,8 +22,8 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 	@Shadow @Final MutableWorldProperties properties;
 	@Shadow RegistryKey<World> registryKey;
 	
-	private boolean planetCheck = false;
-	private PlanetDimensionData planetData = null;
+	private boolean planetCheck;
+	private PlanetDimensionData planetData;
 	
 	public PlanetDimensionData getPlanetDimensionData()
 	{
@@ -33,19 +33,29 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 			{
 				if(planet.getOrbit() != null && planet.getOrbit().getWorldKey() == registryKey)
 					planetData = planet.getOrbit();
-				else if(planet.getSurface1() != null && planet.getSurface1().getWorldKey() == registryKey)
-					planetData = planet.getSurface1();
-				else if(planet.getSurface2() != null && planet.getSurface2().getWorldKey() == registryKey)
-					planetData = planet.getSurface2();
+				else if(planet.getSurface() != null && planet.getSurface().getWorldKey() == registryKey)
+					planetData = planet.getSurface();
+				else if(planet.getSky() != null && planet.getSky().getWorldKey() == registryKey)
+					planetData = planet.getSky();
 				
 				if(planetData != null)
+				{
+					planetCheck = true;
 					break;
+				}
 			}
-			
-			planetCheck = planetData != null;
 		}
 		
+		//if(this.isClient())
+		//	System.out.println(registryKey.toString() + " " + planetData.getPlanet().getName() + " " + planetData.hasWeather());
+		
 		return planetData;
+	}
+	
+	public void clearPlanetDimensionData()
+	{
+		planetCheck = false;
+		planetData = null;
 	}
 	
 	@Override
@@ -85,7 +95,7 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 	public void getThunderGradientInject(float delta, CallbackInfoReturnable<Float> info)
 	{
 		PlanetDimensionData data = getPlanetDimensionData();
-        
+		
 		if(data != null && data.overrideSky() && !data.hasWeather())
 		{
 			info.setReturnValue(0.0f);
@@ -97,7 +107,7 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 	public void getRainGradient(float delta, CallbackInfoReturnable<Float> info)
 	{
 		PlanetDimensionData data = getPlanetDimensionData();
-        
+		
 		if(data != null && data.overrideSky() && !data.hasWeather())
 		{
 			info.setReturnValue(0.0f);

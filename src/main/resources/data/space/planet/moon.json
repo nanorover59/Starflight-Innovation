@@ -36,8 +36,8 @@
             "overrideSky": true,
             "isCloudy": false,
             "hasLowClouds": false,
-            "hasWeather": true,
-            "hasOxygen": true,
+            "hasWeather": false,
+            "hasOxygen": false,
             "temperatureCategory": 2,
             "pressure": 0
         }

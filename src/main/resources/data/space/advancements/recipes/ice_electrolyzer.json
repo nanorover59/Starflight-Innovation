@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_electrolyzer": {
+    "has_titanium_ingot": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:electrolyzer"
+              "space:titanium_ingot"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_electrolyzer",
+      "has_titanium_ingot",
       "has_the_recipe"
     ]
   ]

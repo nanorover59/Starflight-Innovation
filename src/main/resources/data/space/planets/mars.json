@@ -1,0 +1,45 @@
+{
+    "name": "mars",
+    "parentName": "sol",
+    "mass": 0.64171e24,
+    "radius": 3.3962e6,
+    "parkingOrbitRadius": 500e3,
+    "periapsis": 2.06617e11,
+    "apoapsis": 2.49229e11,
+    "argumentOfPeriapsis": 5.86501907915,
+    "trueAnomaly": 0,
+    "ascendingNode": 0.86530876133,
+    "inclination": 0.03229923767,
+    "isTidallyLocked": false,
+    "obliquity": -0.40910518,
+    "rotationRate": 7.2921150e-5,
+    "simpleTexture": false,
+    "drawClouds": true,
+    "cloudRotationRate": 7.2921150e-5,
+    "dimensionData": [
+        {
+            "name": "orbit",
+            "dimensionID": "space:mars_orbit",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        },
+        {
+            "name": "surface",
+            "dimensionID": "space:mars",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": true,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0.00602
+        }
+    ]
+}

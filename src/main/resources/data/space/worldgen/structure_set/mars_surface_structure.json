@@ -1,0 +1,14 @@
+{
+  "structures" : [
+    {
+      "structure" : "space:mars_landing_site",
+      "weight" : 1
+    }
+  ],
+  "placement" : {
+    "salt" : 87396248,
+    "spacing" : 48,
+    "separation" : 32,
+    "type" : "minecraft:random_spread"
+  }
+}

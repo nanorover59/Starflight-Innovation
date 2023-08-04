@@ -29,6 +29,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.FluidTankControllerBlock;
@@ -123,13 +124,19 @@ public class RocketEntity extends MovingCraftEntity
     	
 		for(BlockPos pos : blockPosList)
 		{
+			VoxelShape blockShape = world.getBlockState(pos).getCollisionShape(world, pos);
+			BlockPos downPos = pos;
+			
+			if(!blockShape.isEmpty())
+				downPos = new BlockPos(pos.getX(), pos.getY() - blockShape.getBoundingBox().getYLength() + 1, pos.getZ());
+			
 			if(pos.getX() < min.getX())
 				min = new BlockPos(pos.getX(), min.getY(), min.getZ());
 			else if(pos.getX() > max.getX())
 				max = new BlockPos(pos.getX(), max.getY(), max.getZ());
 			
-			if(pos.getY() < min.getY())
-				min = new BlockPos(min.getX(), pos.getY(), min.getZ());
+			if(downPos.getY() < min.getY())
+				min = new BlockPos(min.getX(), downPos.getY(), min.getZ());
 			else if(pos.getY() > max.getY())
 				max = new BlockPos(max.getX(), pos.getY(), max.getZ());
 			
@@ -408,7 +415,7 @@ public class RocketEntity extends MovingCraftEntity
 			}
 			
 			// Extra displacement to avoid clipping into the ground.
-			if(verticalCollision)
+			/*if(verticalCollision)
 			{
 				for(int i = 0; i < 128; i++)
 				{
@@ -417,7 +424,7 @@ public class RocketEntity extends MovingCraftEntity
 					
 					this.move(MovementType.SELF, new Vec3d(0.0, 0.1, 0.0));
 				}
-			}
+			}*/
 			
 			if(crashLandingFlag)
 			{
@@ -663,6 +670,7 @@ public class RocketEntity extends MovingCraftEntity
 			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
 		
 		setQuaternion(Quaternion.fromEulerXyz(0.0f, (float) (rotationSteps * (Math.PI / 2.0)), 0.0f));
+		fallDistance = 0.0f;
 		
 		for(Entity passenger : this.getPassengerList())
 		{
@@ -671,7 +679,6 @@ public class RocketEntity extends MovingCraftEntity
 			passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
-			passenger.fallDistance = 0.0f;
 		}
 		
 		for(MovingCraftBlockData blockData : blockDataList)

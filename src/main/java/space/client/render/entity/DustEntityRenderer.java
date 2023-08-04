@@ -28,25 +28,25 @@ public class DustEntityRenderer extends MobEntityRenderer<DustEntity, DustEntity
 	}
 
 	@Override
-	public void render(DustEntity dustEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i)
+	public void render(DustEntity entity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i)
 	{
-        if(((Entity) dustEntity).isInvisible())
+        if(((Entity) entity).isInvisible())
             return;
         
-        float yaw = -MathHelper.lerpAngleDegrees(g, dustEntity.prevHeadYaw, dustEntity.headYaw);
-        float pitch = MathHelper.lerpAngleDegrees(g, dustEntity.prevPitch, dustEntity.getPitch()) + 180.0f;
-        double x = (double) dustEntity.getStamina() / (double) DustEntity.INITIAL_STAMINA; 
+        float yaw = -MathHelper.lerpAngleDegrees(g, entity.prevHeadYaw, entity.headYaw);
+        float pitch = MathHelper.lerpAngleDegrees(g, entity.prevPitch, entity.getPitch()) + 180.0f;
+        double x = (double) entity.getStamina() / (double) DustEntity.INITIAL_STAMINA; 
         float alpha = (float) (1.0 - Math.pow((x * 2.0) + 1.0, -3.0));
         
-        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucent(this.getTexture(dustEntity)));
+        VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucent(this.getTexture(entity)));
         ((DustEntityModel<DustEntity>) this.getModel()).copyStateTo(this.model);
-        this.model.animateModel(dustEntity, dustEntity.limbAngle, dustEntity.limbDistance, g);
-        this.model.setAngles(dustEntity, dustEntity.limbAngle, dustEntity.limbDistance, getAnimationProgress(dustEntity, g), yaw, pitch);
-        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(dustEntity, 0.0f), 1.0f, 1.0f, 1.0f, alpha);
+        this.model.animateModel(entity, entity.limbAngle, entity.limbDistance, g);
+        this.model.setAngles(entity, entity.limbAngle, entity.limbDistance, getAnimationProgress(entity, g), yaw, pitch);
+        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), 1.0f, 1.0f, 1.0f, alpha);
 	}
 
 	@Override
-	public Identifier getTexture(DustEntity dustEntity)
+	public Identifier getTexture(DustEntity entity)
 	{
 		return TEXTURE;
 	}

@@ -21,6 +21,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import space.entity.StarflightEntities;
 import space.item.SpaceSuitItem;
@@ -45,6 +47,7 @@ public abstract class LivingEntityMixin extends Entity
 {
 	private double gravity = 1.0;
 	private float airMultiplier = 1.0f;
+	private int jumpTime = 0;
 	
 	@Shadow @Nullable abstract StatusEffectInstance getStatusEffect(StatusEffect effect);
 	
@@ -120,7 +123,7 @@ public abstract class LivingEntityMixin extends Entity
 		if(this.isSubmergedInWater())
 			airMultiplier = 1.0f;
 		
-		// Run oxygen supply mechanics on the server side.
+		// Run oxygen supply and mob low gravity jump mechanics on the server side.
 		if(!this.world.isClient)
 		{
 			LivingEntity thisEntity = (LivingEntity) world.getEntityById(getId());
@@ -129,8 +132,8 @@ public abstract class LivingEntityMixin extends Entity
 			{
 				int spaceSuitCheck = 0;
 				boolean habitableAir = AirUtil.canEntityBreathe(thisEntity, data);
-				boolean creativePlayer = (thisEntity instanceof PlayerEntity && ((PlayerEntity) thisEntity).isCreative());
-				boolean creativeFlying = creativePlayer && ((PlayerEntity) thisEntity).getAbilities().flying;
+				boolean survivalPlayer = thisEntity instanceof PlayerEntity && !((PlayerEntity) thisEntity).isCreative() && !((PlayerEntity) thisEntity).isSpectator();
+				boolean creativeFlying = thisEntity instanceof PlayerEntity && ((PlayerEntity) thisEntity).getAbilities().flying;
 				ItemStack chestplate = null;
 				
 				for(ItemStack stack : thisEntity.getArmorItems())
@@ -147,7 +150,7 @@ public abstract class LivingEntityMixin extends Entity
 				double oxygen = spaceSuitCheck == 4 ? chestplate.getNbt().getDouble("oxygen") : 0.0;
 				double oxygenUsed = 0.0;
 				
-				if(spaceSuitCheck < 4 && !(thisEntity.isSubmergedInWater() || habitableAir) && !creativePlayer)
+				if(spaceSuitCheck < 4 && !(thisEntity.isSubmergedInWater() || habitableAir))
 				{
 					if(!thisEntity.isInLava())
 						thisEntity.setFireTicks(0);
@@ -155,7 +158,7 @@ public abstract class LivingEntityMixin extends Entity
 					if(!thisEntity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
 						thisEntity.damage(DamageSource.GENERIC, 0.5f);
 				}
-				else if(spaceSuitCheck == 4 && (thisEntity.isSubmergedInWater() || !habitableAir) && !creativePlayer)
+				else if(spaceSuitCheck == 4 && (thisEntity.isSubmergedInWater() || !habitableAir) && survivalPlayer)
 					oxygenUsed += 4.0 / 24000.0; // 4kg of oxygen should last for 20 minutes (24000 ticks) without using maneuvering jets.
 				
 				if(spaceSuitCheck == 4)
@@ -219,6 +222,28 @@ public abstract class LivingEntityMixin extends Entity
 							nbt.putBoolean("message3", false);
 					}
 				}
+				
+				// Mobs auto jump further away in low gravity.
+				if(gravity < 0.5 && thisEntity instanceof MobEntity && !thisEntity.hasNoGravity() && thisEntity.isOnGround())
+				{
+					if(jumpTime > 0)
+						jumpTime--;
+					else
+					{
+						if(thisEntity.horizontalSpeed > 0.25)
+						{
+							Vec3d vxz = new Vec3d(thisEntity.getVelocity().getX(), 0.0, thisEntity.getVelocity().getZ()).normalize().multiply(2.0);
+							BlockPos pos = thisEntity.getBlockPos().add(vxz.getX(), 0.0, vxz.getZ());
+							VoxelShape shape = world.getBlockState(pos).getCollisionShape(world, pos);
+							
+							if(!shape.isEmpty() && shape.getBoundingBox().getYLength() > thisEntity.stepHeight && !world.getBlockState(pos.up((int) (1.0 / gravity))).getMaterial().blocksMovement())
+							{
+								thisEntity.addVelocity(0.0, 0.4, 0.0);
+								jumpTime = 40;
+							}
+						}
+					}
+				}
 			}
 		}
 	}
@@ -274,7 +299,7 @@ public abstract class LivingEntityMixin extends Entity
 	@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"))
 	public Vec3d movementInputInject(Vec3d movementInput)
 	{
-		if(this.verticalCollision || this.horizontalCollision || (gravity > 0.0 && this.getVelocity().getY() > 0.0 && this.horizontalSpeed < 0.25f))
+		if(this.verticalCollision || this.horizontalCollision || horizontalSpeed < 0.1)
 			return movementInput;
 		else
 			return movementInput.multiply(airMultiplier);

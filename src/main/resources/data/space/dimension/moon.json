@@ -41,9 +41,9 @@
       }, {
         "biome" : "space:moon_ice",
         "parameters" : {
-          "temperature" : [ -1, -0.75 ],
+          "temperature" : [ -1, 0 ],
           "humidity" : [ 0, 1 ],
-          "continentalness" : [ -0.25, 0.5 ],
+          "continentalness" : [ -0.25, 0.75 ],
           "erosion" : [ -0.5, 0.5 ],
           "weirdness" : [ 0, 1 ],
           "depth" : 0,

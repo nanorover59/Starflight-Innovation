@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:ilmenite_block"
+    ]
+  },
+  "criteria": {
+    "has_ilmenite": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:ilmenite"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:ilmenite_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ilmenite",
+      "has_the_recipe"
+    ]
+  ]
+}

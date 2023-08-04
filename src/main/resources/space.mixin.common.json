@@ -25,7 +25,7 @@
     "FallingBlockMixin",
     "AbstractFurnaceBlockEntityMixin",
     "AbstractFurnaceBlockEntityAccessorMixin",
-    "ServerPlayerInteractionManagerMixin"
+    "ServerPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 0

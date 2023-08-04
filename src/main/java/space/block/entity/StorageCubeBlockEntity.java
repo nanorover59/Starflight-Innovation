@@ -14,6 +14,7 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
@@ -21,7 +22,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 import space.block.StorageCubeBlock;
-import space.util.StarflightEffects;
 
 public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 {
@@ -31,14 +31,14 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 		@Override
 		protected void onContainerOpen(World world, BlockPos pos, BlockState state)
 		{
-			StorageCubeBlockEntity.this.playSound(state, StarflightEffects.STORAGE_CUBE_SOUND_EVENT);
+			StorageCubeBlockEntity.this.playSound(state, SoundEvents.BLOCK_PISTON_EXTEND);
 			StorageCubeBlockEntity.this.setOpen(state, true);
 		}
 
 		@Override
 		protected void onContainerClose(World world, BlockPos pos, BlockState state)
 		{
-			StorageCubeBlockEntity.this.playSound(state, StarflightEffects.STORAGE_CUBE_SOUND_EVENT);
+			StorageCubeBlockEntity.this.playSound(state, SoundEvents.BLOCK_PISTON_CONTRACT);
 			StorageCubeBlockEntity.this.setOpen(state, false);
 		}
 

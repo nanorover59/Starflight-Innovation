@@ -108,15 +108,25 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 		
 		if(world.isReceivingRedstonePower(pos) && !state.get(LIT) && !fromPos.equals(frontPos) && frontState.getBlock() == Blocks.AIR)
 		{
+			//long time = System.currentTimeMillis();
+			
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
+			ArrayList<BlockPos> updateList = new ArrayList<BlockPos>();
 			double supply = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
-			AirUtil.findVolume(world, frontPos, foundList, AirUtil.MAX_VOLUME);
+			
+			//System.out.println("searchSupply: " + (System.currentTimeMillis() - time));
+			//time = System.currentTimeMillis();
+			
+			boolean tooLarge = !AirUtil.findVolume(world, frontPos, foundList, updateList, AirUtil.MAX_VOLUME);
 			double required = foundList.size() * HabitableAirBlock.DENSITY;
 			
-			if(required == 0 || required > supply)
+			//System.out.println("findVolume: " + (System.currentTimeMillis() - time));
+			//time = System.currentTimeMillis();
+			
+			if(tooLarge || required > supply)
 			{
-				MutableText text = Text.translatable("block.space.atmosphere_generator.error_volume");
+				MutableText text = Text.translatable("block.space.atmosphere_generator.error_" + (tooLarge ? "volume" : "supply"));
 				
 				for(PlayerEntity player : world.getPlayers())
 				{
@@ -127,7 +137,15 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 			else
 			{
 				AirUtil.useSupply(world, checkList, required);
-				AirUtil.fillVolume(world, foundList);
+				
+				//System.out.println("useSupply: " + (System.currentTimeMillis() - time));
+				//time = System.currentTimeMillis();
+				
+				AirUtil.fillVolume(world, foundList, updateList);
+				
+				//System.out.println("fillVolume: " + foundList.size() + " " + (System.currentTimeMillis() - time));
+				//time = System.currentTimeMillis();
+				
 				world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
 				StarflightEffects.sendOutgas(world, pos, frontPos, true);
 			}
@@ -153,7 +171,7 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	@Override
 	public boolean isSideInput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
 	{
-		return direction != (Direction) state.get(FACING).getOpposite();
+		return direction != (Direction) state.get(FACING);
 	}
 
 	@Override

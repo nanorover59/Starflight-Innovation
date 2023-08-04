@@ -1,12 +1,18 @@
 package space.block;
 
-import net.minecraft.block.Block;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.BiPredicate;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
+import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.util.AirUtil;
+import space.util.BlockSearch;
 
 public class SealedDoorBlock extends DoorBlock
 {
@@ -16,16 +22,32 @@ public class SealedDoorBlock extends DoorBlock
 	}
 	
 	@Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify)
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		super.neighborUpdate(state, world, pos, block, fromPos, notify);
+		if(world.isClient || state.get(HALF) == DoubleBlockHalf.UPPER || !state.isOf(newState.getBlock()))
+			return;
 		
-		for(Direction direction : Direction.values())
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() instanceof SealedDoorBlock || (blockState.getBlock() != Blocks.AIR && !AirUtil.airBlocking(w, p));
+		};
+
+		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() == StarflightBlocks.HABITABLE_AIR;
+		};
+
+		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+		ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		BlockSearch.search(world, pos, checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
+		
+		for(BlockPos blockPos : foundList)
 		{
-			BlockPos offsetPos = pos.offset(direction);
-			
-			if(world.getBlockState(offsetPos).getBlock() == StarflightBlocks.HABITABLE_AIR)
-				world.updateNeighbor(offsetPos, Blocks.AIR, pos);
+			if(newState.get(OPEN))
+				world.updateNeighbor(blockPos, StarflightBlocks.AIRLOCK_DOOR, pos);
+			else
+				HabitableAirBlock.checkSource(world, blockPos, set);
 		}
 	}
 }

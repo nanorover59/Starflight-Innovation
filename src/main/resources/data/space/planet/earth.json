@@ -39,7 +39,7 @@
             "hasWeather": true,
             "hasOxygen": true,
             "temperatureCategory": 2,
-            "pressure": 1.0
+            "pressure": 1
         }
     ]
 }

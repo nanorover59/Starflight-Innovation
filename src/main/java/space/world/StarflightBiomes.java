@@ -132,6 +132,7 @@ public class StarflightBiomes
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.LESS_COPPER_ORE);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.BAUXITE_ORE);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.SULFUR_ORE);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.ILMENITE_ORE);
 	}
 	
 	private static void addMarsOres(GenerationSettings.Builder generationSettings)
@@ -145,13 +146,14 @@ public class StarflightBiomes
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.DIAMOND_ORE_FERRIC);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.REDSTONE_ORE_FERRIC);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.SULFUR_ORE_FERRIC);
+		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.ILMENITE_ORE_FERRIC);
 		generationSettings.feature(GenerationStep.Feature.UNDERGROUND_ORES, StarflightWorldGeneration.HEMATITE_ORE);
 	}
 	
 	private static void createSpaceBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		float temperature = 0.5f;
+		float temperature = 1.0f;
 		float downfall = 0.0f;
 		int waterColor = 4159204;
 		int waterFogColor = 329011;
@@ -166,7 +168,7 @@ public class StarflightBiomes
 	private static void createMoonBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		float temperature = 0.5f;
+		float temperature = 1.0f;
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
 		int waterFogColor = 0x050533;
@@ -188,12 +190,12 @@ public class StarflightBiomes
 	private static void createMarsBiome(RegistryKey<Biome> biomeKey)
 	{
 		Biome.Precipitation precipitation = Biome.Precipitation.NONE;
-		float temperature = 0.5f;
+		float temperature = 1.0f;
 		float downfall = 0.0f;
 		int waterColor = 0x3f76e4;
 		int waterFogColor = 0x050533;
-		int fogColor = 0xfed48c;
-		int skyColor = 0xfed48c;
+		int fogColor = 0xb3b7ca;
+		int skyColor = 0x99745b;
 		SpawnSettings.Builder spawnSettings = new SpawnSettings.Builder();
 		GenerationSettings.Builder generationSettings = new GenerationSettings.Builder();
 		addMarsOres(generationSettings);

@@ -7,11 +7,14 @@ import java.nio.file.Paths;
 
 import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 import space.energy.EnergyNet;
+import space.planet.Planet;
 import space.planet.PlanetList;
 import space.util.MobSpawningUtil;
 
@@ -19,7 +22,7 @@ public class StarflightEvents
 {
 	private static int saveTimer;
 	
-	public static void registerServerEvents()
+	public static void registerEvents()
 	{
 		// Server Started Event
 		ServerLifecycleEvents.SERVER_STARTED.register((server) ->
@@ -31,7 +34,7 @@ public class StarflightEvents
 	    	if(planetFile.exists())
 	    		planetData = ESSHelper.readCompound(planetFile);
 	    	
-	    	PlanetList.initialize(server.getResourceManager());
+	    	PlanetList.initialize(server);
 	    	PlanetList.loadData(planetData);
 	    	
 	    	File energyFile = new File(server.getSavePath(WorldSavePath.ROOT).toString() + "/space/energy.dat");
@@ -67,6 +70,19 @@ public class StarflightEvents
 			EnergyNet.doEnergyFlow(server);
 			MobSpawningUtil.doCustomMobSpawning(server);
 	    });
+		
+		// Entity Load Event
+		ServerEntityEvents.ENTITY_LOAD.register((entity, world) ->
+		{
+			if(entity instanceof ServerPlayerEntity)
+			{
+				ServerPlayerEntity player = (ServerPlayerEntity) entity;
+				
+				// Unlock all planets until there is a progression mechanic in place.
+				for(Planet planet : PlanetList.getPlanets())
+					PlanetList.unlock(player.getUuid(), planet.getName());
+			}
+		});
 	}
 	
 	private static void saveData(MinecraftServer server)

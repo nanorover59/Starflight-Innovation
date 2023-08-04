@@ -9,6 +9,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
@@ -16,11 +17,8 @@ import space.block.BatteryBlock;
 import space.block.BreakerSwitchBlock;
 import space.block.EnergyBlock;
 import space.block.EnergyCableBlock;
-import space.block.SolarHubBlock;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.PoweredBlockEntity;
-import space.planet.PlanetDimensionData;
-import space.planet.PlanetList;
 
 public class EnergyNet
 {
@@ -152,18 +150,13 @@ public class EnergyNet
 		{
 			ArrayList<BlockPos> removalListProducers = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> removalListConsumers = new ArrayList<BlockPos>();
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
-			double solarMultiplier = 1.0;
-			
-			if(data != null)
-				solarMultiplier = data.getPlanet().getSolarMultiplier() * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit()) ? world.getRainGradient(1.0f) : 0.0f));
-			else
-				solarMultiplier = 1.0f - world.getRainGradient(1.0f);
 			
 			// Update the power output of all energy producers.
 			for(EnergyNode energyNode : energyProducers)
 			{
-				if(energyNode.getDimension() != world.getRegistryKey())
+				ChunkPos chunkPos = new ChunkPos(energyNode.getPosition());
+				
+				if(energyNode.getDimension() != world.getRegistryKey() || !world.isChunkLoaded(chunkPos.x, chunkPos.z))
 					continue;
 				
 				BlockState state = world.getBlockState(energyNode.getPosition());
@@ -175,12 +168,10 @@ public class EnergyNet
 						BatteryBlockEntity batteryBlockEntity = (BatteryBlockEntity) world.getBlockEntity(energyNode.getPosition());
 						
 						if(!batteryBlockEntity.hasAnyCharge())
-							energyNode.setPowerOutput(0.0D);
+							energyNode.setPowerOutput(0.0d);
 						else
 							energyNode.setPowerOutput(BatteryBlock.POWER_OUTPUT);
 					}
-					else if(state.getBlock() instanceof SolarHubBlock)
-						energyNode.setPowerOutput(((EnergyBlock) state.getBlock()).getPowerOutput(world, energyNode.getPosition(), state) * solarMultiplier);
 					else
 						energyNode.setPowerOutput(((EnergyBlock) state.getBlock()).getPowerOutput(world, energyNode.getPosition(), state));
 				}
@@ -191,7 +182,9 @@ public class EnergyNet
 			// Distribute the power use of each energy consumer across any connected energy producers.
 			for(EnergyNode energyNode : energyConsumers)
 			{
-				if(energyNode.getDimension() != world.getRegistryKey())
+				ChunkPos chunkPos = new ChunkPos(energyNode.getPosition());
+				
+				if(energyNode.getDimension() != world.getRegistryKey() || !world.isChunkLoaded(chunkPos.x, chunkPos.z))
 					continue;
 				
 				BlockState state = world.getBlockState(energyNode.getPosition());
@@ -205,7 +198,9 @@ public class EnergyNet
 			// Determine whether or not each energy consumer has enough power to function.
 			for(EnergyNode energyNode : energyConsumers)
 			{
-				if(energyNode.getDimension() != world.getRegistryKey())
+				ChunkPos chunkPos = new ChunkPos(energyNode.getPosition());
+				
+				if(energyNode.getDimension() != world.getRegistryKey() || !world.isChunkLoaded(chunkPos.x, chunkPos.z))
 					continue;
 				
 				BlockState state = world.getBlockState(energyNode.getPosition());	
@@ -261,7 +256,9 @@ public class EnergyNet
 			// Deal damage to energy producers that are overloaded and remove stored energy from battery blocks that have a power load.
 			for(EnergyNode energyNode : energyProducers)
 			{
-				if(energyNode.getDimension() != world.getRegistryKey())
+				ChunkPos chunkPos = new ChunkPos(energyNode.getPosition());
+				
+				if(energyNode.getDimension() != world.getRegistryKey() || !world.isChunkLoaded(chunkPos.x, chunkPos.z))
 					continue;
 				
 				BlockState state = world.getBlockState(energyNode.getPosition());

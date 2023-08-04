@@ -110,15 +110,11 @@ public class MovingCraftEntity extends Entity
 		return false;
 	}
 	
-	/**
-	 * Should this entity be rendered given a squared distance to the client camera viewpoint.
-	 * Define a limit distance of 256 meters.
-	 */
 	@Override
 	public boolean shouldRender(double distance)
 	{
-        return distance < 65536.0;
-    }
+		return true;
+	}
 	
 	@Override
 	protected void initDataTracker()
@@ -251,10 +247,10 @@ public class MovingCraftEntity extends Entity
 	@Override
     public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate)
 	{
+		this.clientInterpolationSteps = interpolationSteps + 2;
         this.clientX = x;
         this.clientY = y;
         this.clientZ = z;
-        this.clientInterpolationSteps = interpolationSteps + 2;
         this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
     }
 

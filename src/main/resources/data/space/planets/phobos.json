@@ -1,0 +1,20 @@
+{
+    "name": "phobos",
+    "parentName": "mars",
+    "mass": 1.0659e16,
+    "radius": 11.2667e3,
+    "parkingOrbitRadius": 0,
+    "periapsis": 9.23442e6,
+    "apoapsis": 9.51758e6,
+    "argumentOfPeriapsis": 3.7751472,
+    "trueAnomaly": 0,
+    "ascendingNode": 2.9530971,
+    "inclination": 0.019076449,
+    "isTidallyLocked": true,
+    "obliquity": 0,
+    "rotationRate": 0,
+    "simpleTexture": true,
+    "drawClouds": false,
+    "cloudRotationRate": 0,
+    "dimensionData": []
+}

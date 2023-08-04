@@ -30,12 +30,12 @@ public class DustEntityModel<T extends Entity> extends SinglePartEntityModel<T>
 		this.rods = new ArrayList<ModelPart>();
 		
 		for(int i = 0; i < finalRodCount; i++)
-			rods.add(root.getChild(DustEntityModel.getRodName(i)));
+			rods.add(root.getChild(getRodName(i)));
 	}
 
 	private static String getRodName(int index)
 	{
-		return "part" + index;
+		return "rod_" + index;
 	}
 
 	public static TexturedModelData getTexturedModelData()
@@ -56,7 +56,7 @@ public class DustEntityModel<T extends Entity> extends SinglePartEntityModel<T>
 				float g = MathHelper.cos(f) * r;
 				float h = 32.0f - (i * 8.0f) + MathHelper.cos((float) f * 0.5f);
 				float k = MathHelper.sin(f) * r;
-				modelPartData.addChild(DustEntityModel.getRodName(finalRodCount), modelPartBuilder, ModelTransform.pivot(g, h, k));
+				modelPartData.addChild(getRodName(finalRodCount), modelPartBuilder, ModelTransform.pivot(g, h, k));
 				finalRodCount++;
 				f += (Math.PI * 2.0f) / rodCount;
 			}

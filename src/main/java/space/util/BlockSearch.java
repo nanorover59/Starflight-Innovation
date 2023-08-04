@@ -9,15 +9,17 @@ import java.util.function.BiPredicate;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.StarflightBlocks;
+import space.block.entity.AtmosphereGeneratorBlockEntity;
 
 public class BlockSearch
 {
-	public static final int MAX_VOLUME = 16384;
+	public static final int MAX_VOLUME = 262144;
 	public static final int MAX_DISTANCE = 128;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	
@@ -28,31 +30,32 @@ public class BlockSearch
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		Set<BlockPos> set = new HashSet<BlockPos>();
-		
-		if(include.test(world, pos))
-			stack.push(pos);
+		stack.push(pos);
 		
 		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			set.add(blockPos);
+			
+			if(set.contains(blockPos))
+				continue;
 			
 			if(distanceLimit && tooFar(pos, blockPos))
-			{
-				set.clear();
 				return;
-			}
-				
-			for(Direction direction : DIRECTIONS)
+			
+			if(include.test(world, blockPos))
 			{
-				BlockPos offset = blockPos.offset(direction);
+				set.add(blockPos);
 				
-				if(!set.contains(offset) && include.test(world, offset))
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
 					stack.push(offset);
+				}
 			}
 		}
 		
-		positionList.addAll(set);
+		if(set.size() < limit)
+			positionList.addAll(set);
 	}
 	
 	/**
@@ -62,31 +65,32 @@ public class BlockSearch
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		Set<BlockPos> set = new HashSet<BlockPos>();
-		
-		if(include.test(world, pos))
-			stack.push(pos);
+		stack.push(pos);
 		
 		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			set.add(blockPos);
+			
+			if(set.contains(blockPos))
+				continue;
 			
 			if(distanceLimit && tooFar(pos, blockPos))
-			{
-				set.clear();
 				return;
-			}
 			
-			for(Direction direction : DIRECTIONS)
+			if(include.test(world, blockPos))
 			{
-				BlockPos offset = blockPos.offset(direction);
+				set.add(blockPos);
 				
-				if(!set.contains(offset) && include.test(world, offset))
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
 					stack.push(offset);
+				}
 			}
 		}
 		
-		positionList.addAll(set);
+		if(set.size() < limit)
+			positionList.addAll(set);
 	}
 	
 	/**
@@ -96,36 +100,34 @@ public class BlockSearch
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		Set<BlockPos> set = new HashSet<BlockPos>();
-		
-		if(include.test(world, pos))
-			stack.push(pos);
+		stack.push(pos);
 		
 		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			set.add(blockPos);
+			
+			if(set.contains(blockPos))
+				continue;
 			
 			if(distanceLimit && tooFar(pos, blockPos))
-			{
-				set.clear();
 				return;
-			}
 			
-			for(Direction direction : DIRECTIONS)
+			if(include.test(world, blockPos))
 			{
-				BlockPos offset = blockPos.offset(direction);
+				set.add(blockPos);
 				
-				if(!set.contains(offset))
+				for(Direction direction : DIRECTIONS)
 				{
-					if(include.test(world, offset))
-						stack.push(offset);
-					else if(edgeCase.test(world, offset))
-						set.add(offset);
+					BlockPos offset = blockPos.offset(direction);
+					stack.push(offset);
 				}
 			}
+			else if(edgeCase.test(world, blockPos))
+				set.add(blockPos);
 		}
 		
-		positionList.addAll(set);
+		if(set.size() < limit)
+			positionList.addAll(set);
 	}
 	
 	/**
@@ -137,40 +139,131 @@ public class BlockSearch
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		Set<BlockPos> set = new HashSet<BlockPos>();
 		Set<BlockPos> foundSet = new HashSet<BlockPos>();
-		
-		if(include.test(world, pos))
-			stack.push(pos);
+		stack.push(pos);
 		
 		while(stack.size() > 0 && set.size() < limit)
 		{
 			BlockPos blockPos = stack.pop();
-			set.add(blockPos);
+			
+			if(set.contains(blockPos) || foundSet.contains(blockPos))
+				continue;
 			
 			if(distanceLimit && tooFar(pos, blockPos))
-			{
-				set.clear();
 				return;
+			
+			if(include.test(world, blockPos))
+			{
+				set.add(blockPos);
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
+					stack.push(offset);
+				}
 			}
+			else if(edgeCase.test(world, blockPos))
+				foundSet.add(blockPos);
+		}
+		
+		if(set.size() < limit)
+		{
+			positionList.addAll(set);
+			foundList.addAll(foundSet);
+		}
+	}
+	
+	/**
+	 * Search the world starting at the given coordinates for coordinates where the include BiPredicate returns true and the passThrough BiPredicate returns false.
+	 * Also add any edge case blocks to a second position list.
+	 */
+	public static boolean passThroughSearch(World world, BlockPos pos, ArrayList<BlockPos> positionList, ArrayList<BlockPos> edgeList, BiPredicate<World, BlockPos> include, BiPredicate<World, BlockPos> edgeCase, BiPredicate<World, BlockPos> passThrough, int limit, boolean distanceLimit)
+	{
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		Set<BlockPos> edgeSet = new HashSet<BlockPos>();
+		Set<BlockPos> passThroughSet = new HashSet<BlockPos>();
+		stack.push(pos);
+		
+		while(stack.size() > 0 && set.size() < limit)
+		{
+			BlockPos blockPos = stack.pop();
+			
+			if(include.test(world, blockPos))
+				set.add(blockPos);
+			
+			if(passThrough.test(world, blockPos))
+				passThroughSet.add(blockPos);
+			
+			if(distanceLimit && tooFar(pos, blockPos))
+				return false;
 			
 			for(Direction direction : DIRECTIONS)
 			{
 				BlockPos offset = blockPos.offset(direction);
 				
-				if(!set.contains(offset))
-				{
-					if(include.test(world, offset))
-						stack.push(offset);
-					else if(edgeCase.test(world, offset))
-					{
-						set.add(offset);
-						foundSet.add(offset);
-					}
-				}
+				if(!set.contains(offset) && include.test(world, offset))
+					stack.push(offset);
+				else if(edgeCase.test(world, offset))
+					edgeSet.add(offset);
 			}
 		}
 		
-		positionList.addAll(set);
-		foundList.addAll(foundSet);
+		if(set.size() <= limit)
+		{
+			set.removeAll(passThroughSet);
+			positionList.addAll(set);
+			edgeList.addAll(edgeSet);
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	/**
+	 * Search for powered atmosphere generator blocks in a volume of habitable air.
+	 */
+	public static void sourceSearch(World world, BlockPos pos, Set<BlockPos> set, ArrayList<BlockPos> foundList)
+	{
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> foundSet = new HashSet<BlockPos>();
+		stack.push(pos);
+		
+		while(stack.size() > 0 && set.size() < AirUtil.MAX_VOLUME)
+		{
+			BlockPos blockPos = stack.pop();
+			
+			if(set.contains(blockPos) || foundSet.contains(blockPos))
+				continue;
+			
+			if(tooFar(pos, blockPos))
+				return;
+			
+			BlockState blockState = world.getBlockState(blockPos);
+			
+			if(blockState.getBlock() != Blocks.AIR && (!AirUtil.airBlocking(world, blockPos) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR))
+			{
+				set.add(blockPos);
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
+					stack.push(offset);
+				}
+			}
+			else if(blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR)
+				foundSet.add(blockPos);
+		}
+		
+		if(set.size() < AirUtil.MAX_VOLUME)
+		{
+			for(BlockPos blockPos : foundSet)
+			{
+				BlockEntity blockEntity = world.getBlockEntity(blockPos);
+
+				if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
+					foundList.add(blockPos);
+			}
+		}
 	}
 	
 	public static void movingCraftSearch(World world, BlockPos blockPos, ArrayList<BlockPos> positionList, int limit)

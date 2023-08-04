@@ -32,7 +32,7 @@ import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
 import space.entity.RocketEntity;
 import space.inventory.ImplementedInventory;
-import space.item.StarflightItems;
+import space.item.NavigationCardItem;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -208,7 +208,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         	
 	        ItemStack stack = inventory.get(0);
 	        
-	        if(stack != null && stack.getItem() == StarflightItems.NAVIGATION_CARD)
+	        if(stack != null && stack.getItem() instanceof NavigationCardItem)
 	        {
 	        	NbtCompound nbt = stack.getNbt();
 	        	

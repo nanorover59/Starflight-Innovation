@@ -1,0 +1,7 @@
+{
+  "type" : "space:landing_site",
+  "biomes" : "#space:mars_biomes",
+  "step" : "surface_structures",
+  "spawn_overrides" : {},
+  "terrain_adaptation" : "beard_thin"
+}

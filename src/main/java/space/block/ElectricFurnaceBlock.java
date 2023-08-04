@@ -94,14 +94,14 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 			double e = (double) pos.getY();
 			double f = (double) pos.getZ() + 0.5;
 			
-			if(random.nextDouble() < 0.05)
+			if(random.nextFloat() < 0.1f)
 				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.1f, 0.5f - 0.1f * random.nextFloat(), true);
 		}
 	}
 
-	public BlockState getPlacementState(ItemPlacementContext ctx)
+	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerFacing().getOpposite());
 	}
 	
 	@Override

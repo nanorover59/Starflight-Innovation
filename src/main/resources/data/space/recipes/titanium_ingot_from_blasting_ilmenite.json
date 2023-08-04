@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {
+    "item": "space:ilmenite"
+  },
+  "result": "space:titanium_ingot",
+  "experience": 0.6,
+  "cookingtime": 100
+}

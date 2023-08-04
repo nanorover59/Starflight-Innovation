@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:block/carpet",
-  "textures": {
-    "wool": "space:block/ares_moss"
-  }
-}

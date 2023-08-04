@@ -89,14 +89,6 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 		
 		if(!viewData)
 		{
-			for(Planet p : selectedPlanet.getSatellites())
-			{
-				// Draw the planet's orbit in the GUI.
-				float px = (float) (x + 99.0);
-				float py = (float) (y + 71.0);
-				drawOrbitEllipse(matrices.peek().getPositionMatrix(), p, px, py, 256);
-			}
-			
 			for(int i = 0; i < planetList.size(); i++)
 			{
 				Planet planet = planetList.get(i);
@@ -110,9 +102,16 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
 				float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
 				
-				if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
+				if(!planetRenderer.isUnlocked())
 					continue;
 				
+				// Draw the planet's orbit in the GUI.
+				drawOrbitEllipse(matrices.peek().getPositionMatrix(), planet, (float) (x + 99.0), (float) (y + 71.0), 256);
+				
+				if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
+					continue;
+					
+				// Draw the planet in the GUI.
 				int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mousePressed);
 				RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
 				

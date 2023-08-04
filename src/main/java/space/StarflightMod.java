@@ -32,7 +32,7 @@ public class StarflightMod implements ModInitializer
 		StarflightParticles.initializeParticles();
 		StarflightBiomes.initializeBiomes();
 		StarflightWorldGeneration.initializeWorldGeneration();
-		StarflightEvents.registerServerEvents();
+		StarflightEvents.registerEvents();
 		StarflightEffects.initializeSounds();
 		StarflightCommands.initializeCommands();
 		

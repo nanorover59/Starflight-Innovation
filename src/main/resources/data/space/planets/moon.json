@@ -1,0 +1,45 @@
+{
+    "name": "moon",
+    "parentName": "earth",
+    "mass": 7.34767309e22,
+    "radius": 1.7381e6,
+    "parkingOrbitRadius": 200e3,
+    "periapsis": 3.633e8,
+    "apoapsis": 4.055e8,
+    "argumentOfPeriapsis": 5.55276502,
+    "trueAnomaly": 0,
+    "ascendingNode": 2.18305783,
+    "inclination": 0.09005899,
+    "isTidallyLocked": true,
+    "obliquity": -0.1164135,
+    "rotationRate": 0,
+    "simpleTexture": false,
+    "drawClouds": false,
+    "cloudRotationRate": 0,
+    "dimensionData": [
+        {
+            "name": "orbit",
+            "dimensionID": "space:moon_orbit",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        },
+        {
+            "name": "surface",
+            "dimensionID": "space:moon",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        }
+    ]
+}
