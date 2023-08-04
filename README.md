@@ -1,8 +1,8 @@
-# Starflight Innovation for Fabric 1.18.2
-A Minecraft mod about exploration and building rockets with some details of a spaceflight simulator game.
+# Starflight Innovation for Minecraft Fabric
+[![](http://cf.way2muchnoise.eu/full_starflight-innovation.svg)](https://www.curseforge.com/minecraft/mc-mods/starflight-innovation)
+[![](http://cf.way2muchnoise.eu/versions/starflight-innovation_all.svg)](https://www.curseforge.com/minecraft/mc-mods/starflight-innovation)
+<br>A leap forwards in space travel mods featuring semi-realistic celestial graphics and delta-V mechanics.
 
-[![](http://cf.way2muchnoise.eu/full_623923_downloads.svg)](https://www.curseforge.com/minecraft/mc-mods/starflight-innovation)
 
-[![](http://cf.way2muchnoise.eu/versions/For%20MC_623923_all.svg)](https://www.curseforge.com/minecraft/mc-mods/starflight-innovation)
 
 One third party library is used and already packaged in the distributed .jar file: [Extremely Simple Storage 1.0.0](https://github.com/Epoxide-Software/Extremely-Simple-Storage)
