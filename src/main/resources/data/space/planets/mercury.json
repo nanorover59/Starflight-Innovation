@@ -1,25 +1,25 @@
 {
-    "name": "mars",
+    "name": "mercury",
     "parentName": "sol",
-    "mass": 0.64171e24,
-    "radius": 3.3962e6,
+    "mass": 0.33010e24,
+    "radius": 2.4405e6,
     "parkingOrbitRadius": 500e3,
-    "periapsis": 2.06617e11,
-    "apoapsis": 2.49229e11,
-    "argumentOfPeriapsis": 5.86501907915,
+    "periapsis": 0.46000e11,
+    "apoapsis": 0.69818e11,
+    "argumentOfPeriapsis": 1.35187007941,
     "trueAnomaly": 0,
-    "ascendingNode": 0.86530876133,
-    "inclination": 0.03229923767,
+    "ascendingNode": 0.843546774487,
+    "inclination": 0.1222580452,
     "isTidallyLocked": false,
-    "obliquity": -0.40910518,
-    "rotationRate": 7.2921150e-5,
+    "obliquity": -0.00059341195,
+    "rotationRate": 4.1333047222e-7,
     "simpleTexture": false,
-    "drawClouds": true,
-    "cloudRotationRate": 7.2921150e-5,
+    "drawClouds": false,
+    "cloudRotationRate": 0,
     "dimensionData": [
         {
             "name": "orbit",
-            "dimensionID": "space:mars_orbit",
+            "dimensionID": "space:mercury_orbit",
             "overridePhysics": true,
             "overrideSky": true,
             "isCloudy": false,
@@ -30,16 +30,16 @@
             "pressure": 0
         },
         {
-            "name": "surface1",
-            "dimensionID": "space:mars",
+            "name": "surface",
+            "dimensionID": "space:mercury",
             "overridePhysics": true,
             "overrideSky": true,
             "isCloudy": false,
             "hasLowClouds": false,
-            "hasWeather": true,
+            "hasWeather": false,
             "hasOxygen": false,
             "temperatureCategory": 2,
-            "pressure": 0.00602
+            "pressure": 0
         }
     ]
 }

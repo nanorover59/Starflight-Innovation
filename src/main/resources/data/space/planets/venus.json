@@ -1,25 +1,25 @@
 {
-    "name": "moon",
-    "parentName": "earth",
-    "mass": 7.34767309e22,
-    "radius": 1.7381e6,
-    "parkingOrbitRadius": 200e3,
-    "periapsis": 3.633e8,
-    "apoapsis": 4.055e8,
-    "argumentOfPeriapsis": 5.55276502,
+    "name": "venus",
+    "parentName": "sol",
+    "mass": 4.8673e24,
+    "radius": 6.0518e6,
+    "parkingOrbitRadius": 500e3,
+    "periapsis": 1.07480e11,
+    "apoapsis": 1.08941e11,
+    "argumentOfPeriapsis": 0.957353062759,
     "trueAnomaly": 0,
-    "ascendingNode": 2.18305783,
-    "inclination": 0.09005899,
-    "isTidallyLocked": true,
-    "obliquity": -0.1164135,
-    "rotationRate": 0,
+    "ascendingNode": 1.3383305132,
+    "inclination": 0.1222580452,
+    "isTidallyLocked": false,
+    "obliquity": -0.00059341195,
+    "rotationRate": 4.1333047222e-7,
     "simpleTexture": false,
     "drawClouds": false,
     "cloudRotationRate": 0,
     "dimensionData": [
         {
             "name": "orbit",
-            "dimensionID": "space:moon_orbit",
+            "dimensionID": "space:venus_orbit",
             "overridePhysics": true,
             "overrideSky": true,
             "isCloudy": false,
@@ -30,8 +30,8 @@
             "pressure": 0
         },
         {
-            "name": "surface1",
-            "dimensionID": "space:moon",
+            "name": "surface",
+            "dimensionID": "space:venus",
             "overridePhysics": true,
             "overrideSky": true,
             "isCloudy": false,
@@ -39,7 +39,7 @@
             "hasWeather": false,
             "hasOxygen": false,
             "temperatureCategory": 2,
-            "pressure": 0
+            "pressure": 93.0
         }
     ]
 }
