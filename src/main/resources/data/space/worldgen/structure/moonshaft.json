@@ -1,6 +1,6 @@
 {
   "type" : "space:moonshaft",
-  "biomes" : "#space:artificial_structures",
+  "biomes" : "#space:moonshaft",
   "step" : "underground_structures",
   "spawn_overrides" : {},
   "terrain_adaptation" : "none"

@@ -6,7 +6,7 @@
     "parkingOrbitRadius": 500e3,
     "periapsis": 0.46000e11,
     "apoapsis": 0.69818e11,
-    "argumentOfPeriapsis": 1.35187007941,
+    "argumentOfPeriapsis": 0.508323304919,
     "trueAnomaly": 0,
     "ascendingNode": 0.843546774487,
     "inclination": 0.1222580452,
@@ -16,30 +16,5 @@
     "simpleTexture": false,
     "drawClouds": false,
     "cloudRotationRate": 0,
-    "dimensionData": [
-        {
-            "name": "orbit",
-            "dimensionID": "space:mercury_orbit",
-            "overridePhysics": true,
-            "overrideSky": true,
-            "isCloudy": false,
-            "hasLowClouds": false,
-            "hasWeather": false,
-            "hasOxygen": false,
-            "temperatureCategory": 2,
-            "pressure": 0
-        },
-        {
-            "name": "surface",
-            "dimensionID": "space:mercury",
-            "overridePhysics": true,
-            "overrideSky": true,
-            "isCloudy": false,
-            "hasLowClouds": false,
-            "hasWeather": false,
-            "hasOxygen": false,
-            "temperatureCategory": 2,
-            "pressure": 0
-        }
-    ]
+    "dimensionData": []
 }

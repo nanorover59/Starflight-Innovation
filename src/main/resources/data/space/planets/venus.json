@@ -16,30 +16,5 @@
     "simpleTexture": false,
     "drawClouds": false,
     "cloudRotationRate": 0,
-    "dimensionData": [
-        {
-            "name": "orbit",
-            "dimensionID": "space:venus_orbit",
-            "overridePhysics": true,
-            "overrideSky": true,
-            "isCloudy": false,
-            "hasLowClouds": false,
-            "hasWeather": false,
-            "hasOxygen": false,
-            "temperatureCategory": 2,
-            "pressure": 0
-        },
-        {
-            "name": "surface",
-            "dimensionID": "space:venus",
-            "overridePhysics": true,
-            "overrideSky": true,
-            "isCloudy": false,
-            "hasLowClouds": false,
-            "hasWeather": false,
-            "hasOxygen": false,
-            "temperatureCategory": 2,
-            "pressure": 93.0
-        }
-    ]
+    "dimensionData": []
 }

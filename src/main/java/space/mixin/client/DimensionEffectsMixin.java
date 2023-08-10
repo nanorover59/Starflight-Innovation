@@ -7,9 +7,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.world.dimension.DimensionType;
 import space.client.StarflightModClient;
+import space.planet.PlanetDimensionData;
+import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
 @Mixin(DimensionEffects.class)
@@ -27,7 +30,7 @@ public class DimensionEffectsMixin
 		}
 	}
 	
-	/*@Inject(method = "getFogColorOverride(FF)[F", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "getFogColorOverride(FF)[F", at = @At("HEAD"), cancellable = true)
 	private void getFogColorOverrideInject(float skyAngle, float tickDelta, CallbackInfoReturnable<float[]> info)
 	{
 		MinecraftClient client = MinecraftClient.getInstance();
@@ -38,5 +41,5 @@ public class DimensionEffectsMixin
 			info.setReturnValue(null);
 			info.cancel();
 		}
-	}*/
+	}
 }

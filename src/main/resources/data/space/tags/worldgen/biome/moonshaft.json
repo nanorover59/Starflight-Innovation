@@ -1,0 +1,7 @@
+{
+    "replace": false,
+    "values": [
+   		"#space:moon_biomes",
+        "#space:mars_biomes"
+    ]
+}

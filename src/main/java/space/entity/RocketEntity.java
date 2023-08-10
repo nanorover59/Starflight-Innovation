@@ -374,9 +374,10 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			// Use hydrogen and oxygen at the 1:8 ratio for water.
 			fuelToUse -= craftMassInitial - craftMass;
-			double factor = (hydrogenSupply + oxygenSupply - fuelToUse) / (hydrogenSupply + oxygenSupply);
-			hydrogenSupply *= factor;
-			oxygenSupply *= factor;
+			double hydrogenToUse = fuelToUse * (1.0 / 9.0);
+	        double oxygenToUse = fuelToUse * (8.0 / 9.0);
+			hydrogenSupply -= hydrogenToUse;
+			oxygenSupply -= oxygenToUse;
 			craftMass -= fuelToUse;
 			ServerWorld next = world.getServer().getWorld(nextDimension);
 			PlanetDimensionData nextData = PlanetList.getDimensionDataForWorld(next);
@@ -483,9 +484,10 @@ public class RocketEntity extends MovingCraftEntity
         // Decrease mass and fuel supply.
         double totalMassFlow = (force / (SG * (changedDimension ? endISP : startISP))) * 0.05;
         craftMass -= totalMassFlow;
-        double factor = (hydrogenSupply + oxygenSupply - totalMassFlow) / (hydrogenSupply + oxygenSupply);
-		hydrogenSupply *= factor;
-		oxygenSupply *= factor;
+        double hydrogenFlow = totalMassFlow * (1.0 / 9.0);
+        double oxygenFlow = totalMassFlow * (8.0 / 9.0);
+		hydrogenSupply -= hydrogenFlow;
+		oxygenSupply -= oxygenFlow;
 	}
 	
 	/**

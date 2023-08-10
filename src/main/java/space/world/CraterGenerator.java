@@ -112,14 +112,14 @@ public class CraterGenerator
 			BlockPos startPos = chunkPos.getBlockPos(0, 0, 0);
 			BlockPos center = new BlockPos(centerX, centerY, centerZ);
 			boolean hasIce = world.getBiome(center).isIn(StarflightWorldGeneration.ICE_CRATERS);
-			int iceY = Math.max(36, center.getY());
+			int iceY = MathHelper.clamp(center.getY() + getCraterDepth(0) / 2, 32, 56);
 			
 			for(int x = 0; x < 16; x++)
 			{
 				for(int z = 0; z < 16; z++)
 				{
 					mutable.set(startPos.getX() + x, 0, startPos.getZ() + z);
-					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR_WG, mutable).getY();
+					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR, mutable).getY();
 					mutable.setY(localSurfaceY);
 					
 					while(!world.getBlockState(mutable).getMaterial().blocksMovement() && mutable.getY() > 0)
@@ -140,12 +140,15 @@ public class CraterGenerator
 						{
 							mutable.setY(i);
 							
-							if(hasIce && i == iceY)
-								world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
-							else if(hasIce && i < iceY)
-								world.setBlockState(mutable, random.nextBoolean() ? Blocks.ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState(), Block.NOTIFY_LISTENERS);
-							else
-								world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+							if(world.getBlockState(mutable).getBlock() != Blocks.AIR)
+							{
+								if(hasIce && i == iceY)
+									world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
+								else if(hasIce && i < iceY)
+									world.setBlockState(mutable, random.nextBoolean() ? Blocks.ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState(), Block.NOTIFY_LISTENERS);
+								else
+									world.setBlockState(mutable, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+							}
 						}
 						
 						mutable.setY(y - 1);

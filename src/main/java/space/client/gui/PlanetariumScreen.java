@@ -24,6 +24,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
@@ -97,18 +98,21 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
 					continue;
 				
-				int renderType = planet.getName() == "sol" ? 1 : 0;
+				int renderType = planet.getName().equals("sol") ? 1 : 0;
 				float renderWidth = Math.max(2.5f, (float) (planet.getRadius() * scaleFactor));
 				float px = (float) ((planetRenderer.getPosition().getX() * scaleFactor) + x + 99.0 - focusX);
 				float py = (float) ((planetRenderer.getPosition().getZ() * scaleFactor) + y + 71.0 - focusY);
+				Matrix4f matrix = matrices.peek().getPositionMatrix();
 				
-				if(!planetRenderer.isUnlocked())
+				//drawGlow(matrix, px, py, 8.0f, 1.0f, 1.0f, 1.0f);
+				
+				if(!planetRenderer.isUnlocked() || planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0)
 					continue;
 				
 				// Draw the planet's orbit in the GUI.
-				drawOrbitEllipse(matrices.peek().getPositionMatrix(), planet, (float) (x + 99.0), (float) (y + 71.0), 256);
+				drawOrbitEllipse(matrix, planet, (float) (x + 99.0), (float) (y + 71.0), 256);
 				
-				if(!inBounds(px, py) || (planet != selectedPlanet && Math.sqrt(Math.pow(px - (x + 99.0), 2.0) + Math.pow(py - (y + 71.0), 2.0)) < 4.0))
+				if(!inBounds(px, py))
 					continue;
 					
 				// Draw the planet in the GUI.
@@ -116,11 +120,14 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				RenderSystem.setShaderTexture(0, renderType == 1 ? new Identifier(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
 				
 				if(renderType == 1)
-					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+				{
+					drawGlow(matrix, px, py, 8.0f, 1.0f, 1.0f, 1.0f);
+					drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+				}
 				else if(planet.hasSimpleTexture())
-					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
+					drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 				else
-					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
+					drawTexturedQuad(matrix, px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
 				
 				if(mouseHold || planet == selectedPlanet)
 					continue;
@@ -128,7 +135,7 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
 				if(selection > 0)
 				{
 					RenderSystem.setShaderTexture(0, SELECTION_TEXTURE);
-					drawTexturedQuad(matrices.peek().getPositionMatrix(), px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth * 1.5f);
+					drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth * 1.5f);
 					
 					if(selection > 1)
 					{
@@ -239,8 +246,9 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
         BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
         bufferBuilder.begin(VertexFormat.DrawMode.DEBUG_LINES, VertexFormats.POSITION_COLOR);
         
-        for(float theta = 0.0f; theta < Math.PI * 2.0f; theta += (Math.PI * 2.0f) / divisions)
+        for(int i = 0; i <= divisions; i++)
         {
+        	float theta = (float) i * (float) (Math.PI * 2.0) / divisions;
         	Vec3d r1 = planet.getRelativePositionAtTrueAnomaly(theta);
         	float x1 = (float) (r1.getX() * scaleFactor) + centerX;
         	float y1 = (float) (r1.getZ() * scaleFactor) + centerY;
@@ -250,12 +258,37 @@ public class PlanetariumScreen extends HandledScreen<ScreenHandler>
         	
         	if(inBounds(x1, y1) && inBounds(x2, y2))
         	{
-        		bufferBuilder.vertex(matrix, x1, y1, 10.0f).color(0.8f, 0.4f, 1.0f, 0.6f).next();
-        		bufferBuilder.vertex(matrix, x2, y2, 10.0f).color(0.8f, 0.4f, 1.0f, 0.6f).next();
+        		bufferBuilder.vertex(matrix, x1, y1, 10.0f).color(0.8f, 0.4f, 1.0f, 0.8f).next();
+        		bufferBuilder.vertex(matrix, x2, y2, 10.0f).color(0.8f, 0.4f, 1.0f, 0.8f).next();
         	}
         }
         
         BufferRenderer.drawWithShader(bufferBuilder.end());
+	}
+	
+	private void drawGlow(Matrix4f matrix, float x, float y, float size, float r, float g, float b)
+	{
+		RenderSystem.enableBlend();
+		RenderSystem.setShader(GameRenderer::getPositionColorShader);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+		bufferBuilder.vertex(matrix, x, y, 10.0f).color(r, g, b, 0.8f).next();
+
+		for(int i = 0; i <= 16; i++)
+		{
+			float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+			float sinTheta = MathHelper.sin(theta);
+			float cosTheta = MathHelper.cos(theta);
+			float radius = size;
+			
+			if(i % 4 == 0)
+				radius *= 1.15f;
+			
+			bufferBuilder.vertex(matrix, x + (radius * cosTheta), y - (radius * sinTheta), 10.0f).color(r, g, b, 0.0f).next();
+		}
+
+		BufferRenderer.drawWithShader(bufferBuilder.end());
+		RenderSystem.disableBlend();
 	}
 	
 	private int planetSelect(MinecraftClient client, float centerX, float centerY, float radius, int mouseX, int mouseY, boolean mousePressed)
