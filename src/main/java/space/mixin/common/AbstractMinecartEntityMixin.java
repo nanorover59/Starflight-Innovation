@@ -40,7 +40,7 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 			if(data != null && !this.onGround && data.overridePhysics() && !(this.hasNoGravity() || data.isOrbit()))
 			{
 				double d = this.isTouchingWater() ? 0.005 : 0.04;
-				this.setVelocity(this.getVelocity().add(0.0, d - (d * data.getPlanet().getSurfaceGravity()), 0.0));
+				this.setVelocity(this.getVelocity().add(0.0, d - (d * data.getGravity()), 0.0));
 			}
 		}
 	}

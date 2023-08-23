@@ -14,7 +14,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
 import space.block.entity.IceElectrolyzerBlockEntity;
-import space.client.StarflightModClient;
 
 public class IceElectrolyzerScreenHandler extends ScreenHandler
 {
@@ -29,7 +28,7 @@ public class IceElectrolyzerScreenHandler extends ScreenHandler
 
 	public IceElectrolyzerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
-		super(StarflightModClient.ICE_ELECTROLYZER_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.ICE_ELECTROLYZER_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 1);
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;

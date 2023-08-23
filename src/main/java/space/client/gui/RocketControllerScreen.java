@@ -25,6 +25,8 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import space.StarflightMod;
+import space.planet.ClientPlanet;
+import space.planet.ClientPlanetList;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -63,24 +65,24 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 	{
 		boolean mousePressed = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		MinecraftClient client = MinecraftClient.getInstance();
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
+		//PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		RenderSystem.setShaderTexture(0, TEXTURE);
 		int x = (width - backgroundWidth) / 2;
 		int y = (height - backgroundHeight) / 2;
 		drawTexture(matrices, x, y, 0, 0, backgroundWidth, backgroundHeight);
-		boolean inOrbit = data != null ? data.isOrbit() : false;
+		boolean inOrbit = ClientPlanetList.isViewpointInOrbit();
 		double ttw = 0;
-		Planet currentPlanet = data != null ? data.getPlanet() : null;
-		Planet targetPlanet = PlanetList.getByName(targetName);
+		ClientPlanet currentPlanet = ClientPlanetList.getViewpointPlanet();
+		ClientPlanet targetPlanet = ClientPlanetList.getByName(targetName);
 		DecimalFormat df = new DecimalFormat("#.#");
 		MutableText massText = Text.translatable("block.space.mass").append(df.format(mass / 1000.0)).append("t");
 		MutableText ttwText = Text.translatable("block.space.ttw");
 		
 		if(!inOrbit && currentPlanet != null)
 		{
-			double weight = mass * currentPlanet.getSurfaceGravity() * 9.81;
+			double weight = mass * currentPlanet.surfaceGravity * 9.81;
 			ttw = thrust / weight;
 			ttwText.append(df.format(ttw));
 		}
@@ -107,7 +109,7 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 		int button2Y = y + 33;
 		int button3X = x + 118;
 		int button3Y = y + 46;
-		boolean button2Enabled = currentPlanet != null && PlanetList.hasSurface(currentPlanet) && requiredDeltaV1 > 0 && ((!inOrbit && ttw > 1 && requiredDeltaV1 < deltaV) || (inOrbit && requiredDeltaV1 < deltaV));
+		boolean button2Enabled = currentPlanet != null && currentPlanet.hasSurface && requiredDeltaV1 > 0 && ((!inOrbit && ttw > 1 && requiredDeltaV1 < deltaV) || (inOrbit && requiredDeltaV1 < deltaV));
 		boolean button3Enabled = inOrbit && requiredDeltaV2 > 0 && requiredDeltaV2 < deltaV;
 		boolean button1Hover = mouseX >= button1X && mouseX < button1X + 48 && mouseY >= button1Y && mouseY < button1Y + 11;
 		boolean button2Hover = button2Enabled && mouseX >= button2X && mouseX < button2X + 48 && mouseY >= button2Y && mouseY < button2Y + 11;

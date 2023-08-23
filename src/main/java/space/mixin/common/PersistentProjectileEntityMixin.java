@@ -46,7 +46,7 @@ public abstract class PersistentProjectileEntityMixin extends Entity
 
 				if(!this.hasNoGravity() && !this.isNoClip())
 				{
-					double gravity = data.isOrbit() ? 0.0f : (float) (0.04 * data.getPlanet().getSurfaceGravity());
+					double gravity = data.isOrbit() ? 0.0f : (float) (0.04 * data.getGravity());
 					this.addVelocity(0.0, -gravity, 0.0);
 				}
 				

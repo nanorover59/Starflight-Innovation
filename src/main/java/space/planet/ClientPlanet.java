@@ -1,5 +1,6 @@
 package space.planet;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -18,75 +19,61 @@ import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import space.StarflightMod;
+import space.util.VectorMathUtil;
 
 @Environment(value=EnvType.CLIENT)
-public class PlanetRenderer implements Comparable<PlanetRenderer>
+public class ClientPlanet implements Comparable<ClientPlanet>
 {
-	private String name;
-	private Vec3d position;
-	private Vec3d surfaceViewpoint;
-	private Vec3d parkingOrbitViewpoint;
-	private Vec3d positionPrevious;
-	private Vec3d surfaceViewpointPrevious;
-	private Vec3d parkingOrbitViewpointPrevious;
-	private double obliquity;
-	private double precession;
-	private double radius;
-	private double surfacePressure;
-	private boolean hasLowClouds;
-	private boolean hasCloudCover;
-	private boolean hasWeather;
-	private boolean simpleTexture;
-	private boolean drawClouds;
-	private double cloudRotation;
-	private int cloudLevel;
-	private boolean unlocked;
+	public String name;
+	public String parentName;
+	public ClientPlanet parent;
+	public ArrayList<ClientPlanet> satellites = new ArrayList<ClientPlanet>();
+	public Vec3d position;
+	public Vec3d surfaceViewpoint;
+	public Vec3d parkingOrbitViewpoint;
+	public Vec3d positionPrevious;
+	public Vec3d surfaceViewpointPrevious;
+	public Vec3d parkingOrbitViewpointPrevious;
+	public double dVOrbit;
+	public double dVSurface;
+	public double dVTransfer;
+	public double sunAngle;
+	public double sunAngleOrbit;
+	public double periapsis;
+	public double apoapsis;
+	public double argumentOfPeriapsis;
+	public double trueAnomaly;
+	public double ascendingNode;
+	public double inclination;
+	public double obliquity;
+	public double precession;
+	public double radius;
+	public double surfaceGravity;
+	public double surfacePressure;
+	public boolean hasLowClouds;
+	public boolean hasCloudCover;
+	public boolean hasWeather;
+	public boolean simpleTexture;
+	public boolean drawClouds;
+	public double cloudRotation;
+	public int cloudLevel;
+	public boolean hasOrbit;
+	public boolean hasSurface;
+	public boolean hasSky;
+	public boolean unlocked;
 	
 	private static final Identifier PLANET_SHADING = new Identifier(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");
 	private static HashMap<String, Identifier> planetTextures = new HashMap<String, Identifier>();
 	
-	public PlanetRenderer(String name_, double obliquity_, double radius_, double surfacePressure_, boolean hasLowClouds_, boolean hasCloudCover_, boolean hasWeather_, boolean simpleTexture_, boolean drawClouds_, boolean unlocked_)
+	public ClientPlanet()
 	{
-		name = name_;
-		setObliquity(obliquity_);
-		setRadius(radius_);
-		setSurfacePressure(surfacePressure_);
-		setLowClouds(hasLowClouds_);
-		setCloudCover(hasCloudCover_);
-		setWeather(hasWeather_);
-		setSimpleTexture(simpleTexture_);
-		setDrawClouds(drawClouds_);
-		setUnlocked(unlocked_);
-	}
-	
-	public PlanetRenderer(PlanetRenderer other)
-	{
-		name = other.name;
-		setPosition(other.position);
-		setSurfaceViewpoint(other.surfaceViewpoint);
-		setParkingOrbitViewpoint(other.parkingOrbitViewpoint);
-		setPositionPrevious(other.positionPrevious);
-		setSurfaceViewpointPrevious(other.surfaceViewpointPrevious);
-		setParkingOrbitViewpointPrevious(other.parkingOrbitViewpointPrevious);
-		setObliquity(other.obliquity);
-		setPrecession(other.precession);
-		setRadius(other.radius);
-		setSurfacePressure(other.surfacePressure);
-		setLowClouds(other.hasLowClouds);
-		setCloudCover(other.hasCloudCover);
-		setWeather(other.hasWeather);
-		setSimpleTexture(other.simpleTexture);
-		setDrawClouds(other.drawClouds);
-		setCloudRotation(other.cloudRotation);
-		setCloudLevel(other.cloudLevel);
-		setUnlocked(other.unlocked);
 	}
 	
 	@Override
-    public int compareTo(PlanetRenderer planetRenderer)
+    public int compareTo(ClientPlanet planetRenderer)
 	{
-		double r1 = position.subtract(PlanetRenderList.getViewpointPlanet().getPosition()).length();
-		double r2 = planetRenderer.getPosition().subtract(PlanetRenderList.getViewpointPlanet().getPosition()).length();
+		double r1 = position.subtract(ClientPlanetList.getViewpointPlanet().getPosition()).length();
+		double r2 = planetRenderer.getPosition().subtract(ClientPlanetList.getViewpointPlanet().getPosition()).length();
         return (int) (r2 - r1);
     }
 
@@ -143,160 +130,28 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 		double z = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getZ(), parkingOrbitViewpoint.getZ());
 		return new Vec3d(x, y, z);
 	}
-
-	public void setParkingOrbitViewpoint(Vec3d parkingOrbitViewpoint)
+	
+	public void linkSatellites(ArrayList<ClientPlanet> planetList)
 	{
-		this.parkingOrbitViewpoint = parkingOrbitViewpoint;
+		for(ClientPlanet p : planetList)
+		{
+			if(p.parentName.equals(name))
+			{
+				satellites.add(p);
+				p.parent = this;
+			}
+		}
 	}
 	
-	public Vec3d getPositionPrevious()
+	public Vec3d getRelativePositionAtTrueAnomaly(double ta)
 	{
-		return positionPrevious;
-	}
-
-	public void setPositionPrevious(Vec3d position)
-	{
-		this.positionPrevious = position;
-	}
-	
-	public Vec3d getSurfaceViewpointPrevious()
-	{
-		return surfaceViewpointPrevious;
-	}
-
-	public void setSurfaceViewpointPrevious(Vec3d surfaceViewpoint)
-	{
-		this.surfaceViewpointPrevious = surfaceViewpoint;
-	}
-	
-	public Vec3d getParkingOrbitViewpointPrevious()
-	{
-		return parkingOrbitViewpointPrevious;
-	}
-
-	public void setParkingOrbitViewpointPrevious(Vec3d parkingOrbitViewpoint)
-	{
-		this.parkingOrbitViewpointPrevious = parkingOrbitViewpoint;
-	}
-	
-	public double getObliquity()
-	{
-		return obliquity;
-	}
-
-	public void setObliquity(double obliquity)
-	{
-		this.obliquity = obliquity;
-	}
-	
-	public double getPrecession()
-	{
-		return precession;
-	}
-
-	public void setPrecession(double precession)
-	{
-		this.precession = precession;
-	}
-	
-	public double getRadius()
-	{
-		return radius;
-	}
-
-	public void setRadius(double radius)
-	{
-		this.radius = radius;
-	}
-	
-	public double getSurfacePressure()
-	{
-		return surfacePressure;
-	}
-	
-	public void setSurfacePressure(double surfacePressure)
-	{
-		this.surfacePressure = surfacePressure;
-	}
-	
-	public boolean hasLowClouds()
-	{
-		return hasLowClouds;
-	}
-	
-	public void setLowClouds(boolean hasLowClouds)
-	{
-		this.hasLowClouds = hasLowClouds;
-	}
-	
-	public boolean hasCloudCover()
-	{
-		return hasCloudCover;
-	}
-	
-	public void setCloudCover(boolean hasCloudCover)
-	{
-		this.hasCloudCover = hasCloudCover;
-	}
-	
-	public boolean hasWeather()
-	{
-		return hasWeather;
-	}
-	
-	public void setWeather(boolean hasWeather)
-	{
-		this.hasWeather = hasWeather;
-	}
-	
-	public boolean hasSimpleTexture()
-	{
-		return simpleTexture;
-	}
-	
-	public void setSimpleTexture(boolean simpleTexture)
-	{
-		this.simpleTexture = simpleTexture;
-	}
-	
-	public boolean drawClouds()
-	{
-		return drawClouds;
-	}
-	
-	public void setDrawClouds(boolean drawClouds)
-	{
-		this.drawClouds = drawClouds;
-	}
-	
-	public double getCloudRotation()
-	{
-		return cloudRotation;
-	}
-
-	public void setCloudRotation(double cloudRotation)
-	{
-		this.cloudRotation = cloudRotation;
-	}
-	
-	public int getCloudLevel()
-	{
-		return cloudLevel;
-	}
-
-	public void setCloudLevel(int cloudLevel)
-	{
-		this.cloudLevel = cloudLevel;
-	}
-	
-	public boolean isUnlocked()
-	{
-		return unlocked;
-	}
-
-	public void setUnlocked(boolean unlocked)
-	{
-		this.unlocked = unlocked;
+		double ecc = (apoapsis - periapsis) / (apoapsis + periapsis); // Eccentricity
+		double sma = (periapsis + apoapsis) / 2.0; // Semi-Major Axis
+		double r = (sma * (1.0 - (ecc * ecc))) / (1.0 + (ecc * Math.cos(ta)));
+		Vec3d lanAxis = new Vec3d(1.0, 0.0, 0.0).rotateY((float) ascendingNode); // Longitude of Ascending Node Axis
+		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPeriapsis + ta));
+		newPosition = VectorMathUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
+		return newPosition;
 	}
 	
 	/**
@@ -326,8 +181,8 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 	public void doRender(BufferBuilder bufferBuilder, MatrixStack matrices, float partialTicks, float brightness, boolean weather)
 	{
 		// Angles to render this planet in the sky.
-		PlanetRenderer viewpointPlanet = PlanetRenderList.getViewpointPlanet();
-		Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(partialTicks) : viewpointPlanet.getSurfaceViewpoint(partialTicks);
+		ClientPlanet viewpointPlanet = ClientPlanetList.getViewpointPlanet();
+		Vec3d viewpoint = ClientPlanetList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(partialTicks) : viewpointPlanet.getSurfaceViewpoint(partialTicks);
 		Vec3d positionVector = getPosition(partialTicks);
 		double rPlanet = viewpoint.subtract(positionVector).length();
 		Vec3d viewpointVector = viewpoint.subtract(viewpointPlanet.getPosition(partialTicks));
@@ -343,10 +198,10 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			matrices.push();
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
 
-			if(name != PlanetRenderList.getViewpointPlanet().getName())
+			if(name != ClientPlanetList.getViewpointPlanet().getName())
 			{
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.getPrecession()));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.getObliquity())));
+				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.precession));
+				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.obliquity)));
 				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) (phiViewpoint - phiPlanet)));
 				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (thetaPlanet)));
 			}
@@ -443,10 +298,10 @@ public class PlanetRenderer implements Comparable<PlanetRenderer>
 			matrices.push();
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
 			
-			if(name != PlanetRenderList.getViewpointPlanet().getName())
+			if(name != ClientPlanetList.getViewpointPlanet().getName())
 			{
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.getPrecession()));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.getObliquity())));
+				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.precession));
+				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.obliquity)));
 				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) (phiViewpoint - phiPlanet)));
 				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (thetaPlanet)));
 			}

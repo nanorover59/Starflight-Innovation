@@ -57,10 +57,8 @@ public class Planet
 	private double cloudRotationRate;
 	private int cloudLevel;
 	private int cloudTimer;
-	
 	public double sunAngle;
 	public double sunAngleOrbit;
-	
 	private PlanetDimensionData orbit;
 	private PlanetDimensionData surface;
 	private PlanetDimensionData sky;
@@ -163,9 +161,9 @@ public class Planet
 		this.satelliteLevel = level;
 	}
 	
-	public void linkSatellites()
+	public void linkSatellites(ArrayList<Planet> planetList)
 	{
-		for(Planet p : PlanetList.getPlanets())
+		for(Planet p : planetList)
 		{
 			if(p.parentName.equals(name))
 			{
@@ -223,6 +221,14 @@ public class Planet
 	public String getName()
 	{
 		return name;
+	}
+	
+	/**
+	 * The parent object's database name.
+	 */
+	public String getParentName()
+	{
+		return parentName;
 	}
 	
 	/**
@@ -306,6 +312,30 @@ public class Planet
 	public double getArgumentOfPeriapsis()
 	{
 		return argumentOfPeriapsis;
+	}
+	
+	/**
+	 * True anomaly in radians.
+	 */
+	public double getTrueAnomaly()
+	{
+		return trueAnomaly;
+	}
+	
+	/**
+	 * Ascending node in radians.
+	 */
+	public double getAscendingNode()
+	{
+		return ascendingNode;
+	}
+	
+	/**
+	 * Inclination in radians.
+	 */
+	public double getInclination()
+	{
+		return inclination;
 	}
 	
 	/**
@@ -509,7 +539,7 @@ public class Planet
 		if(checkList.contains(name))
 			return;
 		
-		System.out.println(name + " " + satelliteLevel);
+		//System.out.println(name + " " + satelliteLevel);
 		
 		if(satelliteLevel > 0)
 		{

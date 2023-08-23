@@ -37,8 +37,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 import space.StarflightMod;
 import space.client.render.StarflightSkyFeatures;
-import space.planet.PlanetRenderList;
-import space.planet.PlanetRenderer;
+import space.planet.ClientPlanetList;
+import space.planet.ClientPlanet;
 
 @Environment(value=EnvType.CLIENT)
 @Mixin(WorldRenderer.class)
@@ -65,18 +65,18 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderSky(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
 	public void renderSkyInject(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean bl, Runnable runnable, CallbackInfo info)
 	{
-		ArrayList<PlanetRenderer> planetList = PlanetRenderList.getRenderers(true);
-		PlanetRenderer viewpointPlanet = PlanetRenderList.getViewpointPlanet();
+		ArrayList<ClientPlanet> planetList = ClientPlanetList.getPlanets(true);
+		ClientPlanet viewpointPlanet = ClientPlanetList.getViewpointPlanet();
 		
 		if(viewpointPlanet != null)
 		{
-			boolean starrySky = PlanetRenderList.isViewpointInOrbit() || viewpointPlanet.getSurfacePressure() < 0.001d;
-			boolean cloudySky = viewpointPlanet.hasCloudCover();
+			boolean starrySky = ClientPlanetList.isViewpointInOrbit() || viewpointPlanet.surfacePressure < 0.001d;
+			boolean cloudySky = viewpointPlanet.hasCloudCover;
 			Vec3d viewpointPlanetPosition = viewpointPlanet.getPosition(tickDelta);
 			
 			// Find the position of the sun and background stars in angular coordinates.
 			Vec3d starPosition = new Vec3d(0.0d, 0.0d, 0.0d);
-			Vec3d viewpoint = PlanetRenderList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(tickDelta) : viewpointPlanet.getSurfaceViewpoint(tickDelta);
+			Vec3d viewpoint = ClientPlanetList.isViewpointInOrbit() ? viewpointPlanet.getParkingOrbitViewpoint(tickDelta) : viewpointPlanet.getSurfaceViewpoint(tickDelta);
 			double azimuthOfViewpoint = Math.atan2(viewpointPlanetPosition.getZ() - viewpoint.getZ(), viewpointPlanetPosition.getX() - viewpoint.getX());
 			double azimuthOfStar = Math.atan2(starPosition.getZ() - viewpoint.getZ(), starPosition.getX() - viewpoint.getX());
 			double trueAzimuth = azimuthOfViewpoint - azimuthOfStar;
@@ -106,8 +106,8 @@ public abstract class WorldRendererMixin
 			double phiViewpoint = Math.atan2(viewpointVector.getZ(), viewpointVector.getX());	
 			matrices.push();
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
-			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.getPrecession()));
-			matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) viewpointPlanet.getObliquity()));
+			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.precession));
+			matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) viewpointPlanet.obliquity));
 			matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) phiViewpoint));
 			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(60.0f));
 			
@@ -138,7 +138,7 @@ public abstract class WorldRendererMixin
 			float celestialFactor = Math.min(starFactor + 0.3f, 1.0f);
 			celestialFactor = Math.max(celestialFactor - rainGradient, 0.0f);
 			
-			for(PlanetRenderer planetRenderer : planetList)
+			for(ClientPlanet planetRenderer : planetList)
 			{
 				if(planetRenderer != null)
 					planetRenderer.doRender(bufferBuilder, matrices, tickDelta, celestialFactor, s < 0.95f);
@@ -255,7 +255,7 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
 	public void renderCloudsInject(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, double d, double e, double f, CallbackInfo info)
 	{
-		if(PlanetRenderList.getViewpointPlanet() != null && (PlanetRenderList.isViewpointInOrbit() || !PlanetRenderList.getViewpointPlanet().hasLowClouds()))
+		if(ClientPlanetList.getViewpointPlanet() != null && (ClientPlanetList.isViewpointInOrbit() || !ClientPlanetList.getViewpointPlanet().hasLowClouds))
 			info.cancel();
 	}
 	

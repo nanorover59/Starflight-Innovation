@@ -14,7 +14,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
 import space.block.entity.StirlingEngineBlockEntity;
-import space.client.StarflightModClient;
 
 public class StirlingEngineScreenHandler extends ScreenHandler
 {
@@ -29,7 +28,7 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 
 	public StirlingEngineScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
-		super(StarflightModClient.STIRLING_ENGINE_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 1);
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;

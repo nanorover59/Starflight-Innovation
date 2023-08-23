@@ -90,7 +90,7 @@ public class ThrusterParticle extends SpriteBillboardParticle
 			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(clientWorld);
 			
 			if(data != null)
-				pressure = data.isOrbit() ? 0.0 : data.getPlanet().getSurfacePressure();
+				pressure = data.getPressure();
 			
 			return new ThrusterParticle(clientWorld, x, y, z, vx, vy, vz, 1.0f, pressure, this.spriteProvider);
 		}

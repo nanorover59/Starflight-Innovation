@@ -9,7 +9,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Util;
-import space.client.StarflightModClient;
 import space.item.NavigationCardItem;
 import space.planet.Planet;
 import space.planet.PlanetList;
@@ -25,7 +24,7 @@ public class PlanetariumScreenHandler extends ScreenHandler
 
 	public PlanetariumScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory)
 	{
-		super(StarflightModClient.PLANETARIUM_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.PLANETARIUM_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 1);
 		this.inventory = inventory;
 		inventory.onOpen(playerInventory.player);

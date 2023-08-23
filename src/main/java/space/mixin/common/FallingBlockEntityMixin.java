@@ -37,7 +37,7 @@ public abstract class FallingBlockEntityMixin extends Entity
 				this.setVelocity(this.getVelocity().multiply(1.0 / 0.98));
 				
 				if(!this.hasNoGravity() && !this.onGround)
-		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getPlanet().getSurfaceGravity()), 0.0));
+		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getGravity()), 0.0));
 				
 				this.setVelocity(this.getVelocity().multiply((float) (1.0 / (1.0 + (0.02 * airMultiplier)))));
 			}

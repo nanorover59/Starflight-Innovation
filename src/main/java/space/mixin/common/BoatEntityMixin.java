@@ -48,7 +48,7 @@ public abstract class BoatEntityMixin extends Entity
 				this.setVelocity(this.getVelocity().x * d, this.getVelocity().y, this.getVelocity().z * d);
 				
 				if(!(this.hasNoGravity() || data.isOrbit()))
-		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getPlanet().getSurfaceGravity()), 0.0));
+		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getGravity()), 0.0));
 				
 				this.yawVelocity *= d;
 			}

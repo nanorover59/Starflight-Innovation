@@ -32,7 +32,7 @@ public abstract class ItemEntityMixin extends Entity
 			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 			
 			if(data != null && data.overridePhysics())
-				velocity = velocity.add(0.0, 0.04 - 0.04 * (data.isOrbit() ? 0.0 : data.getPlanet().getSurfaceGravity()), 0.0);
+				velocity = velocity.add(0.0, 0.04 - 0.04 * (data.isOrbit() ? 0.0 : data.getGravity()), 0.0);
 		}
 		
 		return velocity;

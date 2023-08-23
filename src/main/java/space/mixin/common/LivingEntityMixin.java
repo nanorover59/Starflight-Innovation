@@ -75,7 +75,7 @@ public abstract class LivingEntityMixin extends Entity
 			}
 			else
 			{
-				gravity = data.isOrbit() || this.hasNoGravity() ? 0.0 : data.getPlanet().getSurfaceGravity();
+				gravity = data.isOrbit() || this.hasNoGravity() ? 0.0 : data.getGravity();
 				airMultiplier = (float) AirUtil.getAirResistanceMultiplier(this.world, data, this.getBlockPos());
 			}
 		}

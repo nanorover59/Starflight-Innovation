@@ -7,7 +7,6 @@ import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import space.client.StarflightModClient;
 import space.item.ArrivalCardItem;
 import space.item.NavigationCardItem;
 
@@ -22,7 +21,7 @@ public class RocketControllerScreenHandler extends ScreenHandler
 
 	public RocketControllerScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory)
 	{
-		super(StarflightModClient.ROCKET_CONTROLLER_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.ROCKET_CONTROLLER_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 2);
 		this.inventory = inventory;
 		inventory.onOpen(playerInventory.player);

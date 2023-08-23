@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.HopperScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import space.client.StarflightModClient;
 import space.item.StarflightItems;
 
 public class BatteryScreenHandler extends ScreenHandler
@@ -23,7 +22,7 @@ public class BatteryScreenHandler extends ScreenHandler
 
 	public BatteryScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory)
 	{
-		super(StarflightModClient.BATTERY_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.BATTERY_SCREEN_HANDLER, syncId);
 		this.inventory = inventory;
 		HopperScreenHandler.checkSize(inventory, 5);
 		inventory.onOpen(playerInventory.player);

@@ -7,15 +7,18 @@ import java.nio.file.Paths;
 
 import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerEntityEvents;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.CommonLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 import space.energy.EnergyNet;
-import space.planet.Planet;
 import space.planet.PlanetList;
+import space.planet.PlanetResourceListener;
 import space.util.MobSpawningUtil;
 
 public class StarflightEvents
@@ -27,16 +30,9 @@ public class StarflightEvents
 		// Server Started Event
 		ServerLifecycleEvents.SERVER_STARTED.register((server) ->
 	    {
+	    	
+	    	
 	    	saveTimer = 0;
-	    	File planetFile = new File(server.getSavePath(WorldSavePath.ROOT).toString() + "/space/planets.dat");
-	    	DataCompound planetData = null;
-	    	
-	    	if(planetFile.exists())
-	    		planetData = ESSHelper.readCompound(planetFile);
-	    	
-	    	PlanetList.initialize(server);
-	    	PlanetList.loadData(planetData);
-	    	
 	    	File energyFile = new File(server.getSavePath(WorldSavePath.ROOT).toString() + "/space/energy.dat");
 	    	DataCompound energyData = null;
 	    	
@@ -51,11 +47,16 @@ public class StarflightEvents
 	    {
 	    	// Save planet and vessel data when the server is stopping.
 	    	saveData(server);
+	    	PlanetList.clear();
 	    });
 		
 		// Server Tick Event
 		ServerTickEvents.END_SERVER_TICK.register((server) ->
 	    {
+			PlanetList.serverTick(server);
+			EnergyNet.doEnergyFlow(server);
+			MobSpawningUtil.doCustomMobSpawning(server);
+			
 			saveTimer++;
 			
 			// Save planet and vessel data every 5 minutes.
@@ -64,25 +65,16 @@ public class StarflightEvents
 				saveTimer = 0;
 				saveData(server);
 			}
-			
-			PlanetList.simulateMotion();
-			PlanetList.sendToClients(server);
-			EnergyNet.doEnergyFlow(server);
-			MobSpawningUtil.doCustomMobSpawning(server);
 	    });
 		
-		// Entity Load Event
-		ServerEntityEvents.ENTITY_LOAD.register((entity, world) ->
+		// Server Disconnect Event
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
 		{
-			if(entity instanceof ServerPlayerEntity)
-			{
-				ServerPlayerEntity player = (ServerPlayerEntity) entity;
-				
-				// Unlock all planets until there is a progression mechanic in place.
-				for(Planet planet : PlanetList.getPlanets())
-					PlanetList.unlock(player.getUuid(), planet.getName());
-			}
-		});
+			PlanetList.deactivateClient(handler.getPlayer());
+        });
+		
+		// Resource Reload Event
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PlanetResourceListener());
 	}
 	
 	private static void saveData(MinecraftServer server)
@@ -94,7 +86,7 @@ public class StarflightEvents
     	try
 		{
 			Files.createDirectories(Paths.get(directory));
-			DataCompound planetData = PlanetList.saveData();
+			DataCompound planetData = PlanetList.saveDynamicData();
 			ESSHelper.writeCompound(planetData, planetsFile);
 			DataCompound energyData = EnergyNet.saveData();
 			ESSHelper.writeCompound(energyData, energyFile);

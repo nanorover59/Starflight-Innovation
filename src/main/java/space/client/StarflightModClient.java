@@ -15,10 +15,9 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.screenhandler.v1.ScreenRegistry;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.screenhandler.v1.ScreenHandlerRegistry;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.option.GameOptions;
@@ -31,7 +30,6 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -62,15 +60,8 @@ import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
 import space.mixin.client.KeyBindingMixin;
-import space.planet.PlanetDimensionData;
-import space.planet.PlanetList;
-import space.planet.PlanetRenderList;
-import space.screen.BatteryScreenHandler;
-import space.screen.ElectricFurnaceScreenHandler;
-import space.screen.IceElectrolyzerScreenHandler;
-import space.screen.PlanetariumScreenHandler;
-import space.screen.RocketControllerScreenHandler;
-import space.screen.StirlingEngineScreenHandler;
+import space.planet.ClientPlanetList;
+import space.screen.StarflightScreens;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftRenderList;
 
@@ -90,13 +81,6 @@ public class StarflightModClient implements ClientModInitializer
 	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "key.category.space"));
 	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));*/
 	
-	public static final ScreenHandlerType<PlanetariumScreenHandler> PLANETARIUM_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "planetarium"), PlanetariumScreenHandler::new);
-	public static final ScreenHandlerType<StirlingEngineScreenHandler> STIRLING_ENGINE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "stirling_engine"), StirlingEngineScreenHandler::new);
-	public static final ScreenHandlerType<ElectricFurnaceScreenHandler> ELECTRIC_FURNACE_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "electric_furnace"), ElectricFurnaceScreenHandler::new);
-	public static final ScreenHandlerType<IceElectrolyzerScreenHandler> ICE_ELECTROLYZER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "ice_electrolyzer"), IceElectrolyzerScreenHandler::new);
-	public static final ScreenHandlerType<BatteryScreenHandler> BATTERY_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "battery"), BatteryScreenHandler::new);
-	public static final ScreenHandlerType<RocketControllerScreenHandler> ROCKET_CONTROLLER_SCREEN_HANDLER = ScreenHandlerRegistry.registerSimple(new Identifier(StarflightMod.MOD_ID, "rocket_controller"), RocketControllerScreenHandler::new);
-	
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
 	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
@@ -111,7 +95,7 @@ public class StarflightModClient implements ClientModInitializer
 	{
 		// Client side networking.
 		ClientPlayConnectionEvents.INIT.register((handler, client) -> {
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planet_data"), (client1, handler1, buf, sender1) -> PlanetRenderList.receivePlanetListUpdate(handler1, sender1, client1, buf));
+			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planet_data"), (client1, handler1, buf, sender1) -> ClientPlanetList.receivePlanetListUpdate(client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), (client1, handler1, buf, sender1) -> MovingCraftRenderList.receiveCraftListUpdate(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_entity_offsets"), (client1, handler1, buf, sender1) -> MovingCraftEntity.receiveEntityOffsets(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_data"), (client1, handler1, buf, sender1) -> RocketControllerScreen.receiveDisplayDataUpdate(handler1, sender1, client1, buf));
@@ -141,12 +125,12 @@ public class StarflightModClient implements ClientModInitializer
 		);
 		
 		// GUIs
-		ScreenRegistry.register(PLANETARIUM_SCREEN_HANDLER, PlanetariumScreen::new);
-		ScreenRegistry.register(STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
-		ScreenRegistry.register(ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
-		ScreenRegistry.register(ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
-		ScreenRegistry.register(BATTERY_SCREEN_HANDLER, BatteryScreen::new);
-		ScreenRegistry.register(ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
+		HandledScreens.register(StarflightScreens.PLANETARIUM_SCREEN_HANDLER, PlanetariumScreen::new);
+		HandledScreens.register(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
+		HandledScreens.register(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
+		HandledScreens.register(StarflightScreens.ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
+		HandledScreens.register(StarflightScreens.BATTERY_SCREEN_HANDLER, BatteryScreen::new);
+		HandledScreens.register(StarflightScreens.ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
 		
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
@@ -163,6 +147,9 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_SOLAR_SPECTRE_LAYER, SolarSpectreEntityModel::getTexturedModelData);
 		
+		// Particles
+		StarflightParticles.initializeParticles();
+		
 		// Dimension Effects
 		registerDimensionEffect(new Identifier(StarflightMod.MOD_ID, "mars"), new Mars());
 		
@@ -170,7 +157,7 @@ public class StarflightModClient implements ClientModInitializer
 		ClientTickEvents.START_CLIENT_TICK.register(client -> {
 			
 			// Update the planet render list.
-			PlanetRenderList.updateRenderers();
+			ClientPlanetList.updatePlanets();
 			
 			// Rocket user input.
 			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
@@ -224,9 +211,7 @@ public class StarflightModClient implements ClientModInitializer
 			// Weather particle effects.
 			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)
 			{
-				PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
-				
-				if(data != null && !data.isOrbit() && data.getPlanet().getName().equals("mars"))
+				if(!ClientPlanetList.isViewpointInOrbit() && ClientPlanetList.getViewpointPlanet() != null && ClientPlanetList.getViewpointPlanet().getName().equals("mars"))
 				{
 					Random random = client.world.random;
 					int count = 64 + random.nextInt(64);

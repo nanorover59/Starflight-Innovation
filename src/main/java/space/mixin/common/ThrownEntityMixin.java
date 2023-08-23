@@ -42,7 +42,7 @@ public abstract class ThrownEntityMixin extends Entity
 
 				if(!this.hasNoGravity())
 				{
-					double gravity = data.isOrbit() ? 0.0f : (float) (0.04 * data.getPlanet().getSurfaceGravity());
+					double gravity = data.isOrbit() ? 0.0f : (float) (0.04 * data.getGravity());
 					this.addVelocity(0.0, -gravity, 0.0);
 				}
 				

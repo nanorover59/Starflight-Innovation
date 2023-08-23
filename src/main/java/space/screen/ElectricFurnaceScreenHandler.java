@@ -15,7 +15,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
-import space.client.StarflightModClient;
 
 public class ElectricFurnaceScreenHandler extends ScreenHandler
 {
@@ -30,7 +29,7 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 
 	public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
-		super(StarflightModClient.ELECTRIC_FURNACE_SCREEN_HANDLER, syncId);
+		super(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, syncId);
 		checkSize(inventory, 2);
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;

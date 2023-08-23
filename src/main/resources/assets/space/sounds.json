@@ -42,17 +42,5 @@
       "space:noise2",
       "space:noise3"
     ]
-  },
-  "pew": {
-    "subtitle": "subtitles.space.pew",
-    "sounds": [
-      "space:pew"
-    ]
-  },
-  "hit": {
-    "subtitle": "subtitles.space.hit",
-    "sounds": [
-      "space:hit"
-    ]
   }
 }

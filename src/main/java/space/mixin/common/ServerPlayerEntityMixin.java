@@ -27,7 +27,7 @@ public abstract class ServerPlayerEntityMixin
 		World world = player.getWorld();
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
-		if(data != null && !AirUtil.canEntityBreathe(player, spawnPointPosition, data))
+		if(data != null && spawnPointPosition != null && !AirUtil.canEntityBreathe(player, spawnPointPosition, data))
 		{
 			BlockPos defaultSpawn = new BlockPos(world.getLevelProperties().getSpawnX(), world.getLevelProperties().getSpawnY(), world.getLevelProperties().getSpawnZ());
 			player.setSpawnPoint(World.OVERWORLD, defaultSpawn, 0.0f, true, false);

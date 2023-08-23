@@ -22,12 +22,15 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 	@Shadow @Final MutableWorldProperties properties;
 	@Shadow RegistryKey<World> registryKey;
 	
-	private boolean planetCheck;
-	private PlanetDimensionData planetData;
+	private boolean planetCheck = true;
+	private PlanetDimensionData planetData = null;
 	
 	public PlanetDimensionData getPlanetDimensionData()
 	{
-		if(!planetCheck)
+		if(isClient())
+			return PlanetList.viewpointDimensionData;
+		
+		if(planetCheck)
 		{
 			for(Planet planet : PlanetList.getPlanets())
 			{
@@ -37,36 +40,33 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 					planetData = planet.getSurface();
 				else if(planet.getSky() != null && planet.getSky().getWorldKey() == registryKey)
 					planetData = planet.getSky();
-				
-				if(planetData != null)
-				{
-					planetCheck = true;
-					break;
-				}
 			}
+			
+			planetCheck = false;
 		}
-		
-		//if(this.isClient())
-		//	System.out.println(registryKey.toString() + " " + planetData.getPlanet().getName() + " " + planetData.hasWeather());
 		
 		return planetData;
 	}
 	
 	public void clearPlanetDimensionData()
 	{
-		planetCheck = false;
-		planetData = null;
+		planetCheck = true;
 	}
 	
 	@Override
 	public float getSkyAngle(float f)
 	{
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld((World) (Object) this);
-		
-		if(data != null && data.overrideSky())
+		if(isClient() && PlanetList.hasViewpoint)
+			return (float) ((PlanetList.inOrbit ? PlanetList.sunAngleOrbit : PlanetList.sunAngle) / (Math.PI * 2.0));
+		else
 		{
-			Planet planet = data.getPlanet();
-			return (float) ((data.isOrbit() ? planet.sunAngleOrbit : planet.sunAngle) / (Math.PI * 2.0));
+			PlanetDimensionData data = getPlanetDimensionData();
+			
+			if(data != null && data.overrideSky())
+			{
+				Planet planet = data.getPlanet();
+				return (float) ((data.isOrbit() ? planet.sunAngleOrbit : planet.sunAngle) / (Math.PI * 2.0));
+			}
 		}
 		
 		return this.getDimension().getSkyAngle(this.getLunarTime());
@@ -79,8 +79,16 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
         
 		if(data != null && data.overrideSky())
 		{
-			Planet planet = data.getPlanet();
-			double angle = data.isOrbit() ? planet.sunAngleOrbit : planet.sunAngle;
+			double angle = 0.0;
+			
+			if(isClient())
+				angle = PlanetList.inOrbit ? PlanetList.sunAngleOrbit : PlanetList.sunAngle;
+			else
+			{
+				Planet planet = data.getPlanet();
+				angle = data.isOrbit() ? planet.sunAngleOrbit : planet.sunAngle;
+			}
+			
 			angle -= Math.PI / 2.0;
 			
 			if(angle < 0.0)
