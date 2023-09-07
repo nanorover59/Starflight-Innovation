@@ -90,7 +90,7 @@ public abstract class FluidStateMixin
 						StarflightEffects.sendOutgas(world, pos, pos.up(), true);
 					}
 					else
-						world.createAndScheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 5);
+						world.scheduleFluidTick(pos, world.getFluidState(pos).getFluid(), 5);
 				}
 			}
 		}

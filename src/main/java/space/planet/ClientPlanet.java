@@ -3,6 +3,8 @@ package space.planet;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.fabricmc.api.EnvType;
@@ -15,11 +17,10 @@ import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import space.StarflightMod;
-import space.util.VectorMathUtil;
+import space.util.VectorUtil;
 
 @Environment(value=EnvType.CLIENT)
 public class ClientPlanet implements Comparable<ClientPlanet>
@@ -150,7 +151,7 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 		double r = (sma * (1.0 - (ecc * ecc))) / (1.0 + (ecc * Math.cos(ta)));
 		Vec3d lanAxis = new Vec3d(1.0, 0.0, 0.0).rotateY((float) ascendingNode); // Longitude of Ascending Node Axis
 		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPeriapsis + ta));
-		newPosition = VectorMathUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
+		newPosition = VectorUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
 		return newPosition;
 	}
 	
@@ -196,17 +197,17 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 			// Render this planet object in the sky.
 			float t = getRenderSize(rPlanet);
 			matrices.push();
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
 
 			if(name != ClientPlanetList.getViewpointPlanet().getName())
 			{
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.precession));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.obliquity)));
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) (phiViewpoint - phiPlanet)));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (thetaPlanet)));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) viewpointPlanet.precession));
+				matrices.multiply(RotationAxis.POSITIVE_Z.rotation((float) (viewpointPlanet.obliquity)));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (phiViewpoint - phiPlanet)));
+				matrices.multiply(RotationAxis.POSITIVE_Z.rotation((float) (thetaPlanet)));
 			}
 			else
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) Math.PI));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) Math.PI));
 
 			Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
 
@@ -216,23 +217,23 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 					brightness = 1.0f;
 				
 				RenderSystem.setShaderColor(brightness, brightness, brightness, 0.95f);
-				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 				RenderSystem.setShaderTexture(0, getTexture(name + "_haze"));
 				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 				RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
-				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 				RenderSystem.setShaderTexture(0, getTexture(name));
 				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 			}
 			else
 			{
@@ -249,14 +250,14 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 				
 				float lightingFactor = brightness * (float) (Math.abs(phaseAngle - Math.PI) / Math.PI);
 				RenderSystem.setShaderColor(lightingFactor, lightingFactor, lightingFactor, 1.0f);
-				RenderSystem.setShader(GameRenderer::getPositionTexShader);
+				RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 				RenderSystem.setShaderTexture(0, getTexture(name));
 				bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(0.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(1.0f, 0.0f).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(1.0f, 1.0f).next();
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(0.0f, 1.0f).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 			}
 			
 			matrices.pop();
@@ -296,28 +297,28 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 			
 			// Render this planet object in the sky.
 			matrices.push();
-			matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(-90.0f));
+			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0f));
 			
 			if(name != ClientPlanetList.getViewpointPlanet().getName())
 			{
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) viewpointPlanet.precession));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (viewpointPlanet.obliquity)));
-				matrices.multiply(Vec3f.POSITIVE_X.getRadialQuaternion((float) (phiViewpoint - phiPlanet)));
-				matrices.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) (thetaPlanet)));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) viewpointPlanet.precession));
+				matrices.multiply(RotationAxis.POSITIVE_Z.rotation((float) (viewpointPlanet.obliquity)));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) (phiViewpoint - phiPlanet)));
+				matrices.multiply(RotationAxis.POSITIVE_Z.rotation((float) (thetaPlanet)));
 			}
 			else
-				matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(180.0f));
+				matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0f));
 			
 			Matrix4f matrix4f3 = matrices.peek().getPositionMatrix();
 			RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
-			RenderSystem.setShader(GameRenderer::getPositionTexShader);
+			RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 			RenderSystem.setShaderTexture(0, getTexture(name));
 			bufferBuilder.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, t).texture(endFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startFrame, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endFrame, 1.0f).next();
-			BufferRenderer.drawWithShader(bufferBuilder.end());
+			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 			
 			if(drawClouds)
 			{
@@ -340,7 +341,7 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 				bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startCloudFrameU, startCloudFrameV).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startCloudFrameU, endCloudFrameV).next();
 				bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endCloudFrameU, endCloudFrameV).next();
-				BufferRenderer.drawWithShader(bufferBuilder.end());
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 			}
 			
 			RenderSystem.setShaderTexture(0, PLANET_SHADING);
@@ -349,7 +350,7 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 			bufferBuilder.vertex(matrix4f3, -t, 100.0f, -t).texture(startShadingFrame, 0.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, -t).texture(startShadingFrame, 1.0f).next();
 			bufferBuilder.vertex(matrix4f3, t, 100.0f, t).texture(endShadingFrame, 1.0f).next();
-			BufferRenderer.drawWithShader(bufferBuilder.end());
+			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 			
 			matrices.pop();
 		}

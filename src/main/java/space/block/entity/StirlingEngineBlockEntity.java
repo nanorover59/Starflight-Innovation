@@ -22,16 +22,16 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.tag.ItemTags;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.tag.ItemTags;
-import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 import space.item.StarflightItems;
@@ -167,7 +167,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 
 	public static void addFuel(Map<Item, Integer> fuelTimes, TagKey<Item> tag, int fuelTime)
 	{
-		for(RegistryEntry<Item> registryEntry : Registry.ITEM.iterateEntries(tag))
+		for(RegistryEntry<Item> registryEntry : Registries.ITEM.iterateEntries(tag))
 		{
 			if(isNonFlammableWood(registryEntry.value()))
 				continue;

@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
+import net.minecraft.block.BlockSetType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.DoorBlock;
@@ -18,7 +19,7 @@ public class SealedDoorBlock extends DoorBlock
 {
 	public SealedDoorBlock(Settings settings)
 	{
-		super(settings);
+		super(settings, BlockSetType.IRON);
 	}
 	
 	@Override

@@ -90,7 +90,7 @@ public class StructurePlacerItem extends Item
 			{
 				for(int k = start.getZ(); k < end.getZ(); k++)
 				{
-					if(!world.getBlockState(new BlockPos(i, j, k)).getMaterial().isReplaceable())
+					if(!world.getBlockState(new BlockPos(i, j, k)).isReplaceable())
 						return true;
 				}
 			}

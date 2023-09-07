@@ -1,25 +1,31 @@
 {
   "schemaVersion" : 1,
   "id" : "space",
-  "version" : "1.2.2",
+  "version" : "1.2.3",
   "name" : "Starflight Innovation",
-  "description" : "Yet another rocket building mod!",
+  "description" : "Build rockets out of blocks and fly them from planet to planet!",
   "authors" : [ "nanorover59" ],
   "contact" : {
-    "homepage" : "",
-    "sources" : ""
+    "issues" : "https://github.com/nanorover59/Starflight-Innovation/issues",
+    "sources" : "https://github.com/nanorover59/Starflight-Innovation"
   },
-  "license" : "CC0-1.0",
+  "license" : "MIT License",
   "icon" : "assets/space/icon.png",
   "environment" : "*",
   "entrypoints" : {
     "main" : [ "space.StarflightMod" ],
     "client" : [ "space.client.StarflightModClient" ]
   },
-  "mixins" : [ "space.mixin.common.json", "space.mixin.client.json" ],
+  "mixins" : [
+    "space.mixin.common.json",
+    {
+      "config": "space.mixin.client.json",
+      "environment": "client"
+    }
+  ],
   "depends" : {
-    "fabricloader": ">=0.14.6",
-    "minecraft" : "~1.19",
+    "fabricloader": ">=0.14.21",
+    "minecraft" : "~1.20",
     "java": ">=17"
   }
 }

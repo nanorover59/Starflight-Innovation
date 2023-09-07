@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -66,7 +65,7 @@ public class DividerItem extends Item
 	
 					for(BlockPos p : checkList)
 					{
-						if(world.getBlockState(p).getMaterial() == Material.AIR)
+						if(world.getBlockState(p).isAir())
 						{	
 							cx += p.getX();
 							cy += p.getY();
@@ -90,7 +89,7 @@ public class DividerItem extends Item
 							{
 								BlockState state = world.getBlockState(position.add(i, 0, 0));
 								
-								if(state.getMaterial() != Material.AIR)
+								if(state.isAir())
 									fillState = state;
 								else
 									i++;

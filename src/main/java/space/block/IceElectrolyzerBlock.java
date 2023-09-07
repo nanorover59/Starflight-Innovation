@@ -111,7 +111,7 @@ public class IceElectrolyzerBlock extends BlockWithEntity implements EnergyBlock
 
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 	
 	@Override

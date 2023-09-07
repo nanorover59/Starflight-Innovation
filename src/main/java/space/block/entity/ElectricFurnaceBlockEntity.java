@@ -28,6 +28,7 @@ import net.minecraft.recipe.RecipeInputProvider;
 import net.minecraft.recipe.RecipeMatcher;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.RecipeUnlocker;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -163,7 +164,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 					blockEntity.cookTime = 0;
 					blockEntity.cookTimeTotal = getCookTime(world, blockEntity);
 
-					if(craftRecipe(recipe, blockEntity.inventory, i))
+					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
 						blockEntity.setLastRecipe(recipe);
 
 					bl2 = true;
@@ -190,7 +191,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	{
 		if(!((ItemStack) slots.get(0)).isEmpty() && recipe != null)
 		{
-			ItemStack itemStack = recipe.getOutput();
+			ItemStack itemStack = recipe.getOutput(null);
 
 			if(itemStack.isEmpty())
 				return false;
@@ -200,7 +201,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 				if(itemStack2.isEmpty())
 					return true;
-				else if(!itemStack2.isItemEqualIgnoreDamage(itemStack))
+				else if(!ItemStack.areItemsEqual(itemStack2, itemStack))
 					return false;
 				else if(itemStack2.getCount() < count && itemStack2.getCount() < itemStack2.getMaxCount())
 					return true;
@@ -212,12 +213,12 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			return false;
 	}
 
-	private static boolean craftRecipe(@Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count)
+	private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count)
 	{
 		if(recipe != null && canAcceptRecipeOutput(recipe, slots, count))
 		{
 			ItemStack itemStack = (ItemStack) slots.get(0);
-			ItemStack itemStack2 = recipe.getOutput();
+			ItemStack itemStack2 = recipe.getOutput(registryManager);
 			ItemStack itemStack3 = (ItemStack) slots.get(1);
 
 			if(itemStack3.isEmpty())
@@ -294,7 +295,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	public void setStack(int slot, ItemStack stack)
 	{
 		ItemStack itemStack = (ItemStack) this.inventory.get(slot);
-		boolean bl = !stack.isEmpty() && stack.isItemEqualIgnoreDamage(itemStack) && ItemStack.areNbtEqual(stack, itemStack);
+		boolean bl = !stack.isEmpty() && ItemStack.canCombine(itemStack, stack);
 		this.inventory.set(slot, stack);
 
 		if(stack.getCount() > this.getMaxCountPerStack())
@@ -373,7 +374,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public void dropExperienceForRecipesUsed(ServerPlayerEntity player)
 	{
-		List<Recipe<?>> list = this.getRecipesUsedAndDropExperience(player.getWorld(), player.getPos());
+		List<Recipe<?>> list = this.getRecipesUsedAndDropExperience(player.getServerWorld(), player.getPos());
 		player.unlockRecipes((Collection<Recipe<?>>) list);
 		this.recipesUsed.clear();
 	}

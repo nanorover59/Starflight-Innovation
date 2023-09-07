@@ -1,7 +1,6 @@
 package space.mixin.common;
 
-import javax.annotation.Nullable;
-
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,11 +12,9 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.block.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -62,7 +59,7 @@ public abstract class LivingEntityMixin extends Entity
 	@Inject(method = "baseTick()V", at = @At("TAIL"), cancellable = true)
 	public void baseTickInject(CallbackInfo info)
 	{
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 		
 		// Update the gravity and air resistance multiplier variables.
 		if(data != null && data.overridePhysics())
@@ -76,7 +73,7 @@ public abstract class LivingEntityMixin extends Entity
 			else
 			{
 				gravity = data.isOrbit() || this.hasNoGravity() ? 0.0 : data.getGravity();
-				airMultiplier = (float) AirUtil.getAirResistanceMultiplier(this.world, data, this.getBlockPos());
+				airMultiplier = (float) AirUtil.getAirResistanceMultiplier(this.getWorld(), data, this.getBlockPos());
 			}
 		}
 		else
@@ -94,7 +91,7 @@ public abstract class LivingEntityMixin extends Entity
 			{
 				BlockPos offset = this.getBlockPos().offset(direction, direction == Direction.UP ? Math.round(this.getHeight()) : 1);
 				
-				if(world.getBlockState(offset).getMaterial() != Material.AIR)
+				if(this.getWorld().getBlockState(offset).isAir())
 				{
 					wall = true;
 					break;
@@ -124,9 +121,9 @@ public abstract class LivingEntityMixin extends Entity
 			airMultiplier = 1.0f;
 		
 		// Run oxygen supply and mob low gravity jump mechanics on the server side.
-		if(!this.world.isClient)
+		if(!this.getWorld().isClient)
 		{
-			LivingEntity thisEntity = (LivingEntity) world.getEntityById(getId());
+			LivingEntity thisEntity = (LivingEntity) this.getWorld().getEntityById(getId());
 			
 			if(thisEntity != null)
 			{
@@ -156,7 +153,7 @@ public abstract class LivingEntityMixin extends Entity
 						thisEntity.setFireTicks(0);
 					
 					if(!thisEntity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
-						thisEntity.damage(DamageSource.GENERIC, 0.5f);
+						thisEntity.damage(thisEntity.getDamageSources().generic(), 0.5f);
 				}
 				else if(spaceSuitCheck == 4 && (thisEntity.isSubmergedInWater() || !habitableAir) && survivalPlayer)
 					oxygenUsed += 4.0 / 24000.0; // 4kg of oxygen should last for 20 minutes (24000 ticks) without using maneuvering jets.
@@ -172,7 +169,7 @@ public abstract class LivingEntityMixin extends Entity
 						Vec3d deltaV = thisEntity.getRotationVector().multiply(0.1 * 0.05);
 						thisEntity.addVelocity(deltaV.getX(), deltaV.getY(), deltaV.getZ());
 						thisEntity.velocityModified = true;
-						StarflightEffects.sendJet(world, thisEntity.getPos().add(0.0, 0.65, 0.0), thisEntity.getVelocity().add(thisEntity.getRotationVector().multiply(-2.0)));
+						StarflightEffects.sendJet(this.getWorld(), thisEntity.getPos().add(0.0, 0.65, 0.0), thisEntity.getVelocity().add(thisEntity.getRotationVector().multiply(-2.0)));
 					}
 					
 					thisEntity.setAir(thisEntity.getMaxAir());
@@ -233,10 +230,10 @@ public abstract class LivingEntityMixin extends Entity
 						if(thisEntity.horizontalSpeed > 0.25)
 						{
 							Vec3d vxz = new Vec3d(thisEntity.getVelocity().getX(), 0.0, thisEntity.getVelocity().getZ()).normalize().multiply(2.0);
-							BlockPos pos = thisEntity.getBlockPos().add(vxz.getX(), 0.0, vxz.getZ());
-							VoxelShape shape = world.getBlockState(pos).getCollisionShape(world, pos);
+							BlockPos pos = thisEntity.getBlockPos().add((int) vxz.getX(), 0, (int) vxz.getZ());
+							VoxelShape shape = this.getWorld().getBlockState(pos).getCollisionShape(this.getWorld(), pos);
 							
-							if(!shape.isEmpty() && shape.getBoundingBox().getYLength() > thisEntity.stepHeight && !world.getBlockState(pos.up((int) (1.0 / gravity))).getMaterial().blocksMovement())
+							if(!shape.isEmpty() && shape.getBoundingBox().getYLength() > thisEntity.getStepHeight() && !this.getWorld().getBlockState(pos.up((int) (1.0 / gravity))).blocksMovement())
 							{
 								thisEntity.addVelocity(0.0, 0.4, 0.0);
 								jumpTime = 40;
@@ -321,7 +318,7 @@ public abstract class LivingEntityMixin extends Entity
 	@Inject(method = "computeFallDamage(FF)I", at = @At("HEAD"), cancellable = true)
 	public void computeFallDamageInject(float fallDistance, float damageMultiplier, CallbackInfoReturnable<Integer> info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
 			fallDistance *= gravity; // The distance for fall damage is changed to match local gravity.
 			StatusEffectInstance statusEffectInstance = this.getStatusEffect(StatusEffects.JUMP_BOOST);

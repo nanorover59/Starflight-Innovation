@@ -33,7 +33,7 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
-		this.world = playerInventory.player.world;
+		this.world = playerInventory.player.getWorld();
 		this.addSlot(new Slot(inventory, 0, 80, 45));
 		
 		for(int i = 0; i < 3; i++)
@@ -69,7 +69,7 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		return this.inventory.canPlayerUse(player);
 	}
 
-	public ItemStack transferSlot(PlayerEntity player, int index)
+	public ItemStack quickMove(PlayerEntity player, int index)
 	{
 		ItemStack itemStack = ItemStack.EMPTY;
 		Slot slot = (Slot) this.slots.get(index);
@@ -108,6 +108,13 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		}
 
 		return itemStack;
+	}
+	
+	@Override
+	public void onClosed(PlayerEntity player)
+	{
+		super.onClosed(player);
+		this.inventory.onClose(player);
 	}
 
 	public int getFuelProgress()

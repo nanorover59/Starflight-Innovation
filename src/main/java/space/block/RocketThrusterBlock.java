@@ -109,7 +109,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	}
 
 	@Override
-	public boolean isTranslucent(BlockState state, BlockView world, BlockPos pos)
+	public boolean isTransparent(BlockState state, BlockView world, BlockPos pos)
 	{
 		return !(Boolean) state.get(WATERLOGGED);
 	}
@@ -128,7 +128,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 				nonAir++;
 		}
 		
-		if(nonAir <= 1 && !(shape.getBoundingBox().minY < 0.0 && world.getBlockState(pos.down()).getMaterial().blocksMovement()))
+		if(nonAir <= 1 && !(shape.getBoundingBox().minY < 0.0 && world.getBlockState(pos.down()).blocksMovement()))
 			return true;
 		else
 		{
@@ -155,7 +155,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
 	{
 		if(state.get(WATERLOGGED).booleanValue())
-			world.createAndScheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 
 		return state;
 	}

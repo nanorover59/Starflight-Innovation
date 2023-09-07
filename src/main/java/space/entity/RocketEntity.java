@@ -2,6 +2,9 @@ package space.entity;
 
 import java.util.ArrayList;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
@@ -14,6 +17,8 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -24,14 +29,9 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
-import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.FluidTankControllerBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
@@ -39,10 +39,11 @@ import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.HydrogenTankBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
-import space.client.particle.StarflightParticles;
+import space.particle.StarflightParticleTypes;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
+import space.util.QuaternionUtil;
 import space.util.StarflightEffects;
 import space.vessel.BlockMass;
 import space.vessel.MovingCraftBlockData;
@@ -109,7 +110,7 @@ public class RocketEntity extends MovingCraftEntity
 		this.arrivalPos = arrivalPos;
 		this.arrivalDirection = arrivalDirection;
 		setForwardDirection(forward.getHorizontal());
-		setQuaternion(Quaternion.fromEulerXyz(0.0f, 0.0f, 0.0f));
+		setQuaternion(new Quaternionf());
 		Vec3d centerOfMass = Vec3d.ZERO;
 		BlockPos min = new BlockPos(blockPosList.get(0));
 		BlockPos max = new BlockPos(blockPosList.get(0));
@@ -128,7 +129,7 @@ public class RocketEntity extends MovingCraftEntity
 			BlockPos downPos = pos;
 			
 			if(!blockShape.isEmpty())
-				downPos = new BlockPos(pos.getX(), pos.getY() - blockShape.getBoundingBox().getYLength() + 1, pos.getZ());
+				downPos = new BlockPos(pos.getX(), (int) (pos.getY() - blockShape.getBoundingBox().getYLength() + 1), pos.getZ());
 			
 			if(pos.getX() < min.getX())
 				min = new BlockPos(pos.getX(), min.getY(), min.getZ());
@@ -201,7 +202,7 @@ public class RocketEntity extends MovingCraftEntity
 		craftMassInitial = craftMass;
 		centerOfMass = centerOfMass.multiply(1.0 / craftMass);
 		this.setPosition(Math.floor(centerOfMass.getX()) + 0.5, Math.floor(centerOfMass.getY()), Math.floor(centerOfMass.getZ()) + 0.5);
-		BlockPos centerBlockPos = new BlockPos(Math.floor(centerOfMass.getX()), Math.floor(centerOfMass.getY()), Math.floor(centerOfMass.getZ()));
+		BlockPos centerBlockPos = new BlockPos((int) Math.floor(centerOfMass.getX()), (int) Math.floor(centerOfMass.getY()), (int) Math.floor(centerOfMass.getZ()));
 		
 		// In the absence of an arrival card, set the arrival coordinates to the current coordinates.
 		if(arrivalPos.getX() == -9999 && arrivalPos.getY() == -9999 && arrivalPos.getZ() == -9999)
@@ -331,11 +332,11 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			boolean noBlocks = true;
 			
-			for(int i = world.getTopY(); i > world.getBottomY() + 1; i--)
+			for(int i = getWorld().getTopY(); i > getWorld().getBottomY() + 1; i--)
 			{
 				BlockPos pos = new BlockPos(arrivalPos.getX(), i - 1, arrivalPos.getZ());
 				
-				if(world.getBlockState(pos).isSolidBlock(world, pos))
+				if(getWorld().getBlockState(pos).isSolidBlock(getWorld(), pos))
 				{
 					arrivalPos = new BlockPos(arrivalPos.getX(), i, arrivalPos.getZ());
 					noBlocks = false;
@@ -366,7 +367,7 @@ public class RocketEntity extends MovingCraftEntity
 		move(MovementType.SELF, getVelocity());
 		setBoundingBox(calculateBoundingBox());
 		fallDistance = 0.0f;
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
 		int travelCeiling = data.isOrbit() ? TRAVEL_CEILING_ORBIT : TRAVEL_CEILING;
 		
 		// Move to the next dimension when a high enough altitude is reached.
@@ -379,7 +380,7 @@ public class RocketEntity extends MovingCraftEntity
 			hydrogenSupply -= hydrogenToUse;
 			oxygenSupply -= oxygenToUse;
 			craftMass -= fuelToUse;
-			ServerWorld next = world.getServer().getWorld(nextDimension);
+			ServerWorld next = getWorld().getServer().getWorld(nextDimension);
 			PlanetDimensionData nextData = PlanetList.getDimensionDataForWorld(next);
 			setVelocity(0.0, nextData.isOrbit() ? -ZERO_G_SPEED : -ZERO_G_SPEED / 2.0, 0.0);
 			changedDimension = true;
@@ -392,18 +393,18 @@ public class RocketEntity extends MovingCraftEntity
 		// Turn back into blocks when landed.
 		if(this.age > 10 && (verticalCollision || horizontalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= 0.0))))
 		{
-			Vec3f trackedVelocity = getTrackedVelocity();
-			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.getX(), trackedVelocity.getY(), trackedVelocity.getZ()) * 20.0f; // Get the craft's speed in m/s.
+			Vector3f trackedVelocity = getTrackedVelocity();
+			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
 			boolean crashLandingFlag = false;
 			
 			// Crash landing effects go here.
 			if((verticalCollision || horizontalCollision) && craftSpeed > 10.0)
 			{
-				BlockPos bottom = getBlockPos().add(0, -lowerHeight, 0);
+				BlockPos bottom = getBlockPos().add(0, (int) -lowerHeight, 0);
 				float power = Math.min(craftSpeed / 5.0f, 10.0f);
 				int count = random.nextBetween(4, 5);
 				
-				world.createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, false, DestructionType.DESTROY);
+				getWorld().createExplosion(null, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, false, World.ExplosionSourceType.NONE);
 				
 				/*for(int i = 0; i < count; i++)
 				{
@@ -429,7 +430,7 @@ public class RocketEntity extends MovingCraftEntity
 			
 			if(crashLandingFlag)
 			{
-				int yOffset = random.nextBetween(MathHelper.floor(craftSpeed / 10.0f), MathHelper.floor(craftSpeed / 10.0f) + 1) * (trackedVelocity.getY() > 0.0f ? 1 : -1);
+				int yOffset = random.nextBetween(MathHelper.floor(craftSpeed / 10.0f), MathHelper.floor(craftSpeed / 10.0f) + 1) * (trackedVelocity.y() > 0.0f ? 1 : -1);
 				this.setPosition(getPos().add(0.0, yOffset, 0.0));
 			}
 			
@@ -440,12 +441,12 @@ public class RocketEntity extends MovingCraftEntity
 			sendRenderData(false);
 		
 		// Update thruster state tracked data.
-		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(world, PlanetList.getDimensionDataForWorld(world), getBlockPos()) > 0.25);
+		setThrustUnderexpanded(AirUtil.getAirResistanceMultiplier(getWorld(), PlanetList.getDimensionDataForWorld(getWorld()), getBlockPos()) > 0.25);
 		setThrottle((float) throttle);
-		int yCheck = world.getTopY();
+		int yCheck = getWorld().getTopY();
 		
 		// Monitor the current altitude.
-		while(!world.getBlockState(new BlockPos(getX(), yCheck, getZ())).getMaterial().blocksMovement() && yCheck > world.getBottomY())
+		while(!getWorld().getBlockState(new BlockPos((int) getX(), yCheck, (int) getZ())).blocksMovement() && yCheck > getWorld().getBottomY())
 			yCheck--;
 		
 		if(gravity == 0.0 && yCheck < arrivalPos.getY())
@@ -453,7 +454,7 @@ public class RocketEntity extends MovingCraftEntity
 		
 		setUserInput(userInput);
 		setAltitude((float) (getY() - lowerHeight - yCheck));
-		setTrackedVelocity(new Vec3f(getVelocity()));
+		setTrackedVelocity(getVelocity().toVector3f());
 		setOxygenLevel((float) (oxygenSupply / oxygenCapacity));
 		setHydrogenLevel((float) (hydrogenSupply / hydrogenCapacity));
 	}
@@ -476,10 +477,9 @@ public class RocketEntity extends MovingCraftEntity
 		
 		double force = changedDimension ? nominalThrustEnd * throttle : nominalThrustStart * throttle;
 		double acc = (force / craftMass) * 0.0025;
-		Vec3f direction = Vec3f.POSITIVE_Y.copy();
-		Quaternion quaternion = getCraftQuaternion();
-		direction.rotate(quaternion);
-        this.addVelocity(direction.getX() * acc, direction.getY() * acc, direction.getZ() * acc);
+		Quaternionf quaternion = getCraftQuaternion();
+		Vector3f direction = new Vector3f(0.0f, 1.0f, 0.0f).rotate(quaternion);
+        this.addVelocity(direction.x() * acc, direction.y() * acc, direction.z() * acc);
         
         // Decrease mass and fuel supply.
         double totalMassFlow = (force / (SG * (changedDimension ? endISP : startISP))) * 0.05;
@@ -546,10 +546,7 @@ public class RocketEntity extends MovingCraftEntity
 			yawSpeed = 0.0f;
 		
 		boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
-		Quaternion quaternion = getCraftQuaternion();
-		Quaternion speedQuaternion = Quaternion.fromEulerXyz(b ? pitchSpeed : rollSpeed, yawSpeed, b ? rollSpeed : pitchSpeed);
-		quaternion.hamiltonProduct(speedQuaternion);
-		setQuaternion(quaternion);
+		setQuaternion(QuaternionUtil.hamiltonProduct(getCraftQuaternion(), QuaternionUtil.fromEulerXYZ(b ? pitchSpeed : rollSpeed, yawSpeed, b ? rollSpeed : pitchSpeed)));
 	}
 	
 	/**
@@ -557,7 +554,7 @@ public class RocketEntity extends MovingCraftEntity
 	 */
 	public void storeGravity()
 	{
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
 		
 		if(data == null)
 			gravity = 9.80665 * 0.0025;
@@ -622,8 +619,8 @@ public class RocketEntity extends MovingCraftEntity
 	{
 		ArrayList<MovingCraftBlockRenderData> blocks = MovingCraftRenderList.getBlocksForEntity(getUuid());
 		ArrayList<BlockPos> thrusterOffsets = new ArrayList<BlockPos>();
-		ArrayList<Vec3f> thrusterOffsetsRotated = new ArrayList<Vec3f>();
-		Vec3f upAxis = new Vec3f(0.0f, 1.0f, 0.0f);
+		ArrayList<Vector3f> thrusterOffsetsRotated = new ArrayList<Vector3f>();
+		Vector3f upAxis = new Vector3f(0.0f, 1.0f, 0.0f);
 		
 		for(MovingCraftBlockRenderData block : blocks)
 		{
@@ -631,28 +628,28 @@ public class RocketEntity extends MovingCraftEntity
 				thrusterOffsets.add(block.getPosition());
 		}
 		
-		Quaternion quaternion = getCraftQuaternion();
+		Quaternionf quaternion = getCraftQuaternion();
 		upAxis.rotate(quaternion);
 		
 		for(BlockPos pos : thrusterOffsets)
 		{
-			Vec3f rotated = new Vec3f(pos.getX(), pos.getY() - 3.0f, pos.getZ());
+			Vector3f rotated = new Vector3f(pos.getX(), pos.getY() - 3.0f, pos.getZ());
 			rotated.rotate(quaternion);
 			thrusterOffsetsRotated.add(rotated);
 		}
 		
-		Vec3d velocity = new Vec3d(-upAxis.getX(), -upAxis.getY(), -upAxis.getZ());
-		Vec3f craftVelocity = getTrackedVelocity();
+		Vec3d velocity = new Vec3d(-upAxis.x(), -upAxis.y(), -upAxis.z());
+		Vector3f craftVelocity = getTrackedVelocity();
 		velocity = velocity.multiply(2.0 + this.random.nextDouble());
-		velocity = velocity.add(craftVelocity.getX(), craftVelocity.getY(), craftVelocity.getZ());
+		velocity = velocity.add(craftVelocity.x(), craftVelocity.y(), craftVelocity.z());
 		
-		for(Vec3f pos : thrusterOffsetsRotated)
+		for(Vector3f pos : thrusterOffsetsRotated)
 		{
 			pos.add((float) getX(), (float) getY(), (float) getZ());
 			
 			for(int i = 0; i < 4; i++)
 			{
-				world.addParticle(StarflightParticles.THRUSTER, true, pos.getX(), pos.getY(), pos.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+				getWorld().addParticle(StarflightParticleTypes.THRUSTER, true, pos.x(), pos.y(), pos.z(), velocity.getX(), velocity.getY(), velocity.getZ());
 				pos.add((this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f);
 			}
 		}
@@ -671,7 +668,7 @@ public class RocketEntity extends MovingCraftEntity
 		for(int i = 0; i < rotationSteps; i++)
 			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
 		
-		setQuaternion(Quaternion.fromEulerXyz(0.0f, (float) (rotationSteps * (Math.PI / 2.0)), 0.0f));
+		setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, (float) (rotationSteps * (Math.PI / 2.0))));
 		fallDistance = 0.0f;
 		
 		for(Entity passenger : this.getPassengerList())
@@ -702,12 +699,12 @@ public class RocketEntity extends MovingCraftEntity
 			if(blockData.getStoredFluid() > 0)
 			{
 				BlockPos blockPos = this.getBlockPos().add(blockData.getPosition().rotate(rotation));
-				BlockEntity blockEntity = world.getBlockEntity(blockPos);
+				BlockEntity blockEntity = getWorld().getBlockEntity(blockPos);
 				
 				if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
 				{
 					FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
-					((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(world, blockPos, fluidTank);
+					((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(getWorld(), blockPos, fluidTank);
 					
 					if(blockData.redstonePower())
 						fluidTank.setStoredFluid(blockData.getStoredFluid());
@@ -769,7 +766,7 @@ public class RocketEntity extends MovingCraftEntity
 	protected void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		nextDimension = RegistryKey.of(Registry.WORLD_KEY, new Identifier(nbt.getString("destination")));
+		nextDimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString("destination")));
 		arrivalPos = new BlockPos(nbt.getInt("arrivalX"), nbt.getInt("arrivalY"), nbt.getInt("arrivalZ"));
 		arrivalDirection = nbt.getInt("arrivalDirection");
 		changedDimension = nbt.getBoolean("arrived");

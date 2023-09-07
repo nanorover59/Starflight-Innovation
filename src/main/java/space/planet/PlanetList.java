@@ -8,12 +8,12 @@ import net.darkhax.ess.ESSHelper;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import space.StarflightMod;
 import space.util.IWorldMixin;
@@ -194,7 +194,7 @@ public class PlanetList
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
 		{
 			PacketByteBuf buffer = PacketByteBufs.create();
-			PlanetDimensionData data = getDimensionDataForWorld(player.world);
+			PlanetDimensionData data = getDimensionDataForWorld(player.getWorld());
 			boolean initialize = !activeClients.contains(player.getUuidAsString());
 			
 			if(data == null)

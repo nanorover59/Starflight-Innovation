@@ -1,6 +1,6 @@
 package space.materials;
 
-import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.sound.SoundEvent;
@@ -13,15 +13,15 @@ public class SpaceSuitArmorMaterial implements ArmorMaterial
 	private static final int[] PROTECTION_VALUES = new int[] {1, 2, 3, 1};
 
 	@Override
-	public int getDurability(EquipmentSlot slot)
+	public int getDurability(ArmorItem.Type slot)
 	{
-		return BASE_DURABILITY[slot.getEntitySlotId()] * 6;
+		return BASE_DURABILITY[slot.ordinal()] * 6;
 	}
 
 	@Override
-	public int getProtectionAmount(EquipmentSlot slot)
+	public int getProtection(ArmorItem.Type slot)
 	{
-		return PROTECTION_VALUES[slot.getEntitySlotId()];
+		return PROTECTION_VALUES[slot.ordinal()];
 	}
 
 	@Override

@@ -1,16 +1,18 @@
 package space.block.sapling;
 
 import net.minecraft.block.sapling.SaplingGenerator;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.gen.feature.ConfiguredFeature;
-import space.world.StarflightWorldGeneration;
+import space.StarflightMod;
 
 public class RubberSaplingGenerator extends SaplingGenerator
 {
 	@Override
-	protected RegistryEntry<? extends ConfiguredFeature<?, ?>> getTreeFeature(Random random, boolean bees)
+	protected RegistryKey<ConfiguredFeature<?, ?>> getTreeFeature(Random random, boolean bees)
 	{
-		return random.nextInt(4) == 0 ? StarflightWorldGeneration.TALL_RUBBER_TREE : StarflightWorldGeneration.RUBBER_TREE;
+		return RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree"));
 	}
 }

@@ -1,0 +1,121 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "config": {
+    "surface": "floor",
+    "depth": 1,
+    "vertical_range": 5,
+    "extra_bottom_block_chance": 0,
+    "extra_edge_column_chance": 0.3,
+    "vegetation_chance": 0.8,
+    "xz_radius": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 1,
+        "max_inclusive": 3
+      }
+    },
+    "replaceable": "#minecraft:moss_replaceable",
+    "ground_state": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "space:mars_moss_block"
+      }
+    },
+    "vegetation_feature": {
+      "feature": {
+        "type": "minecraft:simple_random_selector",
+        "config": {
+          "features": [
+            {
+              "feature": {
+                "type": "minecraft:simple_block",
+                "config": {
+                  "to_place": {
+                    "type": "minecraft:weighted_state_provider",
+                    "entries": [
+                      {
+                        "weight": 10,
+                        "data": {
+                          "Name": "space:mars_moss_carpet"
+                        }
+                      },
+                      {
+                        "weight": 1,
+                        "data": {
+                          "Name": "space:lycophyte_top"
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "placement": []
+            },
+            {
+              "feature": {
+                "type": "minecraft:block_column",
+                "config": {
+                  "direction": "up",
+                  "allowed_placement": {
+                    "type": "minecraft:matching_blocks",
+                    "blocks": [
+                      "minecraft:air",
+                      "minecraft:water"
+                    ]
+                  },
+                  "prioritize_tip": true,
+                  "layers": [
+                    {
+                      "height": {
+                        "type": "minecraft:weighted_list",
+                        "distribution": [
+                          {
+                            "weight": 2,
+                            "data": {
+                              "type": "minecraft:uniform",
+                              "value": {
+                                "min_inclusive": 0,
+                                "max_inclusive": 6
+                              }
+                            }
+                          },
+                          {
+                            "weight": 1,
+                            "data": 0
+                          }
+                        ]
+                      },
+                      "provider": {
+                        "type": "minecraft:simple_state_provider",
+                        "state": {
+                          "Name": "space:lycophyte_stem",
+                          "Properties": {
+                            "waterlogged": "false"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "height": 1,
+                      "provider": {
+                        "type": "minecraft:simple_state_provider",
+                        "state": {
+                          "Name": "space:lycophyte_top",
+                          "Properties": {
+                            "waterlogged": "false"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "placement": []
+            }
+          ]
+        }
+      },
+      "placement": []
+    }
+  }
+}

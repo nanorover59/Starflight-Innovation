@@ -13,6 +13,8 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.MinecraftServer;
@@ -23,8 +25,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 import space.StarflightMod;
 import space.block.RocketControllerBlock;
@@ -233,7 +233,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	
 	public static void receiveButtonPress(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
 	{
-		RegistryKey<World> worldKey = RegistryKey.of(Registry.WORLD_KEY, new Identifier(buffer.readString()));
+		RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, new Identifier(buffer.readString()));
 		BlockPos position = buffer.readBlockPos();
 		int buttonID = buffer.readInt();
 		

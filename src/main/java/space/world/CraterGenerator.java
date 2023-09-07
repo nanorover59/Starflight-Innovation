@@ -10,6 +10,7 @@ import net.minecraft.structure.StructurePiecesHolder;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
@@ -122,7 +123,7 @@ public class CraterGenerator
 					int localSurfaceY = world.getTopPosition(Type.OCEAN_FLOOR, mutable).getY();
 					mutable.setY(localSurfaceY);
 					
-					while(!world.getBlockState(mutable).getMaterial().blocksMovement() && mutable.getY() > 0)
+					while(!world.getBlockState(mutable).isSideSolidFullSquare(world, startPos, Direction.UP) && mutable.getY() > 0)
 						mutable.setY(mutable.getY() - 1);
 					
 					mutable.up();
@@ -153,7 +154,7 @@ public class CraterGenerator
 						
 						mutable.setY(y - 1);
 						
-						if(world.getBlockState(mutable).getMaterial().blocksMovement())
+						if(world.getBlockState(mutable).isSideSolidFullSquare(world, startPos, Direction.UP))
 							world.setBlockState(mutable, surfaceState, Block.NOTIFY_LISTENERS);
 					}
 					else

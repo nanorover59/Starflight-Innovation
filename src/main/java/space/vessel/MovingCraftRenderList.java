@@ -12,6 +12,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.BlockPos;
 
 @Environment(value=EnvType.CLIENT)
@@ -51,7 +52,7 @@ public class MovingCraftRenderList
 			
 			for(int i = 0; i < blockCount; i++)
 			{
-				BlockState blockState = NbtHelper.toBlockState(buffer.readNbt());
+				BlockState blockState = NbtHelper.toBlockState(client.world.createCommandRegistryWrapper(RegistryKeys.BLOCK), buffer.readNbt());
 				BlockPos blockPos = buffer.readBlockPos();
 				boolean redstone = buffer.readBoolean();
 				boolean[] sidesShowing = new boolean[6];

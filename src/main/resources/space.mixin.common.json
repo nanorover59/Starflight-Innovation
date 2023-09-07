@@ -6,7 +6,6 @@
   "mixins": [
     "WorldMixin",
     "ServerWorldMixin",
-    "NoiseChunkGeneratorMixin",
     "LivingEntityMixin",
     "ProjectileEntityMixin",
     "ThrownEntityMixin",

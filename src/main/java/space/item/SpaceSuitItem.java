@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.DyeableArmorItem;
 import net.minecraft.item.Item;
@@ -19,7 +20,7 @@ public class SpaceSuitItem extends DyeableArmorItem
 {
 	public static final double MAX_OXYGEN = 4.0;
 	
-	public SpaceSuitItem(ArmorMaterial armorMaterial, EquipmentSlot equipmentSlot, Item.Settings settings)
+	public SpaceSuitItem(ArmorMaterial armorMaterial, ArmorItem.Type equipmentSlot, Item.Settings settings)
 	{
 		super(armorMaterial, equipmentSlot, settings);
 	}

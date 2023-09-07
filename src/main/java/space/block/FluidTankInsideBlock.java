@@ -14,8 +14,8 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.FluidTankInterfaceBlockEntity;
 import space.util.BlockSearch;
@@ -39,12 +39,6 @@ public class FluidTankInsideBlock extends Block
 	{
         return VoxelShapes.empty();
     }
-	
-	@Override
-	public boolean canMobSpawnInside()
-	{
-		return false;
-	}
 	
 	@Override
 	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
@@ -77,7 +71,7 @@ public class FluidTankInsideBlock extends Block
 								StarflightEffects.sendOutgas(world, pos, neighborPos, true);
 							
 							if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_TANK_CAPACITY)
-								blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, DestructionType.DESTROY);
+								blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, World.ExplosionSourceType.BLOCK);
 							
 							fluidTankController.setActive(false);
 							fluidTankController.setStorageCapacity(0);

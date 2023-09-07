@@ -65,6 +65,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
 	public void tick()
 	{
 		super.tick();
+		World world = getWorld();
 		
 		if(world.isClient && getTarget() != null)
 		{
@@ -144,6 +145,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
 
 		public void start()
 		{
+			World world = getWorld();
 			int dx = random.nextInt(32) - random.nextInt(32);
 			int dy = world.getTopY();
 			int dz = random.nextInt(32) - random.nextInt(32);

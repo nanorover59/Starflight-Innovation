@@ -128,7 +128,7 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 	
 	@Override

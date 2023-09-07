@@ -1,8 +1,8 @@
 package space.planet;
 
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 public class PlanetDimensionData
@@ -23,7 +23,7 @@ public class PlanetDimensionData
 	
 	public PlanetDimensionData(Identifier dimensionID, boolean isOrbit, boolean isSky, boolean overridePhysics, boolean overrideSky, boolean isCloudy, boolean hasLowClouds, boolean hasWeather, boolean hasOxygen, int temperatureCategory, double gravity, double pressure)
 	{
-		this.worldKey = RegistryKey.of(Registry.WORLD_KEY, dimensionID);
+		this.worldKey = RegistryKey.of(RegistryKeys.WORLD, dimensionID);
 		this.isOrbit = isOrbit;
 		this.isSky = isSky;
 		this.overridePhysics = overridePhysics;

@@ -101,7 +101,7 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, context.getHorizontalPlayerFacing().getOpposite());
 	}
 	
 	@Override

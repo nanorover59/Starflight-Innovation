@@ -27,9 +27,9 @@ public abstract class ItemEntityMixin extends Entity
 	@ModifyArg(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V", ordinal = 0), index = 0)
 	public Vec3d modifyVelocity1(Vec3d velocity)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 			
 			if(data != null && data.overridePhysics())
 				velocity = velocity.add(0.0, 0.04 - 0.04 * (data.isOrbit() ? 0.0 : data.getGravity()), 0.0);
@@ -41,13 +41,13 @@ public abstract class ItemEntityMixin extends Entity
 	@ModifyArg(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ItemEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V", ordinal = 1), index = 0)
 	public Vec3d modifyVelocity2(Vec3d velocity)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 			
-			if(data != null && data.overridePhysics() && !this.onGround)
+			if(data != null && data.overridePhysics() && !this.isOnGround())
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = 1.0 / (1.0 + (0.02 * airMultiplier));
 				velocity = this.getVelocity().multiply(d);
 			}

@@ -1,5 +1,8 @@
 package space.entity;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -12,12 +15,10 @@ import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.Heightmap.Type;
 import net.minecraft.world.World;
-import space.util.VectorMathUtil;
+import space.util.QuaternionUtil;
 
 public class ZeroGravityMobEntity extends MobEntity
 {
@@ -27,8 +28,8 @@ public class ZeroGravityMobEntity extends MobEntity
 	private static final TrackedData<Float> QW = DataTracker.registerData(ZeroGravityMobEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> ROLL_EXTRA = DataTracker.registerData(ZeroGravityMobEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	public Vec3d pointOfInterest;
-	public Quaternion clientQuaternion;
-	public Quaternion clientQuaternionPrevious;
+	public Quaternionf clientQuaternion;
+	public Quaternionf clientQuaternionPrevious;
 	public float clientRollExtra;
 	public float clientRollExtraPrevious;
 	public int clientInterpolationSteps;
@@ -109,6 +110,8 @@ public class ZeroGravityMobEntity extends MobEntity
 	@Override
 	public void tick()
 	{
+		World world = getWorld();
+		
 		if(world.isClient)
 		{
 			this.clientQuaternionPrevious = this.clientQuaternion;
@@ -121,39 +124,39 @@ public class ZeroGravityMobEntity extends MobEntity
 			int i = (int) (getBoundingBox().getAverageSideLength() * 2.0);
 			double acc = 0.15;
 			
-			if(world.getBlockState(getBlockPos().east(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().east(i)).blocksMovement())
 				addVelocity(-acc, 0.0, 0.0);
 			
-			if(world.getBlockState(getBlockPos().west(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().west(i)).blocksMovement())
 				addVelocity(acc, 0.0, 0.0);
 			
-			if(world.getBlockState(getBlockPos().up(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().up(i)).blocksMovement())
 				addVelocity(0.0, -acc, 0.0);
 			
-			if(world.getBlockState(getBlockPos().down(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().down(i)).blocksMovement())
 				addVelocity(0.0, acc, 0.0);
 			
-			if(world.getBlockState(getBlockPos().south(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().south(i)).blocksMovement())
 				addVelocity(0.0, 0.0, -acc);
 			
-			if(world.getBlockState(getBlockPos().north(i)).getMaterial().blocksMovement())
+			if(world.getBlockState(getBlockPos().north(i)).blocksMovement())
 				addVelocity(0.0, 0.0, acc);
 		}
 		
 		super.tick();
 	}
 
-	public void setQuaternion(Quaternion quaternion)
+	public void setQuaternion(Quaternionf quaternion)
 	{
-		this.dataTracker.set(QX, quaternion.getX());
-		this.dataTracker.set(QY, quaternion.getY());
-		this.dataTracker.set(QZ, quaternion.getZ());
-		this.dataTracker.set(QW, quaternion.getW());
+		this.dataTracker.set(QX, quaternion.x());
+		this.dataTracker.set(QY, quaternion.y());
+		this.dataTracker.set(QZ, quaternion.z());
+		this.dataTracker.set(QW, quaternion.w());
 	}
 
-	public Quaternion getQuaternion()
+	public Quaternionf getQuaternion()
 	{
-		return new Quaternion(this.dataTracker.get(QX).floatValue(), this.dataTracker.get(QY).floatValue(), this.dataTracker.get(QZ).floatValue(), this.dataTracker.get(QW).floatValue());
+		return new Quaternionf(this.dataTracker.get(QX).floatValue(), this.dataTracker.get(QY).floatValue(), this.dataTracker.get(QZ).floatValue(), this.dataTracker.get(QW).floatValue());
 	}
 	
 	public void setRollExtra(float rollExtra)
@@ -168,17 +171,17 @@ public class ZeroGravityMobEntity extends MobEntity
 	
 	public void updateMotion(Vec3d direction, double thrust, boolean ignoreDifference)
 	{
-		Vec3f directionF = new Vec3f(direction);
+		Vector3f directionF = direction.toVector3f();
 		directionF.normalize();
-		Quaternion current = getQuaternion();
-		Vec3f axis = Vec3f.NEGATIVE_Z.copy();
+		Quaternionf current = getQuaternion();
+		Vector3f axis = new Vector3f(0.0f, 0.0f, -1.0f);
 		axis.cross(directionF);
 		axis.normalize();
-		float angle = (float) Math.acos(-directionF.getZ());
-		Quaternion target = axis.getRadialQuaternion(angle);
+		float angle = (float) Math.acos(-directionF.z());
+		Quaternionf target = new Quaternionf().rotateAxis(angle, axis);
 		target.normalize();
-		float difference = VectorMathUtil.difference(current, target);
-		Quaternion step = VectorMathUtil.interpolate(current, target, getTurningFactor());
+		float difference = QuaternionUtil.difference(current, target);
+		Quaternionf step = QuaternionUtil.interpolate(current, target, getTurningFactor());
 		step.normalize();
 		setQuaternion(step);
 		
@@ -189,9 +192,8 @@ public class ZeroGravityMobEntity extends MobEntity
 	private void applyThrust(double thrust)
 	{
 		double acc = thrust * 0.0025;
-		Vec3f direction = Vec3f.NEGATIVE_Z.copy();
-		direction.rotate(getQuaternion());
-		this.addVelocity(direction.getX() * acc, direction.getY() * acc, direction.getZ() * acc);
+		Vector3f direction = new Vector3f(0.0f, 0.0f, -1.0f).rotate(getQuaternion());
+		this.addVelocity(direction.x() * acc, direction.y() * acc, direction.z() * acc);
 		velocityModified = true;
 	}
 	
@@ -218,7 +220,7 @@ public class ZeroGravityMobEntity extends MobEntity
 	public void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		setQuaternion(new Quaternion(nbt.getFloat("qx"), nbt.getFloat("qy"), nbt.getFloat("qz"), nbt.getFloat("qw")));
+		setQuaternion(new Quaternionf(nbt.getFloat("qx"), nbt.getFloat("qy"), nbt.getFloat("qz"), nbt.getFloat("qw")));
 		pointOfInterest = new Vec3d(nbt.getDouble("px"), nbt.getDouble("py"), nbt.getDouble("pz"));
 		setRollExtra(nbt.getFloat("re"));
 	}
@@ -285,7 +287,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public void start()
 		{
-			boolean upBias = getY() < world.getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			boolean upBias = getY() < getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
 			int dx = random.nextInt(range) - random.nextInt(range);
 			int dy = random.nextInt(range) - (upBias ? 0 : random.nextInt(range));
 			int dz = random.nextInt(range) - random.nextInt(range);
@@ -337,7 +339,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public boolean canStart()
 		{
-			return goalSelector.getRunningGoals().count() == 0 && getTarget() != null && getVelocity().length() < 0.1 && getY() > world.getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			return goalSelector.getRunningGoals().count() == 0 && getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
 		}
 
 		public void start()

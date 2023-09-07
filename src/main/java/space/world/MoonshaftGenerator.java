@@ -12,13 +12,13 @@ import net.minecraft.block.enums.RailShape;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.state.property.Properties;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
 import net.minecraft.structure.StructurePieceType;
 import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.structure.StructurePiecesHolder;
-import net.minecraft.tag.BiomeTags;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
@@ -147,10 +147,10 @@ public class MoonshaftGenerator
 			{
 				for(int p = k; p <= n; p++)
 				{
-					if(world.getBlockState(mutable.set(o, j, p)).getMaterial().isLiquid())
+					if(world.getBlockState(mutable.set(o, j, p)).isLiquid())
 						return true;
 
-					if(!world.getBlockState(mutable.set(o, m, p)).getMaterial().isLiquid())
+					if(!world.getBlockState(mutable.set(o, m, p)).isLiquid())
 						continue;
 
 					return true;
@@ -161,10 +161,10 @@ public class MoonshaftGenerator
 			{
 				for(int p = j; p <= m; p++)
 				{
-					if(world.getBlockState(mutable.set(o, p, k)).getMaterial().isLiquid())
+					if(world.getBlockState(mutable.set(o, p, k)).isLiquid())
 						return true;
 
-					if(!world.getBlockState(mutable.set(o, p, n)).getMaterial().isLiquid())
+					if(!world.getBlockState(mutable.set(o, p, n)).isLiquid())
 						continue;
 					
 					return true;
@@ -175,10 +175,10 @@ public class MoonshaftGenerator
 			{
 				for(int p = j; p <= m; p++)
 				{
-					if(world.getBlockState(mutable.set(i, p, o)).getMaterial().isLiquid())
+					if(world.getBlockState(mutable.set(i, p, o)).isLiquid())
 						return true;
 
-					if(!world.getBlockState(mutable.set(l, p, o)).getMaterial().isLiquid())
+					if(!world.getBlockState(mutable.set(l, p, o)).isLiquid())
 						continue;
 
 					return true;
@@ -466,10 +466,10 @@ public class MoonshaftGenerator
 
 		private void fillSupportBeam(StructureWorldAccess world, BlockBox box, int x, int y, int z)
 		{
-			if(this.getBlockAt(world, x, y, z, box).getMaterial().blocksMovement())
+			if(this.getBlockAt(world, x, y, z, box).isOf(SOLID_BLOCK))
 				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x, y, z, box);
 			
-			if(this.getBlockAt(world, x + 2, y, z, box).getMaterial().blocksMovement())
+			if(this.getBlockAt(world, x + 2, y, z, box).isOf(SOLID_BLOCK))
 				this.fillSupportBeam(world, FRAME_BLOCK.getDefaultState(), x + 2, y, z, box);
 		}
 
@@ -738,7 +738,7 @@ public class MoonshaftGenerator
 					
 					BlockPos blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMinZ());
 					
-					if(random.nextInt(r) == 0 && !world.getBlockState(blockPos).getMaterial().blocksMovement())
+					if(random.nextInt(r) == 0 && world.getBlockState(blockPos).isAir())
 					{
 						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
 						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
@@ -746,7 +746,7 @@ public class MoonshaftGenerator
 					
 					blockPos = new BlockPos(i, this.boundingBox.getMinY(), this.boundingBox.getMaxZ());
 					
-					if(random.nextInt(r) == 0 && !world.getBlockState(blockPos).getMaterial().blocksMovement())
+					if(random.nextInt(r) == 0 && world.getBlockState(blockPos).isAir())
 					{
 						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
 						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
@@ -760,7 +760,7 @@ public class MoonshaftGenerator
 					
 					BlockPos blockPos = new BlockPos(this.boundingBox.getMinX(), this.boundingBox.getMinY(), i);
 					
-					if(random.nextInt(r) == 0 && !world.getBlockState(blockPos).getMaterial().blocksMovement())
+					if(random.nextInt(r) == 0 && world.getBlockState(blockPos).isAir())
 					{
 						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
 						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);
@@ -768,7 +768,7 @@ public class MoonshaftGenerator
 					
 					blockPos = new BlockPos(this.boundingBox.getMaxX(), this.boundingBox.getMinY(), i);
 					
-					if(random.nextInt(r) == 0 && !world.getBlockState(blockPos).getMaterial().blocksMovement())
+					if(random.nextInt(r) == 0 && world.getBlockState(blockPos).isAir())
 					{
 						world.setBlockState(blockPos, StarflightBlocks.STORAGE_CUBE.getDefaultState().with(StorageCubeBlock.FACING, Direction.UP), Block.NOTIFY_LISTENERS);
 						LootableContainerBlockEntity.setLootTable(world, random, blockPos, LOOT_TABLE);

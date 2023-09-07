@@ -7,11 +7,13 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -107,7 +109,7 @@ public class MovingCraftBlockData
 		BlockPos blockPos = centerPos.add(position.rotate(rotation));
 		
 		// Do not overwrite existing solid world blocks.
-		if(world.getBlockState(blockPos).getMaterial().blocksMovement())
+		if(world.getBlockState(blockPos).blocksMovement())
 		{
 			BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
 			
@@ -201,7 +203,8 @@ public class MovingCraftBlockData
 	
 	public static MovingCraftBlockData loadData(NbtCompound data)
 	{
-		BlockState blockState = NbtHelper.toBlockState(data.getCompound("blockState"));
+		MinecraftClient client = MinecraftClient.getInstance();
+		BlockState blockState = NbtHelper.toBlockState(client.world.createCommandRegistryWrapper(RegistryKeys.BLOCK), data.getCompound("blockState"));
 		BlockPos position = NbtHelper.toBlockPos(data.getCompound("position"));
 		NbtCompound blockEntityData = data.contains("blockEntityData") ? data.getCompound("blockEntityData") : null;
 		boolean[] booleanArray = BooleanByteUtil.toBooleanArray(data.getByte("sidesShowing"));

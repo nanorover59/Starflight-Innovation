@@ -75,7 +75,7 @@ public class RocketControllerBlock extends BlockWithEntity
 
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	// This method will drop all items onto the ground when the block is broken.

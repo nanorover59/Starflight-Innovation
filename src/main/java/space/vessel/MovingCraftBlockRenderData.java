@@ -3,6 +3,8 @@ package space.vessel;
 import java.util.BitSet;
 import java.util.List;
 
+import org.joml.Quaternionf;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.block.BlockRenderType;
@@ -24,7 +26,6 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
@@ -102,7 +103,7 @@ public class MovingCraftBlockRenderData
 			if(blockState.getProperties().contains(HorizontalFacingBlock.FACING))
 			{
 				Direction direction = blockState.get(HorizontalFacingBlock.FACING).getOpposite();
-				matrixStack.multiply(new Quaternion(0.0F, direction == Direction.NORTH || direction == Direction.SOUTH ? direction.asRotation() + 180.0F : direction.asRotation(), 0.0F, true));
+				matrixStack.multiply(new Quaternionf().rotationY(direction == Direction.NORTH || direction == Direction.SOUTH ? direction.asRotation() + 180.0f : direction.asRotation()));
 			}
 			
 			matrixStack.translate(-0.5, 0.0, -0.5);

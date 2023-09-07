@@ -3,7 +3,7 @@ package space.world;
 import java.util.ArrayList;
 
 import net.minecraft.block.Blocks;
-import net.minecraft.util.registry.RegistryKey;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.chunk.BlockColumn;

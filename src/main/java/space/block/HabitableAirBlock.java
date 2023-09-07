@@ -214,7 +214,7 @@ public class HabitableAirBlock extends AirBlock
 			world.setBlockState(pos, state.with(UNSTABLE, true), Block.NOTIFY_LISTENERS);
 			
 			if(!world.getBlockTickScheduler().isQueued(pos, state.getBlock()))
-				world.createAndScheduleBlockTick(pos, state.getBlock(), 400 + world.getRandom().nextInt(200));
+				world.scheduleBlockTick(pos, state.getBlock(), 400 + world.getRandom().nextInt(200));
 			
 			//System.out.println("Unstable");
 		}

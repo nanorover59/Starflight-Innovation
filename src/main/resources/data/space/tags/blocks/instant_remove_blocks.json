@@ -11,7 +11,7 @@
         "minecraft:soul_lantern",
         "minecraft:campfire",
         "minecraft:soul_campfire",
-        "#minecraft:replaceable_plants",
+        "#minecraft:replaceable",
         "#minecraft:flowers",
         "#minecraft:crops",
         "#minecraft:saplings",

@@ -34,7 +34,7 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
-		this.world = playerInventory.player.world;
+		this.world = playerInventory.player.getWorld();
 		this.addSlot(new Slot(inventory, 0, 56, 35));
 		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 1, 116, 35));
 
@@ -165,5 +165,35 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 	public boolean canInsertIntoSlot(int index)
 	{
 		return index != 1;
+	}
+
+	@Override
+	public ItemStack quickMove(PlayerEntity player, int index)
+	{
+		ItemStack itemStack = ItemStack.EMPTY;
+		Slot slot = (Slot) this.slots.get(index);
+		
+		if(slot != null && slot.hasStack())
+		{
+			ItemStack itemStack2 = slot.getStack();
+			itemStack = itemStack2.copy();
+			
+			if(index < this.inventory.size() ? !this.insertItem(itemStack2, this.inventory.size(), this.slots.size(), true) : !this.insertItem(itemStack2, 0, this.inventory.size(), false))
+				return ItemStack.EMPTY;
+			
+			if(itemStack2.isEmpty())
+				slot.setStack(ItemStack.EMPTY);
+			else
+				slot.markDirty();
+		}
+		
+		return itemStack;
+	}
+	
+	@Override
+	public void onClosed(PlayerEntity player)
+	{
+		super.onClosed(player);
+		this.inventory.onClose(player);
 	}
 }

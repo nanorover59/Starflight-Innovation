@@ -10,7 +10,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
@@ -25,7 +24,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.explosion.Explosion.DestructionType;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.FluidTankInterfaceBlockEntity;
 import space.client.StarflightModClient;
@@ -75,7 +73,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 		}
 		
 		if(fluidTankController.getStoredFluid() > capacity)
-			world.createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2.0F, DestructionType.DESTROY);
+			world.createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2.0F, World.ExplosionSourceType.BLOCK);
 		
 		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
 			world.removeBlockEntity(pos);
@@ -142,7 +140,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 				for(BlockPos p : checkList)
 				{
-					if(world.getBlockState(p).getMaterial() == Material.AIR)
+					if(world.getBlockState(p).isAir())
 					{
 						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
 						fluidTankController.setStorageCapacity(fluidTankController.getStorageCapacity() + capacity);
@@ -204,7 +202,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					}
 				}
 				
-				fluidTankController.setCenterOfMass(new BlockPos(cx, cy, cz));
+				fluidTankController.setCenterOfMass(new BlockPos((int) cx, (int) cy, (int) cz));
 				fluidTankController.setActive(true);
 				valid = true;
 			}

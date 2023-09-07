@@ -28,15 +28,15 @@ public abstract class ThrownEntityMixin extends Entity
 	@Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/thrown/ThrownEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V", ordinal = 0), cancellable = true)
 	public void tickInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 			
 			if(data != null && data.overridePhysics())
 			{
 				Vec3d position = this.getPos();
 				Vec3d velocity = this.getVelocity();
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = this.isTouchingWater() ? 0.8f : 1.0 / (1.0 + (0.01 * airMultiplier));
 				this.setVelocity(velocity.multiply(d));
 

@@ -1,7 +1,5 @@
 package space.item;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -19,7 +17,6 @@ public class GuideBookItem extends Item
 		super(settings);
 	}
 
-	@Environment(EnvType.CLIENT)
 	@Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand)
 	{

@@ -27,13 +27,13 @@ public abstract class ExperienceOrbEntityMixin extends Entity
 	@Inject(method = "tick()V", at = @At("TAIL"), cancellable = true)
 	public void tickInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 
-			if(data != null && data.overridePhysics() && !this.onGround)
+			if(data != null && data.overridePhysics() && !this.isOnGround())
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				this.setVelocity(this.getVelocity().multiply(1.02));
 				
 				if(!this.hasNoGravity())

@@ -19,14 +19,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.block.BatteryBlock;
 import space.block.EnergyBlock;
-import space.block.SolarPanelBlock;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
 import space.energy.EnergyNet;
 import space.energy.EnergyNode;
-import space.planet.PlanetDimensionData;
-import space.planet.PlanetList;
 
 public class MultimeterItem extends Item
 {
@@ -51,7 +48,7 @@ public class MultimeterItem extends Item
         BlockEntity blockEntity = world.getBlockEntity(position);
         MutableText text = Text.translatable("");
         DecimalFormat df = new DecimalFormat("#.##");
-        
+        player.getItemCooldownManager().update();
         if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
         {
         	FluidTankControllerBlockEntity fluidContainer = (FluidTankControllerBlockEntity) blockEntity;

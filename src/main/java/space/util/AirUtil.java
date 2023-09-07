@@ -8,14 +8,13 @@ import java.util.function.BiPredicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
-import net.minecraft.block.PaneBlock;
+import net.minecraft.block.StainedGlassPaneBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tag.BlockTags;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -246,7 +245,7 @@ public class AirUtil
 			return false;
 		else if(block == StarflightBlocks.HABITABLE_AIR || block == StarflightBlocks.LEAK)
 			return true;
-		else if((block instanceof PaneBlock) && blockState.getMaterial() == Material.GLASS)
+		else if(block == Blocks.GLASS_PANE || block instanceof StainedGlassPaneBlock)
 			return true;
 		else if(block instanceof SealedDoorBlock && !blockState.get(SealedDoorBlock.OPEN))
 		{

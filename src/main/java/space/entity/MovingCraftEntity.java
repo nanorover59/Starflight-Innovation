@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -28,8 +31,9 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -39,9 +43,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.StarflightMod;
@@ -65,57 +67,56 @@ public class MovingCraftEntity extends Entity
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	protected BlockPos centerOfMass;
-	public Quaternion clientQuaternion;
-    public Quaternion clientQuaternionPrevious;
+	public Quaternionf clientQuaternion;
+	public Quaternionf clientQuaternionPrevious;
 	public int clientInterpolationSteps;
 	private float craftRoll;
 	private float craftPitch;
 	private float craftYaw;
-    private double clientX;
-    private double clientY;
-    private double clientZ;
-    private double clientXVelocity;
-    private double clientYVelocity;
-    private double clientZVelocity;
-	
+	private double clientX;
+	private double clientY;
+	private double clientZ;
+	private double clientXVelocity;
+	private double clientYVelocity;
+	private double clientZVelocity;
+
 	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
 	{
-        super(entityType, world);
-    }
-	
+		super(entityType, world);
+	}
+
 	public MovingCraftEntity(World world, BlockPos position, ArrayList<MovingCraftBlockData> blockDataList)
 	{
 		this((EntityType<? extends MovingCraftEntity>) StarflightEntities.MOVING_CRAFT, world);
 		this.setPosition(position.getX() + 0.5, position.getY(), position.getZ() + 0.5);
 		this.setInitialBlockPos(this.getBlockPos());
-		
+
 		if(!blockDataList.isEmpty())
 		{
 			for(MovingCraftBlockData blockData : blockDataList)
 				this.blockDataList.add(blockData);
-		}
-		else
+		} else
 			this.setRemoved(RemovalReason.DISCARDED);
 	}
-	
+
 	@Override
-    public boolean isAttackable()
+	public boolean isAttackable()
 	{
-        return false;
-    }
-	
+		return false;
+	}
+
 	@Override
 	public boolean collidesWith(Entity other)
 	{
 		return false;
 	}
-	
+
 	@Override
 	public boolean shouldRender(double distance)
 	{
 		return true;
 	}
-	
+
 	@Override
 	protected void initDataTracker()
 	{
@@ -129,176 +130,179 @@ public class MovingCraftEntity extends Entity
 		this.dataTracker.startTracking(TRACKED_VY, Float.valueOf(0.0f));
 		this.dataTracker.startTracking(TRACKED_VZ, Float.valueOf(0.0f));
 	}
-	
-    public void setInitialBlockPos(BlockPos pos)
-    {
-        this.dataTracker.set(INITIAL_BLOCK_POS, pos);
-    }
-    
-    public void setForwardDirection(int d)
-    {
-    	this.dataTracker.set(FORWARD, d);
-    }
-    
-    public void updateEulerAngles()
-    {
-    	Vec3f angles = getCraftQuaternion().toEulerXyz();
-    	this.craftPitch = angles.getX();
-    	this.craftYaw = angles.getY();
-    	this.craftRoll = angles.getZ();
-    }
-    
-    public void setQuaternion(float x, float y, float z, float w)
-    {
-    	this.dataTracker.set(CRAFT_QX, x);
-    	this.dataTracker.set(CRAFT_QY, y);
-    	this.dataTracker.set(CRAFT_QZ, z);
-    	this.dataTracker.set(CRAFT_QW, w);
-    }
-    
-    public void setQuaternion(Quaternion quaternion)
-    {
-    	this.dataTracker.set(CRAFT_QX, quaternion.getX());
-    	this.dataTracker.set(CRAFT_QY, quaternion.getY());
-    	this.dataTracker.set(CRAFT_QZ, quaternion.getZ());
-    	this.dataTracker.set(CRAFT_QW, quaternion.getW());
-    }
-    
-    public void setTrackedVelocity(Vec3f velocity)
-    {
-    	this.dataTracker.set(TRACKED_VX, velocity.getX());
-    	this.dataTracker.set(TRACKED_VY, velocity.getY());
-    	this.dataTracker.set(TRACKED_VZ, velocity.getZ());
-    }
 
-    public BlockPos getInitialBlockPos()
-    {
-        return this.dataTracker.get(INITIAL_BLOCK_POS);
-    }
-    
-    public Direction getForwardDirection()
-    {
-    	return Direction.fromHorizontal(this.dataTracker.get(FORWARD));
-    }
-    
-    public Quaternion getCraftQuaternion()
-    {
-    	return new Quaternion(this.dataTracker.get(CRAFT_QX).floatValue(), this.dataTracker.get(CRAFT_QY).floatValue(), this.dataTracker.get(CRAFT_QZ).floatValue(), this.dataTracker.get(CRAFT_QW).floatValue());
-    }
-    
-    public float getCraftRoll()
-    {
-        return this.craftRoll;
-    }
-    
-    public float getCraftPitch()
-    {
-        return this.craftPitch;
-    }
+	public void setInitialBlockPos(BlockPos pos)
+	{
+		this.dataTracker.set(INITIAL_BLOCK_POS, pos);
+	}
 
-    public float getCraftYaw()
-    {
-        return this.craftYaw;
-    }
-    
-    public Vec3f getTrackedVelocity()
-    {
-    	return new Vec3f(this.dataTracker.get(TRACKED_VX).floatValue(), this.dataTracker.get(TRACKED_VY).floatValue(), this.dataTracker.get(TRACKED_VZ).floatValue());
-    }
-    
-    /**
-     * Return the number of horizontal rotation steps for rotation about the y-axis. Used for converting back to blocks.
-     */
-    public int getRotationSteps()
-    {
-    	double yaw = getCraftYaw();
-    	
-    	if(yaw < Math.PI * -0.25 && yaw >= Math.PI * -0.75)
-    		return 1;
-    	else if(yaw > Math.PI * 0.75 || yaw < Math.PI * -0.75)
-    		return 2;
-    	else if(yaw > Math.PI * 0.25 && yaw <= Math.PI * 0.75)
-    		return 3;
-    	else
-    		return 0;
-    }
-	
+	public void setForwardDirection(int d)
+	{
+		this.dataTracker.set(FORWARD, d);
+	}
+
+	public void updateEulerAngles()
+	{
+		Vector3f angles = new Vector3f();
+		getCraftQuaternion().getEulerAnglesXYZ(angles);
+		this.craftPitch = angles.x();
+		this.craftYaw = angles.y();
+		this.craftRoll = angles.z();
+	}
+
+	public void setQuaternion(float x, float y, float z, float w)
+	{
+		this.dataTracker.set(CRAFT_QX, x);
+		this.dataTracker.set(CRAFT_QY, y);
+		this.dataTracker.set(CRAFT_QZ, z);
+		this.dataTracker.set(CRAFT_QW, w);
+	}
+
+	public void setQuaternion(Quaternionf quaternion)
+	{
+		this.dataTracker.set(CRAFT_QX, quaternion.x());
+		this.dataTracker.set(CRAFT_QY, quaternion.y());
+		this.dataTracker.set(CRAFT_QZ, quaternion.z());
+		this.dataTracker.set(CRAFT_QW, quaternion.w());
+	}
+
+	public void setTrackedVelocity(Vector3f velocity)
+	{
+		this.dataTracker.set(TRACKED_VX, velocity.x());
+		this.dataTracker.set(TRACKED_VY, velocity.y());
+		this.dataTracker.set(TRACKED_VZ, velocity.z());
+	}
+
+	public BlockPos getInitialBlockPos()
+	{
+		return this.dataTracker.get(INITIAL_BLOCK_POS);
+	}
+
+	public Direction getForwardDirection()
+	{
+		return Direction.fromHorizontal(this.dataTracker.get(FORWARD));
+	}
+
+	public Quaternionf getCraftQuaternion()
+	{
+		return new Quaternionf(this.dataTracker.get(CRAFT_QX).floatValue(), this.dataTracker.get(CRAFT_QY).floatValue(), this.dataTracker.get(CRAFT_QZ).floatValue(), this.dataTracker.get(CRAFT_QW).floatValue());
+	}
+
+	public float getCraftRoll()
+	{
+		return this.craftRoll;
+	}
+
+	public float getCraftPitch()
+	{
+		return this.craftPitch;
+	}
+
+	public float getCraftYaw()
+	{
+		return this.craftYaw;
+	}
+
+	public Vector3f getTrackedVelocity()
+	{
+		return new Vector3f(this.dataTracker.get(TRACKED_VX).floatValue(), this.dataTracker.get(TRACKED_VY).floatValue(), this.dataTracker.get(TRACKED_VZ).floatValue());
+	}
+
+	/**
+	 * Return the number of horizontal rotation steps for rotation about the y-axis.
+	 * Used for converting back to blocks.
+	 */
+	public int getRotationSteps()
+	{
+		double yaw = getCraftYaw();
+
+		if(yaw < Math.PI * -0.25 && yaw >= Math.PI * -0.75)
+			return 1;
+		else if(yaw > Math.PI * 0.75 || yaw < Math.PI * -0.75)
+			return 2;
+		else if(yaw > Math.PI * 0.25 && yaw <= Math.PI * 0.75)
+			return 3;
+		else
+			return 0;
+	}
+
 	public boolean clientMotion()
 	{
-		if(this.world.isClient)
+		World world = getWorld();
+
+		if(world.isClient)
 		{
-            if(this.clientInterpolationSteps > 0)
-            {
-                double a = this.getX() + (this.clientX - this.getX()) / (double) this.clientInterpolationSteps;
-                double b = this.getY() + (this.clientY - this.getY()) / (double) this.clientInterpolationSteps;
-                double c = this.getZ() + (this.clientZ - this.getZ()) / (double) this.clientInterpolationSteps;
-                this.clientInterpolationSteps--;
-                this.setPosition(a, b, c);
-            }
-            else
-                this.refreshPosition();
-            
-            return true;
-        }
-		
+			if(this.clientInterpolationSteps > 0)
+			{
+				double a = this.getX() + (this.clientX - this.getX()) / (double) this.clientInterpolationSteps;
+				double b = this.getY() + (this.clientY - this.getY()) / (double) this.clientInterpolationSteps;
+				double c = this.getZ() + (this.clientZ - this.getZ()) / (double) this.clientInterpolationSteps;
+				this.clientInterpolationSteps--;
+				this.setPosition(a, b, c);
+			} else
+				this.refreshPosition();
+
+			return true;
+		}
+
 		return false;
 	}
-	
+
 	@Override
-    public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate)
+	public void updateTrackedPositionAndAngles(double x, double y, double z, float yaw, float pitch, int interpolationSteps, boolean interpolate)
 	{
 		this.clientInterpolationSteps = interpolationSteps + 2;
-        this.clientX = x;
-        this.clientY = y;
-        this.clientZ = z;
-        this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
-    }
-
-    @Override
-    public void setVelocityClient(double x, double y, double z)
-    {
-        this.clientXVelocity = x;
-        this.clientYVelocity = y;
-        this.clientZVelocity = z;
-        this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
-    }
-	
-	@Override
-    public void updatePassengerPosition(Entity passenger)
-	{
-        if(!this.entityOffsets.containsKey(passenger.getUuid()))
-            return;
-        
-        BlockPos pos = entityOffsets.get(passenger.getUuid());
-        Quaternion quaternion = getCraftQuaternion();
-        Vec3f offset = new Vec3f(pos.getX(), pos.getY() - 0.5f, pos.getZ());
-        offset.rotate(quaternion);
-        passenger.setPosition(this.getX() + offset.getX(), this.getY() + offset.getY(), this.getZ() + offset.getZ());
-        passenger.fallDistance = 0.0f;
+		this.clientX = x;
+		this.clientY = y;
+		this.clientZ = z;
+		this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
 	}
-	
+
+	@Override
+	public void setVelocityClient(double x, double y, double z)
+	{
+		this.clientXVelocity = x;
+		this.clientYVelocity = y;
+		this.clientZVelocity = z;
+		this.setVelocity(this.clientXVelocity, this.clientYVelocity, this.clientZVelocity);
+	}
+
+	@Override
+	protected void updatePassengerPosition(Entity passenger, PositionUpdater positionUpdater)
+	{
+		if(!this.hasPassenger(passenger) || !this.entityOffsets.containsKey(passenger.getUuid()))
+			return;
+		
+		BlockPos pos = entityOffsets.get(passenger.getUuid());
+		Quaternionf quaternion = getCraftQuaternion();
+		Vector3f offset = new Vector3f(pos.getX(), pos.getY() - 0.5f, pos.getZ());
+		offset.rotate(quaternion);
+		passenger.fallDistance = 0.0f;
+		positionUpdater.accept(passenger, this.getX() + offset.x(), this.getY() + offset.y(), this.getZ() + offset.z());
+	}
+
 	public static ArrayList<MovingCraftBlockData> captureBlocks(World world, BlockPos centerPos, ArrayList<BlockPos> positionList)
 	{
 		ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
-		
+
 		// Fill the block data array list.
 		for(BlockPos pos : positionList)
 		{
 			if(world.getBlockState(pos).getBlock() instanceof Waterloggable)
 				world.setBlockState(pos, world.getBlockState(pos).with(Properties.WATERLOGGED, false));
-			
-			blockDataList.add(MovingCraftBlockData.fromBlock(world, pos, centerPos, isBlockSolid(world, pos)));	
+
+			blockDataList.add(MovingCraftBlockData.fromBlock(world, pos, centerPos, isBlockSolid(world, pos)));
 			BlockEntity blockEntity = world.getBlockEntity(pos);
-			
+
 			if(blockEntity != null)
 			{
 				if(blockEntity instanceof ImplementedInventory)
 					((ImplementedInventory) blockEntity).clear();
-				
+
 				blockEntity.readNbt(new NbtCompound());
 			}
 		}
-		
+
 		// Remove blocks from the world.
 		for(BlockPos pos : positionList)
 		{
@@ -307,54 +311,53 @@ public class MovingCraftEntity extends Entity
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 				continue;
 			}
-			
+
 			if(world.getBlockState(pos).getBlock() == StarflightBlocks.HABITABLE_AIR)
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 		}
-		
+
 		for(BlockPos pos : positionList)
 		{
 			if(!isBlockSolid(world, pos))
 			{
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
-				
+
 				for(Entity item : world.getEntitiesByClass(ItemEntity.class, new Box(pos.add(-1, -1, -1), pos.add(1, 1, 1)), b -> true))
 					item.remove(RemovalReason.DISCARDED);
 			}
 		}
-		
-		
+
 		for(BlockPos pos : positionList)
 		{
 			if(isBlockSolid(world, pos))
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 		}
-		
+
 		return blockDataList;
 	}
-	
+
 	private static boolean isBlockSolid(World world, BlockPos blockPos)
 	{
 		BlockState blockState = world.getBlockState(blockPos);
 		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
 	}
-	
+
 	public void pickUpEntity(Entity passenger)
 	{
-		pickUpEntity(passenger, new BlockPos(Math.floor(passenger.getX()), Math.floor(passenger.getY()), Math.floor(passenger.getZ())).subtract(getInitialBlockPos()));
+		pickUpEntity(passenger, new BlockPos((int) Math.floor(passenger.getX()), (int) Math.floor(passenger.getY()), (int) Math.floor(passenger.getZ())).subtract(getInitialBlockPos()));
 	}
-	
+
 	public void pickUpEntity(Entity passenger, BlockPos offset)
 	{
 		if(this.getPassengerList().isEmpty())
 			((EntityMixin) this).setPassengerList(ImmutableList.of(passenger));
 		else
 		{
-			 ArrayList<Entity> list = Lists.newArrayList(this.getPassengerList());
-			 list.add(passenger);
-			 ((EntityMixin) this).setPassengerList(ImmutableList.copyOf(list));
+			ArrayList<Entity> list = Lists.newArrayList(this.getPassengerList());
+			list.add(passenger);
+			((EntityMixin) this).setPassengerList(ImmutableList.copyOf(list));
 		}
-		
+
 		((EntityMixin) passenger).setVehicle(this);
 		entityOffsets.put(passenger.getUuid(), offset);
 	}
@@ -364,29 +367,31 @@ public class MovingCraftEntity extends Entity
 	 */
 	public void changeDimension(ServerWorld destination, Vec3d arrivalLocation, float arrivalYaw)
 	{
-		if(!(this.world instanceof ServerWorld) || this.isRemoved())
+		World world = getWorld();
+
+		if(!(world instanceof ServerWorld) || this.isRemoved())
 			return;
-		
-		this.setQuaternion(Quaternion.fromEulerXyz(0.0f, arrivalYaw, 0.0f));
+
+		this.setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, arrivalYaw));
 		this.setPosition(arrivalLocation);
-		
+
 		ArrayList<Entity> passengerList = Lists.newArrayList(this.getPassengerList());
 		ArrayList<BlockPos> offsetList = new ArrayList<BlockPos>();
-		
+
 		for(Entity entity : passengerList)
 		{
 			updatePassengerPosition(entity);
 			offsetList.add(entityOffsets.get(entity.getUuid()));
 		}
-		
+
 		this.detach();
 		TeleportTarget movingCraftTarget = new TeleportTarget(arrivalLocation, this.getVelocity(), this.getYaw(), this.getPitch());
 		Entity movingCraft = FabricDimensions.teleport(this, destination, movingCraftTarget);
-		
+
 		if(movingCraft != null)
 		{
 			((MovingCraftEntity) movingCraft).entityOffsets.clear();
-			
+
 			for(int i = 0; i < passengerList.size(); i++)
 			{
 				Entity passenger = passengerList.get(i);
@@ -396,11 +401,11 @@ public class MovingCraftEntity extends Entity
 				if(trasferred != null)
 					((MovingCraftEntity) movingCraft).pickUpEntity(trasferred, offsetList.get(i));
 			}
-			
+
 			if(movingCraft instanceof RocketEntity)
 			{
 				((RocketEntity) movingCraft).storeGravity();
-				((RocketEntity) movingCraft).setQuaternion(Quaternion.fromEulerXyz(0.0f, arrivalYaw, 0.0f));
+				((RocketEntity) movingCraft).setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, arrivalYaw));
 			}
 		}
 	}
@@ -419,7 +424,7 @@ public class MovingCraftEntity extends Entity
 		int[] x = new int[blockCount];
 		int[] y = new int[blockCount];
 		int[] z = new int[blockCount];
-		
+
 		for(int i = 0; i < blockCount; i++)
 		{
 			MovingCraftBlockData blockData = blockDataList.get(i);
@@ -428,18 +433,18 @@ public class MovingCraftEntity extends Entity
 			z[i] = blockData.getPosition().getZ();
 			blockData.saveData(nbt);
 		}
-		
+
 		nbt.putIntArray("x", x);
 		nbt.putIntArray("y", y);
 		nbt.putIntArray("z", z);
-		
+
 		nbt.putInt("passengerCount", entityOffsets.size());
 		int i = 0;
-		
+
 		for(UUID pUUID : entityOffsets.keySet())
 		{
 			BlockPos pos = entityOffsets.get(pUUID);
-			
+
 			if(pos != null)
 			{
 				nbt.putUuid("pUUID" + i, pUUID);
@@ -447,7 +452,7 @@ public class MovingCraftEntity extends Entity
 				nbt.putInt("py" + i, pos.getY());
 				nbt.putInt("pz" + i, pos.getZ());
 			}
-			
+
 			i++;
 		}
 	}
@@ -462,33 +467,33 @@ public class MovingCraftEntity extends Entity
 		int[] x = nbt.getIntArray("x");
 		int[] y = nbt.getIntArray("y");
 		int[] z = nbt.getIntArray("z");
-		
+
 		for(int i = 0; i < blockCount; i++)
 		{
 			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
 			blockDataList.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));
 		}
-		
+
 		int passengerCount = nbt.getInt("passengerCount");
-		
+
 		for(int i = 0; i < passengerCount; i++)
 			entityOffsets.put(nbt.getUuid("pUUID" + i), new BlockPos(nbt.getInt("px" + i), nbt.getInt("py" + i), nbt.getInt("pz" + i)));
 	}
 
 	@Override
-	public Packet<?> createSpawnPacket()
+	public Packet<ClientPlayPacketListener> createSpawnPacket()
 	{
-		 return new EntitySpawnS2CPacket(this);
+		return new EntitySpawnS2CPacket(this);
 	}
-	
+
 	public void sendRenderData(boolean forceUnload)
 	{
 		MinecraftServer server = this.getServer();
-		
+
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
 		{
 			boolean inRange = this.getBlockPos().isWithinDistance(player.getBlockPos(), 1024);
-			
+
 			if(!forceUnload && !this.playersInRange.contains(player) && inRange)
 			{
 				PacketByteBuf buffer = PacketByteBufs.create();
@@ -496,63 +501,61 @@ public class MovingCraftEntity extends Entity
 				buffer.writeBoolean(true);
 				buffer.writeUuid(this.getUuid());
 				buffer.writeInt(this.blockDataList.size());
-				
+
 				for(MovingCraftBlockData data : this.blockDataList)
 				{
 					buffer.writeNbt(NbtHelper.fromBlockState(data.getBlockState()));
 					buffer.writeBlockPos(data.getPosition());
 					buffer.writeBoolean(data.redstonePower());
-					
+
 					for(int i = 0; i < 6; i++)
 						buffer.writeBoolean(data.getSidesShowing()[i]);
 				}
-				
+
 				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
-			}
-			else if(forceUnload && this.playersInRange.contains(player) && !inRange)
-			{	
+			} else if(forceUnload && this.playersInRange.contains(player) && !inRange)
+			{
 				PacketByteBuf buffer = PacketByteBufs.create();
 				this.playersInRange.remove(player);
 				buffer.writeBoolean(false);
 				buffer.writeUuid(this.getUuid());
 				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
-			}
-			else if(this.age < 8 && !forceUnload && inRange)
+			} else if(this.age < 8 && !forceUnload && inRange)
 				sendEntityOffsets(player);
 		}
 	}
-	
+
 	public void sendEntityOffsets(ServerPlayerEntity player)
 	{
 		PacketByteBuf buffer = PacketByteBufs.create();
 		buffer.writeInt(getId());
 		int passengerCount = entityOffsets.keySet().size();
 		buffer.writeInt(passengerCount);
-		
+
 		for(UUID pUUID : entityOffsets.keySet())
 		{
 			buffer.writeUuid(pUUID);
 			buffer.writeBlockPos(entityOffsets.get(pUUID));
 		}
-		
+
 		ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_entity_offsets"), buffer);
 	}
-	
+
 	public static void receiveEntityOffsets(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
 		if(client.world == null)
 			return;
-		
+
 		int entityID = buffer.readInt();
 		Entity entity = client.world.getEntityById(entityID);
-		
+
 		if(entity == null || !(entity instanceof MovingCraftEntity))
 			return;
-		
+
 		MovingCraftEntity movingCraft = (MovingCraftEntity) entity;
 		int passengerCount = buffer.readInt();
 		movingCraft.entityOffsets.clear();
-		
+
 		for(int i = 0; i < passengerCount; i++)
 		{
 			UUID pUUID = buffer.readUuid();

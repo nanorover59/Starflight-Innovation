@@ -1,7 +1,6 @@
 package space.world;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -9,10 +8,12 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.structure.StructureSet;
-import net.minecraft.util.dynamic.RegistryOps;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryOps;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.HeightLimitView;
 import net.minecraft.world.Heightmap;
@@ -27,22 +28,15 @@ import net.minecraft.world.gen.chunk.Blender;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.VerticalBlockSample;
 import net.minecraft.world.gen.noise.NoiseConfig;
+import space.StarflightMod;
 
 public class SpaceChunkGenerator extends ChunkGenerator
 {
-	public static final Codec<SpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> SpaceChunkGenerator.createStructureSetRegistryGetter(instance).and(RegistryOps.createRegistryCodec(Registry.BIOME_KEY).forGetter(spaceChunkGenerator -> spaceChunkGenerator.biomeRegistry)).apply(instance, instance.stable(SpaceChunkGenerator::new)));
+	public static final Codec<SpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryOps.getEntryCodec(RegistryKey.of(RegistryKeys.BIOME, new Identifier(StarflightMod.MOD_ID, "space")))).apply(instance, instance.stable(SpaceChunkGenerator::new)));
 
-	private final Registry<Biome> biomeRegistry;
-
-	public SpaceChunkGenerator(Registry<StructureSet> structureSetRegistry, Registry<Biome> biomeRegistry)
+	public SpaceChunkGenerator(RegistryEntry.Reference<Biome> biomeEntry)
 	{
-		super(structureSetRegistry, Optional.empty(), new FixedBiomeSource(biomeRegistry.getOrCreateEntry(StarflightBiomes.SPACE)));
-		this.biomeRegistry = biomeRegistry;
-	}
-
-	public Registry<Biome> getBiomeRegistry()
-	{
-		return this.biomeRegistry;
+		super(new FixedBiomeSource(biomeEntry));
 	}
 
 	@Override

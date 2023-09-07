@@ -7,17 +7,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.Fertilizable;
-import net.minecraft.block.Material;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
@@ -84,7 +83,7 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 	}
 
 	@Override
-	public boolean isFertilizable(BlockView var1, BlockPos var2, BlockState var3, boolean var4)
+	public boolean isFertilizable(WorldView var1, BlockPos var2, BlockState var3, boolean var4)
 	{
 		return true;
 	}
@@ -108,7 +107,7 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 		
 		pos = pos.up();
 		
-		if(world.getBlockState(pos).getMaterial() != Material.AIR)
+		if(!world.getBlockState(pos).isAir())
 			return;
 		
 		world.setBlockState(pos, StarflightBlocks.LYCOPHYTE_TOP.getDefaultState());

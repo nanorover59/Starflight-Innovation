@@ -37,13 +37,13 @@ public abstract class BoatEntityMixin extends Entity
 	@Inject(method = "updateVelocity()V", at = @At("TAIL"), cancellable = true)
 	public void updateVelocityInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 
 			if(data != null && data.overridePhysics() && this.location == Location.IN_AIR)
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getEntityWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = (float) ((1.0 / this.velocityDecay) * (1.0 / (1.0 + ((1.0 - this.velocityDecay) * airMultiplier))));
 				this.setVelocity(this.getVelocity().x * d, this.getVelocity().y, this.getVelocity().z * d);
 				
@@ -58,9 +58,9 @@ public abstract class BoatEntityMixin extends Entity
 	@Inject(method = "updatePaddles()V", at = @At("HEAD"), cancellable = true)
 	public void updatePaddlesInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 
 			if(data != null && data.overridePhysics() && this.location == Location.IN_AIR)
 			{

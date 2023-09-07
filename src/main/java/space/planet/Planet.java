@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import net.darkhax.ess.DataCompound;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import space.util.VectorMathUtil;
+import space.util.VectorUtil;
 
 public class Planet
 {
@@ -527,7 +527,7 @@ public class Planet
 		double r = (sma * (1.0 - (ecc * ecc))) / (1.0 + (ecc * Math.cos(ta)));
 		Vec3d lanAxis = new Vec3d(1.0, 0.0, 0.0).rotateY((float) ascendingNode); // Longitude of Ascending Node Axis
 		Vec3d newPosition = new Vec3d(lanAxis.getX(), lanAxis.getY(), lanAxis.getZ()).rotateY((float) (argumentOfPeriapsis + ta));
-		newPosition = VectorMathUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
+		newPosition = VectorUtil.rotateAboutAxis(newPosition, lanAxis, inclination).multiply(r);
 		return newPosition;
 	}
 	
@@ -613,8 +613,8 @@ public class Planet
 		
 		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
 		axisOfRotation = axisOfRotation.rotateY((float) precession);
-		surfaceViewpoint = absolutePosition.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
-		parkingOrbitViewpoint = absolutePosition.add(VectorMathUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
+		surfaceViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
+		parkingOrbitViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
 		
 		if(isTidallyLocked)
 			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));

@@ -33,11 +33,11 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 	@Inject(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/vehicle/AbstractMinecartEntity;moveOffRail()V", shift = At.Shift.AFTER))
 	public void tickInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getEntityWorld());
 
-			if(data != null && !this.onGround && data.overridePhysics() && !(this.hasNoGravity() || data.isOrbit()))
+			if(data != null && !this.isOnGround() && data.overridePhysics() && !(this.hasNoGravity() || data.isOrbit()))
 			{
 				double d = this.isTouchingWater() ? 0.005 : 0.04;
 				this.setVelocity(this.getVelocity().add(0.0, d - (d * data.getGravity()), 0.0));
@@ -48,23 +48,23 @@ public abstract class AbstractMinecartEntityMixin extends Entity
 	@Inject(method = "moveOffRail()V", at = @At("HEAD"), cancellable = true)
 	public void moveOffRailInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getEntityWorld());
 
-			if(data != null && data.overridePhysics() && !this.onGround)
+			if(data != null && data.overridePhysics() && !this.isOnGround())
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getEntityWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				double d = Math.min(this.getMaxSpeed() / (airMultiplier + Double.MIN_VALUE), 20.0);
 				Vec3d vec3d = this.getVelocity();
 				this.setVelocity(MathHelper.clamp(vec3d.x, -d, d), vec3d.y, MathHelper.clamp(vec3d.z, -d, d));
 
-				if(this.onGround)
+				if(this.isOnGround())
 					this.setVelocity(this.getVelocity().multiply(0.5));
 				
 				this.move(MovementType.SELF, this.getVelocity());
 
-				if(!this.onGround)
+				if(!this.isOnGround())
 					this.setVelocity(this.getVelocity().multiply(1.0 / (1.0 + (0.05 * airMultiplier))));
 				
 				info.cancel();

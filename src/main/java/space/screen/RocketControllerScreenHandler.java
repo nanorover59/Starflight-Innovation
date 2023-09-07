@@ -51,29 +51,33 @@ public class RocketControllerScreenHandler extends ScreenHandler
 	}
 
 	@Override
-	public ItemStack transferSlot(PlayerEntity player, int inventorySlot)
+	public ItemStack quickMove(PlayerEntity player, int index)
 	{
-		ItemStack newStack = ItemStack.EMPTY;
-		Slot slot = this.slots.get(inventorySlot);
+		ItemStack itemStack = ItemStack.EMPTY;
+		Slot slot = (Slot) this.slots.get(index);
+		
 		if(slot != null && slot.hasStack())
 		{
-			ItemStack originalStack = slot.getStack();
-			newStack = originalStack.copy();
-			if(inventorySlot < this.inventory.size())
-			{
-				if(!this.insertItem(originalStack, this.inventory.size(), this.slots.size(), true))
-					return ItemStack.EMPTY;
-			}
-			else if(!this.insertItem(originalStack, 0, this.inventory.size(), false))
+			ItemStack itemStack2 = slot.getStack();
+			itemStack = itemStack2.copy();
+			
+			if(index < this.inventory.size() ? !this.insertItem(itemStack2, this.inventory.size(), this.slots.size(), true) : !this.insertItem(itemStack2, 0, this.inventory.size(), false))
 				return ItemStack.EMPTY;
-
-			if(originalStack.isEmpty())
+			
+			if(itemStack2.isEmpty())
 				slot.setStack(ItemStack.EMPTY);
 			else
 				slot.markDirty();
 		}
 		
-		return newStack;
+		return itemStack;
+	}
+	
+	@Override
+	public void onClosed(PlayerEntity player)
+	{
+		super.onClosed(player);
+		this.inventory.onClose(player);
 	}
 	
 	static class NavigationCardSlot extends Slot

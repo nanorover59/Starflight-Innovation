@@ -90,6 +90,7 @@ public class DustEntity extends HostileEntity
     public void tick()
     {
         super.tick();
+        World world = getWorld();
         int stamina = getStamina();
         
         if(world.isClient)

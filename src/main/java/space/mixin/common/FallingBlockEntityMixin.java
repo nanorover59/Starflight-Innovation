@@ -27,16 +27,16 @@ public abstract class FallingBlockEntityMixin extends Entity
 	@Inject(method = "tick()V", at = @At("TAIL"), cancellable = true)
 	public void tickInject(CallbackInfo info)
 	{
-		if(this.world.getRegistryKey() != World.OVERWORLD && this.world.getRegistryKey() != World.NETHER && this.world.getRegistryKey() != World.END)
+		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(this.getWorld());
 
 			if(data != null && data.overridePhysics())
 			{
-				double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
+				double airMultiplier = AirUtil.getAirResistanceMultiplier(this.getWorld(), data, this.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 				this.setVelocity(this.getVelocity().multiply(1.0 / 0.98));
 				
-				if(!this.hasNoGravity() && !this.onGround)
+				if(!this.hasNoGravity() && !this.isOnGround())
 		            this.setVelocity(this.getVelocity().add(0.0, 0.04 - (0.04 * data.getGravity()), 0.0));
 				
 				this.setVelocity(this.getVelocity().multiply((float) (1.0 / (1.0 + (0.02 * airMultiplier)))));

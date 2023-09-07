@@ -1,7 +1,6 @@
 package space.vessel;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.inventory.Inventory;
@@ -27,7 +26,7 @@ public class BlockMass
 	{
 		BlockState blockState = world.getBlockState(pos);
 		
-		if(blockState.getMaterial() == Material.AIR)
+		if(blockState.isAir())
 			return 0.0;
 		
 		double mass = volumeForBlock(blockState, world, pos) * 100.0; // Assume a density of 100kg per cubic meter for all full blocks.

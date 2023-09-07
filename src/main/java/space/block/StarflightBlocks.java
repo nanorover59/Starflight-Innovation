@@ -8,6 +8,7 @@ import java.util.function.ToIntFunction;
 import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.block.AbstractBlock;
@@ -15,30 +16,32 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CarpetBlock;
+import net.minecraft.block.ExperienceDroppingBlock;
 import net.minecraft.block.LadderBlock;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.MapColor;
-import net.minecraft.block.Material;
 import net.minecraft.block.MossBlock;
-import net.minecraft.block.OreBlock;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.block.RedstoneOreBlock;
 import net.minecraft.block.SandBlock;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.block.enums.Instrument;
+import net.minecraft.block.piston.PistonBehavior;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemGroup;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.state.property.Properties;
-import net.minecraft.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.BlockView;
 import space.StarflightMod;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
@@ -64,102 +67,103 @@ import space.block.entity.StirlingEngineBlockEntity;
 import space.block.entity.StorageCubeBlockEntity;
 import space.block.sapling.RubberSaplingGenerator;
 import space.item.DescriptiveBlockItem;
+import space.item.StarflightItems;
 import space.mixin.common.FireBlockInvokerMixin;
 
 public class StarflightBlocks
 {
 	// Blocks
-	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 5.0f));
-	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 4.0f));
-	public static final Block RIVETED_ALUMINUM = new Block(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
-	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(3.0f, 3.0f));
-	public static final Block WALKWAY = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME));
-	public static final Block STRUCTURAL_ALUMINUM_STAIRS = new StairsBlock(STRUCTURAL_ALUMINUM.getDefaultState(), AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
-	public static final Block STRUCTURAL_ALUMINUM_SLAB = new SlabBlock(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
-	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.of(Material.WOOL).sounds(BlockSoundGroup.WOOL).strength(2.0f, 3.0f));
-	public static final Block BAUXITE_BLOCK = new Block(AbstractBlock.Settings.copy(Blocks.RAW_IRON_BLOCK));
-	public static final Block BAUXITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.IRON_ORE));
-	public static final Block DEEPSLATE_BAUXITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_IRON_ORE));
-	public static final Block TITANIUM_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(4.0f, 6.0f));
-	public static final Block ILMENITE_BLOCK = new Block(AbstractBlock.Settings.copy(Blocks.RAW_GOLD_BLOCK));
-	public static final Block ILMENITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.GOLD_ORE));
-	public static final Block DEEPSLATE_ILMENITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_GOLD_ORE));
-	public static final Block SULFUR_BLOCK = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 5.0f));
-	public static final Block SULFUR_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.COAL_ORE));
-	public static final Block DEEPSLATE_SULFUR_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_COAL_ORE));
+	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.create().mapColor(MapColor.IRON_GRAY).instrument(Instrument.IRON_XYLOPHONE).requiresTool().strength(4.0f, 5.0f).sounds(BlockSoundGroup.COPPER));
+	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block RIVETED_ALUMINUM = new Block(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
+	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(3.0f, 3.0f));
+	public static final Block WALKWAY = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME));
+	public static final Block STRUCTURAL_ALUMINUM_STAIRS = new StairsBlock(STRUCTURAL_ALUMINUM.getDefaultState(), FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
+	public static final Block STRUCTURAL_ALUMINUM_SLAB = new SlabBlock(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
+	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.copyOf(Blocks.WHITE_WOOL).strength(2.0f, 3.0f));
+	public static final Block BAUXITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.RAW_IRON_BLOCK));
+	public static final Block BAUXITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.IRON_ORE));
+	public static final Block DEEPSLATE_BAUXITE_ORE = new ExperienceDroppingBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_IRON_ORE));
+	public static final Block TITANIUM_BLOCK = new Block(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(6.0f, 7.0f));
+	public static final Block ILMENITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.RAW_GOLD_BLOCK));
+	public static final Block ILMENITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.GOLD_ORE));
+	public static final Block DEEPSLATE_ILMENITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.DEEPSLATE_GOLD_ORE));
+	public static final Block SULFUR_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.COAL_BLOCK).strength(3.0f, 5.0f));
+	public static final Block SULFUR_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.COAL_ORE));
+	public static final Block DEEPSLATE_SULFUR_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.DEEPSLATE_COAL_ORE));
 	public static final Block RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.SPRUCE_BROWN);
 	public static final Block SAPPY_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.SPRUCE_BROWN);
 	public static final Block STRIPPED_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.OAK_TAN);
 	public static final Block RUBBER_LEAVES = createLeavesBlock(BlockSoundGroup.WET_GRASS);
 	public static final Block RUBBER_SAPLING = new RubberSaplingBlock(new RubberSaplingGenerator(), FabricBlockSettings.copyOf(Blocks.OAK_SAPLING));
-	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.of(Material.ORGANIC_PRODUCT).sounds(BlockSoundGroup.WOOL).strength(1.0f, 1.0f));
-	public static final Block REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block ICY_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.LIGHT_BLUE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block FERRIC_SAND = new SandBlock(0xB7633D, AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.ORANGE).sounds(BlockSoundGroup.SAND).strength(0.5F));
-	public static final Block FERRIC_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
-	public static final Block REDSLATE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
-	public static final Block REDSLATE_BRICKS = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(1.5f, 6.0f));
-	public static final Block REDSLATE_BRICK_STAIRS = new StairsBlock(REDSLATE_BRICKS.getDefaultState(), AbstractBlock.Settings.copy(REDSLATE_BRICKS));
-	public static final Block REDSLATE_BRICK_SLAB = new SlabBlock(AbstractBlock.Settings.copy(REDSLATE_BRICKS));
-	public static final Block FERRIC_IRON_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.IRON_ORE));
-	public static final Block FERRIC_COPPER_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.COPPER_ORE));
-	public static final Block FERRIC_BAUXITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.IRON_ORE));
-	public static final Block FERRIC_ILMENITE_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.GOLD_ORE));
-	public static final Block FERRIC_SULFUR_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.COAL_ORE));
-	public static final Block FERRIC_GOLD_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.GOLD_ORE));
-	public static final Block FERRIC_DIAMOND_ORE = new OreBlock(AbstractBlock.Settings.copy(Blocks.DIAMOND_ORE));
-	public static final Block FERRIC_REDSTONE_ORE = new RedstoneOreBlock(AbstractBlock.Settings.of(Material.STONE).requiresTool().ticksRandomly().luminance(createLightLevelFromLitBlockState(9)).strength(3.0f, 3.0f));
-	public static final Block HEMATITE_ORE = new OreBlock(FabricBlockSettings.of(Material.STONE).requiresTool().strength(3.0f, 3.0f));
-	public static final Block HEMATITE_BLOCK = new Block(FabricBlockSettings.of(Material.METAL).requiresTool().strength(3.0f, 8.0f));
-	public static final Block DRY_SNOW_BLOCK = new Block(AbstractBlock.Settings.of(Material.SNOW_BLOCK, MapColor.WHITE).sounds(BlockSoundGroup.SNOW).strength(0.1F));
-	public static final Block ARES_MOSS_CARPET = new CarpetBlock(AbstractBlock.Settings.of(Material.PLANT, MapColor.PURPLE).strength(0.1f).sounds(BlockSoundGroup.MOSS_CARPET));
-    public static final Block ARES_MOSS_BLOCK = new MossBlock(AbstractBlock.Settings.of(Material.MOSS_BLOCK, MapColor.PURPLE).strength(0.1f).sounds(BlockSoundGroup.MOSS_BLOCK));
-    public static final Block LYCOPHYTE_TOP = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), true);
-    public static final Block LYCOPHYTE_STEM = new LycophyteBlock(AbstractBlock.Settings.of(Material.PLANT).noCollision().strength(0.1f).sounds(BlockSoundGroup.BIG_DRIPLEAF), false);
-    public static final Block PITCH_BLACK = new Block(FabricBlockSettings.of(Material.METAL).strength(256.0f, 256.0f));
-    public static final Block SEARING_REGOLITH = new RegolithBlock(AbstractBlock.Settings.of(Material.AGGREGATE, MapColor.STONE_GRAY).sounds(BlockSoundGroup.GRAVEL).strength(0.5F));
-	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.of(Material.STONE).requiresTool().strength(2.0f, 5.0f));
-	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
-	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(1.0f, 1.0f));
-	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block SOLAR_HUB = new SolarHubBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
-	public static final Block OXYGEN_PIPE = new OxygenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
-	public static final Block HYDROGEN_PIPE = new HydrogenPipeBlock(FabricBlockSettings.of(Material.METAL).strength(1.0f, 1.0f));
-	public static final Block OXYGEN_TANK = new OxygenTankBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
-	public static final Block OXYGEN_INLET_VALVE = new OxygenInletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block OXYGEN_OUTLET_VALVE = new OxygenOutletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HYDROGEN_TANK = new HydrogenTankBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HYDROGEN_INLET_VALVE = new HydrogenInletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HYDROGEN_OUTLET_VALVE = new HydrogenOutletValveBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block VENT = new VentBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block COPPER_CABLE_AL = new EncasedEnergyCableBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block OXYGEN_PIPE_AL = new EncasedOxygenPipeALBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HYDROGEN_PIPE_AL = new EncasedHydrogenPipeALBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(FabricBlockSettings.of(Material.AIR).strength(0.1f, 0.1f));
-	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block ICE_ELECTROLYZER = new IceElectrolyzerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block OXYGEN_SENSOR = new OxygenSensorBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.of(Material.AIR).air());
-	public static final Block LEAK = new LeakBlock(FabricBlockSettings.of(Material.AIR).air());
-	public static final Block STORAGE_CUBE = new StorageCubeBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).strength(4.0f, 5.0f));
-	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
-	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
-	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
-	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.of(Material.METAL, MapColor.IRON_GRAY).requiresTool().strength(4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
-	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.COPPER).requiresTool().strength(4.0f, 5.0f));
-	public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99), 0.25e6, 260, 240, 12.0);
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.99, 15.0), 0.15e6, 300, 260, 12.0);
-	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 15.99, 16.0), 0.075e6, 400, 100, 4.0);
-	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.of(Material.METAL).sounds(BlockSoundGroup.ANVIL).requiresTool().strength(5.0f, 6.0f), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 15.99, 15.0), 0.15e6, 320, 315, 20.0);
-	
+	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.WET_SPONGE).strength(1.0f, 1.0f));
+	public static final Block REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.LIGHT_GRAY).strength(0.5F));
+	public static final Block BALSALTIC_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
+	public static final Block ICY_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.LIGHT_BLUE_GRAY).strength(0.5F));
+	public static final Block FERRIC_SAND = new SandBlock(0xB7633D, FabricBlockSettings.copyOf(Blocks.SAND).mapColor(MapColor.ORANGE));
+	public static final Block FERRIC_STONE = new Block(FabricBlockSettings.copyOf(Blocks.STONE));
+	public static final Block REDSLATE = new Block(FabricBlockSettings.copyOf(Blocks.SANDSTONE));
+	public static final Block REDSLATE_BRICKS = new Block(FabricBlockSettings.copyOf(REDSLATE));
+	public static final Block REDSLATE_BRICK_STAIRS = new StairsBlock(REDSLATE_BRICKS.getDefaultState(), FabricBlockSettings.copyOf(REDSLATE_BRICKS));
+	public static final Block REDSLATE_BRICK_SLAB = new SlabBlock(FabricBlockSettings.copyOf(REDSLATE_BRICKS));
+	public static final Block FERRIC_IRON_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.IRON_ORE));
+	public static final Block FERRIC_COPPER_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.COPPER_ORE));
+	public static final Block FERRIC_BAUXITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.IRON_ORE));
+	public static final Block FERRIC_ILMENITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.GOLD_ORE));
+	public static final Block FERRIC_SULFUR_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.COAL_ORE));
+	public static final Block FERRIC_GOLD_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.GOLD_ORE));
+	public static final Block FERRIC_DIAMOND_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.DIAMOND_ORE));
+	public static final Block FERRIC_REDSTONE_ORE = new RedstoneOreBlock(FabricBlockSettings.copyOf(Blocks.REDSTONE_ORE));
+	public static final Block HEMATITE_ORE = new ExperienceDroppingBlock(FabricBlockSettings.copyOf(Blocks.IRON_ORE));
+	public static final Block HEMATITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.STONE).strength(3.0f, 8.0f));
+	public static final Block DRY_SNOW_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.SNOW_BLOCK).strength(0.1F));
+	public static final Block ARES_MOSS_CARPET = new CarpetBlock(FabricBlockSettings.copyOf(Blocks.MOSS_CARPET).mapColor(MapColor.PURPLE));
+	public static final Block ARES_MOSS_BLOCK = new MossBlock(FabricBlockSettings.copyOf(Blocks.MOSS_BLOCK).mapColor(MapColor.PURPLE));
+	public static final Block LYCOPHYTE_TOP = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF), true);
+	public static final Block LYCOPHYTE_STEM = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF_STEM), false);
+	public static final Block PITCH_BLACK = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));
+	public static final Block SEARING_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
+	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.copyOf(Blocks.STONE));
+	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(1.0f, 1.0f));
+	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.copyOf(Blocks.COPPER_BLOCK).strength(1.0f, 1.0f));
+	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
+	public static final Block SOLAR_HUB = new SolarHubBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block OXYGEN_PIPE = new OxygenPipeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
+	public static final Block HYDROGEN_PIPE = new HydrogenPipeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
+	public static final Block OXYGEN_TANK = new OxygenTankBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block OXYGEN_INLET_VALVE = new OxygenInletValveBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block OXYGEN_OUTLET_VALVE = new OxygenOutletValveBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block HYDROGEN_TANK = new HydrogenTankBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block HYDROGEN_INLET_VALVE = new HydrogenInletValveBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block HYDROGEN_OUTLET_VALVE = new HydrogenOutletValveBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block VENT = new VentBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block COPPER_CABLE_AL = new EncasedEnergyCableBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block OXYGEN_PIPE_AL = new EncasedOxygenPipeALBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block HYDROGEN_PIPE_AL = new EncasedHydrogenPipeALBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(FabricBlockSettings.create().replaceable().dropsNothing());
+	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block ICE_ELECTROLYZER = new IceElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block OXYGEN_SENSOR = new OxygenSensorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.create().replaceable().noCollision().dropsNothing().air());
+	public static final Block LEAK = new LeakBlock(FabricBlockSettings.create().replaceable().noCollision().dropsNothing().air());
+	public static final Block STORAGE_CUBE = new StorageCubeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).nonOpaque());
+	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).nonOpaque());
+	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
+	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
+	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99), 0.25e6, 260, 240, 12.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.99, 15.0), 0.15e6, 300, 260, 12.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 15.99, 16.0), 0.075e6, 400, 100, 4.0);
+	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 15.99, 15.0), 0.15e6, 320, 315, 20.0);
+
 	// Block Entities
 	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
@@ -182,20 +186,20 @@ public class StarflightBlocks
 	public static final BlockEntityType<AtmosphereGeneratorBlockEntity> ATMOSPHERE_GENERATOR_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(AtmosphereGeneratorBlockEntity::new, ATMOSPHERE_GENERATOR).build(null);
 	public static final BlockEntityType<LeakBlockEntity> LEAK_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(LeakBlockEntity::new, LEAK).build(null);
 	public static final BlockEntityType<StorageCubeBlockEntity> STORAGE_CUBE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StorageCubeBlockEntity::new, STORAGE_CUBE).build(null);
-	
+
 	// Block Tags
-	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
-	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
-	public static final TagKey<Block> EDGE_CASE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "edge_case_blocks"));
-	public static final TagKey<Block> AIR_UPDATE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "air_update_blocks"));
-	public static final TagKey<Block> INSTANT_REMOVE_TAG = TagKey.of(Registry.BLOCK_KEY, new Identifier(StarflightMod.MOD_ID, "instant_remove_blocks"));
-	
+	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
+	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
+	public static final TagKey<Block> EDGE_CASE_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "edge_case_blocks"));
+	public static final TagKey<Block> AIR_UPDATE_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "air_update_blocks"));
+	public static final TagKey<Block> INSTANT_REMOVE_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "instant_remove_blocks"));
+
 	// Fluid Storage Values
 	public static final double HYDROGEN_TANK_CAPACITY = 64.0;
 	public static final double HYDROGEN_PIPE_CAPACITY = 8.0;
 	public static final double OXYGEN_TANK_CAPACITY = HYDROGEN_TANK_CAPACITY * 8.0;
 	public static final double OXYGEN_PIPE_CAPACITY = HYDROGEN_PIPE_CAPACITY * 8.0;
-	
+
 	public static void initializeBlocks()
 	{
 		initializeBlock(ALUMINUM_BLOCK, "aluminum_block");
@@ -288,7 +292,7 @@ public class StarflightBlocks
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
 		initializeBlock(THRUSTER_VACUUM, "thruster_vacuum");
 		initializeBlock(AEROSPIKE, "aerospike");
-		
+
 		// Setup extra block behavior.
 		FireBlockInvokerMixin fireBlock = (FireBlockInvokerMixin) Blocks.FIRE;
 		fireBlock.callRegisterFlammableBlock(RUBBER_LOG, 5, 5);
@@ -296,17 +300,17 @@ public class StarflightBlocks
 		fireBlock.callRegisterFlammableBlock(STRIPPED_RUBBER_LOG, 5, 5);
 		fireBlock.callRegisterFlammableBlock(RUBBER_LEAVES, 30, 60);
 	}
-	
+
 	private static void initializeBlock(Block block, String name)
 	{
 		initializeBlock(block, name, null, true, List.of(), List.of());
 	}
-	
+
 	private static void initializeBlock(Block block, String name, @Nullable BlockEntityType<?> blockEntity)
 	{
 		initializeBlock(block, name, blockEntity, true, List.of(), List.of());
 	}
-	
+
 	private static void initializeEnergyProducerBlock(Block block, String name, @Nullable BlockEntityType<?> blockEntity, double powerOutput, List<Text> hiddenTextList)
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
@@ -314,7 +318,7 @@ public class StarflightBlocks
 		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(powerOutput))).append("kJ/s").formatted(Formatting.GOLD));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
-	
+
 	private static void initializeEnergyConsumerBlock(Block block, String name, @Nullable BlockEntityType<?> blockEntity, double powerInput, List<Text> hiddenTextList)
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
@@ -322,47 +326,49 @@ public class StarflightBlocks
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(powerInput))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		initializeBlock(block, name, blockEntity, true, textList, hiddenTextList);
 	}
-	
+
 	private static void initializeBlock(Block block, String name, @Nullable BlockEntityType<?> blockEntity, boolean creativeInventory, List<Text> textList, List<Text> hiddenTextList)
 	{
 		String mod_id = StarflightMod.MOD_ID;
-		ItemGroup itemGroup = StarflightMod.ITEM_GROUP;
-		Registry.register(Registry.BLOCK, new Identifier(mod_id, name), block);
-		
+		// ItemGroup itemGroup = StarflightMod.ITEM_GROUP;
+		Registry.register(Registries.BLOCK, new Identifier(mod_id, name), block);
+
 		if(textList.isEmpty() && hiddenTextList.isEmpty())
-			Registry.register(Registry.ITEM, new Identifier(mod_id, name), new BlockItem(block, new FabricItemSettings().group(creativeInventory ? itemGroup : null)));
+			Registry.register(Registries.ITEM, new Identifier(mod_id, name), new BlockItem(block, new FabricItemSettings()));
 		else
-			Registry.register(Registry.ITEM, new Identifier(mod_id, name), new DescriptiveBlockItem(block, new FabricItemSettings().group(itemGroup), textList, hiddenTextList));
-		
+			Registry.register(Registries.ITEM, new Identifier(mod_id, name), new DescriptiveBlockItem(block, new FabricItemSettings(), textList, hiddenTextList));
+
 		if(blockEntity != null)
-			Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, name), blockEntity);
+			Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, name), blockEntity);
+		
+		if(creativeInventory)
+			ItemGroupEvents.modifyEntriesEvent(StarflightItems.ITEM_GROUP).register(content -> content.add(block));
 	}
 
 	private static ToIntFunction<BlockState> createLightLevelFromLitBlockState(int litLevel)
 	{
-		return (state) ->
-		{
+		return (state) -> {
 			return (Boolean) state.get(Properties.LIT) ? litLevel : 0;
 		};
 	}
-	
+
 	private static PillarBlock createLogBlock(MapColor topMapColor, MapColor sideMapColor)
 	{
-        return new PillarBlock(AbstractBlock.Settings.of(Material.WOOD, state -> state.get(PillarBlock.AXIS) == Direction.Axis.Y ? topMapColor : sideMapColor).strength(2.0f).sounds(BlockSoundGroup.WOOD));
-    }
-	
+		return new PillarBlock(FabricBlockSettings.create().mapColor(state -> state.get(PillarBlock.AXIS) == Direction.Axis.Y ? topMapColor : sideMapColor).instrument(Instrument.BASS).strength(2.0f).sounds(BlockSoundGroup.WOOD).burnable());
+	}
+
 	private static LeavesBlock createLeavesBlock(BlockSoundGroup soundGroup)
 	{
-        return new LeavesBlock(AbstractBlock.Settings.of(Material.LEAVES).strength(0.2f).ticksRandomly().sounds(soundGroup).nonOpaque().allowsSpawning(StarflightBlocks::canSpawnOnLeaves).suffocates(StarflightBlocks::never).blockVision(StarflightBlocks::never));
-    }
-	
+		return new LeavesBlock(FabricBlockSettings.create().mapColor(MapColor.DARK_GREEN).strength(0.2f).ticksRandomly().sounds(soundGroup).nonOpaque().allowsSpawning(StarflightBlocks::canSpawnOnLeaves).suffocates(StarflightBlocks::never).blockVision(StarflightBlocks::never).burnable().pistonBehavior(PistonBehavior.DESTROY).solidBlock(StarflightBlocks::never));
+	}
+
 	private static Boolean canSpawnOnLeaves(BlockState state, BlockView world, BlockPos pos, EntityType<?> type)
 	{
-        return type == EntityType.OCELOT || type == EntityType.PARROT;
-    }
-	
+		return type == EntityType.OCELOT || type == EntityType.PARROT;
+	}
+
 	private static boolean never(BlockState state, BlockView world, BlockPos pos)
 	{
-        return false;
-    }
+		return false;
+	}
 }

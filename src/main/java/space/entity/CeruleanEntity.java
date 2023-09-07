@@ -45,6 +45,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
+import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.item.StarflightItems;
@@ -104,7 +105,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 	public void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		this.readAngerFromNbt(this.world, nbt);
+		this.readAngerFromNbt(this.getWorld(), nbt);
 	}
 
 	@Override
@@ -218,9 +219,10 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 	@Override
 	public ActionResult interactMob(PlayerEntity player, Hand hand)
 	{
+		World world = getWorld();
 		ItemStack itemStack = player.getStackInHand(hand);
         
-        if (this.world.isClient)
+        if (world.isClient)
             return this.isOwner(player) || this.isTamed() || this.isBreedingItem(itemStack) && !this.isTamed() && !this.hasAngerTime() ? ActionResult.CONSUME : ActionResult.PASS;
 		
 		if(!player.getAbilities().creativeMode)
@@ -247,13 +249,19 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 				this.navigation.stop();
 				this.setTarget(null);
 				this.setSitting(true);
-				this.world.sendEntityStatus(this, EntityStatuses.ADD_POSITIVE_PLAYER_REACTION_PARTICLES);
+				this.getWorld().sendEntityStatus(this, EntityStatuses.ADD_POSITIVE_PLAYER_REACTION_PARTICLES);
 				return ActionResult.SUCCESS;
 			}
 			else
-				this.world.sendEntityStatus(this, EntityStatuses.ADD_NEGATIVE_PLAYER_REACTION_PARTICLES);
+				this.getWorld().sendEntityStatus(this, EntityStatuses.ADD_NEGATIVE_PLAYER_REACTION_PARTICLES);
 		}
 		
 		return ActionResult.SUCCESS;
+	}
+
+	@Override
+	public EntityView method_48926()
+	{
+		return super.getWorld();
 	}
 }

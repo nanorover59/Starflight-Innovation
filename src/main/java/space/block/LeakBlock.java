@@ -18,7 +18,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.LeakBlockEntity;
-import space.client.particle.StarflightParticles;
+import space.particle.StarflightParticleTypes;
 
 public class LeakBlock extends BlockWithEntity
 {
@@ -86,7 +86,7 @@ public class LeakBlock extends BlockWithEntity
 			double xOffset = 0.5 + random.nextDouble() - random.nextDouble();
 			double yOffset = 0.5 + random.nextDouble() - random.nextDouble();
 			double zOffset = 0.5 + random.nextDouble() - random.nextDouble();
-			world.addParticle(StarflightParticles.AIR_FILL, pos.getX() + xOffset, pos.getY() + yOffset, pos.getZ() + zOffset, vx * vf, vy * vf, vz * vf);
+			world.addParticle(StarflightParticleTypes.AIR_FILL, pos.getX() + xOffset, pos.getY() + yOffset, pos.getZ() + zOffset, vx * vf, vy * vf, vz * vf);
 		}
 	}
 

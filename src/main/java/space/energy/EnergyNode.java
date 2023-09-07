@@ -3,10 +3,11 @@ package space.energy;
 import java.util.ArrayList;
 
 import net.darkhax.ess.DataCompound;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryKey;
 import net.minecraft.world.World;
 
 public class EnergyNode
@@ -197,7 +198,7 @@ public class EnergyNode
 	
 	public static EnergyNode loadData(DataCompound data)
 	{
-		EnergyNode energyNode = new EnergyNode(new BlockPos(data.getInt("x"), data.getInt("y"), data.getInt("z")), RegistryKey.of(Registry.WORLD_KEY, new Identifier(data.getString("dimension"))), data.getBoolean("isProducer"), data.getBoolean("isConsumer"));
+		EnergyNode energyNode = new EnergyNode(new BlockPos(data.getInt("x"), data.getInt("y"), data.getInt("z")), RegistryKey.of(RegistryKeys.WORLD, new Identifier(data.getString("dimension"))), data.getBoolean("isProducer"), data.getBoolean("isConsumer"));
 		int inputCount = data.getInt("inputCount");
 		int outputCount = data.getInt("outputCount");
 		int breakerCount = data.getInt("breakerCount");
@@ -212,10 +213,10 @@ public class EnergyNode
 		int[] bz = data.getIntArray("bz");
 		
 		for(int i = 0; i < inputCount; i++)
-			energyNode.getInputs().add(new EnergyNode(new BlockPos(ix[i], iy[i], iz[i]), RegistryKey.of(Registry.WORLD_KEY, new Identifier(data.getString("dimension"))), false, false));
+			energyNode.getInputs().add(new EnergyNode(new BlockPos(ix[i], iy[i], iz[i]), RegistryKey.of(RegistryKeys.WORLD, new Identifier(data.getString("dimension"))), false, false));
 		
 		for(int i = 0; i < outputCount; i++)
-			energyNode.getOutputs().add(new EnergyNode(new BlockPos(ox[i], oy[i], oz[i]), RegistryKey.of(Registry.WORLD_KEY, new Identifier(data.getString("dimension"))), false, false));
+			energyNode.getOutputs().add(new EnergyNode(new BlockPos(ox[i], oy[i], oz[i]), RegistryKey.of(RegistryKeys.WORLD, new Identifier(data.getString("dimension"))), false, false));
 		
 		for(int i = 0; i < breakerCount; i++)
 			energyNode.getBreakers().add(new BlockPos(bx[i], by[i], bz[i]));
