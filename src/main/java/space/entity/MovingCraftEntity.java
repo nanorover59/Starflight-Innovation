@@ -39,6 +39,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -390,6 +391,7 @@ public class MovingCraftEntity extends Entity
 
 		if(movingCraft != null)
 		{
+			((MovingCraftEntity) movingCraft).onDimensionChanged(destination, arrivalLocation, arrivalYaw);
 			((MovingCraftEntity) movingCraft).entityOffsets.clear();
 
 			for(int i = 0; i < passengerList.size(); i++)
@@ -401,15 +403,62 @@ public class MovingCraftEntity extends Entity
 				if(trasferred != null)
 					((MovingCraftEntity) movingCraft).pickUpEntity(trasferred, offsetList.get(i));
 			}
-
-			if(movingCraft instanceof RocketEntity)
-			{
-				((RocketEntity) movingCraft).storeGravity();
-				((RocketEntity) movingCraft).setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, arrivalYaw));
-			}
 		}
 	}
-
+	
+	public void onDimensionChanged(ServerWorld destination, Vec3d arrivalLocation, float arrivalYaw)
+	{
+	}
+	
+	public void releaseBlocks()
+	{
+		// Snap the rotation of this entity into place and then dismount all passengers.
+		updateEulerAngles();
+		int rotationSteps = getRotationSteps();
+		
+		ArrayList<MovingCraftBlockData> toPlaceFirst = new ArrayList<MovingCraftBlockData>();
+		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
+		BlockRotation rotation = BlockRotation.NONE;
+		
+		for(int i = 0; i < rotationSteps; i++)
+			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
+		
+		setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, (float) (rotationSteps * (Math.PI / 2.0))));
+		fallDistance = 0.0f;
+		
+		for(Entity passenger : this.getPassengerList())
+		{
+			updatePassengerPosition(passenger);
+			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
+			passenger.setPosition(passenger.getPos().add(0.0, getVelocity().getY(), 0.0));
+			passenger.setVelocity(Vec3d.ZERO);
+			passenger.velocityModified = true;
+		}
+		
+		for(MovingCraftBlockData blockData : blockDataList)
+		{
+			if(blockData.placeFirst())
+				toPlaceFirst.add(blockData);
+			else
+				toPlaceLast.add(blockData);
+		}
+		
+		for(MovingCraftBlockData blockData : toPlaceFirst)
+			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
+		
+		for(MovingCraftBlockData blockData : toPlaceLast)
+			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
+		
+		for(MovingCraftBlockData blockData : toPlaceFirst)
+			onBlockReleased(blockData, rotation);
+		
+		this.setRemoved(RemovalReason.DISCARDED);
+	}
+	
+	public void onBlockReleased(MovingCraftBlockData blockData, BlockRotation rotation)
+	{
+	}
+	
 	@Override
 	protected void writeCustomDataToNbt(NbtCompound nbt)
 	{

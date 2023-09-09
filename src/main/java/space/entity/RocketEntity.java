@@ -18,13 +18,11 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -64,22 +62,16 @@ public class RocketEntity extends MovingCraftEntity
 	private static final TrackedData<Float> OXYGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> HYDROGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	
-	private RegistryKey<World> nextDimension;
-	private BlockPos arrivalPos;
-	private int arrivalDirection;
 	private int throttleState;
 	private int rollState;
 	private int pitchState;
 	private int yawState;
-	private boolean changedDimension;
 	private boolean userInput;
 	private double craftMass;
 	private double craftMassInitial;
 	private double gravity;
-	private double nominalThrustStart;
-	private double nominalThrustEnd;
-	private double startISP;
-	private double endISP;
+	private double nominalThrust;
+	private double isp;
 	private double hydrogenCapacity;
 	private double oxygenCapacity;
 	private double hydrogenSupply;
@@ -94,6 +86,7 @@ public class RocketEntity extends MovingCraftEntity
 	private float pitchSpeed;
 	private float yawSpeed;
 	private int soundEffectTimer;
+	private boolean pausePhysics;
 	
 	public RocketEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
 	{
@@ -103,25 +96,14 @@ public class RocketEntity extends MovingCraftEntity
 	public RocketEntity(World world, Direction forward, ArrayList<BlockPos> blockPosList, RegistryKey<World> nextDimension, double fuelToUse, BlockPos arrivalPos, int arrivalDirection)
 	{
 		this((EntityType<? extends RocketEntity>) StarflightEntities.ROCKET, world);
-		this.nextDimension = nextDimension;
-		this.changedDimension = false;
+		this.pausePhysics = false;
 		this.userInput = false;
 		this.fuelToUse = fuelToUse;
-		this.arrivalPos = arrivalPos;
-		this.arrivalDirection = arrivalDirection;
 		setForwardDirection(forward.getHorizontal());
 		setQuaternion(new Quaternionf());
 		Vec3d centerOfMass = Vec3d.ZERO;
 		BlockPos min = new BlockPos(blockPosList.get(0));
 		BlockPos max = new BlockPos(blockPosList.get(0));
-		
-		// Define maximum thrust values for the atmospheric pressure in the start dimension and the end dimension.
-		PlanetDimensionData dataStart = PlanetList.getDimensionDataForWorld(world);
-		PlanetDimensionData dataEnd = PlanetList.getDimensionDataForWorld(world.getServer().getWorld(nextDimension));
-    	double atmosphereStart = dataStart.isOrbit() ? 0.0 : dataStart.getPressure();
-    	double atmosphereEnd = dataEnd.isOrbit() ? 0.0 : dataEnd.getPressure();
-    	double massFlowSumStart = 0;
-    	double massFlowSumEnd = 0;
     	
 		for(BlockPos pos : blockPosList)
 		{
@@ -183,30 +165,12 @@ public class RocketEntity extends MovingCraftEntity
         			centerOfMass = centerOfMass.add(fluidTankCenter.multiply(oxygenTank.getStoredFluid()));
         		}
         	}
-        	
-        	Block block = world.getBlockState(pos).getBlock();
-        	
-        	if(block instanceof RocketThrusterBlock && !redstone)
-        	{
-        		double thrustStart = ((RocketThrusterBlock) block).getThrust(atmosphereStart);
-        		double thrustEnd = ((RocketThrusterBlock) block).getThrust(atmosphereEnd);
-        		nominalThrustStart += thrustStart;
-        		nominalThrustEnd += thrustEnd;
-        		massFlowSumStart += thrustStart / (SG * ((RocketThrusterBlock) block).getISP(atmosphereStart));
-        		massFlowSumEnd += thrustEnd / (SG * ((RocketThrusterBlock) block).getISP(atmosphereEnd));
-        	}
 		}
 		
-		startISP = nominalThrustStart / massFlowSumStart;
-		endISP = nominalThrustEnd / massFlowSumEnd;
 		craftMassInitial = craftMass;
 		centerOfMass = centerOfMass.multiply(1.0 / craftMass);
 		this.setPosition(Math.floor(centerOfMass.getX()) + 0.5, Math.floor(centerOfMass.getY()), Math.floor(centerOfMass.getZ()) + 0.5);
 		BlockPos centerBlockPos = new BlockPos((int) Math.floor(centerOfMass.getX()), (int) Math.floor(centerOfMass.getY()), (int) Math.floor(centerOfMass.getZ()));
-		
-		// In the absence of an arrival card, set the arrival coordinates to the current coordinates.
-		if(arrivalPos.getX() == -9999 && arrivalPos.getY() == -9999 && arrivalPos.getZ() == -9999)
-			this.arrivalPos = new BlockPos(centerBlockPos.getX(), -9999, centerBlockPos.getZ());
 		
 		this.setInitialBlockPos(centerBlockPos);
 		this.blockDataList = MovingCraftEntity.captureBlocks(world, centerBlockPos, blockPosList);
@@ -225,8 +189,15 @@ public class RocketEntity extends MovingCraftEntity
 		lowerHeight = centerBlockPos.getY() - min.getY();
 		upperHeight = max.getY() - centerBlockPos.getY();
 		maxWidth = (Math.abs(centerBlockPos.getX() - min.getX()) + Math.abs(centerBlockPos.getX() - max.getX()) + Math.abs(centerBlockPos.getZ() - min.getZ()) + Math.abs(centerBlockPos.getZ() - max.getZ())) / 4;
+		initializePropulsion();
 		storeGravity();
 	}
+	
+	@Override
+	protected Box calculateBoundingBox()
+	{
+        return new Box(getPos().add(-maxWidth, -lowerHeight, -maxWidth), getPos().add(maxWidth, upperHeight, maxWidth));
+    }
 	
 	@Override
 	protected void initDataTracker()
@@ -318,6 +289,9 @@ public class RocketEntity extends MovingCraftEntity
 			return;
 		}
 		
+		if(pausePhysics)
+			return;
+		
 		// Play the rocket engine sound effect.
 		if(getThrottle() > 0.0f && soundEffectTimer <= 0)
 		{
@@ -328,7 +302,7 @@ public class RocketEntity extends MovingCraftEntity
 			soundEffectTimer--;
 		
 		// Set the target landing altitude if necessary.
-		if(changedDimension && arrivalPos.getY() == -9999)
+		/*if(changedDimension && arrivalPos.getY() == -9999)
 		{
 			boolean noBlocks = true;
 			
@@ -346,17 +320,17 @@ public class RocketEntity extends MovingCraftEntity
 			
 			if(noBlocks)
 				arrivalPos = new BlockPos(arrivalPos.getX(), 64, arrivalPos.getZ());
-		}
+		}*/
 		
 		updateEulerAngles();
 		
 		// Automatically control thrust according to either launch or landing behavior. Otherwise, apply manual control from the player.
 		if(!userInput)
 		{
-			if(changedDimension)
+			/*if(changedDimension)
 				verticalLandingAutoThrottle();
 			else
-				launchAnimation();
+				launchAnimation();*/
 		}
 		else
 			applyUserInput();
@@ -371,7 +345,7 @@ public class RocketEntity extends MovingCraftEntity
 		int travelCeiling = data.isOrbit() ? TRAVEL_CEILING_ORBIT : TRAVEL_CEILING;
 		
 		// Move to the next dimension when a high enough altitude is reached.
-		if(this.getBlockPos().getY() > travelCeiling && !changedDimension)
+		/*if(this.getBlockPos().getY() > travelCeiling && !changedDimension)
 		{
 			// Use hydrogen and oxygen at the 1:8 ratio for water.
 			fuelToUse -= craftMassInitial - craftMass;
@@ -388,10 +362,20 @@ public class RocketEntity extends MovingCraftEntity
 			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
 			this.changeDimension(next, new Vec3d(arrivalPos.getX() + 0.5, nextData.isOrbit() ? TRAVEL_CEILING_ORBIT : TRAVEL_CEILING, arrivalPos.getZ() + 0.5), arrivalYaw);
 			return;
+		}*/
+		
+		// Move to the next dimension,
+		if(gravity == 0.0)
+		{
+			
+		}
+		else
+		{
+			
 		}
 		
 		// Turn back into blocks when landed.
-		if(this.age > 10 && (verticalCollision || horizontalCollision || (changedDimension && gravity == 0.0 && (this.getBlockPos().getY() - lowerHeight <= arrivalPos.getY() || getVelocity().getY() >= 0.0))))
+		if(this.age > 10 && (verticalCollision || horizontalCollision))
 		{
 			Vector3f trackedVelocity = getTrackedVelocity();
 			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
@@ -449,14 +433,39 @@ public class RocketEntity extends MovingCraftEntity
 		while(!getWorld().getBlockState(new BlockPos((int) getX(), yCheck, (int) getZ())).blocksMovement() && yCheck > getWorld().getBottomY())
 			yCheck--;
 		
-		if(gravity == 0.0 && yCheck < arrivalPos.getY())
-			yCheck = arrivalPos.getY();
+		if(gravity == 0.0)
+			yCheck = getWorld().getHeight() / 2;
 		
 		setUserInput(userInput);
 		setAltitude((float) (getY() - lowerHeight - yCheck));
 		setTrackedVelocity(getVelocity().toVector3f());
 		setOxygenLevel((float) (oxygenSupply / oxygenCapacity));
 		setHydrogenLevel((float) (hydrogenSupply / hydrogenCapacity));
+	}
+	
+	/**
+	 * Initialize parameters for rocket propulsion as an average of all thrusters.
+	 */
+	public void initializePropulsion()
+	{
+		PlanetDimensionData planetDimensionData = PlanetList.getDimensionDataForWorld(getWorld());
+		double pressure = planetDimensionData.getPressure();
+		double massFlowSum = 0.0;
+		nominalThrust = 0.0;
+		
+		for(MovingCraftBlockData blockData : blockDataList)
+		{
+			Block block = blockData.getBlockState().getBlock();
+			
+			if(block instanceof RocketThrusterBlock && !blockData.redstonePower())
+        	{
+        		double thrust = ((RocketThrusterBlock) block).getThrust(pressure);
+        		nominalThrust += thrust;
+        		massFlowSum += thrust / (SG * ((RocketThrusterBlock) block).getISP(pressure));
+        	}
+		}
+		
+		isp = nominalThrust / massFlowSum;
 	}
 	
 	/**
@@ -475,14 +484,14 @@ public class RocketEntity extends MovingCraftEntity
 		if(throttle == 0.0 || oxygenSupply <= 0.0 || hydrogenSupply <= 0.0)
 			return;
 		
-		double force = changedDimension ? nominalThrustEnd * throttle : nominalThrustStart * throttle;
+		double force = nominalThrust * throttle;
 		double acc = (force / craftMass) * 0.0025;
 		Quaternionf quaternion = getCraftQuaternion();
 		Vector3f direction = new Vector3f(0.0f, 1.0f, 0.0f).rotate(quaternion);
         this.addVelocity(direction.x() * acc, direction.y() * acc, direction.z() * acc);
         
         // Decrease mass and fuel supply.
-        double totalMassFlow = (force / (SG * (changedDimension ? endISP : startISP))) * 0.05;
+        double totalMassFlow = (force / (SG * isp)) * 0.05;
         craftMass -= totalMassFlow;
         double hydrogenFlow = totalMassFlow * (1.0 / 9.0);
         double oxygenFlow = totalMassFlow * (8.0 / 9.0);
@@ -585,8 +594,8 @@ public class RocketEntity extends MovingCraftEntity
 			// A lower constraint of 4m/s^2 is applied.
 			double maxG = (gravity / 0.0025) * 2.0 < 4.0 ? 4.0 : (gravity / 0.0025) * 2.0;
 			
-			if((changedDimension ? nominalThrustEnd : nominalThrustStart) / craftMass > maxG)
-				throttle = changedDimension ? (craftMass * maxG) / nominalThrustEnd : (craftMass * maxG) / nominalThrustStart;
+			if(nominalThrust / craftMass > maxG)
+				throttle = (craftMass * maxG) / nominalThrust;
 			else
 				throttle = 1.0;
 		}
@@ -598,10 +607,10 @@ public class RocketEntity extends MovingCraftEntity
 	private void verticalLandingAutoThrottle()
 	{
 		double vy = getVelocity().getY(); // Vertical velocity in m/tick.
-		double currentHeight = (getPos().getY() - lowerHeight) - arrivalPos.getY();
+		double currentHeight = getAltitude();
 		
 		// Find the necessary throttle to cancel vertical velocity.
-		double t = Math.min(((Math.pow(vy, 2.0) * 0.5) + (gravity * currentHeight)) / (((nominalThrustEnd / craftMass) * 0.0025) * currentHeight), 1.0);
+		double t = Math.min(((Math.pow(vy, 2.0) * 0.5) + (gravity * currentHeight)) / (((nominalThrust / craftMass) * 0.0025) * currentHeight), 1.0);
 		
 		// Activate the engines if the necessary throttle is significantly high and the vehicle has a little bit of altitude.
 		if(gravity > 0.0)
@@ -655,91 +664,46 @@ public class RocketEntity extends MovingCraftEntity
 		}
 	}
 	
-	protected void releaseBlocks()
+	@Override
+	public void onDimensionChanged(ServerWorld destination, Vec3d arrivalLocation, float arrivalYaw)
 	{
-		// Snap the rotation of this entity into place and then dismount all passengers.
-		updateEulerAngles();
-		int rotationSteps = getRotationSteps();
-		
-		ArrayList<MovingCraftBlockData> toPlaceFirst = new ArrayList<MovingCraftBlockData>();
-		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
-		BlockRotation rotation = BlockRotation.NONE;
-		
-		for(int i = 0; i < rotationSteps; i++)
-			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
-		
-		setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, (float) (rotationSteps * (Math.PI / 2.0))));
-		fallDistance = 0.0f;
-		
-		for(Entity passenger : this.getPassengerList())
-		{
-			updatePassengerPosition(passenger);
-			passenger.setPosition(passenger.getPos().add(0.0, 0.5, 0.0));
-			passenger.setPosition(passenger.getPos().add(0.0, (gravity > 0.0 ? 0.5 : 0.0) + getVelocity().getY(), 0.0));
-			passenger.setVelocity(Vec3d.ZERO);
-			passenger.velocityModified = true;
-		}
-		
-		for(MovingCraftBlockData blockData : blockDataList)
-		{
-			if(blockData.placeFirst())
-				toPlaceFirst.add(blockData);
-			else
-				toPlaceLast.add(blockData);
-		}
-		
-		for(MovingCraftBlockData blockData : toPlaceFirst)
-			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
-		
-		for(MovingCraftBlockData blockData : toPlaceLast)
-			blockData.toBlock(this.getWorld(), this.getBlockPos(), rotationSteps);
-		
-		for(MovingCraftBlockData blockData : toPlaceFirst)
-		{
-			if(blockData.getStoredFluid() > 0)
-			{
-				BlockPos blockPos = this.getBlockPos().add(blockData.getPosition().rotate(rotation));
-				BlockEntity blockEntity = getWorld().getBlockEntity(blockPos);
-				
-				if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-				{
-					FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
-					((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(getWorld(), blockPos, fluidTank);
-					
-					if(blockData.redstonePower())
-						fluidTank.setStoredFluid(blockData.getStoredFluid());
-					else
-					{
-						if(blockData.getBlockState().getBlock() == StarflightBlocks.HYDROGEN_TANK)
-							fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (hydrogenSupply / hydrogenCapacity));
-						else if(blockData.getBlockState().getBlock() == StarflightBlocks.OXYGEN_TANK)
-							fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (oxygenSupply / oxygenCapacity));
-					}
-				}
-				else if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
-					((RocketControllerBlockEntity) blockEntity).runScan();
-			}
-		}
-		
-		this.setRemoved(RemovalReason.DISCARDED);
+		storeGravity();
+		initializePropulsion();
+		setQuaternion(new Quaternionf().fromAxisAngleRad(0.0f, 1.0f, 0.0f, arrivalYaw));
 	}
 	
 	@Override
-	protected Box calculateBoundingBox()
+	public void onBlockReleased(MovingCraftBlockData blockData, BlockRotation rotation)
 	{
-        return new Box(getPos().add(-maxWidth, -lowerHeight, -maxWidth), getPos().add(maxWidth, upperHeight, maxWidth));
-    }
+		if(blockData.getStoredFluid() > 0)
+		{
+			BlockPos blockPos = this.getBlockPos().add(blockData.getPosition().rotate(rotation));
+			BlockEntity blockEntity = getWorld().getBlockEntity(blockPos);
+			
+			if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
+			{
+				FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
+				((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(getWorld(), blockPos, fluidTank);
+				
+				if(blockData.redstonePower())
+					fluidTank.setStoredFluid(blockData.getStoredFluid());
+				else
+				{
+					if(blockData.getBlockState().getBlock() == StarflightBlocks.HYDROGEN_TANK)
+						fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (hydrogenSupply / hydrogenCapacity));
+					else if(blockData.getBlockState().getBlock() == StarflightBlocks.OXYGEN_TANK)
+						fluidTank.setStoredFluid(fluidTank.getStorageCapacity() * (oxygenSupply / oxygenCapacity));
+				}
+			}
+			else if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
+				((RocketControllerBlockEntity) blockEntity).runScan();
+		}
+	}
 	
 	@Override
 	protected void writeCustomDataToNbt(NbtCompound nbt)
 	{
 		super.writeCustomDataToNbt(nbt);
-		nbt.putString("destination", nextDimension.getValue().toString());
-		nbt.putInt("arrivalX", arrivalPos.getX());
-		nbt.putInt("arrivalY", arrivalPos.getY());
-		nbt.putInt("arrivalZ", arrivalPos.getZ());
-		nbt.putInt("arrivalDirection", arrivalDirection);
-		nbt.putBoolean("arrived", changedDimension);
 		nbt.putBoolean("userInput", userInput);
 		nbt.putFloat("rollSpeed", rollSpeed);
 		nbt.putFloat("pitchSpeed", pitchSpeed);
@@ -747,10 +711,8 @@ public class RocketEntity extends MovingCraftEntity
 		nbt.putDouble("mass", craftMass);
 		nbt.putDouble("massInitial", craftMassInitial);
 		nbt.putDouble("gravity", gravity);
-		nbt.putDouble("nominalThrustStart", nominalThrustStart);
-		nbt.putDouble("nominalThrustEnd", nominalThrustEnd);
-		nbt.putDouble("startISP", startISP);
-		nbt.putDouble("endISP", endISP);
+		nbt.putDouble("nominalThrust", nominalThrust);
+		nbt.putDouble("isp", isp);
 		nbt.putDouble("throttle", throttle);
 		nbt.putDouble("hydrogenCapacity", hydrogenCapacity);
 		nbt.putDouble("oxygenCapacity", oxygenCapacity);
@@ -766,10 +728,6 @@ public class RocketEntity extends MovingCraftEntity
 	protected void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		nextDimension = RegistryKey.of(RegistryKeys.WORLD, new Identifier(nbt.getString("destination")));
-		arrivalPos = new BlockPos(nbt.getInt("arrivalX"), nbt.getInt("arrivalY"), nbt.getInt("arrivalZ"));
-		arrivalDirection = nbt.getInt("arrivalDirection");
-		changedDimension = nbt.getBoolean("arrived");
 		userInput = nbt.getBoolean("userInput");
 		rollSpeed = nbt.getFloat("rollSpeed");
 		pitchSpeed = nbt.getFloat("pitchSpeed");
@@ -777,10 +735,8 @@ public class RocketEntity extends MovingCraftEntity
 		craftMass = nbt.getDouble("mass");
 		craftMassInitial = nbt.getDouble("massInitial");
 		gravity = nbt.getDouble("gravity");
-		nominalThrustStart = nbt.getDouble("nominalThrustStart");
-		nominalThrustEnd = nbt.getDouble("nominalThrustEnd");
-		startISP = nbt.getDouble("startISP");
-		endISP = nbt.getDouble("endISP");
+		nominalThrust = nbt.getDouble("nominalThrust");
+		isp = nbt.getDouble("isp");
 		throttle = nbt.getDouble("throttle");
 		hydrogenCapacity = nbt.getDouble("hydrogenCapacity");
 		oxygenCapacity = nbt.getDouble("oxygenCapacity");
@@ -810,6 +766,20 @@ public class RocketEntity extends MovingCraftEntity
 			
 			if((throttleState != 0 || rollState != 0 || pitchState != 0 || yawState != 0) && rocketEntity.gravity > 0.0)
 				rocketEntity.userInput = true;
+		}
+	}
+	
+	public static void receiveTravelInput(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
+	{
+		String string = buffer.readString();
+		Entity entity = player.getVehicle();
+		System.out.println();
+		
+		if(entity instanceof RocketEntity)
+		{
+			RocketEntity rocketEntity = (RocketEntity) entity;
+			
+			
 		}
 	}
 }
