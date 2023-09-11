@@ -160,9 +160,15 @@ public class SpaceTravelScreen extends Screen
         y = MARGIN;
         DecimalFormat df = new DecimalFormat("#.#");
         MutableText text = Text.translatable("planet.space." + currentPlanet.getName());
-        context.drawTextWithShadow(textRenderer, text, x, y, selectedPlanet.dVTransfer < deltaV ? GREEN : RED);
-        drawTravelButton(context, textRenderer, Text.translatable("space.navigation.to_surface").append(": ").append(df.format(currentPlanet.dVSurface)).append("m/s"), null, selectedPlanet.dVTransfer, x, y + 14, mouseX, mouseY, mouseDown);
-        drawTravelButton(context, textRenderer, Text.translatable("space.navigation.stay"), null, 0.0, x, y + 28, mouseX, mouseY, mouseDown);
+        context.drawTextWithShadow(textRenderer, text, x, y, GREEN);
+        
+        if(currentPlanet.hasSurface)
+        {
+        	travelButton(context, textRenderer, Text.translatable("space.navigation.to_surface").append(": ").append(df.format(currentPlanet.dVSurface)).append("m/s"), currentPlanet.getName(), currentPlanet.dVSurface, true, x, y + 14, mouseX, mouseY, mouseDown);
+        	travelButton(context, textRenderer, Text.translatable("space.navigation.stay"), currentPlanet.getName(), 0.0, false, x, y + 28, mouseX, mouseY, mouseDown);
+        }
+        else
+        	travelButton(context, textRenderer, Text.translatable("space.navigation.stay"), currentPlanet.getName(), 0.0, false, x, y + 14, mouseX, mouseY, mouseDown);
         
         if(selectedPlanet != currentPlanet)
         {
@@ -171,7 +177,7 @@ public class SpaceTravelScreen extends Screen
 	        	text = Text.translatable("space.navigation.transfer").append(": ").append(df.format(selectedPlanet.dVTransfer)).append("m/s");
 	        	x = width - (textRenderer.getWidth(text) + MARGIN);
 	        	context.drawTextWithShadow(textRenderer, Text.translatable("planet.space." + selectedPlanet.getName()), x, y, selectedPlanet.dVTransfer < deltaV ? GREEN : RED);
-	        	drawTravelButton(context, textRenderer, text, null, selectedPlanet.dVTransfer, x, y + 14, mouseX, mouseY, mouseDown);
+	        	travelButton(context, textRenderer, text, selectedPlanet.getName(), selectedPlanet.dVTransfer, false, x, y + 14, mouseX, mouseY, mouseDown);
 	        }
 	        else
 	        {
@@ -290,7 +296,7 @@ public class SpaceTravelScreen extends Screen
 		}
 	}
 	
-	private void drawTravelButton(DrawContext context, TextRenderer textRenderer, Text buttonText, String worldKey, double requiredDeltaV, int x, int y, int mouseX, int mouseY, boolean mouseDown)
+	private void travelButton(DrawContext context, TextRenderer textRenderer, Text buttonText, String planetName, double requiredDeltaV, boolean landing, int x, int y, int mouseX, int mouseY, boolean mouseDown)
 	{
 		int textWidth = textRenderer.getWidth(buttonText);
         boolean hover = requiredDeltaV < deltaV && mouseX > x && mouseX < x + textWidth && mouseY > y && mouseY < y + 12;
@@ -301,7 +307,9 @@ public class SpaceTravelScreen extends Screen
         if(hover && mouseDown)
         {
         	PacketByteBuf buffer = PacketByteBufs.create();
-    		buffer.writeString(worldKey);
+    		buffer.writeString(planetName);
+    		buffer.writeDouble(requiredDeltaV);
+    		buffer.writeBoolean(landing);
     		ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_travel_button"), buffer);
     		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
     		close();

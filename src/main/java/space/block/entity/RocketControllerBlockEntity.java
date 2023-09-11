@@ -280,7 +280,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 			        		arrivalDirection = nbt.getInt("d");
 			        	}
 			        	
-						RocketEntity entity = new RocketEntity(world, world.getBlockState(position).get(RocketControllerBlock.FACING), positionList, nextWorld, rocketController.mass - finalMass, arrivalPos, arrivalDirection);
+						RocketEntity entity = new RocketEntity(world, world.getBlockState(position).get(RocketControllerBlock.FACING), positionList, arrivalPos, arrivalDirection);
 	
 						if (!entity.isRemoved())
 							world.spawnEntity(entity);

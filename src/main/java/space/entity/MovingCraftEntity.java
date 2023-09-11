@@ -562,14 +562,16 @@ public class MovingCraftEntity extends Entity
 				}
 
 				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
-			} else if(forceUnload && this.playersInRange.contains(player) && !inRange)
+			}
+			else if(forceUnload && this.playersInRange.contains(player) && !inRange)
 			{
 				PacketByteBuf buffer = PacketByteBufs.create();
 				this.playersInRange.remove(player);
 				buffer.writeBoolean(false);
 				buffer.writeUuid(this.getUuid());
 				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
-			} else if(this.age < 8 && !forceUnload && inRange)
+			}
+			else if(this.age < 8 && !forceUnload && inRange)
 				sendEntityOffsets(player);
 		}
 	}
