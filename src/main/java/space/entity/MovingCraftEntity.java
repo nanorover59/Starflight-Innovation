@@ -275,6 +275,10 @@ public class MovingCraftEntity extends Entity
 			return;
 		
 		BlockPos pos = entityOffsets.get(passenger.getUuid());
+		
+		if(pos == null)
+			return;
+		
 		Quaternionf quaternion = getCraftQuaternion();
 		Vector3f offset = new Vector3f(pos.getX(), pos.getY() - 0.5f, pos.getZ());
 		offset.rotate(quaternion);

@@ -5,6 +5,9 @@
         "space:moon_midlands",
         "space:moon_ice",
         "space:mars_lowlands",
-        "space:mars_midlands"
+        "space:mars_midlands",
+        "space:mercury_plains",
+        "space:mercury_hotspot",
+        "space:mercury_ice"
     ]
 }

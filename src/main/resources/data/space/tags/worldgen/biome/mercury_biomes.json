@@ -1,0 +1,8 @@
+{
+    "replace": false,
+    "values": [
+   		"space:mercury_plains",
+        "space:mercury_hotspot",
+        "space:mercury_ice"
+    ]
+}

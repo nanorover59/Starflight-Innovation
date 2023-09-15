@@ -42,7 +42,7 @@ import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.HydrogenTankBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
-import space.client.gui.SpaceTravelScreen;
+import space.client.gui.SpaceNavigationScreen;
 import space.particle.StarflightParticleTypes;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
@@ -50,6 +50,7 @@ import space.planet.PlanetList;
 import space.util.AirUtil;
 import space.util.QuaternionUtil;
 import space.util.StarflightEffects;
+import space.util.VectorUtil;
 import space.vessel.BlockMass;
 import space.vessel.MovingCraftBlockData;
 import space.vessel.MovingCraftBlockRenderData;
@@ -59,6 +60,7 @@ public class RocketEntity extends MovingCraftEntity
 {
 	private static final int TRAVEL_CEILING = 1024;
 	private static final int TRAVEL_CEILING_ORBIT = 512;
+	private static final int PARKING_HEIGHT_ORBIT = 64;
 	private static final double ZERO_G_SPEED = 2.0;
 	private static final double SG = 9.80665; // Standard gravity for ISP calculations.
 	
@@ -319,11 +321,12 @@ public class RocketEntity extends MovingCraftEntity
 		checkDimensionChange();
 		fallDistance = 0.0f;
 		
+		Vector3f trackedVelocity = getTrackedVelocity();
+		float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
+		
 		// Turn back into blocks when landed.
-		if(this.age > 10 && (verticalCollision || horizontalCollision || (autoState == 2 && gravity == 0.0 && getBlockPos().getY() < arrivalPos.getY())))
+		if(this.age > 10 && (verticalCollision || horizontalCollision || (autoState == 2 && gravity == 0.0 && craftSpeed < 2.0)))
 		{
-			Vector3f trackedVelocity = getTrackedVelocity();
-			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
 			boolean crashLandingFlag = false;
 			
 			// Crash landing effects go here.
@@ -379,7 +382,7 @@ public class RocketEntity extends MovingCraftEntity
 			yCheck--;
 		
 		if(gravity == 0.0)
-			yCheck = getWorld().getHeight() / 2;
+			yCheck = arrivalPos.getY();
 		
 		setUserInput(autoState == 0);
 		setAltitude((float) (getY() - lowerHeight - yCheck));
@@ -511,7 +514,7 @@ public class RocketEntity extends MovingCraftEntity
 			}
 
 			if(noBlocks)
-				arrivalPos = new BlockPos(arrivalPos.getX(), 64, arrivalPos.getZ());
+				arrivalPos = new BlockPos(arrivalPos.getX(), PARKING_HEIGHT_ORBIT, arrivalPos.getZ());
 		}
 		
 		if(autoState == 1)
@@ -642,6 +645,7 @@ public class RocketEntity extends MovingCraftEntity
 				requiredDeltaV = data.getPlanet().dVSurfaceToOrbit();
 				setVelocity(0.0, -ZERO_G_SPEED, 0.0);
 				arrivalY = TRAVEL_CEILING_ORBIT;
+				autoState = 2;
 			}
 		}
 		else if(getBlockPos().getY() < getWorld().getBottomY())
@@ -863,6 +867,7 @@ public class RocketEntity extends MovingCraftEntity
 					
 					if(landing)
 					{
+						// Travel to the surface dimension.
 						if(currentPlanet.getSky() != null)
 							nextWorld = rocketEntity.getServer().getWorld(currentPlanet.getSky().getWorldKey());
 						else if(currentPlanet.getSurface() != null)
@@ -874,10 +879,30 @@ public class RocketEntity extends MovingCraftEntity
 					{
 						if(planet == currentPlanet)
 						{
+							// Stay in the same orbit dimension but loop around to the opposite Y threshold.
+							Vec3d planePoint = new Vec3d(0.0, rocketEntity.getY() < 0.0 ? TRAVEL_CEILING_ORBIT : rocketEntity.getWorld().getBottomY(), 0.0);
+							Vec3d heading = rocketEntity.getVelocity().negate().normalize();
+							Vec3d moveTo = null;
+							double xzDistance = 0.0;
 							
+							while(moveTo == null || xzDistance > 256.0)
+							{
+								moveTo = VectorUtil.linePlaneIntersection(rocketEntity.getPos(), rocketEntity.getPos().add(heading), planePoint, new Vec3d(0.0, 1.0, 0.0));
+								xzDistance = moveTo.add(0.0, -moveTo.getY(), 0.0).distanceTo(rocketEntity.getPos().add(0.0, -rocketEntity.getPos().getY(), 0.0));
+								
+								if(xzDistance > 256.0)
+									heading = heading.add(0.0, rocketEntity.getY() < 0.0 ? 0.1 : -0.1, 0.0).normalize();
+							}
+							
+							rocketEntity.setPosition(moveTo);
+							rocketEntity.setVelocity(heading.multiply(-rocketEntity.getVelocity().length()));
+							rocketEntity.velocityDirty = true;
+							rocketEntity.pausePhysics = false;
+							rocketEntity.throttle = 0.0;
 						}
 						else
 						{
+							// Travel to the next planet's orbit dimension.
 							nextWorld = rocketEntity.getServer().getWorld(planet.getOrbit().getWorldKey());
 							rocketEntity.setVelocity(0.0, -ZERO_G_SPEED, 0.0);
 							arrivalY = TRAVEL_CEILING_ORBIT;
@@ -901,6 +926,6 @@ public class RocketEntity extends MovingCraftEntity
 	public static void receiveOpenTravelScreen(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
 	{
 		double deltaV = buffer.readDouble();
-		client.execute(() -> client.setScreen(new SpaceTravelScreen(deltaV)));
+		client.execute(() -> client.setScreen(new SpaceNavigationScreen(deltaV)));
 	}
 }

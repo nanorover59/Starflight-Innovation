@@ -44,9 +44,6 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		{
 			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g);
 			
-			if(!quaternion.isFinite())
-				System.out.println("!!!");
-			
 			matrixStack.multiply(quaternion);
 		}
 		else if(entity.clientQuaternion != null)

@@ -18,7 +18,7 @@ public class VectorUtil
 	}
 	
 	/**
-	 * Get the angle between two 3D vectors using their dot product.
+	 * Get the angle between two 3D vectors in radians using their dot product.
 	 */
 	public static double getAngle(Vec3d v1, Vec3d v2)
 	{
@@ -65,5 +65,24 @@ public class VectorUtil
 	public static float lengthFloat(Vector3f v)
 	{
 		return (float) Math.sqrt(Math.pow(v.x, 2.0) + Math.pow(v.y, 2.0) + Math.pow(v.z, 2.0));
+	}
+	
+	/**
+	 * Find the point of intersection between a line and a plane.
+	 * Returns null if the dot product of the plane normal and line direction is within some exclusion range.
+	 */
+	public static Vec3d linePlaneIntersection(Vec3d line1, Vec3d line2, Vec3d planePoint, Vec3d planeNormal)
+	{
+		Vec3d lineDirection = line2.subtract(line1);
+		double dot = planeNormal.dotProduct(lineDirection);
+		
+		if(Math.abs(dot) > 1.0e-6)
+		{
+			Vec3d planeToPoint = planePoint.subtract(line1);
+			double t = planeToPoint.dotProduct(planeNormal) / dot;
+			return line1.add(lineDirection.multiply(t));
+		}
+		
+		return null;
 	}
 }

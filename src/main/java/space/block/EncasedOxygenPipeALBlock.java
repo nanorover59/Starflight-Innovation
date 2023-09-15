@@ -12,8 +12,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import space.block.entity.FluidContainerBlockEntity;
 import space.block.entity.EncasedOxygenPipeALBlockEntity;
+import space.block.entity.FluidContainerBlockEntity;
 import space.block.entity.OxygenPipeBlockEntity;
 
 public class EncasedOxygenPipeALBlock extends OxygenPipeBlock

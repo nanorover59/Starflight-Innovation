@@ -1,0 +1,44 @@
+{
+  "type" : "space:mercury",
+  "generator" : {
+    "type" : "minecraft:noise",
+    "settings" : "space:mercury",
+    "biome_source" : {
+      "type" : "minecraft:multi_noise",
+      "biomes" : [ {
+        "biome" : "space:mercury_plains",
+        "parameters" : {
+          "temperature" : [ -0.75, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ -1, -0.25 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 1 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:mercury_hotspot",
+        "parameters" : {
+          "temperature" : [ 0, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ -0.25, 0.75 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ -0.5, 1 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:mercury_ice",
+        "parameters" : {
+          "temperature" : [ -1, -0.5 ],
+          "humidity" : [ 0, 1 ],
+          "continentalness" : [ -0.25, 0.75 ],
+          "erosion" : [ -0.5, 0.5 ],
+          "weirdness" : [ 0, 1 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      } ]
+    }
+  }
+}

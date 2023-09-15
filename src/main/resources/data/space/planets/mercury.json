@@ -16,5 +16,30 @@
     "simpleTexture": false,
     "drawClouds": false,
     "cloudRotationRate": 0,
-    "dimensionData": []
+    "dimensionData": [
+        {
+            "name": "orbit",
+            "dimensionID": "space:mercury_orbit",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        },
+        {
+            "name": "surface",
+            "dimensionID": "space:mercury",
+            "overridePhysics": true,
+            "overrideSky": true,
+            "isCloudy": false,
+            "hasLowClouds": false,
+            "hasWeather": false,
+            "hasOxygen": false,
+            "temperatureCategory": 2,
+            "pressure": 0
+        }
+    ]
 }

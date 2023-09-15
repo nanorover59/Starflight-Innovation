@@ -3,7 +3,6 @@ package space.energy;
 import java.util.ArrayList;
 
 import net.darkhax.ess.DataCompound;
-import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;

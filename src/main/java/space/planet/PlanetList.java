@@ -6,10 +6,12 @@ import java.util.ArrayList;
 import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.WorldSavePath;
@@ -344,5 +346,22 @@ public class PlanetList
 		}
 		else
 			centerPlanet.setInitialPositionAndVelocity(checkList);
+	}
+	
+	public static void receiveTransferCalculationRequest(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
+	{
+		String planetFromName = buffer.readString();
+		String planetToName = buffer.readString();
+		
+		server.execute(() -> {
+			Planet planetFrom = getByName(planetFromName);
+			Planet planetTo = getByName(planetToName);
+			double deltaV = planetFrom.dVToPlanet(planetTo);
+			System.out.println(deltaV);
+			
+			PacketByteBuf sendBuffer = PacketByteBufs.create();
+			sendBuffer.writeDouble(deltaV);
+			ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "planetarium_transfer"), sendBuffer);
+		});
 	}
 }

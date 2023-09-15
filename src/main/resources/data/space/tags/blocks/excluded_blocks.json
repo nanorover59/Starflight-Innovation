@@ -16,6 +16,8 @@
         "space:balsaltic_regolith",
         "space:icy_regolith",
         "space:ferric_sand",
-        "space:dry_snow_block"
+        "space:dry_snow_block",
+        "space:solarized_regolith",
+        "space:searing_regolith"
     ]
 }

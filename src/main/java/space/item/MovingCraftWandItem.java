@@ -7,7 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import space.client.gui.SpaceTravelScreen;
+import space.client.gui.SpaceNavigationScreen;
 
 public class MovingCraftWandItem extends Item
 {
@@ -22,7 +22,7 @@ public class MovingCraftWandItem extends Item
         if(world.isClient())
         {
         	MinecraftClient minecraft = MinecraftClient.getInstance();
-        	minecraft.setScreen(new SpaceTravelScreen(1000000.0));
+        	minecraft.setScreen(new SpaceNavigationScreen(-1.0));
         	return super.use(world, player, hand);
         }
         

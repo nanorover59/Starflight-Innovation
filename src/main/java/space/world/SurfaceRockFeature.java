@@ -27,14 +27,14 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		BlockPos blockPos = context.getOrigin();
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(6 + random.nextInt(8)));
+		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(6 + random.nextInt(12)));
 		float chance = 0.25f;
 		
 		if(structureWorldAccess.getBiome(blockPos).isIn(StarflightWorldGeneration.MORE_SCATTER))
 			chance = 0.8f;
 		
 		// Random chance of generating a stray basalt rock.
-		if(random.nextInt(4) == 0)
+		if(random.nextInt(8) == 0)
 			blockState = Blocks.SMOOTH_BASALT.getDefaultState();
 		
 		// Skip generating at random or if the block found is not stone related.

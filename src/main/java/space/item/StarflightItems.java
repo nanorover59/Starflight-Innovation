@@ -64,8 +64,6 @@ public class StarflightItems
 	public static final Item ROCKET_CORE_2 = new Item(new FabricItemSettings());
 	public static final Item MULTIMETER = new MultimeterItem(new FabricItemSettings().maxCount(1));
 	public static final Item WRENCH = new WrenchItem(new FabricItemSettings().maxCount(1));
-	public static final Item NAVIGATION_CARD = new NavigationCardItem(new FabricItemSettings().maxCount(1));
-	public static final Item ARRIVAL_CARD = new ArrivalCardItem(new FabricItemSettings().maxCount(1));
 	public static final Item GUIDE_BOOK = new GuideBookItem(new FabricItemSettings().maxCount(1));
 	public static final Item OXYGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), "oxygen");
 	public static final Item HYDROGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), "hydrogen");
@@ -122,8 +120,6 @@ public class StarflightItems
 		registerItem(ROCKET_CORE_2, "rocket_core_2");
 		registerItem(MULTIMETER, "multimeter");
 		registerItem(WRENCH, "wrench");
-		registerItem(NAVIGATION_CARD, "navigation_card");
-		registerItem(ARRIVAL_CARD, "arrival_card");
 		registerItem(OXYGEN_LOADER, "oxygen_loader");
 		registerItem(HYDROGEN_LOADER, "hydrogen_loader");
 		registerItem(DIVIDER, "divider");

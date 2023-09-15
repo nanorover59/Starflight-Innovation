@@ -7,15 +7,15 @@ import org.lwjgl.glfw.GLFW;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.client.util.NarratorManager;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -26,11 +26,12 @@ import space.planet.ClientPlanet;
 import space.planet.ClientPlanetList;
 
 @Environment(EnvType.CLIENT)
-public class RocketControllerScreen extends HandledScreen<ScreenHandler>
+public class RocketControllerScreen extends Screen
 {
 	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/rocket_controller.png");
-	private static final int GREEN = 0x6abe30;
-	private static final int RED = 0xdc3222;
+	private static final int MARGIN = 12;
+    private static final int GREEN = 0xFF6ABE30;
+	private static final int RED = 0xFFDC3222;
 	public static String worldKey;
 	public static BlockPos position = new BlockPos(-256, -256, -256);
 	public static String targetName;
@@ -44,25 +45,39 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 	public static double deltaVCapacity = 0.0;
 	public static double requiredDeltaV1 = 0.0;
 	public static double requiredDeltaV2 = 0.0;
+	private double scaleFactor = 3.0e-10;
 	
 	private int buttonCooldown = 0;
 
-	public RocketControllerScreen(ScreenHandler handler, PlayerInventory inventory, Text title)
+	public RocketControllerScreen()
 	{
-		super(handler, inventory, title);
-		backgroundHeight = 222;
-		playerInventoryTitleY = backgroundHeight - 94;
+		super(NarratorManager.EMPTY);
+	}
+	
+	@Override
+    protected void init()
+	{
+		
+        ScreenMouseEvents.afterMouseScroll(this).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
+            if(verticalAmount < 0)
+		    	scaleFactor *= 0.9;
+		    else if(verticalAmount > 0)
+		    	scaleFactor *= 1.1;
+        });
 	}
 
 	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY)
+	public void render(DrawContext context, int mouseX, int mouseY, float delta)
 	{
 		boolean mousePressed = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		//PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.world);
-		int x = (width - backgroundWidth) / 2;
-		int y = (height - backgroundHeight) / 2;
-		context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight);
-		boolean inOrbit = ClientPlanetList.isViewpointInOrbit();
+		int x = MARGIN;
+		int y = MARGIN;
+		
+		
+		
+		
+		/*boolean inOrbit = ClientPlanetList.isViewpointInOrbit();
 		double ttw = 0;
 		ClientPlanet currentPlanet = ClientPlanetList.getViewpointPlanet();
 		ClientPlanet targetPlanet = ClientPlanetList.getByName(targetName);
@@ -148,22 +163,7 @@ public class RocketControllerScreen extends HandledScreen<ScreenHandler>
 				sendButtonPress(1);
 			else if(button3Hover)
 				sendButtonPress(2);
-		}
-	}
-	
-	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta)
-	{
-		renderBackground(context);
-		super.render(context, mouseX, mouseY, delta);
-		drawMouseoverTooltip(context, mouseX, mouseY);
-	}
-
-	@Override
-	protected void init()
-	{
-		super.init();
-		titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2;
+		}*/
 	}
 	
 	private void sendButtonPress(int buttonID)

@@ -1,0 +1,7 @@
+{
+  "type" : "space:crater",
+  "biomes" : "#space:mercury_biomes",
+  "step" : "surface_structures",
+  "spawn_overrides" : {},
+  "terrain_adaptation" : "none"
+}

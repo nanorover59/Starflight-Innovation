@@ -15,7 +15,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -43,8 +42,8 @@ import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
 import space.client.gui.ElectricFurnaceScreen;
 import space.client.gui.IceElectrolyzerScreen;
-import space.client.gui.PlanetariumScreen;
 import space.client.gui.RocketControllerScreen;
+import space.client.gui.SpaceNavigationScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
@@ -102,6 +101,7 @@ public class StarflightModClient implements ClientModInitializer
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_entity_offsets"), (client1, handler1, buf, sender1) -> MovingCraftEntity.receiveEntityOffsets(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_open_travel_screen"), (client1, handler1, buf, sender1) -> RocketEntity.receiveOpenTravelScreen(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_data"), (client1, handler1, buf, sender1) -> RocketControllerScreen.receiveDisplayDataUpdate(handler1, sender1, client1, buf));
+			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planetarium_transfer"), (client1, handler1, buf, sender1) -> SpaceNavigationScreen.receiveTransferCalculation(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "fizz"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveFizz(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "outgas"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveOutgas(handler1, sender1, client1, buf));
 			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "jet"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveJet(handler1, sender1, client1, buf));
@@ -128,12 +128,10 @@ public class StarflightModClient implements ClientModInitializer
 		);
 		
 		// GUIs
-		HandledScreens.register(StarflightScreens.PLANETARIUM_SCREEN_HANDLER, PlanetariumScreen::new);
 		HandledScreens.register(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
 		HandledScreens.register(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
 		HandledScreens.register(StarflightScreens.ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
 		HandledScreens.register(StarflightScreens.BATTERY_SCREEN_HANDLER, BatteryScreen::new);
-		HandledScreens.register(StarflightScreens.ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
 		
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));

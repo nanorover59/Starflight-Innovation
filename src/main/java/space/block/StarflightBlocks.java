@@ -60,7 +60,6 @@ import space.block.entity.OxygenInletValveBlockEntity;
 import space.block.entity.OxygenOutletValveBlockEntity;
 import space.block.entity.OxygenPipeBlockEntity;
 import space.block.entity.OxygenTankBlockEntity;
-import space.block.entity.PlanetariumBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.SolarHubBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
@@ -122,7 +121,8 @@ public class StarflightBlocks
 	public static final Block LYCOPHYTE_TOP = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF_STEM), true);
 	public static final Block LYCOPHYTE_STEM = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF_STEM), false);
 	public static final Block PITCH_BLACK = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));
-	public static final Block SEARING_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
+	public static final Block SOLARIZED_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
+	public static final Block SEARING_REGOLITH = new RegolithBlock(FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.ORANGE).strength(0.5F));
 	public static final Block FRIGID_STONE = new Block(FabricBlockSettings.copyOf(Blocks.STONE));
 	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(1.0f, 1.0f));
 	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -165,7 +165,6 @@ public class StarflightBlocks
 	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 15.99, 15.0), 0.15e6, 320, 315, 20.0);
 
 	// Block Entities
-	public static final BlockEntityType<PlanetariumBlockEntity> PLANETARIUM_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PlanetariumBlockEntity::new, PLANETARIUM).build(null);
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
 	public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, ELECTRIC_FURNACE).build(null);
 	public static final BlockEntityType<SolarHubBlockEntity> SOLAR_HUB_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(SolarHubBlockEntity::new, SOLAR_HUB).build(null);
@@ -251,10 +250,11 @@ public class StarflightBlocks
 		initializeBlock(LYCOPHYTE_TOP, "lycophyte_top");
 		initializeBlock(LYCOPHYTE_STEM, "lycophyte_stem", null, false, List.of(), List.of());
 		initializeBlock(PITCH_BLACK, "pitch_black", null, false, List.of(), List.of());
+		initializeBlock(SOLARIZED_REGOLITH, "solarized_regolith");
 		initializeBlock(SEARING_REGOLITH, "searing_regolith");
 		initializeBlock(FRIGID_STONE, "frigid_stone");
 		initializeBlock(TREE_TAP, "tree_tap");
-		initializeBlock(PLANETARIUM, "planetarium", PLANETARIUM_BLOCK_ENTITY);
+		initializeBlock(PLANETARIUM, "planetarium");
 		initializeBlock(COPPER_CABLE, "copper_cable");
 		initializeEnergyProducerBlock(STIRLING_ENGINE, "stirling_engine", STIRLING_ENGINE_BLOCK_ENTITY, 10, List.of());
 		initializeEnergyConsumerBlock(ELECTRIC_FURNACE, "electric_furnace", ELECTRIC_FURNACE_BLOCK_ENTITY, 10, List.of());

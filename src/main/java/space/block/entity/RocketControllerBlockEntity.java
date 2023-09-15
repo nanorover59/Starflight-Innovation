@@ -8,39 +8,29 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.StarflightMod;
-import space.block.RocketControllerBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
-import space.entity.RocketEntity;
-import space.inventory.ImplementedInventory;
-import space.item.NavigationCardItem;
-import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
-import space.screen.RocketControllerScreenHandler;
 import space.util.BlockSearch;
 import space.vessel.BlockMass;
 
-public class RocketControllerBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory
+public class RocketControllerBlockEntity extends BlockEntity
 {
 	private final DefaultedList<ItemStack> inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
 	private ArrayList<PlayerEntity> viewingList = new ArrayList<PlayerEntity>();
@@ -64,36 +54,6 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	public RocketControllerBlockEntity(BlockPos pos, BlockState state)
 	{
 		super(StarflightBlocks.ROCKET_CONTROLLER_BLOCK_ENTITY, pos, state);
-	}
-	
-	@Override
-	public Text getDisplayName()
-	{
-		return Text.translatable(getCachedState().getBlock().getTranslationKey());
-	}
-
-	@Override
-	public DefaultedList<ItemStack> getItems()
-	{
-		return inventory;
-	}
-
-	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player)
-	{
-		return new RocketControllerScreenHandler(syncId, playerInventory, this);
-	}
-	
-	@Override
-	public void onOpen(PlayerEntity player)
-	{
-		viewingList.add(player);
-	}
-	
-	@Override
-	public void onClose(PlayerEntity player)
-	{
-		viewingList.remove(player);
 	}
 	
 	/**
@@ -184,7 +144,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         deltaVCapacity = availableDV(mass + (hydrogenCapacity - hydrogen) + (oxygenCapacity - oxygen), hydrogenCapacity, oxygenCapacity, averageVEVacuum);
         
         // Run delta-V calculations.
-        runDeltaVCalculations();
+        //runDeltaVCalculations();
 	}
 	
 	private double availableDV(double initialMass, double hydrogen, double oxygen, double averageVE)
@@ -197,7 +157,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 	/**
 	 * Update the destination planet to what is found on a navigation card and run delta-v calculations.
 	 */
-	public void runDeltaVCalculations()
+	/*public void runDeltaVCalculations()
 	{
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 		Planet currentPlanet = data.getPlanet();
@@ -229,7 +189,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
         	requiredDeltaV1 = currentPlanet.dVSurfaceToOrbit();
         	requiredDeltaV2 = 0;
         }
-	}
+	}*/
 	
 	public static void receiveButtonPress(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
 	{
@@ -244,7 +204,11 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 			if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
 			{
 				RocketControllerBlockEntity rocketController = (RocketControllerBlockEntity) blockEntity;
-				ItemStack navigationCard = rocketController.getStack(0);
+				
+				
+				
+				
+				/*ItemStack navigationCard = rocketController.getStack(0);
 				ItemStack arrivalCard = rocketController.getStack(1);
 				rocketController.runScan();
 				
@@ -285,7 +249,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 						if (!entity.isRemoved())
 							world.spawnEntity(entity);
 			        }
-				}
+				}*/
 				
 				rocketController.sendDisplayData(player);
 			}
@@ -299,7 +263,7 @@ public class RocketControllerBlockEntity extends BlockEntity implements NamedScr
 		
 		if(stack.isEmpty() == blockEntity.hasCard)
 		{
-			blockEntity.runDeltaVCalculations();
+			//blockEntity.runDeltaVCalculations();
 			
 			for(PlayerEntity player : blockEntity.viewingList)
 				blockEntity.sendDisplayData(world.getServer().getPlayerManager().getPlayer(player.getUuid()));
