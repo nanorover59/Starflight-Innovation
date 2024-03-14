@@ -37,20 +37,15 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 		this.world = playerInventory.player.getWorld();
 		this.addSlot(new Slot(inventory, 0, 56, 35));
 		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 1, 116, 35));
-
-		int k;
-		for(k = 0; k < 3; ++k)
+		
+		for(int i = 0; i < 3; i++)
 		{
-			for(int j = 0; j < 9; ++j)
-			{
-				this.addSlot(new Slot(playerInventory, j + k * 9 + 9, 8 + j * 18, 84 + k * 18));
-			}
+			for(int j = 0; j < 9; j++)
+				this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 84 + i * 18));
 		}
 
-		for(k = 0; k < 9; ++k)
-		{
-			this.addSlot(new Slot(playerInventory, k, 8 + k * 18, 142));
-		}
+		for(int i = 0; i < 9; i++)
+			this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
 
 		this.addProperties(propertyDelegate);
 	}
@@ -157,9 +152,9 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 		return j != 0 && i != 0 ? i * 24 / j : 0;
 	}
 
-	public boolean isBurning()
+	public int getCharge()
 	{
-		return this.propertyDelegate.get(0) == 1;
+		return this.propertyDelegate.get(0);
 	}
 
 	public boolean canInsertIntoSlot(int index)

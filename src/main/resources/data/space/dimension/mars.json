@@ -97,18 +97,18 @@
         "biome" : "space:mars_dripstone",
         "parameters" : {
           "temperature" : [ -1, 1 ],
-          "humidity" : [ 0, 1 ],
+          "humidity" : [ -0.5, 1 ],
           "continentalness" : [ 0.8, 1 ],
           "erosion" : [ -1, 1 ],
           "weirdness" : [ -1, 1 ],
-          "depth" : [ 1.0, 1.2 ],
+          "depth" : 1,
           "offset" : 0
         }
       }, {
         "biome" : "space:mars_lush_caves",
         "parameters" : {
           "temperature" : [ -0.5, 1 ],
-          "humidity" : [ 0.7, 1 ],
+          "humidity" : [ -0.5, 1 ],
           "continentalness" : [ -1, 0.5 ],
           "erosion" : [ -1, 1 ],
           "weirdness" : [ -1, 1 ],

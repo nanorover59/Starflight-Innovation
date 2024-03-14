@@ -18,7 +18,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import space.block.StarflightBlocks;
 import space.client.StarflightModClient;
 import space.util.BlockSearch;
@@ -50,7 +49,7 @@ public class DividerItem extends Item
 			{
 				ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
 				
-				BiPredicate<WorldAccess, BlockPos> include = (w, p) -> {
+				BiPredicate<World, BlockPos> include = (w, p) -> {
 					return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
 				};
 				

@@ -1,0 +1,36 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/damaged_aluminum_0"
+      },
+      {
+        "model": "space:block/damaged_aluminum_0",
+        "y": 90
+      },
+      {
+        "model": "space:block/damaged_aluminum_0",
+        "y": 180
+      },
+      {
+        "model": "space:block/damaged_aluminum_0",
+        "y": 270
+      },
+      {
+        "model": "space:block/damaged_aluminum_1"
+      },
+      {
+        "model": "space:block/damaged_aluminum_1",
+        "y": 90
+      },
+      {
+        "model": "space:block/damaged_aluminum_1",
+        "y": 180
+      },
+      {
+        "model": "space:block/damaged_aluminum_1",
+        "y": 270
+      }
+    ]
+  }
+}

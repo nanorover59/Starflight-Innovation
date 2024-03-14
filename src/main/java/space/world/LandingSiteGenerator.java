@@ -7,7 +7,7 @@ import java.util.Set;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.LootableContainerBlockEntity;
+import net.minecraft.inventory.LootableInventory;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
@@ -153,7 +153,7 @@ public class LandingSiteGenerator
 						if(blockState.getBlock() == Blocks.DIRT && random.nextInt(4) == 0)
 							world.setBlockState(pos.up(), Blocks.DEAD_BUSH.getDefaultState(), Block.NOTIFY_LISTENERS);
 						else if(blockState.getBlock() == StarflightBlocks.STORAGE_CUBE)
-							LootableContainerBlockEntity.setLootTable(world, random, pos, LOOT_TABLE);
+							LootableInventory.setLootTable(world, random, pos, LOOT_TABLE);
 					}
 				}
 			}

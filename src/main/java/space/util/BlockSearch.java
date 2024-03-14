@@ -13,9 +13,11 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import space.block.BreakerSwitchBlock;
+import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
+import space.block.entity.EnergyBlockEntity;
 
 public class BlockSearch
 {
@@ -27,41 +29,6 @@ public class BlockSearch
 	 * Search the world starting at the given coordinates for coordinates where the BiPredicate returns true.
 	 */
 	public static void search(World world, BlockPos pos, ArrayList<BlockPos> positionList, BiPredicate<World, BlockPos> include, int limit, boolean distanceLimit)
-	{
-		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
-		Set<BlockPos> set = new HashSet<BlockPos>();
-		stack.push(pos);
-		
-		while(stack.size() > 0 && set.size() < limit)
-		{
-			BlockPos blockPos = stack.pop();
-			
-			if(set.contains(blockPos))
-				continue;
-			
-			if(distanceLimit && tooFar(pos, blockPos))
-				return;
-			
-			if(include.test(world, blockPos))
-			{
-				set.add(blockPos);
-				
-				for(Direction direction : DIRECTIONS)
-				{
-					BlockPos offset = blockPos.offset(direction);
-					stack.push(offset);
-				}
-			}
-		}
-		
-		if(set.size() < limit)
-			positionList.addAll(set);
-	}
-	
-	/**
-	 * Search the world starting at the given coordinates for coordinates where the BiPredicate returns true.
-	 */
-	public static void search(WorldAccess world, BlockPos pos, ArrayList<BlockPos> positionList, BiPredicate<WorldAccess, BlockPos> include, int limit, boolean distanceLimit)
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		Set<BlockPos> set = new HashSet<BlockPos>();
@@ -279,6 +246,168 @@ public class BlockSearch
 		};
 		
 		BlockSearch.search(world, blockPos, positionList, include, edgeCase, limit, true);
+	}
+	
+	public static void energyConnectionSearch(World world, BlockPos pos)
+	{
+		BlockState blockState = world.getBlockState(pos);
+		
+		if(!(blockState.getBlock() instanceof EnergyBlock))
+		{
+			for(Direction direction : DIRECTIONS)
+			{
+				BlockPos offset = pos.offset(direction);
+				
+				if(world.getBlockState(offset).getBlock() instanceof EnergyBlock)
+					energyConnectionSearch(world, offset);
+			}
+			
+			return;
+		}
+		
+		// Repeat for pass through, output, and input sides of the initial block.
+		for(int i = 0; i < 3; i++)
+		{
+			Set<BlockPos> set = new HashSet<>();
+			Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+			Set<BlockPos> energyProducers = new HashSet<BlockPos>();
+			Set<BlockPos> energyConsumers = new HashSet<BlockPos>();
+			stack.push(pos);
+			
+			// Search for energy producers to update.
+			while(stack.size() > 0 && set.size() < MAX_VOLUME)
+			{
+				BlockPos blockPos = stack.pop();
+				blockState = world.getBlockState(blockPos);
+				set.add(blockPos);
+				
+				if(blockState.getBlock() instanceof EnergyBlock)
+				{
+					EnergyBlock energyBlock = (EnergyBlock) blockState.getBlock();
+					
+					for(Direction direction : DIRECTIONS)
+					{
+						BlockPos offset = blockPos.offset(direction);
+						
+						// Continue searching through a side if it is a pass through or an input of the starting block.
+						if(!set.contains(offset))
+						{
+							boolean continueSearch = false;
+							
+							if(blockPos.equals(pos))
+							{
+								if(i == 0)
+									continueSearch = energyBlock.isPassThrough(world, blockPos, blockState, direction);
+								else if(i == 1)
+									continueSearch = energyBlock.isOutput(world, blockPos, blockState, direction);
+								else if(i == 2)
+									continueSearch = energyBlock.isInput(world, blockPos, blockState, direction);
+									
+							}
+							else
+								continueSearch = energyBlock.isPassThrough(world, blockPos, blockState, direction);
+							
+							if(continueSearch)
+							{
+								BlockState offsetBlockState = world.getBlockState(offset);
+								
+								if(offsetBlockState.getBlock() instanceof EnergyBlock)
+								{
+									EnergyBlock offsetEnergyBlock = (EnergyBlock) offsetBlockState.getBlock();
+									
+									if(offsetEnergyBlock.isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
+										stack.push(offset);
+									
+									if(offsetEnergyBlock.isOutput(world, offset, offsetBlockState, direction.getOpposite()))
+										energyProducers.add(offset);
+									
+									if(offsetEnergyBlock.isInput(world, offset, offsetBlockState, direction.getOpposite()))
+										energyConsumers.add(offset);
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			for(BlockPos producerPos : energyProducers)
+			{
+				BlockEntity blockEntity = world.getBlockEntity(producerPos);
+				
+				if(blockEntity instanceof EnergyBlockEntity)
+				{
+					EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
+					energyBlockEntity.clearOutputs();
+					System.out.println("Updated: " + energyBlockEntity);
+					
+					for(BlockPos consumerBlockPos : energyConsumers)
+					{
+						energyBlockEntity.addOutput(consumerBlockPos);
+						System.out.println("        " + consumerBlockPos.toShortString());
+					}
+				}
+			}
+		}
+	}
+	
+	private static boolean energyProducerSearch(World world, BlockPos pos)
+	{
+		Set<BlockPos> set = new HashSet<>();
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> energyConsumers = new HashSet<BlockPos>();
+		stack.push(pos);
+		
+		// Search for energy producers to update.
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
+		{
+			BlockPos blockPos = stack.pop();
+			BlockState blockState = world.getBlockState(blockPos);
+			set.add(blockPos);
+			
+			if(blockState.getBlock() instanceof EnergyBlock)
+			{
+				EnergyBlock energyBlock = (EnergyBlock) blockState.getBlock();
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
+					
+					// Continue searching through a side if it is a pass through or an input of the starting block.
+					if(!set.contains(offset) && ((blockPos != pos && energyBlock.isPassThrough(world, blockPos, blockState, direction)) || (blockPos == pos && energyBlock.isOutput(world, blockPos, blockState, direction))))
+					{
+						BlockState offsetBlockState = world.getBlockState(offset);
+						
+						if(offsetBlockState.getBlock() instanceof EnergyBlock)
+						{
+							EnergyBlock offsetEnergyBlock = (EnergyBlock) offsetBlockState.getBlock();
+							
+							if(offsetEnergyBlock.isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
+								stack.push(offset);
+							
+							if(offsetEnergyBlock.isInput(world, offset, offsetBlockState, direction.getOpposite()))
+								energyConsumers.add(offset);
+						}
+					}
+				}
+			}
+		}
+		
+		BlockEntity blockEntity = world.getBlockEntity(pos);
+		
+		if(blockEntity instanceof EnergyBlockEntity)
+		{
+			EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
+			energyBlockEntity.clearOutputs();
+			System.out.println("Updated: " + energyBlockEntity);
+			
+			for(BlockPos consumerBlockPos : energyConsumers)
+			{
+				energyBlockEntity.addOutput(consumerBlockPos);
+				System.out.println("        " + consumerBlockPos.toShortString());
+			}
+		}
+		
+		return energyConsumers.size() > 0;
 	}
 	
 	private static boolean tooFar(BlockPos pos1, BlockPos pos2)

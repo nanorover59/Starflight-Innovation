@@ -22,11 +22,20 @@
       "space:ore_bauxite",
       "space:ore_sulfur",
       "space:ore_ilmenite",
-      "space:ore_hematite",
-      "minecraft:spring_lava",
+      "space:ore_hematite"
+    ],
+    [
       "minecraft:dripstone_cluster",
       "minecraft:large_dripstone",
-      "pointed_dripstone"
+      "pointed_dripstone" 
+    ],
+    [
+      "space:spring_lava",
+      "minecraft:underwater_magma"
+    ],
+    [
+      "space:freeze_water",
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

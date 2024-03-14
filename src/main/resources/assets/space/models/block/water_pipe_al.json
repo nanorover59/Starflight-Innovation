@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/water_pipe_al",
+    "side": "space:block/riveted_aluminum",
+    "top": "space:block/water_pipe_al"
+  }
+}

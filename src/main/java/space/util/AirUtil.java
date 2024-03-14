@@ -19,14 +19,14 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.AtmosphereGeneratorBlock;
-import space.block.OxygenPipeBlock;
+import space.block.FluidPipeBlock;
 import space.block.OxygenSensorBlock;
 import space.block.SealedDoorBlock;
 import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
-import space.block.entity.FluidContainerBlockEntity;
+import space.block.entity.FluidPipeBlockEntity;
 import space.block.entity.LeakBlockEntity;
-import space.block.entity.OxygenOutletValveBlockEntity;
+import space.block.entity.ValveBlockEntity;
 import space.planet.PlanetDimensionData;
 
 public class AirUtil
@@ -45,7 +45,7 @@ public class AirUtil
 		if(world.getBlockState(pos).getBlock() == StarflightBlocks.HABITABLE_AIR)
 			return 0.9;
 		
-		return data.isOrbit() ? 0.0 : data.getPressure();
+		return data.isOrbit() ? 0.0 : Math.min(data.getPressure(), 1.0);
 	}
 	
 	/**
@@ -303,7 +303,7 @@ public class AirUtil
 	{
 		BiPredicate<World, BlockPos> include = (w, p) -> {
 			BlockState blockState = world.getBlockState(p);
-			return blockState.getBlock() instanceof OxygenPipeBlock || blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE || blockState.getBlock() == activeBlock;
+			return blockState.getBlock() instanceof FluidPipeBlock || blockState.getBlock() == StarflightBlocks.VALVE || blockState.getBlock() == activeBlock;
 		};
 		
 		BlockSearch.search(world, position, checkList, include, BlockSearch.MAX_VOLUME, false);
@@ -316,17 +316,17 @@ public class AirUtil
 			
 			if(blockEntity != null)
 			{
-				if(blockState.getBlock() instanceof OxygenPipeBlock)
+				if(blockState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) blockState.getBlock()).getFluidType().getID() == FluidResourceType.OXYGEN.getID())
 				{
-					FluidContainerBlockEntity fluidContainerBlockEntity = (FluidContainerBlockEntity) blockEntity;
+					FluidPipeBlockEntity fluidContainerBlockEntity = (FluidPipeBlockEntity) blockEntity;
 					oxygen += fluidContainerBlockEntity.getStoredFluid();
 				}
-				else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
+				else if(blockState.getBlock() == StarflightBlocks.VALVE)
 				{
-					OxygenOutletValveBlockEntity oxygenOutletValveBlockEntity = (OxygenOutletValveBlockEntity) blockEntity;
+					ValveBlockEntity valveBlockEntity = (ValveBlockEntity) blockEntity;
 					
-					if(oxygenOutletValveBlockEntity.getFluidTankController() != null)
-						oxygen += oxygenOutletValveBlockEntity.getFluidTankController().getStoredFluid();
+					if(valveBlockEntity.getFluidTankController() != null && valveBlockEntity.getFluidTankController().getFluidType().getID() == FluidResourceType.OXYGEN.getID())
+						oxygen += valveBlockEntity.getFluidTankController().getStoredFluid();
 				}
 			}
 		}
@@ -343,9 +343,9 @@ public class AirUtil
 		{
 			BlockState blockState = world.getBlockState(pos);
 			
-			if(blockState.getBlock() instanceof OxygenPipeBlock)
+			if(blockState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) blockState.getBlock()).getFluidType().getID() == FluidResourceType.OXYGEN.getID())
 			{
-				FluidContainerBlockEntity blockEntity = (FluidContainerBlockEntity) world.getBlockEntity(pos);
+				FluidPipeBlockEntity blockEntity = (FluidPipeBlockEntity) world.getBlockEntity(pos);
 				
 				if(toUse < blockEntity.getStoredFluid())
 				{
@@ -358,11 +358,11 @@ public class AirUtil
 					blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
 				}
 			}
-			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_OUTLET_VALVE)
+			else if(blockState.getBlock() == StarflightBlocks.VALVE)
 			{
-				OxygenOutletValveBlockEntity blockEntity = (OxygenOutletValveBlockEntity) world.getBlockEntity(pos);
+				ValveBlockEntity blockEntity = (ValveBlockEntity) world.getBlockEntity(pos);
 				
-				if(blockEntity.getFluidTankController() != null)
+				if(blockEntity.getFluidTankController() != null && blockEntity.getFluidTankController().getFluidType().getID() == FluidResourceType.OXYGEN.getID())
 				{
 					if(toUse < blockEntity.getFluidTankController().getStoredFluid())
 					{

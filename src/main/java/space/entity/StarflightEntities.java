@@ -24,6 +24,7 @@ public class StarflightEntities
 	public static final EntityType<CeruleanEntity> CERULEAN = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<CeruleanEntity>) CeruleanEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.5f)).build();
 	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<AncientHumanoidEntity>) AncientHumanoidEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.8f)).build();
 	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarSpectreEntity>) SolarSpectreEntity::new).dimensions(EntityDimensions.changing(1.5f, 1.5f)).build();
+	public static final EntityType<StratofishEntity> STRATOFISH = FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, (EntityType.EntityFactory<StratofishEntity>) StratofishEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
 
 	// Entity Tags
 	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(RegistryKeys.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "no_oxygen"));
@@ -37,6 +38,7 @@ public class StarflightEntities
 		registerMobEntity(CERULEAN, "cerulean", CeruleanEntity.createCeruleanAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 		registerMobEntity(ANCIENT_HUMANOID, "ancient_humanoid", AncientHumanoidEntity.createZombieAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 		registerMobEntity(SOLAR_SPECTRE, "solar_spectre", SolarSpectreEntity.createSolarSpectreAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
+		registerMobEntity(STRATOFISH, "stratofish", StratofishEntity.createStratofishAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 	}
 
 	private static <T extends MobEntity> void registerMobEntity(EntityType<T> entityType, String name, DefaultAttributeContainer.Builder attributes, Location location, Heightmap.Type heightmap)

@@ -10,14 +10,12 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.block.entity.FluidTankInterfaceBlockEntity;
+import space.block.entity.ValveBlockEntity;
 import space.util.BlockSearch;
 import space.util.StarflightEffects;
 
@@ -41,13 +39,15 @@ public class FluidTankInsideBlock extends Block
     }
 	
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
-	{
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify)
+    {
+		BlockState neighborState = world.getBlockState(sourcePos);
+		
 		if(neighborState.getBlock() == Blocks.AIR)
 		{
-			BiPredicate<WorldAccess, BlockPos> include = (w, p) -> {
+			BiPredicate<World, BlockPos> include = (w, p) -> {
 				BlockState b = w.getBlockState(p);
-				return b.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE || b.getBlock() instanceof FluidTankControllerBlock || b.getBlock() instanceof FluidUtilityBlock;
+				return b.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE || b.getBlock() instanceof FluidTankControllerBlock || b.getBlock() instanceof ValveBlock;
 			};
 			
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();	
@@ -67,28 +67,24 @@ public class FluidTankInsideBlock extends Block
 						{
 							FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
 							
-							if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_PIPE_CAPACITY)
-								StarflightEffects.sendOutgas(world, pos, neighborPos, true);
+							if(fluidTankController.getStoredFluid() > fluidTankController.getFluidType().getStorageDensity() * 0.1)
+								StarflightEffects.sendOutgas(world, pos, sourcePos, true);
 							
-							if(fluidTankController.getStoredFluid() > StarflightBlocks.HYDROGEN_TANK_CAPACITY)
+							if(fluidTankController.getStoredFluid() > fluidTankController.getFluidType().getStorageDensity())
 								blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, World.ExplosionSourceType.BLOCK);
 							
-							fluidTankController.setActive(false);
 							fluidTankController.setStorageCapacity(0);
 							fluidTankController.setStoredFluid(0);
 							fluidTankController.setCenterOfMass(new BlockPos(0, 0, 0));
 						}
-						else if(blockEntity instanceof FluidTankInterfaceBlockEntity)
+						else if(blockEntity instanceof ValveBlockEntity)
 						{
-							FluidTankInterfaceBlockEntity fluidTankInterface = (FluidTankInterfaceBlockEntity) blockEntity;
-							fluidTankInterface.setActive(false);
+							ValveBlockEntity fluidTankInterface = (ValveBlockEntity) blockEntity;
 							fluidTankInterface.setControllerPosition(new BlockPos(0, 0, 0));
 						}
 					}
 				}
 			}
 		}
-		
-		return state;
 	}
 }

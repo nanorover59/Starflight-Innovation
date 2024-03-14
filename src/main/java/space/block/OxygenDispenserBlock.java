@@ -32,6 +32,7 @@ import space.item.OxygenTankItem;
 import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 import space.util.AirUtil;
+import space.util.FluidResourceType;
 import space.util.StarflightEffects;
 
 public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
@@ -139,9 +140,9 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	}
 
 	@Override
-	public String getFluidName()
+	public FluidResourceType getFluidType()
 	{
-		return "oxygen";
+		return FluidResourceType.OXYGEN;
 	}
 
 	@Override

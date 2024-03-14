@@ -1,7 +1,0 @@
-{
-  "parent": "minecraft:block/cube_column",
-  "textures": {
-    "end": "space:block/riveted_aluminum",
-    "side": "space:block/solar_hub_side"
-  }
-}

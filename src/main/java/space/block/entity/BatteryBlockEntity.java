@@ -1,5 +1,7 @@
 package space.block.entity;
 
+import java.util.ArrayList;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -12,14 +14,17 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.inventory.ImplementedInventory;
 import space.item.BatteryCellItem;
 import space.screen.BatteryScreenHandler;
 
-public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory
+public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory, EnergyBlockEntity
 {
 	private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
+	private ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
 	
 	public BatteryBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
@@ -44,39 +49,52 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		return new BatteryScreenHandler(syncId, playerInventory, this);
 	}
 	
-	public boolean canCharge()
+	@Override
+	public double getOutput()
 	{
-		if(this.inventory.size() == 0)
-			return false;
-		else
-		{
-			for(ItemStack stack : this.inventory)
-			{
-				if(!stack.isEmpty() && stack.getNbt().getDouble("charge") < ((BatteryCellItem) stack.getItem()).getMaxCharge())
-					return true;
-			}
-		}
-		
-		return false;
+		return ((EnergyBlock) getCachedState().getBlock()).getOutput() / world.getTickManager().getTickRate();
 	}
 	
-	public boolean hasAnyCharge()
+	@Override
+	public double getInput()
 	{
-		if(this.inventory.size() == 0)
-			return false;
-		else
-		{
-			for(ItemStack stack : this.inventory)
-			{
-				if(!stack.isEmpty() && stack.getNbt().getDouble("charge") > 0)
-					return true;
-			}
-		}
-		
-		return false;
+		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
 	}
 	
-	public void charge(double amount)
+	@Override
+	public double getEnergyStored()
+	{
+		double d = 0.0;
+		
+		for(ItemStack stack : this.inventory)
+		{
+			if(stack.isEmpty())
+				continue;
+			else
+				d += stack.getNbt().getDouble("charge");
+		}
+		
+		return d;
+	}
+
+	@Override
+	public double getEnergyCapacity()
+	{
+		double d = 0.0;
+		
+		for(ItemStack stack : this.inventory)
+		{
+			if(stack.isEmpty())
+				continue;
+			else
+				d += ((BatteryCellItem) stack.getItem()).getMaxCharge();
+		}
+		
+		return d;
+	}
+
+	@Override
+	public double changeEnergy(double amount)
 	{
 		int batteryCount = 0;
 		
@@ -92,7 +110,9 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		}
 		
 		if(batteryCount == 0)
-			return;
+			return 0;
+		
+		double fraction = amount / batteryCount;
 		
 		for(ItemStack stack : this.inventory)
 		{
@@ -102,84 +122,40 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 			double maxCharge = ((BatteryCellItem) stack.getItem()).getMaxCharge();
 			double previousCharge = stack.getNbt().getDouble("charge");
 			
-			if(previousCharge + (amount / batteryCount) >= maxCharge)
+			if(previousCharge + fraction > maxCharge)
+			{
 				stack.getNbt().putDouble("charge", maxCharge);
+				amount -= (previousCharge + fraction) - maxCharge;
+			}
+			else if(previousCharge + fraction < 0)
+			{
+				stack.getNbt().putDouble("charge", 0);
+				amount -= previousCharge + fraction;
+			}
 			else
-				stack.getNbt().putDouble("charge", previousCharge + (amount / batteryCount));
+				stack.getNbt().putDouble("charge", previousCharge + fraction);
 		}
 		
 		world.updateComparators(pos, world.getBlockState(pos).getBlock());
+		return amount;
 	}
-	
-	public void discharge(double amount)
-	{
-		int batteryCount = 0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty())
-				continue;
-			
-			double charge = stack.getNbt().getDouble("charge");
-			
-			if(charge > 0)
-				batteryCount++;
-		}
-		
-		if(batteryCount == 0)
-			return;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty())
-				continue;
-			
-			double previousCharge = stack.getNbt().getDouble("charge");
-			
-			if(previousCharge - (amount / batteryCount) <= 0)
-				stack.getNbt().putDouble("charge", 0.0);
-			else
-				stack.getNbt().putDouble("charge", previousCharge - (amount / batteryCount));
-		}
-		
-		world.updateComparators(pos, world.getBlockState(pos).getBlock());
-	}
-	
-	public double getChargeCapacity()
-	{
-		double d = 0.0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty())
-				continue;
-			else
-				d += ((BatteryCellItem) stack.getItem()).getMaxCharge();
-		}
-		
-		return d;
-	}
-	
-	public double getCharge()
-	{
-		double d = 0.0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty())
-				continue;
-			else
-				d += stack.getNbt().getDouble("charge");
-		}
-		
-		return d;
-	}
-	
+
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public ArrayList<BlockPos> getOutputs()
 	{
-		super.readNbt(nbt);
-		Inventories.readNbt(nbt, this.inventory);
+		return outputs;
+	}
+
+	@Override
+	public void addOutput(BlockPos output)
+	{
+		outputs.add(output);
+	}
+
+	@Override
+	public void clearOutputs()
+	{
+		outputs.clear();
 	}
 	
 	@Override
@@ -187,5 +163,19 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 	{
 		super.writeNbt(nbt);
 		Inventories.writeNbt(nbt, this.inventory);
+		EnergyBlockEntity.outputsToNBT(outputs, nbt);
+	}
+	
+	@Override
+	public void readNbt(NbtCompound nbt)
+	{
+		super.readNbt(nbt);
+		Inventories.readNbt(nbt, this.inventory);
+		outputs.addAll(EnergyBlockEntity.outputsFromNBT(nbt));
+	}
+	
+	public static void serverTick(World world, BlockPos pos, BlockState state, BatteryBlockEntity blockEntity)
+	{
+		EnergyBlockEntity.transferEnergy(blockEntity, 0.5);
 	}
 }

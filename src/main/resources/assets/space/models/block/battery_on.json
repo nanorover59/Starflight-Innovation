@@ -1,12 +1,8 @@
 {
-  "parent": "minecraft:block/orientable",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "up": "space:block/battery_output",
-    "down": "space:block/battery_input",
-    "north": "space:block/battery_output",
-    "east": "space:block/battery_side_on",
-    "south": "space:block/battery_input",
-    "west": "space:block/battery_side_on",
-    "particle": "space:block/battery_side_on"
+    "bottom": "space:block/battery_input",
+    "side": "space:block/battery_side_on",
+    "top": "space:block/battery_output"
   }
 }

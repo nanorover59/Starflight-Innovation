@@ -1,10 +1,11 @@
 package space.block;
 
-import java.util.ArrayList;
-
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
@@ -22,11 +23,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import space.energy.EnergyNet;
+import space.util.BlockSearch;
 
-public class EnergyCableBlock extends Block implements Waterloggable
+public class EnergyCableBlock extends Block implements EnergyBlock, Waterloggable
 {
+	public static final MapCodec<EnergyCableBlock> CODEC = EnergyCableBlock.createCodec(EnergyCableBlock::new);
 	public static final BooleanProperty NORTH = BooleanProperty.of("north");
 	public static final BooleanProperty EAST = BooleanProperty.of("east");
 	public static final BooleanProperty SOUTH = BooleanProperty.of("south");
@@ -42,6 +43,12 @@ public class EnergyCableBlock extends Block implements Waterloggable
 	}
 	
 	@Override
+	public MapCodec<? extends EnergyCableBlock> getCodec()
+	{
+		return CODEC;
+	}
+	
+	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager)
 	{
 		stateManager.add(NORTH);
@@ -51,6 +58,12 @@ public class EnergyCableBlock extends Block implements Waterloggable
 		stateManager.add(UP);
 		stateManager.add(DOWN);
 		stateManager.add(WATERLOGGED);
+	}
+	
+	@Override
+	public BlockRenderType getRenderType(BlockState state)
+	{
+		return BlockRenderType.MODEL;
 	}
 	
 	@Override
@@ -93,31 +106,6 @@ public class EnergyCableBlock extends Block implements Waterloggable
 	}
 	
 	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
-	{
-		for(Direction d : DIRECTIONS)
-			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
-		
-		world.setBlockState(pos, state);
-		
-		if(!world.isClient())
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
-		}
-	}
-	
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
-	{
-		if(!world.isClient())
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			EnergyNet.updateEnergyNodes(world, pos, checkList);
-		}
-	}
-	
-	@Override
 	@Nullable
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
@@ -127,15 +115,55 @@ public class EnergyCableBlock extends Block implements Waterloggable
 	}
 	
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
+	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		 if(state.get(WATERLOGGED).booleanValue())
-	            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+		int connections = 0;
 		
-		return updateStateForConnection(world, neighborPos, neighborState, state, direction);
+		for(Direction d : DIRECTIONS)
+		{
+			state = updateStateForConnection(world, pos, world.getBlockState(pos.offset(d)), state, d);
+			
+			if(isConnected(state, d))
+				connections++;
+		}
+		
+		world.setBlockState(pos, state);
+		
+		if(!world.isClient && connections > 1)
+			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
-	public static BlockState updateStateForConnection(WorldAccess world, BlockPos neighborPos, BlockState neighborState, BlockState initialState, Direction direction)
+	@Override
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
+	{
+		if(state.isOf(newState.getBlock()))
+			return;
+		
+		int connections = 0;
+		
+		for(Direction d : DIRECTIONS)
+		{
+			if(isConnected(state, d))
+				connections++;
+		}
+		
+		if(!world.isClient && connections > 1)
+			BlockSearch.energyConnectionSearch(world, pos);
+	}
+	
+	@Override
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify)
+    {
+		if(state.get(WATERLOGGED).booleanValue())
+            world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+		
+		for(Direction d : DIRECTIONS)
+			state = updateStateForConnection(world, pos, world.getBlockState(pos.offset(d)), state, d);
+		
+		world.setBlockState(pos, state);
+    }
+	
+	public BlockState updateStateForConnection(World world, BlockPos neighborPos, BlockState neighborState, BlockState initialState, Direction direction)
 	{
 		BlockState result = initialState;
 		
@@ -173,17 +201,7 @@ public class EnergyCableBlock extends Block implements Waterloggable
 		return result;
 	}
 	
-	public static boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		if(state.getBlock() instanceof EnergyBlock)
-			return ((EnergyBlock) state.getBlock()).canSideConnect(world, pos, state, direction.getOpposite());
-		else if(state.getBlock() instanceof BreakerSwitchBlock)
-			return direction == state.get(BreakerSwitchBlock.FACING) || direction == state.get(BreakerSwitchBlock.FACING).getOpposite();
-		else
-			return state.getBlock() instanceof EnergyCableBlock;
-	}
-	
-	public boolean isConnected(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean isConnected(BlockState state, Direction direction)
 	{
 		if((direction == Direction.NORTH && state.get(NORTH))
 		|| (direction == Direction.EAST && state.get(EAST))
@@ -194,5 +212,29 @@ public class EnergyCableBlock extends Block implements Waterloggable
 			return true;
 		
 		return false;
+	}
+	
+	public boolean canConnect(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		BlockPos offset = pos.offset(direction);
+		BlockState offsetState = world.getBlockState(pos.offset(direction));
+		
+		if(!(offsetState.getBlock() instanceof EnergyBlock))
+			return false;
+		
+		EnergyBlock energyBlock = (EnergyBlock) offsetState.getBlock();
+		return energyBlock.canConnectToCables(world, offset, offsetState, direction.getOpposite());
+	}
+	
+	@Override
+	public boolean isPassThrough(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return isConnected(state, direction);
+	}
+	
+	@Override
+	public boolean canConnectToCables(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return true;
 	}
 }

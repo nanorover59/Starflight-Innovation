@@ -18,47 +18,37 @@ import net.minecraft.entity.Entity;
 public class SolarSpectreEntityModel<T extends Entity> extends SinglePartEntityModel<T>
 {
 	private static final String FIN_NAME = "fin_";
-	private static final String WHISKER_NAME = "whisker_";
 	private final ModelPart root;
 	private final ArrayList<ModelPart> fins;
-	private final ArrayList<ModelPart> whiskers;
 
 	public SolarSpectreEntityModel(ModelPart root)
 	{
 		this.root = root;
 		this.fins = new ArrayList<ModelPart>();
-		this.whiskers = new ArrayList<ModelPart>();
 
 		for(int i = 0; i < 6; i++)
 			fins.add(root.getChild(FIN_NAME + i));
-
-		for(int i = 0; i < 4; i++)
-			whiskers.add(root.getChild(WHISKER_NAME + i));
 	}
 
 	public static TexturedModelData getTexturedModelData()
 	{
 		ModelData modelData = new ModelData();
 		ModelPartData modelPartData = modelData.getRoot();
-		float offset = -3.0f;
 		int i = 0;
-		modelPartData.addChild("core", ModelPartBuilder.create().uv(0, 0).cuboid(-3.0f, 0.0f, -12.0f, 6.0f, 6.0f, 24.0f, new Dilation(0.0f)), ModelTransform.pivot(0.0f, offset, 0.0f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 12).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, 6.0f + offset, 8.0f, 3.0543f, -0.6981f, -0.8727f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 0).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, 6.0f + offset, 8.0f, -3.0543f, -0.6981f, -2.2689f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 0).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, offset, 8.0f, 3.0543f, -0.6981f, 2.2689f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 12).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, offset, 8.0f, -3.0543f, -0.6981f, 0.8727f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 0).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, 3.0f + offset, 0.0f, -3.1416f, -0.7854f, 3.1416f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 12).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, 3.0f + offset, 0.0f, 3.1416f, -0.7854f, 0.0f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 24).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, 6.0f + offset, -4.0f, -3.0543f, -1.0472f, -2.618f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 36).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, 6.0f + offset, -4.0f, 3.0543f, -1.0472f, -0.5236f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 48).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, offset, -4.0f, -3.0543f, -1.0472f, 0.5236f));
-		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 60).cuboid(0.0f, -6.0f, -48.0f, 0.0f, 12.0f, 48.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, offset, -4.0f, 3.0543f, -1.0472f, 2.618f));
-		i = 0;
-		modelPartData.addChild(WHISKER_NAME + i++, ModelPartBuilder.create().uv(0, 30).cuboid(-12.0f, 0.0f, -2.0f, 12.0f, 0.0f, 4.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, offset, -8.0f, 1.4934f, -0.2443f, 0.7543f));
-		modelPartData.addChild(WHISKER_NAME + i++, ModelPartBuilder.create().uv(24, 30).cuboid(-12.0f, 0.0f, -2.0f, 12.0f, 0.0f, 4.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, offset, -8.0f, 1.6482f, -0.2443f, 2.3873f));
-		modelPartData.addChild(WHISKER_NAME + i++, ModelPartBuilder.create().uv(32, 0).cuboid(-12.0f, 0.0f, -2.0f, 12.0f, 0.0f, 4.0f, new Dilation(0.0f)), ModelTransform.of(-3.0f, 6.0f + offset, -8.0f, 1.4934f, -0.2443f, -0.7543f));
-		modelPartData.addChild(WHISKER_NAME + i++, ModelPartBuilder.create().uv(32, 4).cuboid(-12.0f, 0.0f, -2.0f, 12.0f, 0.0f, 4.0f, new Dilation(0.0f)), ModelTransform.of(3.0f, 6.0f + offset, -8.0f, 1.6482f, -0.2443f, -2.3873f));
-		return TexturedModelData.of(modelData, 128, 128);
+		modelPartData.addChild("core", ModelPartBuilder.create().uv(108, 108).cuboid(-3.0F, -3.0F, -10.0F, 6.0F, 6.0F, 20.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 0).cuboid(-64.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -3.0F, 10.0F, 0.0F, 0.3927F, 1.5708F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 16).mirrored().cuboid(0.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(0.0F, 3.0F, 10.0F, 0.0F, -0.3927F, 1.5708F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 128).cuboid(-32.0F, -2.0F, 0.0F, 32.0F, 4.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, 3.0F, -10.0F, 0.0F, 0.1745F, -0.3927F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(128, 0).mirrored().cuboid(0.0F, -2.0F, 0.0F, 32.0F, 4.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(3.0F, 3.0F, -10.0F, 0.0F, -0.1745F, 0.3927F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(128, 4).mirrored().cuboid(0.0F, -2.0F, 0.0F, 32.0F, 4.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(3.0F, -3.0F, -10.0F, 0.0F, -0.1745F, -0.3927F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(128, 8).cuboid(-32.0F, -2.0F, 0.0F, 32.0F, 4.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, -3.0F, -10.0F, 0.0F, 0.1745F, 0.3927F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 32).cuboid(-64.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, 3.0F, 0.0F, 0.0F, 0.1745F, -0.7854F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 48).mirrored().cuboid(0.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(3.0F, 0.0F, 10.0F, 0.0F, -0.3927F, 0.0F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 64).cuboid(-64.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, -3.0F, 0.0F, 0.0F, 0.1745F, 0.7854F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 80).mirrored().cuboid(0.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(3.0F, -3.0F, 0.0F, 0.0F, -0.1745F, -0.7854F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 96).cuboid(-64.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-3.0F, 0.0F, 10.0F, 0.0F, 0.3927F, 0.0F));
+		modelPartData.addChild(FIN_NAME + i++, ModelPartBuilder.create().uv(0, 112).mirrored().cuboid(0.0F, -8.0F, 0.0F, 64.0F, 16.0F, 0.0F, new Dilation(0.0F)).mirrored(false), ModelTransform.of(3.0F, 3.0F, 0.0F, 0.0F, -0.1745F, 0.7854F));
+		return TexturedModelData.of(modelData, 256, 256);
 	}
 
 	@Override

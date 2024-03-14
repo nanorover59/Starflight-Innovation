@@ -19,7 +19,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.entity.MovingCraftEntity;
-import space.util.QuaternionUtil;
 import space.vessel.MovingCraftBlockRenderData;
 import space.vessel.MovingCraftRenderList;
 
@@ -41,11 +40,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 			return;
 		
 		if(entity.clientQuaternionPrevious != null && entity.clientQuaternion != null)
-		{
-			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g);
-			
-			matrixStack.multiply(quaternion);
-		}
+			matrixStack.multiply(new Quaternionf(entity.clientQuaternionPrevious).slerp(entity.clientQuaternion, g));
 		else if(entity.clientQuaternion != null)
 			matrixStack.multiply(entity.clientQuaternion);
 		
@@ -57,7 +52,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getCraftYaw());
+			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getYaw());
 	}
 
 	@SuppressWarnings("deprecation")

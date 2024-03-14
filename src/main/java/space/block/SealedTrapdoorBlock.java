@@ -18,7 +18,7 @@ public class SealedTrapdoorBlock extends TrapdoorBlock
 {
 	public SealedTrapdoorBlock(Settings settings)
 	{
-		super(settings, BlockSetType.IRON);
+		super(BlockSetType.IRON, settings);
 	}
 	
 	@Override

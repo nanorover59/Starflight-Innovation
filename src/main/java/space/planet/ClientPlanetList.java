@@ -144,6 +144,7 @@ public class ClientPlanetList
 				clientPlanet.position = dynamicData.position();
 				clientPlanet.surfaceViewpoint = dynamicData.surfaceViewpoint();
 				clientPlanet.parkingOrbitViewpoint = dynamicData.parkingOrbitViewpoint();
+				clientPlanet.dVTransfer = dynamicData.dVTransfer();
 				clientPlanet.sunAngle = dynamicData.sunAngle();
 				clientPlanet.sunAngleOrbit = dynamicData.sunAngleOrbit();
 				clientPlanet.cloudRotation = dynamicData.cloudRotation();
@@ -232,6 +233,11 @@ public class ClientPlanetList
 	public static ClientPlanet getViewpointPlanet()
 	{
 		return viewpoint;
+	}
+	
+	public static PlanetDimensionData getViewpointDimensionData()
+	{
+		return viewpointDimensionDataBuffer;
 	}
 	
 	public static boolean isViewpointInOrbit()

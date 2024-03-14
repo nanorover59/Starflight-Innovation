@@ -50,7 +50,6 @@ public class Planet
 	private Vec3d surfaceViewpoint;
 	private Vec3d parkingOrbitViewpoint;
 	private int temperatureCategory;
-	private double surfacePressure;
 	private boolean simpleTexture;
 	private boolean drawClouds;
 	private double cloudRotation;
@@ -63,14 +62,13 @@ public class Planet
 	private PlanetDimensionData surface;
 	private PlanetDimensionData sky;
 	
-	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_, double surfacePressure_)
+	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_)
 	{
 		name = name_;
 		parentName = parentName_;
 		mass = mass_;
 		radius = radius_;
 		parkingOrbitRadius = radius + parkingOrbitRadius_;
-		surfacePressure = surfacePressure_;
 		surfaceGravity = ((G * mass) / (radius * radius) / ((G * EARTH_MASS) / (EARTH_RADIUS * EARTH_RADIUS)));
 		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(parkingOrbitRadius, 3.0));
 		position = new Vec3d(0.0, 0.0, 0.0);
@@ -428,7 +426,7 @@ public class Planet
 	 */
 	public int getTemperatureCategory(float skyAngle, boolean inOrbit)
 	{
-		if(temperatureCategory >= TEMPERATE && (inOrbit || surfacePressure < 0.01))
+		if(temperatureCategory >= TEMPERATE && (inOrbit || (getSurface() != null && getSurface().getPressure() < 0.01)))
 			return skyAngle < 0.25f || skyAngle > 0.75f ? HOT : COLD;
 			
 		return temperatureCategory;
@@ -648,7 +646,17 @@ public class Planet
 	 */
 	public double dVSurfaceToOrbit()
 	{
-		return (circularOrbitVelocity(parkingOrbitRadius) * 1.08) + (1000.0 * Math.pow(surfacePressure, 7.0 / 11.0));
+		double pressure = getSurface() != null ? getSurface().getPressure() : 0.0;
+		return (circularOrbitVelocity(parkingOrbitRadius) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
+	}
+	
+	/**
+	 * Calculate the delta-v needed to reach the parking orbit of this planet from its sky.
+	 */
+	public double dVSkyToOrbit()
+	{
+		double pressure = getSky() != null ? getSky().getPressure() : 0.0;
+		return (circularOrbitVelocity(parkingOrbitRadius) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
 	}
 	
 	/**
@@ -656,7 +664,7 @@ public class Planet
 	 */
 	public double dVOrbitToSurface()
 	{
-		if(surfacePressure < 0.001)
+		if(getSurface() != null && getSurface().getPressure() < 0.001)
 			return dVSurfaceToOrbit();
 		
 		return 500.0;

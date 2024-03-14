@@ -156,6 +156,20 @@ public class ClientPlanet implements Comparable<ClientPlanet>
 	}
 	
 	/**
+	 * Get the multiplier for solar panel power depending on distance to the sun and the presence of heavy cloud cover.
+	 */
+	public double getSolarMultiplier()
+	{
+		double d = getPosition().lengthSquared();
+		
+		if(d == 0.0)
+			return 0.0;
+		
+		d /= 2.238016e22; // Convert the distance from meters to astronomical units.
+		return (1.0 / d) * (hasCloudCover ? 0.5 : 1.0);
+	}
+	
+	/**
 	 * Return the size to render this planet object depending on its distance from the viewpoint.
 	 * The size is calculated as a factor of the size of the Sun viewed from Earth.
 	 */

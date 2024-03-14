@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "space:block/lever_block_on",
+    "side": "space:block/structural_aluminum"
+  }
+}

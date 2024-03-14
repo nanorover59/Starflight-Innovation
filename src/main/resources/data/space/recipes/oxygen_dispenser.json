@@ -10,7 +10,7 @@
             "item": "space:aluminum_ingot"
         },
         "b": {
-            "item": "space:oxygen_outlet_valve"
+            "item": "space:valve"
         },
         "c": {
             "item": "space:oxygen_pipe"

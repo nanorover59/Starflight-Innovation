@@ -98,7 +98,7 @@ public class MobSpawningUtil
 				continue;
 			
 			BlockPos pos = chunkPos.getStartPos().add(world.random.nextInt(16), 64, world.random.nextInt(16));
-			Box checkBox = new Box(new BlockPos(pos.getX() - 128, world.getBottomY(), pos.getZ() - 128), new BlockPos(pos.getX() + 128, world.getTopY(), pos.getZ() + 128));
+			Box checkBox = new Box(pos.getX() - 128, world.getBottomY(), pos.getZ() - 128, pos.getX() + 128, world.getTopY(), pos.getZ() + 128);
 			
 			if(world.getEntitiesByType(TypeFilter.instanceOf(SolarSpectreEntity.class), checkBox, Predicates.alwaysTrue()).size() > 4)
 				continue;
@@ -137,7 +137,7 @@ public class MobSpawningUtil
 				continue;
 			
 			BlockPos pos = chunkPos.getStartPos().add(world.random.nextInt(16), 256, world.random.nextInt(16));
-			Box checkBox = new Box(new BlockPos(pos.getX() - 32, world.getBottomY(), pos.getZ() - 32), new BlockPos(pos.getX() + 32, world.getTopY(), pos.getZ() + 32));
+			Box checkBox = new Box(pos.getX() - 32, world.getBottomY(), pos.getZ() - 32, pos.getX() + 32, world.getTopY(), pos.getZ() + 32);
 			
 			if(world.getEntitiesByType(TypeFilter.instanceOf(DustEntity.class), checkBox, Predicates.alwaysTrue()).size() > 1)
 				continue;

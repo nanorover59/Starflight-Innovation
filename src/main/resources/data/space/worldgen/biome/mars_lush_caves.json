@@ -22,10 +22,18 @@
       "space:ore_bauxite",
       "space:ore_sulfur",
       "space:ore_ilmenite",
-      "space:ore_hematite",
+      "space:ore_hematite"
+    ],
+    [
+      "space:spring_lava",
+      "minecraft:underwater_magma"
+    ],
+    [
       "space:mars_delta",
-      "space:mars_cave_moss",
-      "minecraft:spring_lava"
+      "space:mars_cave_vegetation"
+    ],
+    [
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

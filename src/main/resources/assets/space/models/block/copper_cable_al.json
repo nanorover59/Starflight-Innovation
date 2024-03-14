@@ -1,6 +1,8 @@
 {
-  "parent": "block/cube_all",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "all": "space:block/copper_cable_al"
+    "bottom": "space:block/copper_cable_al",
+    "side": "space:block/riveted_aluminum",
+    "top": "space:block/copper_cable_al"
   }
 }

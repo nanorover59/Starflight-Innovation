@@ -1,5 +1,6 @@
 package space.block.entity;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -32,16 +33,20 @@ import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.item.StarflightItems;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.StirlingEngineScreenHandler;
 
-public class StirlingEngineBlockEntity extends LockableContainerBlockEntity implements SidedInventory
+public class StirlingEngineBlockEntity extends LockableContainerBlockEntity implements SidedInventory, EnergyBlockEntity
 {
 	public DefaultedList<ItemStack> inventory;
+	private ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
+	private double energy;
 	int powerState;
 	int burnTime;
 	int fuelTime;
@@ -186,70 +191,6 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 		return this.burnTime > 0;
 	}
 
-	@Override
-	public void readNbt(NbtCompound nbt)
-	{
-		super.readNbt(nbt);
-		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-		Inventories.readNbt(nbt, this.inventory);
-		this.burnTime = nbt.getInt("burnTime");
-		this.fuelTime = nbt.getInt("fuelTime");
-	}
-
-	@Override
-	public void writeNbt(NbtCompound nbt)
-	{
-		super.writeNbt(nbt);
-		Inventories.writeNbt(nbt, this.inventory);
-		nbt.putInt("burnTime", this.burnTime);
-		nbt.putInt("fuelTime", this.fuelTime);
-	}
-
-	public static void serverTick(World world, BlockPos pos, BlockState state, StirlingEngineBlockEntity blockEntity)
-	{
-		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
-		boolean bl = blockEntity.isBurning();
-		
-		if(blockEntity.isBurning())
-		{
-			blockEntity.burnTime--;
-			blockEntity.powerState = 1;
-			world.markDirty(pos);
-		}
-		else
-			blockEntity.powerState = 0;
-		
-		if(!blockEntity.isBurning() && !itemStack.isEmpty())
-		{
-			int itemFuelTime = blockEntity.getFuelTime(itemStack);
-			
-			if(itemFuelTime > 0)
-			{
-				blockEntity.fuelTime = itemFuelTime;
-				blockEntity.burnTime = itemFuelTime;
-				
-				if(blockEntity.isBurning() && !itemStack.isEmpty())
-				{
-					Item item = itemStack.getItem();
-					itemStack.decrement(1);
-					
-					if(itemStack.isEmpty())
-					{
-						Item item2 = item.getRecipeRemainder();
-						blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
-					}
-				}
-			}
-		}
-
-		if(bl != blockEntity.isBurning())
-		{
-			state = (BlockState) state.with(AbstractFurnaceBlock.LIT, blockEntity.isBurning());
-			world.setBlockState(pos, state, Block.NOTIFY_ALL);
-			markDirty(world, pos, state);
-		}
-	}
-
 	protected int getFuelTime(ItemStack fuel)
 	{
 		if(world != null && !fuel.isIn(StarflightItems.NO_OXYGEN_FUEL_ITEM_TAG))
@@ -361,5 +302,125 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	public ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
 		return new StirlingEngineScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
+	}
+
+	@Override
+	public double getOutput()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getOutput() / world.getTickManager().getTickRate();
+	}
+	
+	@Override
+	public double getInput()
+	{
+		return 0.0;
+	}
+	
+	@Override
+	public double getEnergyStored()
+	{
+		return energy;
+	}
+
+	@Override
+	public double getEnergyCapacity()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+	}
+
+	@Override
+	public double changeEnergy(double amount)
+	{
+		double newEnergy = energy + amount;
+		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
+		return amount - (newEnergy - energy);
+	}
+
+	@Override
+	public ArrayList<BlockPos> getOutputs()
+	{
+		return outputs;
+	}
+
+	@Override
+	public void addOutput(BlockPos output)
+	{
+		outputs.add(output);
+	}
+
+	@Override
+	public void clearOutputs()
+	{
+		outputs.clear();
+	}
+	
+	@Override
+	public void writeNbt(NbtCompound nbt)
+	{
+		super.writeNbt(nbt);
+		Inventories.writeNbt(nbt, this.inventory);
+		EnergyBlockEntity.outputsToNBT(outputs, nbt);
+		nbt.putDouble("energy", this.energy);
+		nbt.putInt("burnTime", this.burnTime);
+		nbt.putInt("fuelTime", this.fuelTime);
+	}
+	
+	@Override
+	public void readNbt(NbtCompound nbt)
+	{
+		super.readNbt(nbt);
+		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
+		Inventories.readNbt(nbt, this.inventory);
+		this.outputs = EnergyBlockEntity.outputsFromNBT(nbt);
+		this.energy = nbt.getDouble("energy");
+		this.burnTime = nbt.getInt("burnTime");
+		this.fuelTime = nbt.getInt("fuelTime");
+	}
+	
+	public static void serverTick(World world, BlockPos pos, BlockState state, StirlingEngineBlockEntity blockEntity)
+	{
+		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
+		boolean bl = blockEntity.isBurning();
+		
+		if(blockEntity.isBurning())
+		{
+			blockEntity.burnTime--;
+			blockEntity.powerState = 1;
+			blockEntity.changeEnergy(blockEntity.getOutput()); // Generate 0.5kJ/tick
+			EnergyBlockEntity.transferEnergy(blockEntity, blockEntity.getOutput());
+			world.markDirty(pos);
+		}
+		else
+			blockEntity.powerState = 0;
+		
+		if(!blockEntity.isBurning() && !itemStack.isEmpty())
+		{
+			int itemFuelTime = blockEntity.getFuelTime(itemStack);
+			
+			if(itemFuelTime > 0)
+			{
+				blockEntity.fuelTime = itemFuelTime;
+				blockEntity.burnTime = itemFuelTime;
+				
+				if(blockEntity.isBurning() && !itemStack.isEmpty())
+				{
+					Item item = itemStack.getItem();
+					itemStack.decrement(1);
+					
+					if(itemStack.isEmpty())
+					{
+						Item item2 = item.getRecipeRemainder();
+						blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
+					}
+				}
+			}
+		}
+
+		if(bl != blockEntity.isBurning())
+		{
+			state = (BlockState) state.with(AbstractFurnaceBlock.LIT, blockEntity.isBurning());
+			world.setBlockState(pos, state, Block.NOTIFY_ALL);
+			markDirty(world, pos, state);
+		}
 	}
 }

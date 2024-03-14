@@ -1,10 +1,13 @@
 package space.vessel;
 
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.FluidState;
@@ -14,16 +17,14 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Properties;
-import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Direction.Axis;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import space.block.EnergyBlock;
 import space.block.FluidTankInsideBlock;
-import space.block.SolarHubBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
+import space.block.entity.RocketControllerBlockEntity;
 import space.util.BooleanByteUtil;
 
 public class MovingCraftBlockData
@@ -56,7 +57,7 @@ public class MovingCraftBlockData
 		BlockEntity blockEntity = world.getBlockEntity(blockPos);
 		NbtCompound blockEntityData = null;
 		
-		if(blockEntity != null)
+		if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
 			blockEntityData = blockEntity.createNbt();
 		
 		boolean[] sidesShowing = new boolean[6];
@@ -80,32 +81,32 @@ public class MovingCraftBlockData
 		double storedFluid = 0.0;
 		
 		if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-		{
 			storedFluid = ((FluidTankControllerBlockEntity) blockEntity).getStoredFluid();
-			((FluidTankControllerBlockEntity) blockEntity).setStoredFluid(0.0);
-		}
 		
 		return new MovingCraftBlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, world.isReceivingRedstonePower(blockPos), storedFluid);
 	}
 	
-	public void toBlock(World world, BlockPos centerPos, int rotationSteps)
+	public void toBlock(World world, BlockPos centerPos, Quaternionf quaternion)
 	{
-		if(blockState.getProperties().contains(HorizontalFacingBlock.FACING))
+		Matrix4f rotationMatrix = new Matrix4f().rotation(quaternion);
+		
+		if(blockState.getProperties().contains(Properties.FACING))
 		{
-			Direction direction = blockState.get(HorizontalFacingBlock.FACING);
+			Direction direction = blockState.get(Properties.FACING);
+			direction = Direction.transform(rotationMatrix, direction);
+			blockState = blockState.with(Properties.FACING, direction);
+		}
+		else if(blockState.getProperties().contains(Properties.HORIZONTAL_FACING))
+		{
+			Direction direction = blockState.get(Properties.HORIZONTAL_FACING);
+			direction = Direction.transform(rotationMatrix, direction);
 			
-			for(int i = 0; i < rotationSteps; i++)
-				direction = direction.rotateClockwise(Axis.Y);
-				
-			blockState = blockState.with(HorizontalFacingBlock.FACING, direction);
+			if(direction != Direction.UP && direction != Direction.DOWN)
+				blockState = blockState.with(Properties.HORIZONTAL_FACING, direction);
 		}
 		
-		BlockRotation rotation = BlockRotation.NONE;
-		
-		for(int i = 0; i < rotationSteps; i++)
-			rotation = rotation.rotate(BlockRotation.CLOCKWISE_90);
-		
-		BlockPos blockPos = centerPos.add(position.rotate(rotation));
+        Vector3f offset = new Vector3f(position.getX(), position.getY(), position.getZ()).rotate(quaternion);
+		BlockPos blockPos = centerPos.add(MathHelper.floor(offset.x()), MathHelper.floor(offset.y()), MathHelper.floor(offset.z()));
 		
 		// Do not overwrite existing solid world blocks.
 		if(world.getBlockState(blockPos).blocksMovement())
@@ -135,14 +136,6 @@ public class MovingCraftBlockData
 		
 		if(blockEntity != null && blockEntityData != null)
 			blockEntity.readNbt(blockEntityData);
-		
-		if(blockState.getBlock() instanceof EnergyBlock)
-		{
-			((EnergyBlock) blockState.getBlock()).addNode(world, blockPos);
-			
-			if(blockState.getBlock() instanceof SolarHubBlock)
-				SolarHubBlock.updateSolarPanels(world, blockPos);
-		}
 	}
 
 	public BlockState getBlockState()

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:water_pipe_al"
+    ]
+  },
+  "criteria": {
+    "has_water_pipe": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:water_pipe"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:water_pipe_al"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_water_pipe",
+      "has_the_recipe"
+    ]
+  ]
+}

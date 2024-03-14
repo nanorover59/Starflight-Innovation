@@ -2,6 +2,8 @@ package space.block;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -33,6 +35,7 @@ import space.block.entity.StorageCubeBlockEntity;
 
 public class StorageCubeBlock extends BlockWithEntity
 {
+	public static final MapCodec<StorageCubeBlock> CODEC = StorageCubeBlock.createCodec(StorageCubeBlock::new);
 	public static final DirectionProperty FACING = Properties.FACING;
 	public static final BooleanProperty OPEN = Properties.OPEN;
 
@@ -41,7 +44,25 @@ public class StorageCubeBlock extends BlockWithEntity
 		super(settings);
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.UP)).with(OPEN, false));
 	}
+	
+	@Override
+	public MapCodec<? extends StorageCubeBlock> getCodec()
+	{
+		return CODEC;
+	}
 
+	@Override
+	public BlockRenderType getRenderType(BlockState state)
+	{
+		return BlockRenderType.MODEL;
+	}
+	
+	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
+	{
+		builder.add(FACING, OPEN);
+	}
+	
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
@@ -87,18 +108,6 @@ public class StorageCubeBlock extends BlockWithEntity
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new StorageCubeBlockEntity(pos, state);
-	}
-
-	@Override
-	public BlockRenderType getRenderType(BlockState state)
-	{
-		return BlockRenderType.MODEL;
-	}
-	
-	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
-	{
-		builder.add(FACING, OPEN);
 	}
 
 	@Override

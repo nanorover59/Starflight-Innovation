@@ -70,7 +70,7 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 	{
 		super.writeNbt(nbt);
 		
-		if(!this.serializeLootTable(nbt))
+		if(!this.writeLootTable(nbt))
 			Inventories.writeNbt(nbt, this.inventory);
 	}
 
@@ -80,7 +80,7 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 		super.readNbt(nbt);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		
-		if(!this.deserializeLootTable(nbt))
+		if(!this.readLootTable(nbt))
 			Inventories.readNbt(nbt, this.inventory);
 	}
 
@@ -91,7 +91,7 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 	}
 
 	@Override
-	protected DefaultedList<ItemStack> getInvStackList()
+	protected DefaultedList<ItemStack> method_11282()
 	{
 		return this.inventory;
 	}

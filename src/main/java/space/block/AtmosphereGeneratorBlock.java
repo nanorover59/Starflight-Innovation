@@ -1,6 +1,12 @@
 package space.block;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.jetbrains.annotations.Nullable;
+
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
@@ -9,6 +15,9 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
@@ -21,17 +30,22 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
-import space.energy.EnergyNet;
+import space.client.StarflightModClient;
 import space.util.AirUtil;
+import space.util.BlockSearch;
+import space.util.FluidResourceType;
 import space.util.StarflightEffects;
 
 public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUtilityBlock, EnergyBlock
 {
+	public static final MapCodec<AtmosphereGeneratorBlock> CODEC = AtmosphereGeneratorBlock.createCodec(AtmosphereGeneratorBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty LIT = Properties.LIT;
 	
@@ -42,10 +56,38 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	}
 	
 	@Override
+	public MapCodec<? extends AtmosphereGeneratorBlock> getCodec()
+	{
+		return CODEC;
+	}
+	
+	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager)
 	{
 		stateManager.add(FACING);
 		stateManager.add(LIT);
+	}
+	
+	@Override
+    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+	{
+		ArrayList<Text> textList = new ArrayList<Text>();
+		DecimalFormat df = new DecimalFormat("#.##");
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		tooltip.addAll(textList);
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.multimeter.description_1"), Text.translatable("block.space.multimeter.description_2"));
+	}
+	
+	@Override
+	public double getInput()
+	{
+		return 8.0;
+	}
+	
+	@Override
+	public double getEnergyCapacity()
+	{
+		return 64.0;
 	}
 	
 	@Override
@@ -63,8 +105,15 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		if(!world.isClient())
-			addNode(world, pos);
+		if(!world.isClient)
+			BlockSearch.energyConnectionSearch(world, pos);
+	}
+	
+	@Override
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
+	{
+		if(!world.isClient && !state.isOf(newState.getBlock()))
+			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override
@@ -86,9 +135,9 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	}
 	
 	@Override
-	public String getFluidName()
+	public FluidResourceType getFluidType()
 	{
-		return "oxygen";
+		return FluidResourceType.OXYGEN;
 	}
 
 	@Override
@@ -155,34 +204,16 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 		else if(frontState.getBlock() == Blocks.AIR)
 			world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, false), Block.NOTIFY_ALL);
     }
-
+	
 	@Override
-	public double getPowerOutput(World world, BlockPos pos, BlockState state)
-	{
-		return 0;
-	}
-
-	@Override
-	public double getPowerDraw(World world, BlockPos pos, BlockState state)
-	{
-		return state.get(LIT) ? 5.0 : 0.0;
-	}
-
-	@Override
-	public boolean isSideInput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean isInput(World world, BlockPos pos, BlockState state, Direction direction)
 	{
 		return direction != (Direction) state.get(FACING);
 	}
-
-	@Override
-	public boolean isSideOutput(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
-		return false;
-	}
-
-	@Override
-	public void addNode(World world, BlockPos pos)
-	{
-		EnergyNet.addConsumer(world, pos);
+		return world.isClient ? null : validateTicker(type, StarflightBlocks.ATMOSPHERE_GENERATOR_BLOCK_ENTITY, AtmosphereGeneratorBlockEntity::serverTick);
 	}
 }

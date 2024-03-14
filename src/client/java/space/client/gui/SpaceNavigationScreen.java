@@ -89,6 +89,9 @@ public class SpaceNavigationScreen extends Screen
 		if(selectedPlanet == null)
 			selectedPlanet = ClientPlanetList.getByName("sol");
 		
+		if(selectedPlanet == null)
+			return;
+		
 		int x = width / 2;
 		int y = height / 2;
 		boolean mouseDown = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;

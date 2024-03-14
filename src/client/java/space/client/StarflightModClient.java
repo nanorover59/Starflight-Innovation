@@ -24,6 +24,7 @@ import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
@@ -41,7 +42,7 @@ import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
 import space.client.gui.ElectricFurnaceScreen;
-import space.client.gui.IceElectrolyzerScreen;
+import space.client.gui.ExtractorScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.SpaceNavigationScreen;
 import space.client.gui.StirlingEngineScreen;
@@ -51,17 +52,20 @@ import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
+import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.client.render.entity.model.SolarSpectreEntityModel;
+import space.client.render.entity.model.StratofishEntityModel;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
-import space.mixin.client.KeyBindingMixin;
+import space.mixin.client.KeyBindingInvokerMixin;
 import space.particle.StarflightParticleTypes;
 import space.planet.ClientPlanetList;
+import space.render.client.block.entity.WaterTankBlockEntityRenderer;
 import space.screen.StarflightScreens;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftRenderList;
@@ -88,6 +92,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
 	public static final EntityModelLayer MODEL_SOLAR_SPECTRE_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "solar_spectre"), "main");
+	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "stratofish"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
@@ -110,6 +115,7 @@ public class StarflightModClient implements ClientModInitializer
 		// Client side block properties.
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.ALUMINUM_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WALKWAY, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WATER_TANK, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
@@ -127,10 +133,13 @@ public class StarflightModClient implements ClientModInitializer
 			StarflightItems.SPACE_SUIT_BOOTS
 		);
 		
+		// Block Entity Rendering
+		BlockEntityRendererFactories.register(StarflightBlocks.WATER_TANK_BLOCK_ENTITY, WaterTankBlockEntityRenderer::new);
+		
 		// GUIs
 		HandledScreens.register(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
 		HandledScreens.register(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
-		HandledScreens.register(StarflightScreens.ICE_ELECTROLYZER_SCREEN_HANDLER, IceElectrolyzerScreen::new);
+		HandledScreens.register(StarflightScreens.EXTRACTOR_SCREEN_HANDLER, ExtractorScreen::new);
 		HandledScreens.register(StarflightScreens.BATTERY_SCREEN_HANDLER, BatteryScreen::new);
 		
 		// Entity Rendering
@@ -140,6 +149,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_SPECTRE, (context) -> new SolarSpectreEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
@@ -147,6 +157,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, StarflightModClient::getInnerArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_SOLAR_SPECTRE_LAYER, SolarSpectreEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();
@@ -167,6 +178,10 @@ public class StarflightModClient implements ClientModInitializer
 				int rollState = 0;
 				int pitchState = 0;
 				int yawState = 0;
+				int stopState = 0;
+				int xState = 0;
+				int yState = 0;
+				int zState = 0;
 				
 				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT))
 					throttleState++;
@@ -198,6 +213,27 @@ public class StarflightModClient implements ClientModInitializer
 				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_E))
 					yawState--;
 				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_J))
+					xState++;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_L))
+					xState--;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_I))
+					zState++;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_K))
+					zState--;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_U))
+					yState++;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_O))
+					yState--;
+				
+				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_SPACE))
+					stopState++;
+				
 				GameOptions o = client.options;
 				unpressKeys(o.dropKey, o.inventoryKey, o.sneakKey, o.sprintKey, o.forwardKey, o.backKey, o.leftKey, o.rightKey);
 				
@@ -206,6 +242,10 @@ public class StarflightModClient implements ClientModInitializer
 				buffer.writeInt(rollState);
 				buffer.writeInt(pitchState);
 				buffer.writeInt(yawState);
+				buffer.writeInt(xState);
+				buffer.writeInt(yState);
+				buffer.writeInt(zState);
+				buffer.writeInt(stopState);
 				ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
 			}
 			
@@ -273,7 +313,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static void unpressKeys(KeyBinding ... keyBindings)
 	{
 		for(KeyBinding key : keyBindings)
-			((KeyBindingMixin) key).callReset();
+			((KeyBindingInvokerMixin) key).callReset();
 	}
 	
 	public static void registerDimensionEffect(Identifier dimensionType, DimensionEffects dimensionEffect)

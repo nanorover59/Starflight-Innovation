@@ -1,5 +1,7 @@
 package space.block;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -8,10 +10,9 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
@@ -20,15 +21,16 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.entity.RocketControllerBlockEntity;
+import space.client.gui.RocketControllerScreen;
 
 public class RocketControllerBlock extends BlockWithEntity
 {
+	public static final MapCodec<RocketControllerBlock> CODEC = RocketControllerBlock.createCodec(RocketControllerBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 
 	protected RocketControllerBlock(Settings settings)
@@ -38,6 +40,12 @@ public class RocketControllerBlock extends BlockWithEntity
 	}
 
 	@Override
+	public MapCodec<? extends RocketControllerBlock> getCodec()
+	{
+		return CODEC;
+	}
+	
+	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new RocketControllerBlockEntity(pos, state);
@@ -46,7 +54,7 @@ public class RocketControllerBlock extends BlockWithEntity
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
-		return checkType(type, StarflightBlocks.ROCKET_CONTROLLER_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> RocketControllerBlockEntity.tick(world1, pos, blockState, blockEntity));
+		return validateTicker(type, StarflightBlocks.ROCKET_CONTROLLER_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> RocketControllerBlockEntity.tick(world1, pos, blockState, blockEntity));
 	}
 
 	@Override
@@ -58,42 +66,28 @@ public class RocketControllerBlock extends BlockWithEntity
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
-		if(!world.isClient)
+		if(world.isClient)
 		{
-			NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
-
-			if(screenHandlerFactory != null)
+			MinecraftClient minecraft = MinecraftClient.getInstance();
+        	minecraft.setScreen(new RocketControllerScreen(world.getRegistryKey().getValue().toString(), pos));
+		}
+		else
+		{
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
 			{
-				RocketControllerBlockEntity blockEntity = (RocketControllerBlockEntity) world.getBlockEntity(pos);
-				blockEntity.sendDisplayData((ServerPlayerEntity) player);
-				player.openHandledScreen(screenHandlerFactory);
+				RocketControllerBlockEntity rocketController = (RocketControllerBlockEntity) blockEntity;
+				rocketController.sendDisplayData((ServerPlayerEntity) player);
 			}
 		}
-
+		
 		return ActionResult.SUCCESS;
 	}
 
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
-	}
-
-	// This method will drop all items onto the ground when the block is broken.
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
-	{
-		if(!state.isOf(newState.getBlock()))
-		{
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-
-			if(blockEntity instanceof Inventory)
-			{
-				ItemScatterer.spawn(world, pos, (Inventory) blockEntity);
-				world.updateComparators(pos, this);
-			}
-
-			super.onStateReplaced(state, world, pos, newState, moved);
-		}
 	}
 
 	@Override

@@ -26,6 +26,7 @@ import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.entity.StarflightEntities;
 import space.materials.SpaceSuitArmorMaterial;
+import space.util.FluidResourceType;
 
 public class StarflightItems
 {
@@ -65,8 +66,8 @@ public class StarflightItems
 	public static final Item MULTIMETER = new MultimeterItem(new FabricItemSettings().maxCount(1));
 	public static final Item WRENCH = new WrenchItem(new FabricItemSettings().maxCount(1));
 	public static final Item GUIDE_BOOK = new GuideBookItem(new FabricItemSettings().maxCount(1));
-	public static final Item OXYGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), "oxygen");
-	public static final Item HYDROGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), "hydrogen");
+	public static final Item OXYGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), FluidResourceType.OXYGEN);
+	public static final Item HYDROGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), FluidResourceType.HYDROGEN);
 	public static final Item DIVIDER = new DividerItem(new FabricItemSettings().maxCount(1));
 	public static final Item WAND = new MovingCraftWandItem(new FabricItemSettings());
 	
@@ -84,6 +85,7 @@ public class StarflightItems
 	public static final Item DUST_SPAWN_EGG = new SpawnEggItem(StarflightEntities.DUST, 0xBE673F, 0x82342B, new Item.Settings());
 	public static final Item ANCIENT_HUMANOID_SPAWN_EGG = new SpawnEggItem(StarflightEntities.ANCIENT_HUMANOID, 0xF8F9F9, 0x154360, new Item.Settings());
 	public static final Item SOLAR_SPECTRE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SOLAR_SPECTRE, 0xE9F3FD, 0xC8E2F9, new Item.Settings());
+	public static final Item STRATOFISH_SPAWN_EGG = new SpawnEggItem(StarflightEntities.STRATOFISH, 0xFFE8FA, 0x7B6D9E, new Item.Settings());
 	
 	// Item Tags
 	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, new Identifier(StarflightMod.MOD_ID, "no_oxygen_fuel"));
@@ -140,6 +142,7 @@ public class StarflightItems
 		registerItem(DUST_SPAWN_EGG, "dust_spawn_egg");
 		registerItem(ANCIENT_HUMANOID_SPAWN_EGG, "ancient_humanoid_spawn_egg");
 		registerItem(SOLAR_SPECTRE_SPAWN_EGG, "solar_spectre_spawn_egg");
+		registerItem(STRATOFISH_SPAWN_EGG, "stratofish_spawn_egg");
 	}
 	
 	private static void registerItem(Item item, String name)

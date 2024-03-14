@@ -83,7 +83,7 @@ public class GuideBookScreen extends Screen
 	@Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta)
 	{
-        this.renderBackground(context);
+        this.renderBackground(context, mouseX, mouseY, delta);
         int x = (this.width - WIDTH) / 2 - 28;
         int y = (this.height - HEIGHT) / 2 + 16;
         context.drawTexture(BOOK_TEXTURE, x, y, 0, 0, WIDTH, 180, WIDTH, HEIGHT);
@@ -220,7 +220,7 @@ public class GuideBookScreen extends Screen
 		}
 
 		@Override
-		public void renderButton(DrawContext context, int mouseX, int mouseY, float delta)
+		public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta)
 		{
 			MinecraftClient minecraftClient = MinecraftClient.getInstance();
 			TextRenderer textRenderer = minecraftClient.textRenderer;

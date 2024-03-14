@@ -39,6 +39,7 @@ import space.StarflightMod;
 import space.client.render.StarflightSkyFeatures;
 import space.planet.ClientPlanet;
 import space.planet.ClientPlanetList;
+import space.planet.PlanetDimensionData;
 
 @Environment(value=EnvType.CLIENT)
 @Mixin(WorldRenderer.class)
@@ -67,11 +68,12 @@ public abstract class WorldRendererMixin
 	{
 		ArrayList<ClientPlanet> planetList = ClientPlanetList.getPlanets(true);
 		ClientPlanet viewpointPlanet = ClientPlanetList.getViewpointPlanet();
+		PlanetDimensionData dimensionData = ClientPlanetList.getViewpointDimensionData();
 		
-		if(viewpointPlanet != null)
+		if(viewpointPlanet != null && dimensionData != null)
 		{
-			boolean starrySky = ClientPlanetList.isViewpointInOrbit() || viewpointPlanet.surfacePressure < 0.001d;
-			boolean cloudySky = viewpointPlanet.hasCloudCover;
+			boolean starrySky = ClientPlanetList.isViewpointInOrbit() || dimensionData.getPressure() < 0.001d;
+			boolean cloudySky = dimensionData.isCloudy();
 			Vec3d viewpointPlanetPosition = viewpointPlanet.getPosition(tickDelta);
 			
 			// Find the position of the sun and background stars in angular coordinates.
@@ -83,7 +85,6 @@ public abstract class WorldRendererMixin
 			
 			// Setup for sky rendering.
 			BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
-			BackgroundRenderer.setFogBlack();
 			BackgroundRenderer.clearFog();
 			RenderSystem.depthMask(false);
 			RenderSystem.disableBlend();
@@ -111,8 +112,14 @@ public abstract class WorldRendererMixin
 			matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) phiViewpoint));
 			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(60.0f));
 			
-			float rainGradient = starrySky ? 0.0f : this.world.getRainGradient(tickDelta);
-			float s = cloudySky ? 0.0f : (1.0f - rainGradient);
+			float rainGradient = this.world.getRainGradient(tickDelta);
+			
+			if(starrySky)
+				rainGradient = 0.0f;
+			else if(cloudySky)
+				rainGradient = 1.0f;
+			
+			float s = 1.0f - rainGradient;
 			float starFactor = starrySky ? 1.0f : this.world.method_23787(tickDelta) * s * 2.0f;
 
 			if(starFactor > 0.0f)
@@ -252,7 +259,7 @@ public abstract class WorldRendererMixin
 		}
 	}
 	
-	@Inject(method = "renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/math/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "renderClouds(Lnet/minecraft/client/util/math/MatrixStack;Lorg/joml/Matrix4f;FDDD)V", at = @At("HEAD"), cancellable = true)
 	public void renderCloudsInject(MatrixStack matrices, Matrix4f projectionMatrix, float tickDelta, double d, double e, double f, CallbackInfo info)
 	{
 		if(ClientPlanetList.getViewpointPlanet() != null && (ClientPlanetList.isViewpointInOrbit() || !ClientPlanetList.getViewpointPlanet().hasLowClouds))

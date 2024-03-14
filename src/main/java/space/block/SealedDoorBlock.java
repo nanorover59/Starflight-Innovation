@@ -19,7 +19,7 @@ public class SealedDoorBlock extends DoorBlock
 {
 	public SealedDoorBlock(Settings settings)
 	{
-		super(settings, BlockSetType.IRON);
+		super(BlockSetType.IRON, settings);
 	}
 	
 	@Override

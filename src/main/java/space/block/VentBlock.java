@@ -18,6 +18,7 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.client.StarflightModClient;
+import space.util.FluidResourceType;
 import space.util.StarflightEffects;
 
 public class VentBlock extends Block implements FluidUtilityBlock
@@ -43,9 +44,9 @@ public class VentBlock extends Block implements FluidUtilityBlock
 	}
 
 	@Override
-	public String getFluidName()
+	public FluidResourceType getFluidType()
 	{
-		return "hydrogen/oxygen";
+		return FluidResourceType.ANY;
 	}
 
 	@Override

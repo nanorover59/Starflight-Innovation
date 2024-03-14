@@ -39,7 +39,6 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Arra
 					double mass = 0.0;
 					double radius = 0.0;
 					double parkingOrbitRadius = 0.0;
-					double surfacePressure = 0.0;
 					double periapsis = 0.0;
 					double apoapsis = 0.0;
 					double argumentOfPeriapsis = 0.0;
@@ -151,10 +150,8 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Arra
 								if(name1.equals("orbit"))
 									orbit = dimensionData;
 								else if(name1.equals("surface"))
-								{
 									surface = dimensionData;
-									surfacePressure = pressure;
-								} else if(name1.equals("sky"))
+								else if(name1.equals("sky"))
 									sky = dimensionData;
 							}
 
@@ -169,7 +166,7 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Arra
 
 					if(!name.equals("null"))
 					{
-						Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius, surfacePressure);
+						Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius);
 						planet.setOrbitParameters(periapsis, apoapsis, argumentOfPeriapsis, trueAnomaly, ascendingNode, inclination);
 						planet.setRotationParameters(isTidallyLocked, obliquity, rotationRate, 0.0);
 						planet.setDecorativeParameters(simpleTexture, drawClouds, cloudRotationRate);

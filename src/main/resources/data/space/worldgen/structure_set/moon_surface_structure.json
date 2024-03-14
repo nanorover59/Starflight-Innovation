@@ -1,14 +1,14 @@
 {
   "structures" : [
     {
-      "structure" : "space:moon_landing_site",
+      "structure" : "space:moon_small_structure",
       "weight" : 1
     }
   ],
   "placement" : {
     "salt" : 95426513,
-    "spacing" : 48,
-    "separation" : 32,
+    "spacing" : 16,
+    "separation" : 8,
     "type" : "minecraft:random_spread"
   }
 }

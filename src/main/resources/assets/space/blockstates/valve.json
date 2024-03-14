@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "mode=0": {
+      "model": "space:block/valve_in"
+    },
+    "mode=1": {
+      "model": "space:block/valve_out"
+    },
+    "mode=2": {
+      "model": "space:block/valve_off"
+    }
+  }
+}

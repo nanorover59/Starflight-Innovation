@@ -2,6 +2,8 @@ package space.block;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -22,9 +24,17 @@ import space.particle.StarflightParticleTypes;
 
 public class LeakBlock extends BlockWithEntity
 {
+	public static final MapCodec<LeakBlock> CODEC = LeakBlock.createCodec(LeakBlock::new);
+	
 	public LeakBlock(Settings settings)
 	{
 		super(settings);
+	}
+	
+	@Override
+	public MapCodec<? extends LeakBlock> getCodec()
+	{
+		return CODEC;
 	}
 
 	@Override
@@ -99,6 +109,6 @@ public class LeakBlock extends BlockWithEntity
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
-		return world.isClient ? null : checkType(type, StarflightBlocks.LEAK_BLOCK_ENTITY, LeakBlockEntity::serverTick);
+		return world.isClient ? null : validateTicker(type, StarflightBlocks.LEAK_BLOCK_ENTITY, LeakBlockEntity::serverTick);
 	}
 }

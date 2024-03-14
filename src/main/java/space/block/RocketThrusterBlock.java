@@ -37,6 +37,7 @@ import space.util.CubicHermiteSpline;
 public class RocketThrusterBlock extends Block implements Waterloggable
 {
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
+	private static final double ISP_MULTIPLIER = 2.0;
 	private final double standardGravity = 9.80665;
 	private final double massFlow;
 	private final double vacuumThrust;
@@ -54,12 +55,12 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
 		this.shape = shape;
 		this.vacuumThrust = vacuumThrust;
-		this.vacuumISP = vacuumISP;
-		this.atmISP = atmISP;
+		this.vacuumISP = vacuumISP * ISP_MULTIPLIER;
+		this.atmISP = atmISP * ISP_MULTIPLIER;
 		this.maxExitPressure = maxExitPressure;
-		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, vacuumISP, atmISP, -20.0, -1.0);
-		this.splineISP2 = new CubicHermiteSpline(1.0, maxExitPressure, atmISP, 0.0001, -1.0, -0.0001);
-		this.massFlow = vacuumThrust / (vacuumISP * standardGravity);
+		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, this.vacuumISP, this.atmISP, -20.0, -1.0);
+		this.splineISP2 = new CubicHermiteSpline(1.0, this.maxExitPressure, this.atmISP, 0.0001, -1.0, -0.0001);
+		this.massFlow = vacuumThrust / (this.vacuumISP * standardGravity);
 		this.atmThrust = atmISP * massFlow * standardGravity;
 	}
 	
@@ -192,7 +193,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		
 		if(client.player != null)
 		{
-			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(client.player.getWorld());
+			PlanetDimensionData data = PlanetList.viewpointDimensionData;
 			p = data == null ? 1.0 : data.getPressure();
 		}
 		

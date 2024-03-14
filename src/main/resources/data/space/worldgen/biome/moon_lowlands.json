@@ -1,5 +1,9 @@
 {
-  "carvers": {},
+  "carvers": {
+    "air": [
+      "space:moon_crater"
+    ]
+  },
   "downfall": 0.0,
   "effects": {
     "fog_color": 0,
@@ -22,8 +26,13 @@
       "space:ore_copper",
       "space:ore_bauxite",
       "space:ore_sulfur",
-      "space:ore_ilmenite",
-      "minecraft:spring_lava"
+      "space:ore_ilmenite"
+    ],
+    [
+      "space:spring_lava"
+    ],
+    [
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

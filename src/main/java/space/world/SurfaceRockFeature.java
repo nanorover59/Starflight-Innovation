@@ -4,7 +4,6 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -27,18 +26,9 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		BlockPos blockPos = context.getOrigin();
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(6 + random.nextInt(12)));
-		float chance = 0.25f;
+		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(8 + random.nextInt(8)));
 		
-		if(structureWorldAccess.getBiome(blockPos).isIn(StarflightWorldGeneration.MORE_SCATTER))
-			chance = 0.8f;
-		
-		// Random chance of generating a stray basalt rock.
-		if(random.nextInt(8) == 0)
-			blockState = Blocks.SMOOTH_BASALT.getDefaultState();
-		
-		// Skip generating at random or if the block found is not stone related.
-		if(random.nextFloat() > chance || !blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+		if(!blockState.isIn(BlockTags.PICKAXE_MINEABLE))
 			return true;
 		
 		while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
@@ -47,34 +37,33 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		if(blockPos.getY() <= structureWorldAccess.getBottomY() + 3)
 			return false;
 		
-		int rockSize = 2;
+		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 8.0f);
+		int u = Math.min(rockSize, 4);
 		
-		for(int i = 0; i < 8; i++)
+		for(int i = 0; i < rockSize; i++)
 		{
-			if(random.nextInt(4) == 0)
-				rockSize++;
-			else
-				break;
-		}
-		
-		for(int i = 0; i < 3 + (rockSize / 2); i++)
-		{
-			int j = random.nextInt(rockSize);
-			int k = random.nextInt(rockSize);
-			int l = random.nextInt(rockSize);
-			float f = (float) (j + k + l) * 0.333f + 0.5f;
+			int j = random.nextInt(u);
+			int k = random.nextInt(u);
+			int l = random.nextInt(u);
+			float f = (float) (j + k + l) * 0.333f;
 			
 			for(BlockPos blockPos2 : BlockPos.iterate(blockPos.add(-j, -k, -l), blockPos.add(j, k, l)))
 			{
-				if(!(blockPos2.getSquaredDistance(blockPos) <= (double) (f * f)))
+				if(blockPos2.getSquaredDistance(blockPos) > (double) (f * f))
 					continue;
 				
-				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NOTIFY_LISTENERS);
+				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
 			}
 			
-			blockPos = blockPos.add(random.nextInt(rockSize) - random.nextInt(rockSize), -random.nextInt(rockSize) / 2, random.nextInt(rockSize) - random.nextInt(rockSize));
+			blockPos = blockPos.add(-u + random.nextInt(u) + 1, -u + random.nextInt(u) + 1, -u + random.nextInt(u) + 1);
 		}
 		
 		return true;
+	}
+	
+	private float powerLaw(Random random, float alpha, float min, float max)
+	{
+		float u = random.nextFloat();
+		return (float) (Math.pow((Math.pow(max, 1.0f - alpha) - Math.pow(min, 1.0f - alpha)) * u + Math.pow(min, 1.0f - alpha), 1.0f / (1.0f - alpha)));
 	}
 }

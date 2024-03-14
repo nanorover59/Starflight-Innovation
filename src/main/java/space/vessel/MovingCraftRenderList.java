@@ -45,7 +45,7 @@ public class MovingCraftRenderList
 		boolean b = buffer.readBoolean(); // Load render data if the boolean value is true or remove render data if it is false.
 		UUID entityUUID = buffer.readUuid();
 		
-		if(b)
+		if(client.world != null && b)
 		{
 			int blockCount = buffer.readInt();
 			ArrayList<MovingCraftBlockRenderData> blockList = new ArrayList<MovingCraftBlockRenderData>();

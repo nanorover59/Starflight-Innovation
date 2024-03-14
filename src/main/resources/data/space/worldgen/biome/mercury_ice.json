@@ -1,5 +1,9 @@
 {
-  "carvers": {},
+  "carvers": {
+    "air": [
+      "space:mercury_crater"
+    ]
+  },
   "downfall": 0.0,
   "effects": {
     "fog_color": 0,
@@ -24,6 +28,12 @@
       "space:ore_sulfur",
       "space:ore_ilmenite",
       "minecraft:spring_lava"
+    ],
+    [
+      "space:spring_lava"
+    ],
+    [ 
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

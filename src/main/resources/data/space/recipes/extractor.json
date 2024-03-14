@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bcb",
+        "cac",
+        "bcb"
+    ],
+    "key": {
+        "a": {
+            "item": "space:electrolyzer"
+        },
+        "b": {
+            "item": "space:copper_cable"
+        },
+        "c": {
+            "item": "space:titanium_ingot"
+        }
+    },
+    "result": {
+        "item": "space:extractor",
+        "count": 1
+    }
+}

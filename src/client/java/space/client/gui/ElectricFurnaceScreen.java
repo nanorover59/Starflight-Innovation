@@ -35,7 +35,7 @@ public class ElectricFurnaceScreen extends HandledScreen<ScreenHandler>
 
 	public void render(DrawContext context, int mouseX, int mouseY, float delta)
 	{
-		renderBackground(context);
+		renderBackground(context, mouseX, mouseY, delta);
 		super.render(context, mouseX, mouseY, delta);
 		drawMouseoverTooltip(context, mouseX, mouseY);
 	}
@@ -44,12 +44,10 @@ public class ElectricFurnaceScreen extends HandledScreen<ScreenHandler>
 	{
 		int i = this.x;
 		int j = this.y;
-		context.drawTexture(TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
 		int l;
-
-		if(((ElectricFurnaceScreenHandler) this.handler).isBurning())
-			context.drawTexture(TEXTURE, i + 35, j + 36, 176, 0, 14, 14);
-
+		context.drawTexture(TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+		l = ((ElectricFurnaceScreenHandler) this.handler).getCharge();
+		context.drawTexture(TEXTURE, i + 35, j - l + 50, 176, 14 - l, 14, l);
 		l = ((ElectricFurnaceScreenHandler) this.handler).getCookProgress();
 		context.drawTexture(TEXTURE, i + 79, j + 34, 176, 14, l + 1, 16);
 	}

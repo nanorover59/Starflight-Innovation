@@ -49,8 +49,7 @@
           "depth" : 0,
           "offset" : 0
         }
-      },
-      {
+      }, {
         "biome" : "space:moon_rocks",
         "parameters" : {
           "temperature" : [ -0.75, 1 ],

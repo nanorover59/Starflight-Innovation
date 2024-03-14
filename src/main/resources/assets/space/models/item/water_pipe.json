@@ -1,0 +1,71 @@
+{
+    "__comment": "Model generated using MrCrayfish's Model Creator (https://mrcrayfish.com/tools?id=mc)",
+    "textures": {
+        "water_pipe": "space:block/water_pipe",
+        "particle": "#water_pipe"
+    },
+    "elements": [
+        {
+            "from": [ 0, 6, 6 ], 
+            "to": [ 6, 10, 10 ], 
+            "faces": {
+                "north": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "east": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "south": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "west": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "up": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "down": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] }
+            }
+        },
+        {
+            "from": [ 6, 6, 6 ], 
+            "to": [ 10, 10, 10 ], 
+            "faces": {
+                "north": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "east": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "south": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "west": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "up": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "down": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] }
+            }
+        },
+        {
+            "from": [ 10, 6, 6 ], 
+            "to": [ 16, 10, 10 ], 
+            "faces": {
+                "north": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "east": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "south": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "west": { "texture": "#water_pipe", "uv": [ 0, 0, 4, 4 ] },
+                "up": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] },
+                "down": { "texture": "#water_pipe", "uv": [ 4, 0, 10, 4 ] }
+            }
+        }
+    ],
+    "display": {
+		"thirdperson_righthand": {
+			"rotation": [75, 315, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.375, 0.375, 0.375]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 315, 0],
+			"translation": [0, 2.5, 0],
+			"scale": [0.4, 0.4, 0.4]
+		},
+		"ground": {
+			"translation": [0, 3, 0],
+			"scale": [0.25, 0.25, 0.25]
+		},
+		"gui": {
+			"rotation": [30, 45, 0],
+			"scale": [0.625, 0.625, 0.625]
+		},
+		"head": {
+			"rotation": [0, 180, 0]
+		},
+		"fixed": {
+			"rotation": [0, 180, 0]
+		}
+	}
+}

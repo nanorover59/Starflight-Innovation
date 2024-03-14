@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -37,6 +39,7 @@ import space.item.StarflightItems;
 
 public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 {
+	public static final MapCodec<TreeTapBlock> CODEC = TreeTapBlock.createCodec(TreeTapBlock::new);
 	public static final BooleanProperty RUBBER_SAP = BooleanProperty.of("rubber_sap");
 	protected static final VoxelShape NORTH_SHAPE = Block.createCuboidShape(4.0, 0.0, 8.0, 12.0, 11.0, 16.0);
 	protected static final VoxelShape SOUTH_SHAPE = Block.createCuboidShape(4.0, 0.0, 0.0, 12.0, 11.0, 8.0);
@@ -48,6 +51,12 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	{
 		super(settings);
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH).with(RUBBER_SAP, false).with(WATERLOGGED, false)));
+	}
+	
+	@Override
+	public MapCodec<? extends TreeTapBlock> getCodec()
+	{
+		return CODEC;
 	}
 	
 	@Override

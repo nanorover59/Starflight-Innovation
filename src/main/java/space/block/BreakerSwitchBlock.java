@@ -1,16 +1,12 @@
 package space.block;
 
-import java.util.ArrayList;
-
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
@@ -19,14 +15,12 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import space.block.entity.StorageCubeBlockEntity;
-import space.energy.EnergyNet;
+import space.util.BlockSearch;
 
-public class BreakerSwitchBlock extends Block
+public class BreakerSwitchBlock extends Block implements EnergyBlock
 {
 	public static final DirectionProperty FACING = Properties.FACING;
 	public static final BooleanProperty LIT = Properties.LIT;
@@ -42,31 +36,23 @@ public class BreakerSwitchBlock extends Block
 	{
 		return BlockRenderType.MODEL;
 	}
-	
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
-	{
-		if(state.isOf(newState.getBlock()))
-			return;
-
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-
-		if(blockEntity instanceof Inventory)
-		{
-			ItemScatterer.spawn(world, pos, (Inventory) ((Object) blockEntity));
-			world.updateComparators(pos, this);
-		}
-
-		super.onStateReplaced(state, world, pos, newState, moved);
-	}
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack)
 	{
-		BlockEntity blockEntity = world.getBlockEntity(pos);
+		if(world.isClient)
+			return;
+		
+		BlockSearch.energyConnectionSearch(world, pos);
+	}
+	
+	@Override
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
+	{
+		if(world.isClient)
+			return;
 
-		if(itemStack.hasCustomName() && blockEntity instanceof StorageCubeBlockEntity)
-			((StorageCubeBlockEntity) blockEntity).setCustomName(itemStack.getName());
+		BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override
@@ -75,9 +61,8 @@ public class BreakerSwitchBlock extends Block
 		if(world.isClient)
 			return;
 		
-		world.setBlockState(pos, state.with(LIT, world.isReceivingRedstonePower(pos)), Block.NOTIFY_LISTENERS);
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		EnergyNet.updateEnergyNodes(world, pos, checkList);
+		world.setBlockState(pos, state.with(LIT, world.isReceivingRedstonePower(pos)), Block.NOTIFY_ALL);
+		//BlockSearch.energyConnectionSearch(world, pos);
     }
 	
 	@Override
@@ -102,5 +87,17 @@ public class BreakerSwitchBlock extends Block
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite());
+	}
+	
+	@Override
+	public boolean isPassThrough(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return state.get(LIT) && (direction == state.get(FACING) || direction == state.get(FACING).getOpposite());
+	}
+	
+	@Override
+	public boolean canConnectToCables(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return direction == state.get(FACING) || direction == state.get(FACING).getOpposite();
 	}
 }

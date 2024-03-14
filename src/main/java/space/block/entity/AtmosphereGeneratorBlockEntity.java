@@ -1,5 +1,7 @@
 package space.block.entity;
 
+import java.util.ArrayList;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -7,17 +9,17 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 import space.block.AtmosphereGeneratorBlock;
+import space.block.EnergyBlock;
 import space.block.HabitableAirBlock;
 import space.block.StarflightBlocks;
-import space.energy.EnergyNet;
-import space.energy.EnergyNode;
 
-public class AtmosphereGeneratorBlockEntity extends BlockEntity implements PoweredBlockEntity
+public class AtmosphereGeneratorBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
-	private int powerState;
+	private double energy;
 	
 	public AtmosphereGeneratorBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
@@ -25,63 +27,88 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Power
 	}
 	
 	@Override
-	public void setPowerState(int i)
+	public double getOutput()
 	{
-		powerState = i;
-		
-		if(i == 0)
-		{
-			BlockState state = world.getBlockState(pos);
-			Direction direction = state.get(AtmosphereGeneratorBlock.FACING);
-			BlockPos frontPos = pos.offset(direction);
-			BlockState frontState = world.getBlockState(frontPos);
-			
-			if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR && !frontState.get(HabitableAirBlock.UNSTABLE))
-			{
-				EnergyNode consumer = EnergyNet.getConsumer(pos, world.getRegistryKey());
-				boolean producersLoaded = true; // Avoid powering off the atmosphere generator because sources are unloaded.
-				
-				for(EnergyNode producer : consumer.getInputs())
-				{
-					ChunkPos chunkPos = new ChunkPos(producer.getPosition());
-					
-					if(!world.isChunkLoaded(chunkPos.x, chunkPos.z))
-					{
-						producersLoaded = false;
-						break;
-					}
-				}
-				
-				if(producersLoaded)
-				{
-					HabitableAirBlock.setUnstable(world, frontPos, frontState);
-					MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
-					
-					for(PlayerEntity player : world.getPlayers())
-					{
-			            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
-			            	player.sendMessage(text, true);
-			        }
-				}
-			}
-		}
+		return 0.0;
 	}
 	
 	@Override
-	public int getPowerState()
+	public double getInput()
 	{
-		return powerState;
+		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
+	}
+	
+	@Override
+	public double getEnergyStored()
+	{
+		return energy;
+	}
+
+	@Override
+	public double getEnergyCapacity()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+	}
+
+	@Override
+	public double changeEnergy(double amount)
+	{
+		double newEnergy = energy + amount;
+		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
+		return amount - (newEnergy - energy);
+	}
+
+	@Override
+	public ArrayList<BlockPos> getOutputs()
+	{
+		return null;
+	}
+
+	@Override
+	public void addOutput(BlockPos output)
+	{
+	}
+
+	@Override
+	public void clearOutputs()
+	{
+	}
+	
+	@Override
+	protected void writeNbt(NbtCompound nbt)
+	{
+		super.writeNbt(nbt);
+		nbt.putDouble("energy", this.energy);
 	}
 	
 	@Override
 	public void readNbt(NbtCompound nbt)
 	{
 		super.readNbt(nbt);
+		this.energy = nbt.getDouble("energy");
 	}
-
-	@Override
-	protected void writeNbt(NbtCompound nbt)
+	
+	public static void serverTick(World world, BlockPos pos, BlockState state, AtmosphereGeneratorBlockEntity blockEntity)
 	{
-		super.writeNbt(nbt);
+		Direction direction = state.get(AtmosphereGeneratorBlock.FACING);
+		BlockPos frontPos = pos.offset(direction);
+		BlockState frontState = world.getBlockState(frontPos);
+		
+		if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)
+		{
+			blockEntity.changeEnergy(-0.125);
+		
+			if(blockEntity.energy == 0 && !frontState.get(HabitableAirBlock.UNSTABLE))
+			{
+				HabitableAirBlock.setUnstable(world, frontPos, frontState);
+				MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
+				
+				for(PlayerEntity player : world.getPlayers())
+				{
+		            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
+		            	player.sendMessage(text, true);
+		        }
+			}
+		}
 	}
 }

@@ -1,0 +1,91 @@
+{
+  "type": "minecraft:vegetation_patch",
+  "config": {
+    "surface": "floor",
+    "depth": 3,
+    "vertical_range": 2,
+    "extra_bottom_block_chance": 0.8,
+    "extra_edge_column_chance": 0.7,
+    "vegetation_chance": 0.25,
+    "xz_radius": {
+      "type": "minecraft:uniform",
+      "value": {
+        "min_inclusive": 4,
+        "max_inclusive": 7
+      }
+    },
+    "replaceable": "#minecraft:base_stone_overworld",
+    "ground_state": {
+      "type": "minecraft:simple_state_provider",
+      "state": {
+        "Name": "minecraft:mud"
+      }
+    },
+    "vegetation_feature": {
+      "feature": {
+        "type": "minecraft:random_selector",
+        "config": {
+          "features": [
+            {
+              "chance": 0.25,
+              "feature": {
+                "feature": {
+                  "type": "minecraft:block_column",
+                  "config": {
+                    "direction": "up",
+                    "allowed_placement": {
+                      "type": "minecraft:true"
+                    },
+                    "prioritize_tip": false,
+                    "layers": [
+                      {
+                        "height": {
+                          "type": "minecraft:biased_to_bottom",
+                          "value": {
+                            "min_inclusive": 0,
+                            "max_inclusive": 4
+                          }
+                        },
+                        "provider": {
+                          "type": "minecraft:simple_state_provider",
+                          "state": {
+                            "Name": "space:lycophyte_stem"
+                          }
+                        }
+                      },
+                      {
+                        "height": 1,
+                        "provider": {
+                          "type": "minecraft:simple_state_provider",
+                          "state": {
+                            "Name": "space:lycophyte_top"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                },
+                "placement": []
+              }
+            }
+          ],
+          "default": {
+            "feature": {
+              "type": "minecraft:simple_block",
+              "config": {
+                "to_place": {
+                  "type": "minecraft:simple_state_provider",
+                  "state": {
+                    "Name": "space:mars_moss_carpet"
+                  }
+                }
+              }
+            },
+            "placement": []
+          }
+        }
+      },
+      "placement": []
+    }
+  }
+}

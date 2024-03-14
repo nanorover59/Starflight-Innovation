@@ -1,12 +1,23 @@
 package space.block;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
+
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -15,16 +26,20 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import space.block.entity.SolarPanelBlockEntity;
+import space.client.StarflightModClient;
+import space.util.BlockSearch;
 
-public class SolarPanelBlock extends Block implements Waterloggable
+public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, EnergyBlock
 {
-	public static double NOMINAL_OUTPUT = 2.5;
+	public static final MapCodec<SolarPanelBlock> CODEC = SolarPanelBlock.createCodec(SolarPanelBlock::new);
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
 	
@@ -35,9 +50,37 @@ public class SolarPanelBlock extends Block implements Waterloggable
 	}
 	
 	@Override
+	public MapCodec<? extends SolarPanelBlock> getCodec()
+	{
+		return CODEC;
+	}
+	
+	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
 	{
 		builder.add(WATERLOGGED);
+	}
+	
+	@Override
+    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+	{
+		ArrayList<Text> textList = new ArrayList<Text>();
+		DecimalFormat df = new DecimalFormat("#.##");
+		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.solar_panel.description"));
+		tooltip.addAll(textList);
+	}
+	
+	@Override
+	public double getOutput()
+	{
+		return 4.0;
+	}
+	
+	@Override
+	public double getEnergyCapacity()
+	{
+		return 16.0;
 	}
 
 	@Override
@@ -90,23 +133,54 @@ public class SolarPanelBlock extends Block implements Waterloggable
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		if(!world.isClient())
-			SolarHubBlock.updateSolarPanels(world, pos);
+		if(!world.isClient)
+			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		if(!world.isClient())
-			SolarHubBlock.updateSolarPanels(world, pos);
+		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
+			world.removeBlockEntity(pos);
+		
+		if(!world.isClient)
+			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
-	{
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify)
+    {
 		if(state.get(WATERLOGGED).booleanValue())
 			world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
+    }
+	
+	@Override
+	public boolean isOutput(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return direction != Direction.UP;
+	}
 
-		return state;
+	@Override
+	public boolean isInput(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return false;
+	}
+	
+	@Override
+	public boolean isPassThrough(World world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return direction != Direction.UP;
+	}
+	
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
+	{
+		return new SolarPanelBlockEntity(pos, state);
+	}
+	
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
+	{
+		return world.isClient ? null : validateTicker(type, StarflightBlocks.SOLAR_PANEL_BLOCK_ENTITY, SolarPanelBlockEntity::serverTick);
 	}
 }

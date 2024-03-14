@@ -233,7 +233,7 @@ public abstract class LivingEntityMixin extends Entity
 							BlockPos pos = thisEntity.getBlockPos().add((int) vxz.getX(), 0, (int) vxz.getZ());
 							VoxelShape shape = this.getWorld().getBlockState(pos).getCollisionShape(this.getWorld(), pos);
 							
-							if(!shape.isEmpty() && shape.getBoundingBox().getYLength() > thisEntity.getStepHeight() && !this.getWorld().getBlockState(pos.up((int) (1.0 / gravity))).blocksMovement())
+							if(!shape.isEmpty() && shape.getBoundingBox().getLengthY() > thisEntity.getStepHeight() && !this.getWorld().getBlockState(pos.up((int) (1.0 / gravity))).blocksMovement())
 							{
 								thisEntity.addVelocity(0.0, 0.4, 0.0);
 								jumpTime = 40;

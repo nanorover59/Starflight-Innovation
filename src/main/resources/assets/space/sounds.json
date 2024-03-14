@@ -6,6 +6,13 @@
       "space:current1"
     ]
   },
+  "wrench": {
+    "subtitle": "subtitles.space.wrench",
+    "sounds": [
+      "space:wrench0",
+      "space:wrench1"
+    ]
+  },
   "storage_cube": {
     "subtitle": "subtitles.space.storage_cube",
     "sounds": [

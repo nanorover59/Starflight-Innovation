@@ -6,6 +6,8 @@ import java.util.function.BiPredicate;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -23,21 +25,35 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.block.entity.FluidTankInterfaceBlockEntity;
+import space.block.entity.ValveBlockEntity;
 import space.client.StarflightModClient;
 import space.util.BlockSearch;
+import space.util.FluidResourceType;
 import space.util.StarflightEffects;
 
 public class FluidTankControllerBlock extends BlockWithEntity
 {
-	double capacity;
+	public static final MapCodec<FluidTankControllerBlock> CODEC = FluidTankControllerBlock.createCodec(FluidTankControllerBlock::new);
+	private final FluidResourceType fluid;
+	private final double capacity;
 	
-	public FluidTankControllerBlock(Settings settings, double fluidTankCapacity)
+	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid)
 	{
 		super(settings);
-		this.capacity = fluidTankCapacity;
+		this.fluid = fluid;
+		this.capacity = fluid.getStorageDensity();
+	}
+	
+	public FluidTankControllerBlock(Settings settings)
+	{
+		this(settings, FluidResourceType.WATER);
+	}
+	
+	@Override
+	public MapCodec<? extends FluidTankControllerBlock> getCodec()
+	{
+		return CODEC;
 	}
 	
 	@Override
@@ -50,12 +66,6 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.MODEL;
-	}
-
-	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
-	{
-		return null;
 	}
 
 	@Override
@@ -90,9 +100,9 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			{
 				FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
 
-				if(!fluidTankController.isActive())
+				if(fluidTankController.getStorageCapacity() == 0)
 				{
-					int result = initializeFluidTank(world, pos, fluidTankController.getFluidName(), capacity, fluidTankController);
+					int result = initializeFluidTank(world, pos, fluidTankController.getFluidType(), capacity, fluidTankController);
 					MutableText text = Text.translatable("");
 					
 					if(result < 4)
@@ -109,12 +119,23 @@ public class FluidTankControllerBlock extends BlockWithEntity
 		return ActionResult.PASS;
 	}
 	
+	public FluidResourceType getFluidType()
+	{
+		return fluid;
+	}
+	
 	public int initializeFluidTank(World world, BlockPos position, FluidTankControllerBlockEntity fluidTankController)
 	{
-		return 0;
+		return initializeFluidTank(world, position, fluid, capacity, fluidTankController);
+	}
+	
+	@Override
+	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
+	{
+		return new FluidTankControllerBlockEntity(pos, state);
 	}
 
-	protected static int initializeFluidTank(World world, BlockPos position, String fluidName, double capacity, FluidTankControllerBlockEntity fluidTankController)
+	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
@@ -125,7 +146,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
 			ArrayList<BlockPos> actionList = new ArrayList<BlockPos>(); // List of all fluid tank controller and interface blocks found.
 			
-			BiPredicate<WorldAccess, BlockPos> include = (w, p) -> {
+			BiPredicate<World, BlockPos> include = (w, p) -> {
 				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
 			};
 			
@@ -143,7 +164,6 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					if(world.getBlockState(p).isAir())
 					{
 						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
-						fluidTankController.setStorageCapacity(fluidTankController.getStorageCapacity() + capacity);
 						cx += p.getX();
 						cy += p.getY();
 						cz += p.getZ();
@@ -154,7 +174,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 							BlockPos offset = p.offset(direction1);
 							BlockEntity blockEntity = world.getBlockEntity(offset);
 
-							if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof FluidTankInterfaceBlockEntity))
+							if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof ValveBlockEntity))
 								actionList.add(offset);
 						}
 					}
@@ -164,9 +184,8 @@ public class FluidTankControllerBlock extends BlockWithEntity
 				cy /= count;
 				cz /= count;
 				
-				// Check for excess fluid tank controllers and a minimum of one inlet and one outlet valve.
-				boolean inlet = false;
-				boolean outlet = false;
+				// Check for excess fluid tank controllers and a minimum of one interface valve.
+				boolean valve = false;
 				
 				for(BlockPos p : actionList)
 				{
@@ -177,33 +196,29 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					
 					if(blockState.getBlock() instanceof FluidTankControllerBlock)
 						return 2;
-					if(blockState.getBlock().getName().getString().toLowerCase().contains("inlet"))
-						inlet = true;
-					else if(blockState.getBlock().getName().getString().toLowerCase().contains("outlet"))
-						outlet = true;
+					if(blockState.getBlock() instanceof ValveBlock)
+						valve = true;
 				}
 				
-				if(!inlet || !outlet)
+				if(!valve)
 					return 3;
-				
-				// Activate inlet and outlet valves.
+
 				for(BlockPos p : actionList)
 				{
 					if(p.equals(position))
 						continue;
 
 					BlockEntity blockEntityAction = world.getBlockEntity(p);
-					
-					if(blockEntityAction instanceof FluidTankInterfaceBlockEntity && ((FluidTankInterfaceBlockEntity) blockEntityAction).getFluidName() == fluidName)
+
+					if(blockEntityAction instanceof ValveBlockEntity)
 					{
-						FluidTankInterfaceBlockEntity fluidTankInterface = (FluidTankInterfaceBlockEntity) blockEntityAction;
-						fluidTankInterface.setActive(true);
+						ValveBlockEntity fluidTankInterface = (ValveBlockEntity) blockEntityAction;
 						fluidTankInterface.setControllerPosition(position);
 					}
 				}
 				
+				fluidTankController.setStorageCapacity(capacity * count);
 				fluidTankController.setCenterOfMass(new BlockPos((int) cx, (int) cy, (int) cz));
-				fluidTankController.setActive(true);
 				valid = true;
 			}
 		}

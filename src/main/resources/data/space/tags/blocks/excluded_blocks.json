@@ -1,13 +1,13 @@
 {
     "replace": false,
     "values": [
-        "minecraft:dirt",
         "minecraft:grass_block",
+        "minecraft:dirt",
         "minecraft:mycelium",
         "minecraft:sand",
         "minecraft:red_sand",
         "minecraft:gravel",
-        "minecraft:grass",
+        "minecraft:tall_grass",
         "minecraft:fern",
         "minecraft:ice",
         "minecraft:water",

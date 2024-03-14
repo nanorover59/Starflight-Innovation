@@ -4,9 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -16,14 +14,12 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 
 public class FrameBlock extends Block implements Waterloggable
 {
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 16.0, 15.99);
 
 	public FrameBlock(AbstractBlock.Settings settings)
 	{
@@ -36,34 +32,20 @@ public class FrameBlock extends Block implements Waterloggable
 	{
 		builder.add(WATERLOGGED);
 	}
-
-	@Override
-	public BlockRenderType getRenderType(BlockState state)
-	{
-		return BlockRenderType.MODEL;
-	}
 	
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
-	{
-		return SHAPE;
-	}
-
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
-	{
-		return SHAPE;
-	}
-	
-	@Override
-	public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos)
-	{
-		return SHAPE;
-	}
-
 	@Override
 	public boolean isTransparent(BlockState state, BlockView world, BlockPos pos)
 	{
 		return !(Boolean) state.get(WATERLOGGED);
+	}
+	
+	@Override
+	public boolean isSideInvisible(BlockState state, BlockState stateFrom, Direction direction)
+	{
+		if(stateFrom.isOf(this))
+			return true;
+		
+		return super.isSideInvisible(state, stateFrom, direction);
 	}
 
 	@Override

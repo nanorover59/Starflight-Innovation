@@ -19,12 +19,13 @@ import net.minecraft.world.World;
 import space.block.FluidTankControllerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
+import space.util.FluidResourceType;
 
 public class LoaderItem extends Item
 {
-	private String fluid;
+	private final FluidResourceType fluid;
 	
-	public LoaderItem(Settings settings, String fluid)
+	public LoaderItem(Settings settings, FluidResourceType fluid)
 	{
 		super(settings);
 		this.fluid = fluid;
@@ -51,15 +52,15 @@ public class LoaderItem extends Item
         	{
         		FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
         		
-        		if(fluidTank.getFluidName() == fluid)
+        		if(fluidTank.getFluidType().getID() == fluid.getID())
         		{
-	        		if(!fluidTank.isActive())
+	        		if(fluidTank.getStorageCapacity() == 0)
 	        			((FluidTankControllerBlock) world.getBlockState(position).getBlock()).initializeFluidTank(world, position, fluidTank);
 	        		
 					fluidTank.setStoredFluid(fluidTank.getStorageCapacity());
 					MutableText text = Text.translatable("");
 			        DecimalFormat df = new DecimalFormat("#.##");
-					text.append(Text.translatable("block.space." + fluidTank.getFluidName() + "_container.level"));
+					text.append(Text.translatable("block.space." + fluidTank.getFluidType().getName() + "_container.level"));
 		        	text.append(String.valueOf(df.format(fluidTank.getStoredFluid())));
 		        	text.append("kg / ");
 		        	text.append(String.valueOf(df.format(fluidTank.getStorageCapacity())));

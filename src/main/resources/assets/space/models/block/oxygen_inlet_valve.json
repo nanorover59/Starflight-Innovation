@@ -1,6 +1,0 @@
-{
-  "parent": "block/cube_all",
-  "textures": {
-    "all": "space:block/oxygen_inlet_valve"
-  }
-}

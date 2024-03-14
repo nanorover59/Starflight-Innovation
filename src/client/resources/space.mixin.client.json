@@ -4,13 +4,13 @@
   "package": "space.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "LevelPropertiesMixin",
+    "IntegratedServerLoaderMixin",
     "WorldRendererMixin",
     "DimensionEffectsMixin",
-    "BlockModelRendererMixin",
+    "BlockModelRendererInvokerMixin",
     "CameraMixin",
     "InGameHudMixin",
-    "KeyBindingMixin",
+    "KeyBindingInvokerMixin",
     "ClientPlayerInteractionManagerMixin"
   ],
   "injectors": {

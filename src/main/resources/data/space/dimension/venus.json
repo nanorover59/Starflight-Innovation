@@ -1,0 +1,66 @@
+{
+  "type" : "space:venus",
+  "generator" : {
+    "type" : "minecraft:noise",
+    "settings" : "space:venus",
+    "biome_source" : {
+      "type" : "minecraft:multi_noise",
+      "biomes" : [ {
+        "biome" : "space:venus_lowlands",
+        "parameters" : {
+          "temperature" : [ -1, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ -1, 0 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 0.4 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:venus_midlands",
+        "parameters" : {
+          "temperature" : [ -1, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ 0, 0.6 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 0.8 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:venus_highlands",
+        "parameters" : {
+          "temperature" : [ -1, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ 0.6, 1 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 1 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:venus_volcanic_plains",
+        "parameters" : {
+          "temperature" : [ -1, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ -1, 0.25 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 1 ],
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:venus_lava_caves",
+        "parameters" : {
+          "temperature" : [ -1, 1 ],
+          "humidity" : [ 0, 0 ],
+          "continentalness" : [ -1, 1 ],
+          "erosion" : [ 0, 1 ],
+          "weirdness" : [ 0, 1 ],
+          "depth" : 1,
+          "offset" : 0
+        }
+      } ]
+    }
+  }
+}

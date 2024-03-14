@@ -1,0 +1,10 @@
+{
+  "type" : "space:venus_sky",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "space:venus_sky",
+      "layers": []
+    }
+  }
+}

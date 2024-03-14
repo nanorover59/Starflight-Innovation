@@ -30,7 +30,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
 import space.entity.MovingCraftEntity;
-import space.mixin.client.BlockModelRendererMixin;
+import space.mixin.client.BlockModelRendererInvokerMixin;
 
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftBlockRenderData
@@ -106,7 +106,7 @@ public class MovingCraftBlockRenderData
 				matrixStack.multiply(new Quaternionf().rotationY(direction == Direction.NORTH || direction == Direction.SOUTH ? direction.asRotation() + 180.0f : direction.asRotation()));
 			}
 			
-			matrixStack.translate(-0.5, 0.0, -0.5);
+			matrixStack.translate(-0.5, -0.5, -0.5);
 			blockEntityRenderDispatcher.get(blockEntity).render(blockEntity, 0.0F, matrixStack, vertexConsumerProvider, light, OverlayTexture.DEFAULT_UV);
 			matrixStack.pop();
 			return;
@@ -122,7 +122,7 @@ public class MovingCraftBlockRenderData
 		VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayers.getMovingBlockLayer(blockState));
         BakedModel model = blockRenderManager.getModel(blockState);
         matrixStack.push();
-        matrixStack.translate(position.getX() - 0.5, position.getY(), position.getZ() - 0.5);
+        matrixStack.translate(position.getX() - 0.5, position.getY() - 0.5, position.getZ() - 0.5);
         long seed = blockState.getRenderingSeed(position.add(centerBlockPosInitial));
         
         for(Direction direction : DIRECTIONS)
@@ -133,14 +133,14 @@ public class MovingCraftBlockRenderData
             if(list.isEmpty() || !canRenderSide(direction))
             	continue;
             
-            ((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
+            ((BlockModelRendererInvokerMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
         }
         
         random.setSeed(seed);
         List<BakedQuad> list = model.getQuads(blockState, null, random);
         
         if(!list.isEmpty())
-        	((BlockModelRendererMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
+        	((BlockModelRendererInvokerMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
         
         matrixStack.pop();
 	}

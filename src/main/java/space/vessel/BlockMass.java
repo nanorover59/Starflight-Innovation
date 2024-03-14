@@ -17,7 +17,7 @@ public class BlockMass
 		double volume = 0;
 		
 		for(Box box : blockState.getOutlineShape(world, pos).getBoundingBoxes())
-			volume += box.getXLength() * box.getYLength() * box.getZLength();
+			volume += box.getLengthX() * box.getLengthY() * box.getLengthZ();
 		
 		return volume;
 	}
@@ -29,7 +29,12 @@ public class BlockMass
 		if(blockState.isAir())
 			return 0.0;
 		
-		double mass = volumeForBlock(blockState, world, pos) * 100.0; // Assume a density of 100kg per cubic meter for all full blocks.
+		double density = 100; // Assume a density of 25kg per cubic meter by default.
+		
+		//if(blockState.isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG))
+		//	density = 20;
+		
+		double mass = volumeForBlock(blockState, world, pos) * density;
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 	
 		// If the block has a block entity, check for an inventory using the same function as hoppers.

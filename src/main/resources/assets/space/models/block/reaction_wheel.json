@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/reaction_wheel_cap",
+    "side": "space:block/reaction_wheel_side",
+    "top": "space:block/reaction_wheel_cap"
+  }
+}

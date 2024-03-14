@@ -2,6 +2,8 @@ package space.block;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -20,13 +22,13 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 
 public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 {
+	public static final MapCodec<LycophyteBlock> CODEC = LycophyteBlock.createCodec(LycophyteBlock::new);
 	private static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	private final boolean isTop;
 
@@ -35,6 +37,17 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 		super(settings);
 		this.isTop = isTop;
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
+	}
+	
+	public LycophyteBlock(AbstractBlock.Settings settings)
+	{
+		this(settings, false);
+	}
+	
+	@Override
+	public MapCodec<? extends LycophyteBlock> getCodec()
+	{
+		return CODEC;
 	}
 
 	@Override
@@ -78,12 +91,12 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 		
 		if(!canPlaceAt(blockState, world, pos) || (!isTop && direction == Direction.UP && neighborState.isAir()))
 			blockState = Blocks.AIR.getDefaultState();
-
+		
 		return blockState;
 	}
 
 	@Override
-	public boolean isFertilizable(WorldView var1, BlockPos var2, BlockState var3, boolean var4)
+	public boolean isFertilizable(WorldView var1, BlockPos var2, BlockState var3)
 	{
 		return true;
 	}
@@ -115,7 +128,7 @@ public class LycophyteBlock extends Block implements Fertilizable, Waterloggable
 	}
 
 	@Override
-	public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state)
+	public ItemStack getPickStack(WorldView world, BlockPos pos, BlockState state)
 	{
 		return new ItemStack(StarflightBlocks.LYCOPHYTE_TOP);
 	}

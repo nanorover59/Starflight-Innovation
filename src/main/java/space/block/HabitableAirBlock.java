@@ -66,7 +66,7 @@ public class HabitableAirBlock extends AirBlock
 
 			if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 			{
-				if(((AtmosphereGeneratorBlockEntity) blockEntity).getPowerState() == 0)
+				if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() == 0)
 					AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
 				else
 					world.setBlockState(pos, state.with(UNSTABLE, false), Block.NOTIFY_LISTENERS);
@@ -123,7 +123,7 @@ public class HabitableAirBlock extends AirBlock
 
 				if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 				{
-					if(((AtmosphereGeneratorBlockEntity) blockEntity).getPowerState() == 0)
+					if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() == 0)
 						setUnstable(world, pos, state);
 					else
 						world.setBlockState(pos, state.with(UNSTABLE, false), Block.NOTIFY_LISTENERS);
@@ -195,7 +195,7 @@ public class HabitableAirBlock extends AirBlock
 
 			if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 			{
-				if(((AtmosphereGeneratorBlockEntity) blockEntity).getPowerState() == 1)
+				if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() > 0)
 				{
 					source = true;
 					break;

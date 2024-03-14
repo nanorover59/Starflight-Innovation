@@ -28,7 +28,7 @@ public class ThrusterParticle extends SpriteBillboardParticle
 		this.scale = scale;
 		this.spriteProvider = spriteProvider;
 		this.setSpriteForAge(spriteProvider);
-		double m = Math.max(-0.5 * pressure + 0.5, 0.05);
+		double m = Math.max(-0.5 * pressure + 0.5, 0.25);
 		this.velocityX = vx + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityY = vy + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityZ = vz + (random.nextDouble() - random.nextDouble()) * m;

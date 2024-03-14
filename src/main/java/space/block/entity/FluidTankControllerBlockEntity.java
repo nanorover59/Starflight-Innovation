@@ -2,35 +2,32 @@ package space.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
+import space.block.FluidTankControllerBlock;
+import space.block.StarflightBlocks;
+import space.util.FluidResourceType;
 
 public class FluidTankControllerBlockEntity extends BlockEntity
 {
-	private boolean active;
+	private final FluidResourceType fluid;
 	private double storageCapacity;
 	private double storedFluid;
 	private BlockPos centerOfMass;
 	
-	public FluidTankControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
+	public FluidTankControllerBlockEntity(BlockPos pos, BlockState state)
 	{
-		super(type, pos, state);
-		active = false;
-		storageCapacity = 0;
-		storedFluid = 0;
-		centerOfMass = new BlockPos(0, 0, 0);
+		super(StarflightBlocks.FLUID_TANK_CONTROLLER_BLOCK_ENTITY, pos, state);
+		this.fluid = ((FluidTankControllerBlock) state.getBlock()).getFluidType();
+		this.storageCapacity = 0;
+		this.storedFluid = 0;
+		this.centerOfMass = new BlockPos(0, 0, 0);
 	}
 	
-	public String getFluidName()
+	public FluidResourceType getFluidType()
 	{
-		return "null";
-	}
-	
-	public boolean isActive()
-	{
-		return active;
+		return fluid;
 	}
 	
 	public double getStorageCapacity()
@@ -49,11 +46,6 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	public BlockPos getCenterOfMass()
 	{
 		return centerOfMass;
-	}
-	
-	public void setActive(boolean b)
-	{
-		active = b;
 	}
 	
 	public void setStorageCapacity(double d)
@@ -84,7 +76,6 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	@Override
 	public void readNbt(NbtCompound nbt)
 	{
-		this.active = nbt.getBoolean("active");
 		this.storageCapacity = nbt.getDouble("storageCapacity");
 		this.storedFluid = nbt.getDouble("storedFluid");
 		this.centerOfMass = NbtHelper.toBlockPos(nbt.getCompound("centerOfMass"));
@@ -93,7 +84,6 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	@Override
 	public void writeNbt(NbtCompound nbt)
 	{
-		nbt.putBoolean("active", active);
 		nbt.putDouble("storageCapacity", storageCapacity);
 		nbt.putDouble("storedFluid", storedFluid);
 		nbt.put("centerOfMass", NbtHelper.fromBlockPos(centerOfMass));

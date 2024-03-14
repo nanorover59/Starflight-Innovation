@@ -1,5 +1,6 @@
 package space.block.entity;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -23,7 +24,7 @@ import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.recipe.AbstractCookingRecipe;
-import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeInputProvider;
 import net.minecraft.recipe.RecipeMatcher;
 import net.minecraft.recipe.RecipeType;
@@ -42,13 +43,15 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.ElectricFurnaceBlock;
+import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.screen.ElectricFurnaceScreenHandler;
 
-public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, PoweredBlockEntity
+public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, EnergyBlockEntity
 {
 	public DefaultedList<ItemStack> inventory;
-	int powerState;
+	private double energy;
+	int chargeState;
 	int cookTime;
 	int cookTimeTotal;
 	public final PropertyDelegate propertyDelegate;
@@ -65,7 +68,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				switch(index)
 				{
 				case 0:
-					return ElectricFurnaceBlockEntity.this.powerState;
+					return ElectricFurnaceBlockEntity.this.chargeState;
 				case 1:
 					return ElectricFurnaceBlockEntity.this.cookTime;
 				case 2:
@@ -80,7 +83,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				switch(index)
 				{
 				case 0:
-					ElectricFurnaceBlockEntity.this.powerState = value;
+					ElectricFurnaceBlockEntity.this.chargeState = value;
 				case 1:
 					ElectricFurnaceBlockEntity.this.cookTime = value;
 					break;
@@ -99,99 +102,11 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		this.recipesUsed = new Object2IntOpenHashMap<Identifier>();
 	}
 
-	private boolean canCook()
-	{
-		return powerState == 1;
-	}
-
-	public void readNbt(NbtCompound nbt)
-	{
-		super.readNbt(nbt);
-		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-		Inventories.readNbt(nbt, this.inventory);
-		this.cookTime = nbt.getShort("CookTime");
-		this.cookTimeTotal = nbt.getShort("CookTimeTotal");
-		NbtCompound nbtCompound = nbt.getCompound("RecipesUsed");
-		Iterator<String> var3 = nbtCompound.getKeys().iterator();
-		
-		while(var3.hasNext())
-		{
-			String string = (String) var3.next();
-			this.recipesUsed.put(new Identifier(string), nbtCompound.getInt(string));
-		}
-	}
-
-	public void writeNbt(NbtCompound nbt)
-	{
-		super.writeNbt(nbt);
-		nbt.putShort("CookTime", (short) this.cookTime);
-		nbt.putShort("CookTimeTotal", (short) this.cookTimeTotal);
-		Inventories.writeNbt(nbt, this.inventory);
-		NbtCompound nbtCompound = new NbtCompound();
-		this.recipesUsed.forEach((identifier, integer) ->
-		{
-			nbtCompound.putInt(identifier.toString(), integer);
-		});
-		nbt.put("RecipesUsed", nbtCompound);
-	}
-
-	public static void serverTick(World world, BlockPos pos, BlockState state, ElectricFurnaceBlockEntity blockEntity)
-	{
-		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
-		boolean bl2 = false;
-
-		if(blockEntity.canCook() && !itemStack.isEmpty())
-		{
-			Recipe<?> recipe;
-
-			if(!world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, blockEntity, world).isEmpty())
-				recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, blockEntity, world).get();
-			else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, blockEntity, world).isEmpty())
-				recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, blockEntity, world).get();
-			else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).isEmpty())
-				recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).get();
-			else
-				recipe = null;
-			
-			int i = blockEntity.getMaxCountPerStack();
-
-			if(blockEntity.canCook() && canAcceptRecipeOutput(recipe, blockEntity.inventory, i))
-			{
-				blockEntity.cookTime++;
-
-				if(blockEntity.cookTime == blockEntity.cookTimeTotal)
-				{
-					blockEntity.cookTime = 0;
-					blockEntity.cookTimeTotal = getCookTime(world, blockEntity);
-
-					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
-						blockEntity.setLastRecipe(recipe);
-
-					bl2 = true;
-				}
-			}
-			else
-				blockEntity.cookTime = 0;
-		}
-		else if(!blockEntity.canCook() && blockEntity.cookTime > 0)
-			blockEntity.cookTime = MathHelper.clamp((int) (blockEntity.cookTime - 2), (int) 0, (int) blockEntity.cookTimeTotal);
-
-		if(world.getBlockState(pos).get(ElectricFurnaceBlock.LIT) != (blockEntity.canCook() && !itemStack.isEmpty()))
-		{
-			state = (BlockState) state.with(ElectricFurnaceBlock.LIT, blockEntity.canCook() && !itemStack.isEmpty());
-			world.setBlockState(pos, state, Block.NOTIFY_ALL);
-			bl2 = true;
-		}
-		
-		if(bl2)
-			markDirty(world, pos, state);
-	}
-
-	private static boolean canAcceptRecipeOutput(@Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count)
+	private static boolean canAcceptRecipeOutput(DynamicRegistryManager registryManager, @Nullable RecipeEntry<?> recipe, DefaultedList<ItemStack> slots, int count)
 	{
 		if(!((ItemStack) slots.get(0)).isEmpty() && recipe != null)
 		{
-			ItemStack itemStack = recipe.getOutput(null);
+			ItemStack itemStack = recipe.value().getResult(registryManager);
 
 			if(itemStack.isEmpty())
 				return false;
@@ -213,12 +128,12 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			return false;
 	}
 
-	private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable Recipe<?> recipe, DefaultedList<ItemStack> slots, int count)
+	private static boolean craftRecipe(DynamicRegistryManager registryManager, @Nullable RecipeEntry<?> recipe, DefaultedList<ItemStack> slots, int count)
 	{
-		if(recipe != null && canAcceptRecipeOutput(recipe, slots, count))
+		if(recipe != null && canAcceptRecipeOutput(registryManager, recipe, slots, count))
 		{
 			ItemStack itemStack = (ItemStack) slots.get(0);
-			ItemStack itemStack2 = recipe.getOutput(registryManager);
+			ItemStack itemStack2 = recipe.value().getResult(registryManager);
 			ItemStack itemStack3 = (ItemStack) slots.get(1);
 
 			if(itemStack3.isEmpty())
@@ -236,18 +151,18 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	public boolean hasValidItem()
 	{
 		int i = getMaxCountPerStack();
-		Recipe<?> recipe;
+		RecipeEntry<?> recipe;
 		
 		if(!world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, this, world).isEmpty())
-			recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, this, world).get();
+			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, this, world).get();
 		else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, this, world).isEmpty())
-			recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, this, world).get();
+			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, this, world).get();
 		else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, this, world).isEmpty())
-			recipe = (Recipe<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, this, world).get();
+			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, this, world).get();
 		else
 			recipe = null;
 		
-		return ElectricFurnaceBlockEntity.canAcceptRecipeOutput(recipe, inventory, i);
+		return ElectricFurnaceBlockEntity.canAcceptRecipeOutput(world.getRegistryManager(), recipe, inventory, i);
 	}
 
 	private static int getCookTime(World world, Inventory inventory)
@@ -339,17 +254,17 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	}
 
-	public void setLastRecipe(@Nullable Recipe<?> recipe)
+	public void setLastRecipe(@Nullable RecipeEntry<?> recipe)
 	{
 		if(recipe != null)
 		{
-			Identifier identifier = recipe.getId();
+			Identifier identifier = recipe.id();
 			this.recipesUsed.addTo(identifier, 1);
 		}
 	}
 
 	@Nullable
-	public Recipe<?> getLastRecipe()
+	public RecipeEntry<?> getLastRecipe()
 	{
 		return null;
 	}
@@ -374,14 +289,14 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public void dropExperienceForRecipesUsed(ServerPlayerEntity player)
 	{
-		List<Recipe<?>> list = this.getRecipesUsedAndDropExperience(player.getServerWorld(), player.getPos());
-		player.unlockRecipes((Collection<Recipe<?>>) list);
+		List<RecipeEntry<?>> list = this.getRecipesUsedAndDropExperience(player.getServerWorld(), player.getPos());
+		player.unlockRecipes((Collection<RecipeEntry<?>>) list);
 		this.recipesUsed.clear();
 	}
 
-	public List<Recipe<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos)
+	public List<RecipeEntry<?>> getRecipesUsedAndDropExperience(ServerWorld world, Vec3d pos)
 	{
-		List<Recipe<?>> list = Lists.newArrayList();
+		List<RecipeEntry<?>> list = Lists.newArrayList();
 		ObjectIterator<Entry<Identifier>> var4 = this.recipesUsed.object2IntEntrySet().iterator();
 
 		while(var4.hasNext())
@@ -391,7 +306,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			world.getRecipeManager().get((Identifier) entry.getKey()).ifPresent((recipe) ->
 			{
 				list.add(recipe);
-				dropExperience(world, pos, entry.getIntValue(), ((AbstractCookingRecipe) recipe).getExperience());
+				dropExperience(world, pos, entry.getIntValue(), ((AbstractCookingRecipe) recipe.value()).getExperience());
 			});
 		}
 
@@ -408,18 +323,6 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 		ExperienceOrbEntity.spawn(world, pos, i);
 	}
-	
-	@Override
-	public void setPowerState(int i)
-	{
-		powerState = i;
-	}
-
-	@Override
-	public int getPowerState()
-	{
-		return powerState;
-	}
 
 	@Override
 	public Text getContainerName()
@@ -431,5 +334,141 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	public ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
 		return new ElectricFurnaceScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
+	}
+	
+	@Override
+	public double getOutput()
+	{
+		return 0.0;
+	}
+	
+	@Override
+	public double getInput()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
+	}
+	
+	@Override
+	public double getEnergyStored()
+	{
+		return energy;
+	}
+
+	@Override
+	public double getEnergyCapacity()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+	}
+
+	@Override
+	public double changeEnergy(double amount)
+	{
+		double newEnergy = energy + amount;
+		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
+		return amount - (newEnergy - energy);
+	}
+
+	@Override
+	public ArrayList<BlockPos> getOutputs()
+	{
+		return null;
+	}
+
+	@Override
+	public void addOutput(BlockPos output)
+	{
+	}
+
+	@Override
+	public void clearOutputs()
+	{
+	}
+	
+	public void writeNbt(NbtCompound nbt)
+	{
+		super.writeNbt(nbt);
+		nbt.putDouble("energy", this.energy);
+		nbt.putShort("CookTime", (short) this.cookTime);
+		nbt.putShort("CookTimeTotal", (short) this.cookTimeTotal);
+		Inventories.writeNbt(nbt, this.inventory);
+		NbtCompound nbtCompound = new NbtCompound();
+		this.recipesUsed.forEach((identifier, integer) ->
+		{
+			nbtCompound.putInt(identifier.toString(), integer);
+		});
+		nbt.put("RecipesUsed", nbtCompound);
+	}
+	
+	public void readNbt(NbtCompound nbt)
+	{
+		super.readNbt(nbt);
+		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
+		Inventories.readNbt(nbt, this.inventory);
+		this.energy = nbt.getDouble("energy");
+		this.cookTime = nbt.getShort("CookTime");
+		this.cookTimeTotal = nbt.getShort("CookTimeTotal");
+		NbtCompound nbtCompound = nbt.getCompound("RecipesUsed");
+		Iterator<String> var3 = nbtCompound.getKeys().iterator();
+		
+		while(var3.hasNext())
+		{
+			String string = (String) var3.next();
+			this.recipesUsed.put(new Identifier(string), nbtCompound.getInt(string));
+		}
+	}
+
+	public static void serverTick(World world, BlockPos pos, BlockState state, ElectricFurnaceBlockEntity blockEntity)
+	{
+		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
+		boolean bl2 = false;
+		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
+		
+		if(!itemStack.isEmpty())
+		{
+			RecipeEntry<?> recipe;
+
+			if(!world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, blockEntity, world).isEmpty())
+				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, blockEntity, world).get();
+			else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, blockEntity, world).isEmpty())
+				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, blockEntity, world).get();
+			else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).isEmpty())
+				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).get();
+			else
+				recipe = null;
+			
+			int i = blockEntity.getMaxCountPerStack();
+
+			if(blockEntity.energy > 0 && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory, i))
+			{
+				blockEntity.changeEnergy(-blockEntity.getInput());
+				blockEntity.cookTime++;
+
+				if(blockEntity.cookTime == blockEntity.cookTimeTotal)
+				{
+					blockEntity.cookTime = 0;
+					blockEntity.cookTimeTotal = getCookTime(world, blockEntity);
+
+					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
+						blockEntity.setLastRecipe(recipe);
+
+					bl2 = true;
+				}
+			}
+			else
+				blockEntity.cookTime = 0;
+		}
+		
+		if(blockEntity.cookTime > 0 && (itemStack.isEmpty() || blockEntity.energy == 0))
+			blockEntity.cookTime = MathHelper.clamp((int) (blockEntity.cookTime - 2), (int) 0, (int) blockEntity.cookTimeTotal);
+		
+		if(world.getBlockState(pos).get(ElectricFurnaceBlock.LIT) != (blockEntity.energy > 0 && !itemStack.isEmpty()))
+		{
+			state = (BlockState) state.with(ElectricFurnaceBlock.LIT, blockEntity.energy > 0 && !itemStack.isEmpty());
+			world.setBlockState(pos, state, Block.NOTIFY_ALL);
+			bl2 = true;
+		}
+		
+		if(bl2)
+			markDirty(world, pos, state);
 	}
 }

@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "   ",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:copper_ingot"
+        }
+    },
+    "result": {
+        "item": "space:water_pipe",
+        "count": 16
+    }
+}

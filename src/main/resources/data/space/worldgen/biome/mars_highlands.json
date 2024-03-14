@@ -3,7 +3,8 @@
     "air": [
       "minecraft:cave",
       "minecraft:cave_extra_underground",
-      "minecraft:canyon"
+      "minecraft:canyon",
+      "space:mars_crater"
     ]
   },
   "downfall": 0.0,
@@ -25,9 +26,15 @@
       "space:ore_bauxite",
       "space:ore_sulfur",
       "space:ore_ilmenite",
-      "space:ore_hematite",
+      "space:ore_hematite"
+    ],
+    [
       "space:spring_lava",
       "minecraft:underwater_magma"
+    ],
+    [
+      "space:freeze_water",
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

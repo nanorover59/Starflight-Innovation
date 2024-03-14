@@ -25,6 +25,7 @@ import space.particle.StarflightParticleTypes;
 public class StarflightEffects
 {
 	public static SoundEvent CURRENT_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "current"));
+	public static SoundEvent WRENCH_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "wrench"));
 	public static SoundEvent STORAGE_CUBE_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "storage_cube"));
 	public static SoundEvent THRUSTER_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "thruster"));
 	public static SoundEvent LEAK_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "leak"));
@@ -34,6 +35,7 @@ public class StarflightEffects
 	public static void initializeSounds()
 	{
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "current"), CURRENT_SOUND_EVENT);
+		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "wrench"), WRENCH_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "storage_cube"), STORAGE_CUBE_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "thruster"), THRUSTER_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "leak"), LEAK_SOUND_EVENT);

@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "space:block/water_pipe_al",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "space:block/water_pipe_al",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "space:block/water_pipe_al",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "space:block/water_pipe_al",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "space:block/water_pipe_al"
+    },
+    "facing=west": {
+      "model": "space:block/water_pipe_al",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
