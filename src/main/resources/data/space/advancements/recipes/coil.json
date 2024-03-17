@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:coil"
+    ]
+  },
+  "criteria": {
+    "has_copper_cable": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:copper_cable"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:coil"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_copper_cable",
+      "has_the_recipe"
+    ]
+  ]
+}

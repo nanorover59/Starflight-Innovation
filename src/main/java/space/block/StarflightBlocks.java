@@ -122,6 +122,8 @@ public class StarflightBlocks
 	public static final Block ARES_MOSS_BLOCK = new MossBlock(FabricBlockSettings.copyOf(Blocks.MOSS_BLOCK).mapColor(MapColor.PURPLE));
 	public static final Block LYCOPHYTE_TOP = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF_STEM), true);
 	public static final Block LYCOPHYTE_STEM = new LycophyteBlock(FabricBlockSettings.copyOf(Blocks.BIG_DRIPLEAF_STEM), false);
+	public static final Block AEROPLANKTON = new Block(FabricBlockSettings.copyOf(Blocks.MOSS_BLOCK));
+	public static final Block RED_AEROPLANKTON = new Block(FabricBlockSettings.copyOf(Blocks.MOSS_BLOCK));
 	public static final Block PITCH_BLACK = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));
 	public static final Block SOLARIZED_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
 	public static final Block SEARING_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.ORANGE).strength(0.5F));
@@ -129,8 +131,13 @@ public class StarflightBlocks
 	public static final Block TREE_TAP = new TreeTapBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(1.0f, 1.0f));
 	public static final Block PLANETARIUM = new PlanetariumBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block COPPER_CABLE = new EnergyCableBlock(FabricBlockSettings.copyOf(Blocks.COPPER_BLOCK).strength(1.0f, 1.0f));
+	public static final Block IRON_MACHINE_CASING = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK));
+	public static final Block TITANIUM_MACHINE_CASING = new Block(FabricBlockSettings.copyOf(TITANIUM_BLOCK));
 	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block PUMP = new PumpBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
+	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block EXTRACTOR = new ExtractorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
 	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -147,9 +154,6 @@ public class StarflightBlocks
 	public static final Block OXYGEN_PIPE_AL = new EncasedFluidPipeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), FluidResourceType.OXYGEN);
 	public static final Block HYDROGEN_PIPE_AL = new EncasedFluidPipeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), FluidResourceType.HYDROGEN);
 	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(FabricBlockSettings.create().replaceable().dropsNothing());
-	public static final Block PUMP = new PumpBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
-	public static final Block EXTRACTOR = new ExtractorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block OXYGEN_SENSOR = new OxygenSensorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -244,6 +248,8 @@ public class StarflightBlocks
 		initializeBlock(ARES_MOSS_BLOCK, "mars_moss_block");
 		initializeBlock(LYCOPHYTE_TOP, "lycophyte_top");
 		initializeBlock(LYCOPHYTE_STEM, "lycophyte_stem", false, List.of(), List.of());
+		initializeBlock(AEROPLANKTON, "aeroplankton");
+		initializeBlock(RED_AEROPLANKTON, "red_aeroplankton");
 		initializeBlock(PITCH_BLACK, "pitch_black", false, List.of(), List.of());
 		initializeBlock(SOLARIZED_REGOLITH, "solarized_regolith");
 		initializeBlock(SEARING_REGOLITH, "searing_regolith");
@@ -251,8 +257,13 @@ public class StarflightBlocks
 		initializeBlock(TREE_TAP, "tree_tap");
 		initializeBlock(PLANETARIUM, "planetarium");
 		initializeBlock(COPPER_CABLE, "copper_cable");
+		initializeBlock(IRON_MACHINE_CASING, "iron_machine_casing");
+		initializeBlock(TITANIUM_MACHINE_CASING, "titanium_machine_casing");
 		initializeBlock(STIRLING_ENGINE, "stirling_engine");
 		initializeBlock(ELECTRIC_FURNACE, "electric_furnace");
+		initializeBlock(PUMP, "pump");
+		initializeBlock(ELECTROLYZER, "electrolyzer");
+		initializeBlock(EXTRACTOR, "extractor");
 		initializeBlock(SOLAR_PANEL, "solar_panel");
 		initializeBlock(BATTERY, "battery");
 		initializeBlock(BREAKER_SWITCH, "breaker_switch", true, List.of(), List.of(Text.translatable("block.space.breaker_switch.description")));
@@ -269,9 +280,6 @@ public class StarflightBlocks
 		initializeBlock(OXYGEN_PIPE_AL, "oxygen_pipe_al");
 		initializeBlock(HYDROGEN_PIPE_AL, "hydrogen_pipe_al");
 		initializeBlock(FLUID_TANK_INSIDE, "fluid_tank_inside", false, List.of(), List.of());
-		initializeBlock(PUMP, "pump");
-		initializeBlock(EXTRACTOR, "extractor");
-		initializeBlock(ELECTROLYZER, "electrolyzer");
 		initializeBlock(OXYGEN_DISPENSER, "oxygen_dispenser");
 		initializeBlock(ATMOSPHERE_GENERATOR, "atmosphere_generator", true, List.of(), List.of(Text.translatable("block.space.atmosphere_generator.description_1"), Text.translatable("block.space.atmosphere_generator.description_2")));
 		initializeBlock(OXYGEN_SENSOR, "oxygen_sensor", false, List.of(), List.of(Text.translatable("block.space.oxygen_sensor.description_1"), Text.translatable("block.space.oxygen_sensor.description_2")));

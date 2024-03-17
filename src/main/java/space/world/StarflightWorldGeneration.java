@@ -33,6 +33,9 @@ public class StarflightWorldGeneration
 	// Freeze Water Feature
 	public static final Feature<DefaultFeatureConfig> FREEZE_WATER = Registry.register(Registries.FEATURE, new Identifier(StarflightMod.MOD_ID, "freeze_water"), new FreezeWaterFeature(DefaultFeatureConfig.CODEC));
 	
+	// Aeroplankton Feature
+	public static final Feature<DefaultFeatureConfig> AEROPLANKTON = Registry.register(Registries.FEATURE, new Identifier(StarflightMod.MOD_ID, "aeroplankton"), new AeroplanktonFeature(DefaultFeatureConfig.CODEC));
+	
 	// Impact Crater Structure
 	public static final StructurePieceType CRATER_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "crater_piece"), CraterGenerator.Piece::new);
 	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);

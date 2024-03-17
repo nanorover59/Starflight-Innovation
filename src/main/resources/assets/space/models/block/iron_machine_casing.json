@@ -1,0 +1,6 @@
+{
+  "parent": "block/cube_all",
+  "textures": {
+    "all": "space:block/iron_machine_casing"
+  }
+}

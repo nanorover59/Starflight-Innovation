@@ -1,0 +1,21 @@
+{
+  "feature": "space:aeroplankton",
+  "placement": [
+    {
+      "type": "minecraft:count_on_every_layer",
+      "count": {
+        "type": "minecraft:biased_to_bottom",
+        "value": {
+          "min_inclusive": 0,
+          "max_inclusive": 4
+        }
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

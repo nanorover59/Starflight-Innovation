@@ -46,9 +46,11 @@ public class StarflightItems
 	public static final Item ILMENITE = new Item(new FabricItemSettings());
 	public static final Item SULFUR = new Item(new FabricItemSettings());
 	public static final Item HEMATITE = new Item(new FabricItemSettings());
-	public static final Item RUBBER = new Item(new FabricItemSettings());
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings());
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings());
+	public static final Item RUBBER = new Item(new FabricItemSettings());
+	public static final Item COIL = new Item(new FabricItemSettings());
+	public static final Item ELECTRIC_MOTOR = new Item(new FabricItemSettings());
 	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE));
 	public static final Item ALUMINUM_SHAFT = new Item(new FabricItemSettings());
 	public static final Item TITANIUM_SWORD = new SwordItem(ToolMaterials.DIAMOND, 3, -2.4f, new Item.Settings());
@@ -103,10 +105,12 @@ public class StarflightItems
 		registerItem(ILMENITE, "ilmenite");
 		registerItem(SULFUR, "sulfur");
 		registerItem(HEMATITE, "hematite");
-		registerItem(RUBBER, "rubber");
 		registerItem(RUBBER_SAP, "rubber_sap");
 		registerItem(RUBBER_RESIN, "rubber_resin");
+		registerItem(RUBBER, "rubber");
 		registerItem(CHEESE, "cheese");
+		registerItem(COIL, "coil");
+		registerItem(ELECTRIC_MOTOR, "electric_motor");
 		registerItem(ALUMINUM_SHAFT, "aluminum_shaft");
 		registerItem(TITANIUM_SWORD, "titanium_sword");
 		registerItem(TITANIUM_SHOVEL, "titanium_shovel");

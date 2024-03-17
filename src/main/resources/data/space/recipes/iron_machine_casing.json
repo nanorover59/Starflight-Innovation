@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "aba",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_ingot"
+        },
+        "b": {
+            "ingredient": {
+                "item": "space:wrench",
+                "consumeItem": false
+            },
+            "damagingItem": {
+                 "damage": 2
+            }
+        }
+    },
+    "result": {
+        "item": "space:iron_machine_casing",
+        "count": 1
+    }
+}

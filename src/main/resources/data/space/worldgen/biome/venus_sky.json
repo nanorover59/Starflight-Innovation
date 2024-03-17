@@ -7,13 +7,24 @@
     "water_color": 4159204,
     "water_fog_color": 329011
   },
-  "features": [],
+  "features": [
+  	[
+  	  "space:aeroplankton"
+  	]
+  ],
   "has_precipitation": false,
   "spawn_costs": {},
   "spawners": {
     "ambient": [],
     "axolotls": [],
-    "creature": [],
+    "creature": [
+      {
+        "type": "space:stratofish",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 50
+      }
+    ],
     "misc": [],
     "monster": [],
     "underground_water_creature": [],
