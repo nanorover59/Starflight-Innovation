@@ -28,8 +28,6 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
 		
-		System.out.println(origin.toShortString());
-		
 		int divisions = 8;
 		int reach = 8;
 		Vector3f vector = new Vector3f(1.0f, 0.0f, 0.0f);
@@ -38,11 +36,13 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		
 		for(int i = 0; i < divisions; i++)
 		{
+			Vector3f pos = new Vector3f(origin.getX(), origin.getY(), origin.getZ());
 			BlockPos.Mutable mutable = origin.mutableCopy();
 			
 			for(int j = 0; j < reach; j++)
 			{
-				mutable.set(origin.add((int) vector.x() * j, (int) vector.y() * j, (int) vector.z() * j));
+				pos.add(vector);
+				mutable.set(pos.x(), pos.y(), pos.z());
 				placeAeroplanktonBlock(structureWorldAccess, random, mutable, origin);
 			}
 			
@@ -57,7 +57,7 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		double r = blockPos.getSquaredDistance(originPos);
 		BlockState state;
 		
-		if(random.nextDouble() * 256.0 < r)
+		if(random.nextDouble() * 128.0 < r)
 			state = StarflightBlocks.RED_AEROPLANKTON.getDefaultState();
 		else
 			state = StarflightBlocks.AEROPLANKTON.getDefaultState();
