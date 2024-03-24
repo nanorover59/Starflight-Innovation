@@ -15,7 +15,9 @@
   "has_precipitation": false,
   "spawn_costs": {},
   "spawners": {
-    "ambient": [
+    "ambient": [],
+    "axolotls": [],
+    "creature": [
       {
         "type": "space:stratofish",
         "maxCount": 1,
@@ -23,8 +25,6 @@
         "weight": 10
       }
     ],
-    "axolotls": [],
-    "creature": [],
     "misc": [],
     "monster": [],
     "underground_water_creature": [],

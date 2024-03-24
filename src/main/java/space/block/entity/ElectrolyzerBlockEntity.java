@@ -217,30 +217,36 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockE
 		
 		if(waterInlets > 0 && (oxygenOutlets > 0 || hydrogenOutlets > 0))
 		{
-			blockEntity.changeEnergy(-1.0);
+			blockEntity.changeEnergy(-blockEntity.getInput());
 			
-			if(!world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
+			if(blockEntity.energy > 0)
 			{
-				state = (BlockState) state.with(ElectrolyzerBlock.LIT, true);
-				world.setBlockState(pos, state, Block.NOTIFY_ALL);
-				markDirty(world, pos, state);
-			}
-			
-			for(Direction direction : Direction.values())
-			{
-				BlockPos offset = pos.offset(direction);
-				Block offsetBlock = world.getBlockState(offset).getBlock();
-				BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
+				if(!world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
+				{
+					state = (BlockState) state.with(ElectrolyzerBlock.LIT, true);
+					world.setBlockState(pos, state, Block.NOTIFY_ALL);
+					markDirty(world, pos, state);
+				}
 				
-				if(offsetBlock == StarflightBlocks.WATER_PIPE)
-					((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(-WATER_FLOW / waterInlets);
-				else if(offsetBlock == StarflightBlocks.OXYGEN_PIPE)
-					((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(OXYGEN_FLOW / oxygenOutlets);
-				else if(offsetBlock == StarflightBlocks.HYDROGEN_PIPE)
-					((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(HYDROGEN_FLOW / hydrogenOutlets);
+				for(Direction direction : Direction.values())
+				{
+					BlockPos offset = pos.offset(direction);
+					Block offsetBlock = world.getBlockState(offset).getBlock();
+					BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
+					
+					if(offsetBlock == StarflightBlocks.WATER_PIPE)
+						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(-WATER_FLOW / waterInlets);
+					else if(offsetBlock == StarflightBlocks.OXYGEN_PIPE)
+						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(OXYGEN_FLOW / oxygenOutlets);
+					else if(offsetBlock == StarflightBlocks.HYDROGEN_PIPE)
+						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(HYDROGEN_FLOW / hydrogenOutlets);
+				}
+				
+				return;
 			}
 		}
-		else if(world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
+		
+		if(world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
 		{
 			state = (BlockState) state.with(ElectrolyzerBlock.LIT, false);
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);

@@ -21,13 +21,13 @@ public class AirParticle extends SpriteBillboardParticle
 		this.spriteProvider = spriteProvider;
 		this.velocityMultiplier = 0.98f;
 		this.gravityStrength = 0.0f;
-		this.velocityX = vx + (random.nextDouble() - random.nextDouble()) * 0.1;
-		this.velocityY = vy + (random.nextDouble() - random.nextDouble()) * 0.1;
-		this.velocityZ = vz + (random.nextDouble() - random.nextDouble()) * 0.1;
+		this.velocityX = vx + (random.nextDouble() - random.nextDouble()) * 0.01;
+		this.velocityY = vy + (random.nextDouble() - random.nextDouble()) * 0.01;
+		this.velocityZ = vz + (random.nextDouble() - random.nextDouble()) * 0.01;
 		this.prevPosX = this.x - this.velocityX;
 		this.prevPosY = this.y - this.velocityY;
 		this.prevPosZ = this.z - this.velocityZ;
-		this.scale = 0.5f - world.random.nextFloat() * 0.25f;
+		this.scale = 0.5f - world.random.nextFloat() * 0.1f;
 		this.setSpriteForAge(spriteProvider);
 	}
 

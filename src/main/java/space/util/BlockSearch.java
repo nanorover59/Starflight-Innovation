@@ -13,7 +13,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import space.block.BreakerSwitchBlock;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
@@ -348,66 +347,6 @@ public class BlockSearch
 				}
 			}
 		}
-	}
-	
-	private static boolean energyProducerSearch(World world, BlockPos pos)
-	{
-		Set<BlockPos> set = new HashSet<>();
-		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
-		Set<BlockPos> energyConsumers = new HashSet<BlockPos>();
-		stack.push(pos);
-		
-		// Search for energy producers to update.
-		while(stack.size() > 0 && set.size() < MAX_VOLUME)
-		{
-			BlockPos blockPos = stack.pop();
-			BlockState blockState = world.getBlockState(blockPos);
-			set.add(blockPos);
-			
-			if(blockState.getBlock() instanceof EnergyBlock)
-			{
-				EnergyBlock energyBlock = (EnergyBlock) blockState.getBlock();
-				
-				for(Direction direction : DIRECTIONS)
-				{
-					BlockPos offset = blockPos.offset(direction);
-					
-					// Continue searching through a side if it is a pass through or an input of the starting block.
-					if(!set.contains(offset) && ((blockPos != pos && energyBlock.isPassThrough(world, blockPos, blockState, direction)) || (blockPos == pos && energyBlock.isOutput(world, blockPos, blockState, direction))))
-					{
-						BlockState offsetBlockState = world.getBlockState(offset);
-						
-						if(offsetBlockState.getBlock() instanceof EnergyBlock)
-						{
-							EnergyBlock offsetEnergyBlock = (EnergyBlock) offsetBlockState.getBlock();
-							
-							if(offsetEnergyBlock.isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
-								stack.push(offset);
-							
-							if(offsetEnergyBlock.isInput(world, offset, offsetBlockState, direction.getOpposite()))
-								energyConsumers.add(offset);
-						}
-					}
-				}
-			}
-		}
-		
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-		
-		if(blockEntity instanceof EnergyBlockEntity)
-		{
-			EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
-			energyBlockEntity.clearOutputs();
-			System.out.println("Updated: " + energyBlockEntity);
-			
-			for(BlockPos consumerBlockPos : energyConsumers)
-			{
-				energyBlockEntity.addOutput(consumerBlockPos);
-				System.out.println("        " + consumerBlockPos.toShortString());
-			}
-		}
-		
-		return energyConsumers.size() > 0;
 	}
 	
 	private static boolean tooFar(BlockPos pos1, BlockPos pos2)

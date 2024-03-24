@@ -1,7 +1,5 @@
 package space.mixin.client;
 
-import java.util.ArrayList;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -12,8 +10,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BackgroundRenderer.FogType;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.client.render.Camera;
+import net.minecraft.util.math.MathHelper;
 import space.planet.ClientPlanet;
 import space.planet.ClientPlanetList;
 import space.planet.PlanetDimensionData;
@@ -41,7 +39,6 @@ public abstract class BackgroundRendererMixin
 			
 			if(fogFactor < 1.0f)
 			{
-				//System.out.println(fogFactor);
 				RenderSystem.setShaderFogStart(fogStart * fogFactor);
 				RenderSystem.setShaderFogEnd(fogEnd * fogFactor);
 			}

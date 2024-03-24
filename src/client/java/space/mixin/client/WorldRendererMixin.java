@@ -173,6 +173,7 @@ public abstract class WorldRendererMixin
 				float fogR = (float) fogRGB.getX();
 				float fogG = (float) fogRGB.getY();
 				float fogB = (float) fogRGB.getZ();
+				float fogYOffset = 0.0f;
 				float rain = world.getRainGradient(tickDelta);
 				float thunder = world.getThunderGradient(tickDelta);
 				float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
@@ -194,19 +195,22 @@ public abstract class WorldRendererMixin
 					fogB *= factor;
 				}
 				
+				if(dimensionData.isSky() && viewpointPlanet.hasCloudCover)
+		        	fogYOffset = 128.0f * MathHelper.clamp(1.0f - (float) Math.abs(client.world.getBottomY() - camera.getPos().getY()) / 128.0f, 0.0f, 1.0f);
+				
 				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
 				RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 				Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 		        bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		        bufferBuilder.vertex(matrix4f, 0.0f, 16.0f, 0.0f).color(skyR, skyG, skyB, 0.8f).next();
+		        bufferBuilder.vertex(matrix4f, 0.0f, fogYOffset + 16.0f, 0.0f).color(skyR, skyG, skyB, 0.8f).next();
 		        
 		        for(int i = 0; i <= 16; i++)
 				{
 					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
 					float sinTheta = MathHelper.sin(theta);
 					float cosTheta = MathHelper.cos(theta);
-		        	bufferBuilder.vertex(matrix4f, range * cosTheta, 0.0f, range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
+		        	bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
 				}
 		        
 		        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
@@ -218,7 +222,7 @@ public abstract class WorldRendererMixin
 					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
 					float sinTheta = MathHelper.sin(theta);
 					float cosTheta = MathHelper.cos(theta);
-		        	bufferBuilder.vertex(matrix4f, range * cosTheta, 0.0f, -range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
+		        	bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, -range * sinTheta).color(fogR, fogG, fogB, 0.8f).next();
 				}
 		        
 		        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());

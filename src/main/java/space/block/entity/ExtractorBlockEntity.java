@@ -337,7 +337,7 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 					blockEntity.totalTime = 0;
 				}
 			}
-			else
+			else if(blockEntity.time >= 0)
 				blockEntity.time -= 2;
 		}
 		else

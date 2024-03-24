@@ -160,7 +160,7 @@ public class StratofishEntity extends FlyingEntity
 		@Override
 		public void start()
 		{
-			this.radius = 5.0f + StratofishEntity.this.random.nextFloat() * 10.0f;
+			this.radius = 10.0f + StratofishEntity.this.random.nextFloat() * 10.0f;
 			this.yOffset = -4.0f + StratofishEntity.this.random.nextFloat() * 9.0f;
 			this.circlingDirection = StratofishEntity.this.random.nextBoolean() ? 1.0f : -1.0f;
 			this.adjustDirection();

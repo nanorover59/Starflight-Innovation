@@ -51,8 +51,14 @@ public class BreakerSwitchBlock extends Block implements EnergyBlock
 	{
 		if(world.isClient)
 			return;
-
-		BlockSearch.energyConnectionSearch(world, pos);
+		
+		if(newState.isOf(state.getBlock()) && !newState.get(LIT))
+		{
+			BlockSearch.energyConnectionSearch(world, pos.offset(newState.get(FACING)));
+			BlockSearch.energyConnectionSearch(world, pos.offset(newState.get(FACING).getOpposite()));
+		}
+		else
+			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override

@@ -22,6 +22,7 @@ import space.block.StarflightBlocks;
 import space.entity.DustEntity;
 import space.entity.SolarSpectreEntity;
 import space.entity.StarflightEntities;
+import space.entity.StratofishEntity;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
@@ -42,7 +43,10 @@ public class MobSpawningUtil
 					doSolarSpectreSpawning(world, data);
 				
 				if(world.getDimensionEntry().matchesId(new Identifier(StarflightMod.MOD_ID, "mars")))
-					doDustSpawning(world);	
+					doDustSpawning(world);
+				
+				if(world.getDimensionEntry().matchesId(new Identifier(StarflightMod.MOD_ID, "venus_sky")))
+					doStratofishSpawning(world);
 			}
 		}
 	}
@@ -151,6 +155,35 @@ public class MobSpawningUtil
 				continue;
 			
 			DustEntity entity = new DustEntity(StarflightEntities.DUST, world);
+			entity.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+			entity.setYaw(world.random.nextFloat() * (float) Math.PI * 2.0f);
+			world.spawnEntity(entity);
+		}
+	}
+	
+	private static void doStratofishSpawning(ServerWorld world)
+	{
+		if(dustTimer > 0)
+		{
+			dustTimer--;
+			return;
+		}
+		
+		dustTimer = world.random.nextBetween(20, 60);
+		ArrayList<ChunkPos> chunkPosList = getChunkPosList(world, 2, 6, Predicates.alwaysTrue());
+		
+		for(ChunkPos chunkPos : chunkPosList)
+		{
+			if(world.random.nextFloat() > 0.5e-2f)
+				continue;
+			
+			BlockPos pos = chunkPos.getStartPos().add(world.random.nextInt(16), 32 + world.random.nextInt(128), world.random.nextInt(16));
+			Box checkBox = new Box(pos.getX() - 32, pos.getY() - 32, pos.getZ() - 32, pos.getX() + 32, pos.getY() + 32, pos.getZ() + 32);
+			
+			if(!world.isSkyVisible(pos) || world.getEntitiesByType(TypeFilter.instanceOf(StratofishEntity.class), checkBox, Predicates.alwaysTrue()).size() > 4)
+				continue;
+			
+			StratofishEntity entity = new StratofishEntity(StarflightEntities.STRATOFISH, world);
 			entity.setPosition(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
 			entity.setYaw(world.random.nextFloat() * (float) Math.PI * 2.0f);
 			world.spawnEntity(entity);

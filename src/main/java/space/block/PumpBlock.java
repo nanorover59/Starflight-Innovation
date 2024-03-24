@@ -86,17 +86,8 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		updateWaterState(world, pos, (Direction) state.get(FACING));
-		
 		if(!world.isClient)
 			BlockSearch.energyConnectionSearch(world, pos);
-	}
-	
-	@Override
-	public BlockState getStateForNeighborUpdate(BlockState state, Direction direction, BlockState neighborState, WorldAccess world, BlockPos pos, BlockPos neighborPos)
-	{
-		updateWaterState((World) world, pos, (Direction) state.get(FACING));
-		return state;
 	}
 	
 	private static void updateWaterState(World world, BlockPos position, Direction direction)
@@ -185,7 +176,7 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	@Override
 	public boolean isInput(World world, BlockPos pos, BlockState state, Direction direction)
 	{
-		return direction == (Direction) state.get(FACING).getOpposite() || direction == Direction.UP || direction == Direction.DOWN;
+		return direction != (Direction) state.get(FACING) && direction != (Direction) state.get(FACING).getOpposite();
 	}
 
 	@Override

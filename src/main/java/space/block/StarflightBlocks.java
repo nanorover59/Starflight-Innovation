@@ -65,6 +65,7 @@ import space.block.entity.SolarPanelBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.entity.StorageCubeBlockEntity;
 import space.block.entity.ValveBlockEntity;
+import space.block.entity.VentBlockEntity;
 import space.block.entity.WaterTankBlockEntity;
 import space.item.DescriptiveBlockItem;
 import space.item.StarflightItems;
@@ -169,9 +170,9 @@ public class StarflightBlocks
 	public static final Block RCS_BLOCK = new ReactionControlThrusterBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), ReactionControlThrusterBlock.DIAGONAL);
 	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
-	public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99), 1.05e6, 400, 360, 12.0);
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.99, 15.0), 0.8e6, 450, 400, 12.0);
-	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 15.99, 16.0), 0.5e6, 480, 200, 4.0);
+	public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99), 1.05e6, 400, 360, 10.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.99, 15.0), 0.8e6, 450, 400, 10.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 15.99, 16.0), 0.5e6, 480, 200, 10.0);
 	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 15.99, 15.0), 0.8e6, 460, 440, 20.0);
 
 	// Block Entities
@@ -182,6 +183,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, WATER_PIPE, OXYGEN_PIPE, HYDROGEN_PIPE, WATER_PIPE_AL, OXYGEN_PIPE_AL, HYDROGEN_PIPE_AL).build(null);
 	public static final BlockEntityType<FluidTankControllerBlockEntity> FLUID_TANK_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(FluidTankControllerBlockEntity::new, OXYGEN_TANK, HYDROGEN_TANK).build(null);
 	public static final BlockEntityType<ValveBlockEntity> VALVE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ValveBlockEntity::new, VALVE).build(null);
+	public static final BlockEntityType<VentBlockEntity> VENT_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(VentBlockEntity::new, VENT).build(null);
 	public static final BlockEntityType<WaterTankBlockEntity> WATER_TANK_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(WaterTankBlockEntity::new, WATER_TANK).build(null);
 	public static final BlockEntityType<PumpBlockEntity> PUMP_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PumpBlockEntity::new, PUMP).build(null);
 	public static final BlockEntityType<ExtractorBlockEntity> EXTRACTOR_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ExtractorBlockEntity::new, EXTRACTOR).build(null);
@@ -307,6 +309,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "fluid_pipe"), FLUID_PIPE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "fluid_tank_controller"), FLUID_TANK_CONTROLLER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "valve"), VALVE_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "vent"), VENT_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "water_tank"), WATER_TANK_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "pump"), PUMP_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "extractor"), EXTRACTOR_BLOCK_ENTITY);

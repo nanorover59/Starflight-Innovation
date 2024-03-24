@@ -1,5 +1,30 @@
 {
   "variants": {
-    "": { "model": "space:block/vent" }
+    "facing=down": {
+      "model": "space:block/vent",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "space:block/vent",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "space:block/vent",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "space:block/vent",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "space:block/vent"
+    },
+    "facing=west": {
+      "model": "space:block/vent",
+      "x": 90,
+      "y": 270
+    }
   }
 }

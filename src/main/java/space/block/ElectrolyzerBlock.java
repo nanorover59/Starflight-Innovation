@@ -74,6 +74,12 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	}
 	
 	@Override
+	public BlockRenderType getRenderType(BlockState state)
+	{
+		return BlockRenderType.MODEL;
+	}
+	
+	@Override
 	public double getInput()
 	{
 		return 16.0;
@@ -148,12 +154,6 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	public BlockState getPlacementState(ItemPlacementContext ctx)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
-	}
-	
-	@Override
-	public BlockRenderType getRenderType(BlockState state)
-	{
-		return BlockRenderType.MODEL;
 	}
 
 	@Override

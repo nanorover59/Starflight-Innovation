@@ -10,7 +10,6 @@ import net.minecraft.world.World;
 import space.block.FluidPipeBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
-import space.block.VentBlock;
 import space.block.WaterTankBlock;
 import space.util.FluidResourceType;
 
@@ -126,12 +125,6 @@ public class FluidPipeBlockEntity extends BlockEntity
 					adjacentBlockEntity.markDirty();
 					world.updateListeners(offsetPos, adjacentState, adjacentState, Block.NOTIFY_LISTENERS);
 				}
-			}
-			else if(blockEntity.getStoredFluid() > 0.05 && adjacentState.getBlock() == StarflightBlocks.VENT && world.isReceivingRedstonePower(offsetPos))
-			{
-				blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
-				blockEntity.markDirty();
-				VentBlock.particleEffect(world, offsetPos);
 			}
 		}
     }

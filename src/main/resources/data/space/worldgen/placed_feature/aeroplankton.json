@@ -2,6 +2,26 @@
   "feature": "space:aeroplankton",
   "placement": [
     {
+      "type": "minecraft:count",
+      "count": {
+        "type": "minecraft:weighted_list",
+        "distribution": [
+          {
+            "weight": 10,
+            "data": 0
+          },
+          {
+            "weight": 5,
+            "data": 1
+          },
+          {
+            "weight": 1,
+            "data": 2
+          }
+        ]
+      }
+    },
+    {
       "type": "minecraft:in_square"
     },
     {
@@ -9,20 +29,10 @@
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "absolute": 0
+          "absolute": -48
         },
         "max_inclusive": {
-          "absolute": 256
-        }
-      }
-    },
-    {
-      "type": "minecraft:count",
-      "count": {
-        "type": "minecraft:uniform",
-        "value": {
-          "min_inclusive": 0,
-          "max_inclusive": 1
+          "absolute": 320
         }
       }
     },
