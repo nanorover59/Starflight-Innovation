@@ -1,7 +1,6 @@
 package space.block;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +11,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
@@ -86,57 +84,17 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		if(!world.isClient)
-			BlockSearch.energyConnectionSearch(world, pos);
-	}
-	
-	private static void updateWaterState(World world, BlockPos position, Direction direction)
-	{
-		if(world.isClient())
+		if(world.isClient)
 			return;
-		
-		int limit = 512;
-		BlockPos startPos = position.offset(direction);
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		checkWater(world, startPos, checkList, limit);
-		PumpBlockEntity blockEntity = (PumpBlockEntity) world.getBlockEntity(position);
-		
-		if(blockEntity != null)
-			blockEntity.setWater(checkList.size() >= limit);
-	}
 	
-	private static void checkWater(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit)
-	{
-		if(world.getBlockState(position).getBlock() != Blocks.WATER || checkList.contains(position))
-			return;
-		
-		checkList.add(position);
-		
-		if(checkList.size() >= limit)
-			return;
-		
-		for(Direction direction : Direction.values())
-			checkWater(world, position.offset(direction), checkList, limit);
+		BlockSearch.energyConnectionSearch(world, pos);
+		PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
-	
-	/*@Override
-	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
-	{
-		if((Boolean) state.get(LIT))
-		{
-			double d = (double) pos.getX() + 0.5;
-			double e = (double) pos.getY();
-			double f = (double) pos.getZ() + 0.5;
-			
-			if(random.nextDouble() < 0.1)
-				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
-		}
-	}*/
 	
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerLookDirection().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerLookDirection());
 	}
 	
 	@Override
@@ -160,11 +118,12 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
-			world.removeBlockEntity(pos);
+		if(world.isClient() || state.isOf(newState.getBlock()))
+			return;
 		
-		if(!world.isClient && !state.isOf(newState.getBlock()))
-			BlockSearch.energyConnectionSearch(world, pos);
+		world.removeBlockEntity(pos);
+		BlockSearch.energyConnectionSearch(world, pos);
+		PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
 	
 	@Override

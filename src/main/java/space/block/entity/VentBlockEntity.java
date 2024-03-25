@@ -29,7 +29,7 @@ public class VentBlockEntity extends BlockEntity
 	{
 		super(StarflightBlocks.VENT_BLOCK_ENTITY, pos, state);
 		water = false;
-		pump = new BlockPos(0, 0, 0);
+		pump = pos;
 	}
 	
 	public int getMode()
@@ -67,7 +67,7 @@ public class VentBlockEntity extends BlockEntity
 			if(set.contains(blockPos))
 				continue;
 			
-			if(world.getFluidState(pos).isOf(Fluids.WATER))
+			if(world.getFluidState(blockPos).isOf(Fluids.WATER))
 			{
 				set.add(blockPos);
 				
@@ -125,7 +125,7 @@ public class VentBlockEntity extends BlockEntity
 		}
 	}
 	
-	public void setControllerPosition(BlockPos blockPos)
+	public void setPumpPosition(BlockPos blockPos)
 	{
 		pump = blockPos;
 	}
@@ -152,7 +152,6 @@ public class VentBlockEntity extends BlockEntity
 			return;
 		
 		int ventState = state.get(VentBlock.VENT_STATE);
-		System.out.println(blockEntity.water + " " + blockEntity.getPump());
 		
 		if(blockEntity.water && blockEntity.getPump() != null)
 		{

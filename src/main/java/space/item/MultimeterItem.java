@@ -16,6 +16,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.EnergyBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
@@ -61,6 +62,20 @@ public class MultimeterItem extends Item
         	if(fluidContainer.getStorageCapacity() > 0)
         	{
 	        	text.append(Text.translatable("block.space." + fluidContainer.getFluidType().getName() + "_container.level"));
+	        	text.append(String.valueOf(df.format(fluidContainer.getStoredFluid())));
+	        	text.append("kg / ");
+	        	text.append(String.valueOf(df.format(fluidContainer.getStorageCapacity())));
+	        	text.append("kg    ");
+	        	text.append(String.valueOf(df.format((fluidContainer.getStoredFluid() / fluidContainer.getStorageCapacity()) * 100)) + "%");
+        	}
+        }
+        else if(blockEntity != null && blockEntity instanceof BalloonControllerBlockEntity)
+        {
+        	BalloonControllerBlockEntity fluidContainer = (BalloonControllerBlockEntity) blockEntity;
+        	
+        	if(fluidContainer.getStorageCapacity() > 0)
+        	{
+	        	text.append(Text.translatable("block.space.hydrogen_container.level"));
 	        	text.append(String.valueOf(df.format(fluidContainer.getStoredFluid())));
 	        	text.append("kg / ");
 	        	text.append(String.valueOf(df.format(fluidContainer.getStorageCapacity())));

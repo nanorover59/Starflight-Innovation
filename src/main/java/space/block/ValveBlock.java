@@ -46,7 +46,25 @@ public class ValveBlock extends BlockWithEntity implements FluidUtilityBlock
 	{
 		builder.add(MODE);
 	}
-
+	
+	@Override
+    public BlockRenderType getRenderType(BlockState state)
+	{
+        return BlockRenderType.MODEL;
+    }
+	
+	@Override
+	public FluidResourceType getFluidType()
+	{
+		return FluidResourceType.ANY;
+	}
+	
+	@Override
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return true;
+	}
+	
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
@@ -62,34 +80,16 @@ public class ValveBlock extends BlockWithEntity implements FluidUtilityBlock
 	}
 	
 	@Override
-	public FluidResourceType getFluidType()
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		return FluidResourceType.ANY;
+		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
+			world.removeBlockEntity(pos);
 	}
-	
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return true;
-	}
-	
-	@Override
-    public BlockRenderType getRenderType(BlockState state)
-	{
-        return BlockRenderType.MODEL;
-    }
 	
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new ValveBlockEntity(pos, state);
-	}
-	
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
-	{
-		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
-			world.removeBlockEntity(pos);
 	}
 	
 	@Nullable

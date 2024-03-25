@@ -13,9 +13,13 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.state.StateManager;
+import net.minecraft.state.property.IntProperty;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -25,41 +29,42 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import space.block.entity.FluidTankControllerBlockEntity;
-import space.block.entity.ValveBlockEntity;
+import net.minecraft.world.WorldAccess;
+import space.block.entity.BalloonControllerBlockEntity;
 import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
 import space.util.StarflightEffects;
 
-public class FluidTankControllerBlock extends BlockWithEntity
+public class BalloonControllerBlock extends BlockWithEntity implements FluidUtilityBlock
 {
-	public static final MapCodec<FluidTankControllerBlock> CODEC = FluidTankControllerBlock.createCodec(FluidTankControllerBlock::new);
-	private final FluidResourceType fluid;
+	public static final MapCodec<BalloonControllerBlock> CODEC = BalloonControllerBlock.createCodec(BalloonControllerBlock::new);
+	public static final IntProperty MODE = ValveBlock.MODE;
 	private final double capacity;
 	
-	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid)
+	public BalloonControllerBlock(Settings settings)
 	{
 		super(settings);
-		this.fluid = fluid;
-		this.capacity = fluid.getStorageDensity();
-	}
-	
-	public FluidTankControllerBlock(Settings settings)
-	{
-		this(settings, FluidResourceType.WATER);
+		this.capacity = 4.0;
 	}
 	
 	@Override
-	public MapCodec<? extends FluidTankControllerBlock> getCodec()
+	public MapCodec<? extends BalloonControllerBlock> getCodec()
 	{
 		return CODEC;
 	}
 	
 	@Override
+	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
+	{
+		builder.add(MODE);
+	}
+	
+	@Override
 	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.fluid_tank.description_1"), Text.translatable("block.space.fluid_tank.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.balloon.description_1"), Text.translatable("block.space.balloon.description_2"));
 	}
 
 	@Override
@@ -67,13 +72,28 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	{
 		return BlockRenderType.MODEL;
 	}
+	
+	@Override
+	public FluidResourceType getFluidType()
+	{
+		return FluidResourceType.HYDROGEN;
+	}
+	
+	@Override
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	{
+		return true;
+	}
 
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) world.getBlockEntity(pos);
+		if(state.isOf(newState.getBlock()))
+			return;
 		
-		if(fluidTankController.getStoredFluid() > capacity)
+		BalloonControllerBlockEntity balloonController = (BalloonControllerBlockEntity) world.getBlockEntity(pos);
+		
+		if(balloonController.getStoredFluid() > capacity)
 		{
 			for(Direction direction : Direction.values())
 			{
@@ -82,10 +102,10 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			}
 		}
 		
-		if(fluidTankController.getStoredFluid() > capacity)
+		if(balloonController.getStoredFluid() > capacity)
 			world.createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 2.0F, World.ExplosionSourceType.BLOCK);
 		
-		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
+		if(state.hasBlockEntity())
 			world.removeBlockEntity(pos);
 	}
 
@@ -94,16 +114,23 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	{
 		if(world.isClient)
 			return ActionResult.PASS;
-		
+
+		if(player.getActiveItem().getItem() == StarflightItems.WRENCH)
+		{
+			state = (BlockState) state.cycle(MODE);
+			world.setBlockState(pos, state, Block.NOTIFY_ALL);
+			return ActionResult.CONSUME;
+		}
+
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 
-		if(blockEntity instanceof FluidTankControllerBlockEntity)
+		if(blockEntity instanceof BalloonControllerBlockEntity)
 		{
-			FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
+			BalloonControllerBlockEntity balloonController = (BalloonControllerBlockEntity) blockEntity;
 
-			if(fluidTankController.getStorageCapacity() == 0)
+			if(balloonController.getStorageCapacity() == 0)
 			{
-				int result = initializeFluidTank(world, pos, fluidTankController.getFluidType(), capacity, fluidTankController);
+				int result = initializeBalloon(world, pos, capacity, balloonController);
 				MutableText text = Text.translatable("");
 
 				if(result < 4)
@@ -119,27 +146,28 @@ public class FluidTankControllerBlock extends BlockWithEntity
 		return ActionResult.PASS;
 	}
 	
-	public FluidResourceType getFluidType()
+	public int initializeBalloon(World world, BlockPos position, BalloonControllerBlockEntity balloonController)
 	{
-		return fluid;
-	}
-	
-	public int initializeFluidTank(World world, BlockPos position, FluidTankControllerBlockEntity fluidTankController)
-	{
-		return initializeFluidTank(world, position, fluid, capacity, fluidTankController);
+		return initializeBalloon(world, position, capacity, balloonController);
 	}
 	
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
-		return new FluidTankControllerBlockEntity(pos, state);
+		return new BalloonControllerBlockEntity(pos, state);
+	}
+	
+	@Nullable
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
+	{
+		return world.isClient ? null : validateTicker(type, StarflightBlocks.BALLOON_CONTROLLER_BLOCK_ENTITY, BalloonControllerBlockEntity::serverTick);
 	}
 
-	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, double capacity, FluidTankControllerBlockEntity fluidTankController)
+	protected static int initializeBalloon(World world, BlockPos position, double capacity, BalloonControllerBlockEntity balloonController)
 	{
 		boolean valid = false;
-		fluidTankController.setStorageCapacity(0);
-		fluidTankController.setStoredFluid(0);
+		balloonController.setStorageCapacity(0);
+		balloonController.setStoredFluid(0);
 
 		for(Direction direction : Direction.values())
 		{
@@ -147,7 +175,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			ArrayList<BlockPos> actionList = new ArrayList<BlockPos>(); // List of all fluid tank controller and interface blocks found.
 			
 			BiPredicate<World, BlockPos> include = (w, p) -> {
-				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
+				return !world.getBlockState(p).isIn(StarflightBlocks.BALLOON_BLOCK_TAG);
 			};
 			
 			BlockSearch.search(world, position.offset(direction), checkList, include, BlockSearch.MAX_VOLUME, true);
@@ -174,7 +202,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 							BlockPos offset = p.offset(direction1);
 							BlockEntity blockEntity = world.getBlockEntity(offset);
 
-							if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof ValveBlockEntity))
+							if(blockEntity != null && blockEntity instanceof BalloonControllerBlockEntity)
 								actionList.add(offset);
 						}
 					}
@@ -184,9 +212,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 				cy /= count;
 				cz /= count;
 				
-				// Check for excess fluid tank controllers and a minimum of one interface valve.
-				boolean valve = false;
-				
+				// Check for excess balloon controllers.
 				for(BlockPos p : actionList)
 				{
 					if(p.equals(position))
@@ -194,31 +220,13 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					
 					BlockState blockState = world.getBlockState(p);
 					
-					if(blockState.getBlock() instanceof FluidTankControllerBlock)
+					if(blockState.getBlock() instanceof BalloonControllerBlock)
 						return 2;
-					if(blockState.getBlock() instanceof ValveBlock)
-						valve = true;
 				}
 				
-				if(!valve)
-					return 3;
-
-				for(BlockPos p : actionList)
-				{
-					if(p.equals(position))
-						continue;
-
-					BlockEntity blockEntityAction = world.getBlockEntity(p);
-
-					if(blockEntityAction instanceof ValveBlockEntity)
-					{
-						ValveBlockEntity fluidTankInterface = (ValveBlockEntity) blockEntityAction;
-						fluidTankInterface.setControllerPosition(position);
-					}
-				}
-				
-				fluidTankController.setStorageCapacity(capacity * count);
-				fluidTankController.setCenterOfMass(new BlockPos((int) cx, (int) cy, (int) cz));
+				balloonController.setStorageCapacity(capacity * count);
+				balloonController.setCenterOfMass(new BlockPos((int) cx, (int) cy, (int) cz));
+				balloonController.markDirty();
 				valid = true;
 			}
 		}

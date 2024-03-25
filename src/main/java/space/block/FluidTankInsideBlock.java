@@ -14,6 +14,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.util.BlockSearch;
@@ -47,7 +48,7 @@ public class FluidTankInsideBlock extends Block
 		{
 			BiPredicate<World, BlockPos> include = (w, p) -> {
 				BlockState b = w.getBlockState(p);
-				return b.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE || b.getBlock() instanceof FluidTankControllerBlock || b.getBlock() instanceof ValveBlock;
+				return b.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE || b.getBlock() instanceof FluidTankControllerBlock || b.getBlock() instanceof BalloonControllerBlock || b.getBlock() instanceof ValveBlock;
 			};
 			
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();	
@@ -82,6 +83,25 @@ public class FluidTankInsideBlock extends Block
 							ValveBlockEntity fluidTankInterface = (ValveBlockEntity) blockEntity;
 							fluidTankInterface.setControllerPosition(new BlockPos(0, 0, 0));
 						}
+					}
+				}
+				else if(world.getBlockState(fluidTankBlockPos).getBlock() instanceof BalloonControllerBlock)
+				{
+					BlockEntity blockEntity = world.getBlockEntity(fluidTankBlockPos);
+
+					if(blockEntity != null && blockEntity instanceof BalloonControllerBlockEntity)
+					{
+						BalloonControllerBlockEntity balloonController = (BalloonControllerBlockEntity) blockEntity;
+
+						if(balloonController.getStoredFluid() > 1.0)
+							StarflightEffects.sendOutgas(world, pos, sourcePos, true);
+
+						if(balloonController.getStoredFluid() > 2.0)
+							blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, World.ExplosionSourceType.BLOCK);
+
+						balloonController.setStorageCapacity(0);
+						balloonController.setStoredFluid(0);
+						balloonController.setCenterOfMass(new BlockPos(0, 0, 0));
 					}
 				}
 			}

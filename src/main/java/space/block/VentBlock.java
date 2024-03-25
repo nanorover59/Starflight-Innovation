@@ -33,6 +33,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import space.block.entity.PumpBlockEntity;
 import space.block.entity.VentBlockEntity;
 import space.client.StarflightModClient;
 import space.particle.StarflightParticleTypes;
@@ -59,7 +60,7 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	@Override
 	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"), Text.translatable("block.space.vent.description_3"));
 	}
 
 	@Override
@@ -83,17 +84,22 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
         	Direction direction = state.get(FACING);
         	BlockPos forwardPos = pos.offset(direction);
         	Vector3f vector = direction.getUnitVector();
-        	double x = forwardPos.getX() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-        	double y = forwardPos.getY() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-        	double z = forwardPos.getZ() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-        	double vx = vector.x() * 0.25;
-        	double vy = vector.y() * 0.25;
-        	double vz = vector.z() * 0.25;
+        	int count = 2 + random.nextInt(3);
         	
-        	if(state.get(VENT_STATE) == 1 && world.getBlockState(forwardPos).isAir())
-        		world.addImportantParticle(StarflightParticleTypes.AIR_FILL, x, y, z, vx, vy, vz);
-        	else if(state.get(VENT_STATE) == 2 && world.getFluidState(forwardPos).isOf(Fluids.WATER))
-        		world.addImportantParticle(ParticleTypes.BUBBLE, x, y, z, -vx, -vy, -vz);
+        	for(int i = 0; i < count; i++)
+        	{
+	        	double x = forwardPos.getX() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
+	        	double y = forwardPos.getY() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
+	        	double z = forwardPos.getZ() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
+	        	double vx = vector.x() * 0.25;
+	        	double vy = vector.y() * 0.25;
+	        	double vz = vector.z() * 0.25;
+	        	
+	        	if(state.get(VENT_STATE) == 1 && world.getBlockState(forwardPos).isAir())
+	        		world.addImportantParticle(StarflightParticleTypes.AIR_FILL, x, y, z, vx, vy, vz);
+	        	else if(state.get(VENT_STATE) == 2 && world.getFluidState(forwardPos).isOf(Fluids.WATER))
+	        		world.addImportantParticle(ParticleTypes.BUBBLE, x, y, z, -vx, -vy, -vz);
+        	}
         }
 	}
 	
@@ -105,7 +111,7 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 		
 		VentBlockEntity blockEntity = (VentBlockEntity) world.getBlockEntity(pos);
 		blockEntity.updateWaterState(world, pos);
-		blockEntity.findPump(world, pos);
+		PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
 	
 	@Override
@@ -116,7 +122,7 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 		
 		VentBlockEntity blockEntity = (VentBlockEntity) world.getBlockEntity(pos);
 		blockEntity.updateWaterState(world, pos);
-		blockEntity.findPump(world, pos);
+		PumpBlockEntity.intakeFilterSearch(world, pos, true);
     }
 	
 	@Override

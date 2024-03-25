@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "mode=0": {
+      "model": "space:block/balloon_controller_in"
+    },
+    "mode=1": {
+      "model": "space:block/balloon_controller_out"
+    },
+    "mode=2": {
+      "model": "space:block/balloon_controller_off"
+    }
+  }
+}

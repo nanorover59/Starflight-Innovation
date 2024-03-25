@@ -52,6 +52,7 @@ import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.BlockView;
 import space.StarflightMod;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
+import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.ElectricFurnaceBlockEntity;
 import space.block.entity.ElectrolyzerBlockEntity;
@@ -148,6 +149,7 @@ public class StarflightBlocks
 	public static final Block WATER_TANK = new WaterTankBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).nonOpaque());
 	public static final Block OXYGEN_TANK = new FluidTankControllerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), FluidResourceType.OXYGEN);
 	public static final Block HYDROGEN_TANK = new FluidTankControllerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), FluidResourceType.HYDROGEN);
+	public static final Block BALLOON_CONTROLLER = new BalloonControllerBlock(FabricBlockSettings.copyOf(REINFORCED_FABRIC));
 	public static final Block VALVE = new ValveBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block VENT = new VentBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block COPPER_CABLE_AL = new EncasedEnergyCableBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -182,6 +184,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<BatteryBlockEntity> BATTERY_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(BatteryBlockEntity::new, BATTERY).build(null);
 	public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, WATER_PIPE, OXYGEN_PIPE, HYDROGEN_PIPE, WATER_PIPE_AL, OXYGEN_PIPE_AL, HYDROGEN_PIPE_AL).build(null);
 	public static final BlockEntityType<FluidTankControllerBlockEntity> FLUID_TANK_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(FluidTankControllerBlockEntity::new, OXYGEN_TANK, HYDROGEN_TANK).build(null);
+	public static final BlockEntityType<BalloonControllerBlockEntity> BALLOON_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(BalloonControllerBlockEntity::new, BALLOON_CONTROLLER).build(null);
 	public static final BlockEntityType<ValveBlockEntity> VALVE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ValveBlockEntity::new, VALVE).build(null);
 	public static final BlockEntityType<VentBlockEntity> VENT_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(VentBlockEntity::new, VENT).build(null);
 	public static final BlockEntityType<WaterTankBlockEntity> WATER_TANK_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(WaterTankBlockEntity::new, WATER_TANK).build(null);
@@ -195,6 +198,7 @@ public class StarflightBlocks
 
 	// Block Tags
 	public static final TagKey<Block> FLUID_TANK_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "fluid_tank_blocks"));
+	public static final TagKey<Block> BALLOON_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "balloon_blocks"));
 	public static final TagKey<Block> EXCLUDED_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "excluded_blocks"));
 	public static final TagKey<Block> EDGE_CASE_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "edge_case_blocks"));
 	public static final TagKey<Block> AIR_UPDATE_TAG = TagKey.of(RegistryKeys.BLOCK, new Identifier(StarflightMod.MOD_ID, "air_update_blocks"));
@@ -275,6 +279,7 @@ public class StarflightBlocks
 		initializeBlock(WATER_TANK, "water_tank");
 		initializeBlock(OXYGEN_TANK, "oxygen_tank");
 		initializeBlock(HYDROGEN_TANK, "hydrogen_tank");
+		initializeBlock(BALLOON_CONTROLLER, "balloon_controller");
 		initializeBlock(VALVE, "valve");
 		initializeBlock(VENT, "vent");
 		initializeBlock(COPPER_CABLE_AL, "copper_cable_al");
@@ -308,6 +313,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "battery"), BATTERY_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "fluid_pipe"), FLUID_PIPE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "fluid_tank_controller"), FLUID_TANK_CONTROLLER_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "balloon_controller"), BALLOON_CONTROLLER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "valve"), VALVE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "vent"), VENT_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "water_tank"), WATER_TANK_BLOCK_ENTITY);

@@ -7,6 +7,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.BalloonControllerBlock;
 import space.block.FluidPipeBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
@@ -106,6 +107,21 @@ public class FluidPipeBlockEntity extends BlockEntity
 						blockEntity.markDirty();
 						fluidTankBlockEntity.markDirty();
 					}
+				}
+			}
+			else if(adjacentState.getBlock() instanceof BalloonControllerBlock && adjacentState.get(ValveBlock.MODE) == 0)
+			{
+				BalloonControllerBlockEntity adjacentBlockEntity = ((BalloonControllerBlockEntity) world.getBlockEntity(offsetPos));
+				double adjecentCapacity = adjacentBlockEntity.getStorageCapacity();
+				double adjecentFluid = adjacentBlockEntity.getStoredFluid();
+
+				if(adjecentCapacity > 0 && adjecentFluid < adjecentCapacity && adjecentFluid != blockEntity.getStoredFluid())
+				{
+					double deltaFluid = Math.min(blockEntity.getStoredFluid(), adjecentCapacity - adjecentFluid);
+					blockEntity.changeStoredFluid(-deltaFluid);
+					adjacentBlockEntity.changeStoredFluid(deltaFluid);
+					blockEntity.markDirty();
+					adjacentBlockEntity.markDirty();
 				}
 			}
 			else if(adjacentState.getBlock() instanceof WaterTankBlock)

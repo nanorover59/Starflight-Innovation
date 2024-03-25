@@ -298,9 +298,20 @@ public class BlockSearch
 								if(i == 0)
 									continueSearch = energyBlock.isPassThrough(world, blockPos, blockState, direction);
 								else if(i == 1)
+								{
 									continueSearch = energyBlock.isOutput(world, blockPos, blockState, direction);
+									
+									if(continueSearch)
+										energyProducers.add(blockPos);
+										
+								}
 								else if(i == 2)
+								{
 									continueSearch = energyBlock.isInput(world, blockPos, blockState, direction);
+
+									if(continueSearch)
+										energyConsumers.add(blockPos);
+								}
 									
 							}
 							else

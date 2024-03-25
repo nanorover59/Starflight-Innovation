@@ -1,11 +1,13 @@
 package space.block.entity;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.function.BiPredicate;
+import java.util.Deque;
+import java.util.HashSet;
+import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
@@ -13,9 +15,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
+import space.block.FluidPipeBlock;
 import space.block.PumpBlock;
 import space.block.StarflightBlocks;
-import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
 public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
@@ -113,20 +115,65 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 		return toSpread;
 	}
 	
-	public static void intakeFilterSearch(World world, BlockPos blockPos, ArrayList<BlockPos> positionList, int limit)
+	public static void intakeFilterSearch(World world, BlockPos startPos, boolean searchAround)
 	{
-		BiPredicate<World, BlockPos> include = (w, p) -> {
-			BlockState b = w.getBlockState(p);
-			return b.getBlock() != Blocks.AIR && !b.isIn(StarflightBlocks.EXCLUDED_BLOCK_TAG) && !b.isIn(StarflightBlocks.EDGE_CASE_TAG);
-		};
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Block startBlock = world.getBlockState(startPos).getBlock();
 		
-		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
-			BlockState b = w.getBlockState(p);
-			return b.isIn(StarflightBlocks.EDGE_CASE_TAG);
-		};
+		if(startBlock instanceof FluidPipeBlock && ((FluidPipeBlock) startBlock).getFluidType().getID() == FluidResourceType.WATER.getID())
+			stack.push(startPos);
+		else if(searchAround)
+		{
+			for(Direction direction : Direction.values())
+				intakeFilterSearch(world, startPos.offset(direction), false);
+			
+			return;
+		}
 		
-		BlockSearch.search(world, blockPos, positionList, include, edgeCase, limit, true);
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		Set<BlockPos> intakeSet = new HashSet<BlockPos>();
+		BlockPos pumpPos = null;
 		
+		for(Direction direction: Direction.values())
+			stack.push(startPos.offset(direction));
+		
+		while(stack.size() > 0 && set.size() < 2048)
+		{
+			BlockPos blockPos = stack.pop();
+			
+			if(set.contains(blockPos))
+				continue;
+			
+			Block block = world.getBlockState(blockPos).getBlock();
+			
+			if(block instanceof FluidPipeBlock && ((FluidPipeBlock) block).getFluidType().getID() == FluidResourceType.WATER.getID())
+			{
+				set.add(blockPos);
+				
+				for(Direction direction : Direction.values())
+				{
+					BlockPos offset = blockPos.offset(direction);
+					stack.push(offset);
+				}
+			}
+			else if(block == StarflightBlocks.PUMP)
+				pumpPos = blockPos;
+			else if(block == StarflightBlocks.VENT)
+				intakeSet.add(blockPos);
+		}
+		
+		for(BlockPos intakePos : intakeSet)
+		{
+			BlockEntity blockEntity = world.getBlockEntity(intakePos);
+			
+			if(blockEntity instanceof VentBlockEntity)
+			{
+				if(pumpPos == null)
+					((VentBlockEntity) blockEntity).setPumpPosition(intakePos);
+				else
+					((VentBlockEntity) blockEntity).setPumpPosition(pumpPos);
+			}
+		}
 	}
 	
 	public void setWater(boolean b)
