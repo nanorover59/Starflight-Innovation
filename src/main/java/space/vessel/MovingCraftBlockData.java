@@ -132,6 +132,7 @@ public class MovingCraftBlockData
 		}
 		
 		world.setBlockState(blockPos, blockState, Block.NOTIFY_LISTENERS);
+		world.scheduleBlockTick(blockPos, blockState.getBlock(), 0);
 		BlockEntity blockEntity = world.getBlockEntity(blockPos);
 		
 		if(blockEntity != null && blockEntityData != null)

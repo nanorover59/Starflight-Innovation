@@ -52,7 +52,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(world, entity, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getYaw());
+			blockData.renderBlock(world, matrixStack, vertexConsumerProvider, random, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getYaw());
 	}
 
 	@SuppressWarnings("deprecation")

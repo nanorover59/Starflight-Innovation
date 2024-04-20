@@ -15,13 +15,10 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.option.GameOptions;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
@@ -30,7 +27,6 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -47,6 +43,7 @@ import space.client.gui.RocketControllerScreen;
 import space.client.gui.SpaceNavigationScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
+import space.client.render.StarflightClientEffects;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
@@ -62,7 +59,6 @@ import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
-import space.mixin.client.KeyBindingInvokerMixin;
 import space.particle.StarflightParticleTypes;
 import space.planet.ClientPlanetList;
 import space.render.client.block.entity.WaterTankBlockEntityRenderer;
@@ -73,19 +69,6 @@ import space.vessel.MovingCraftRenderList;
 @Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
 {
-	/*private static KeyBinding throttleUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));
-	private static KeyBinding throttleDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, "key.category.space"));
-	private static KeyBinding throttleMax = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_max", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.category.space"));
-	private static KeyBinding throttleMin = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.throttle_min", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.category.space"));
-	
-	private static KeyBinding rollCCW = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.roll_ccw", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_H, "key.category.space"));
-	private static KeyBinding rollCW = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.roll_cw", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_K, "key.category.space"));
-	
-	private static KeyBinding pitchUp = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_up", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_U, "key.category.space"));
-	private static KeyBinding pitchDown = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.pitch_down", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_J, "key.category.space"));
-	private static KeyBinding yawLeft = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_left", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Y, "key.category.space"));
-	private static KeyBinding yawRight = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.space.yaw_right", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_I, "key.category.space"));*/
-	
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
 	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
@@ -115,6 +98,8 @@ public class StarflightModClient implements ClientModInitializer
 		// Client side block properties.
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.ALUMINUM_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WALKWAY, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.IRON_FRAME, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WATER_TANK, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
@@ -145,6 +130,7 @@ public class StarflightModClient implements ClientModInitializer
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.LINEAR_PLATFORM, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
@@ -165,89 +151,14 @@ public class StarflightModClient implements ClientModInitializer
 		// Dimension Effects
 		registerDimensionEffect(new Identifier(StarflightMod.MOD_ID, "mars"), new Mars());
 		
-		// Client Tick Event
-		ClientTickEvents.START_CLIENT_TICK.register(client -> {
-			
+		// Start Client Tick Event
+		ClientTickEvents.START_CLIENT_TICK.register(client ->
+		{
 			// Update the planet render list.
 			ClientPlanetList.updatePlanets();
 			
 			// Rocket user input.
-			if(client.player != null && client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
-			{
-				int throttleState = 0;
-				int rollState = 0;
-				int pitchState = 0;
-				int yawState = 0;
-				int stopState = 0;
-				int xState = 0;
-				int yState = 0;
-				int zState = 0;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_SHIFT))
-					throttleState++;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL))
-					throttleState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_Z))
-					throttleState = 2;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_X))
-					throttleState = -2;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_A))
-					rollState++;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_D))
-					rollState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_W))
-					pitchState++;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_S))
-					pitchState--;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_Q))
-					yawState++;
-
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_E))
-					yawState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_J))
-					xState++;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_L))
-					xState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_I))
-					zState++;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_K))
-					zState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_U))
-					yState++;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_O))
-					yState--;
-				
-				if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_SPACE))
-					stopState++;
-				
-				GameOptions o = client.options;
-				unpressKeys(o.dropKey, o.inventoryKey, o.sneakKey, o.sprintKey, o.forwardKey, o.backKey, o.leftKey, o.rightKey);
-				
-				PacketByteBuf buffer = PacketByteBufs.create();
-				buffer.writeInt(throttleState);
-				buffer.writeInt(rollState);
-				buffer.writeInt(pitchState);
-				buffer.writeInt(yawState);
-				buffer.writeInt(xState);
-				buffer.writeInt(yState);
-				buffer.writeInt(zState);
-				buffer.writeInt(stopState);
-				ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
-			}
+			StarflightControls.vehicleControls(client);
 			
 			// Weather particle effects.
 			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)
@@ -308,12 +219,6 @@ public class StarflightModClient implements ClientModInitializer
 		}
 		else
 			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
-	}
-	
-	public static void unpressKeys(KeyBinding ... keyBindings)
-	{
-		for(KeyBinding key : keyBindings)
-			((KeyBindingInvokerMixin) key).callReset();
 	}
 	
 	public static void registerDimensionEffect(Identifier dimensionType, DimensionEffects dimensionEffect)

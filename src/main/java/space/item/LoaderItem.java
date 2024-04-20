@@ -37,7 +37,7 @@ public class LoaderItem extends Item
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space." + fluid + "_loader.description_1"), Text.translatable("item.space." + fluid + "_loader.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space." + fluid.getName() + "_loader.description_1"), Text.translatable("item.space." + fluid.getName() + "_loader.description_2"));
 	}
 
 	@Override
@@ -72,24 +72,6 @@ public class LoaderItem extends Item
 			        	text.append(String.valueOf(df.format((fluidTank.getStoredFluid() / fluidTank.getStorageCapacity()) * 100)) + "%");
 			        	context.getPlayer().sendMessage(text, true);
 	        		}
-	        	}
-	        	else if(fluid.getID() == FluidResourceType.HYDROGEN.getID() && blockEntity instanceof BalloonControllerBlockEntity)
-	        	{
-	        		BalloonControllerBlockEntity balloon = (BalloonControllerBlockEntity) blockEntity;
-	        		
-	        		if(balloon.getStorageCapacity() == 0)
-	        			((BalloonControllerBlock) world.getBlockState(position).getBlock()).initializeBalloon(world, position, balloon);
-	        		
-	        		balloon.setStoredFluid(balloon.getStorageCapacity());
-					MutableText text = Text.translatable("");
-			        DecimalFormat df = new DecimalFormat("#.##");
-					text.append(Text.translatable("block.space.hydrogen_container.level"));
-		        	text.append(String.valueOf(df.format(balloon.getStoredFluid())));
-		        	text.append("kg / ");
-		        	text.append(String.valueOf(df.format(balloon.getStorageCapacity())));
-		        	text.append("kg    ");
-		        	text.append(String.valueOf(df.format((balloon.getStoredFluid() / balloon.getStorageCapacity()) * 100)) + "%");
-		        	context.getPlayer().sendMessage(text, true);
 	        	}
         	}
         }

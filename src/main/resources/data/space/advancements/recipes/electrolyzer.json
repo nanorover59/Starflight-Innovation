@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_bucket": {
+    "has_iron_machine_casing": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "minecraft:bucket"
+              "space:iron_machine_casing"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_bucket",
+      "has_iron_machine_casing",
       "has_the_recipe"
     ]
   ]

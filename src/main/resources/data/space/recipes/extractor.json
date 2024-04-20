@@ -1,19 +1,18 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "bcb",
         "cac",
-        "bcb"
+        " b "
     ],
     "key": {
         "a": {
-            "item": "space:electrolyzer"
+            "item": "space:electric_furnace"
         },
         "b": {
-            "item": "space:copper_cable"
+            "item": "space:titanium_machine_casing"
         },
         "c": {
-            "item": "space:titanium_ingot"
+            "item": "space:valve"
         }
     },
     "result": {

@@ -26,6 +26,7 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
@@ -60,6 +61,8 @@ public class MovingCraftEntity extends Entity
 	private static final TrackedData<Vector3f> TRACKED_VELOCITY = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_ANGULAR_VELOCITY = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_ANGLES = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
+	private static final TrackedData<Vector3f> TRACKED_BOX_MIN = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
+	private static final TrackedData<Vector3f> TRACKED_BOX_MAX = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	protected ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
@@ -79,18 +82,22 @@ public class MovingCraftEntity extends Entity
 	private double clientZVelocity;
 	private double craftMass;
 	private double craftMassInitial;
+	private double craftVolume;
+	private Vec3d boxMin;
+	private Vec3d boxMax;
 
 	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> entityType, World world)
 	{
 		super(entityType, world);
 	}
 
-	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, double mass, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
+	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
 	{
 		this(type, world);
 		this.blockDataList = blockDataList;
 		this.craftMass = mass;
 		this.craftMassInitial = mass;
+		this.craftVolume = volume;
 		this.momentOfInertia1 = momentOfInertia1;
 		this.momentOfInertia2 = momentOfInertia2;
 		this.angularVelocity = new Vector3f();
@@ -101,7 +108,60 @@ public class MovingCraftEntity extends Entity
 		
 		if(blockDataList.isEmpty())
 			setRemoved(RemovalReason.DISCARDED);
+		
+		BlockPos min = new BlockPos(blockDataList.get(0).getPosition());
+		BlockPos max = new BlockPos(blockDataList.get(0).getPosition());
+    	
+		for(MovingCraftBlockData blockData : blockDataList)
+		{
+			BlockPos pos = blockData.getPosition();
+			
+			if(pos.getX() < min.getX())
+				min = new BlockPos(pos.getX(), min.getY(), min.getZ());
+			else if(pos.getX() > max.getX())
+				max = new BlockPos(pos.getX(), max.getY(), max.getZ());
+			
+			if(pos.getY() < min.getY())
+				min = new BlockPos(min.getX(), pos.getY(), min.getZ());
+			else if(pos.getY() > max.getY())
+				max = new BlockPos(max.getX(), pos.getY(), max.getZ());
+			
+			if(pos.getZ() < min.getZ())
+				min = new BlockPos(min.getX(), min.getY(), pos.getZ());
+			else if(pos.getZ() > max.getZ())
+				max = new BlockPos(max.getX(), max.getY(), pos.getZ());
+		}
+		
+		boxMin = new Vec3d(min.getX() - 0.5, min.getY() - 0.5, min.getZ() - 0.5);
+		boxMax = new Vec3d(max.getX() + 0.5, max.getY() + 0.5, max.getZ() + 0.5);
+		Box box = Box.enclosing(min, max.up()).offset(blockPos);
+		
+		for(Entity entity : world.getOtherEntities(this, box))
+		{
+			if(entity instanceof LivingEntity)
+			{
+				BlockPos offset = entity.getBlockPos().subtract(blockPos);
+				pickUpEntity(entity, offset);
+			}
+		}
 	}
+	
+	@Override
+	protected Box calculateBoundingBox()
+	{
+		World world = getWorld();
+		
+		if(world.isClient)
+		{
+			Vec3d min = new Vec3d(this.dataTracker.get(TRACKED_BOX_MIN));
+			Vec3d max = new Vec3d(this.dataTracker.get(TRACKED_BOX_MAX));
+			return new Box(getPos().add(min), getPos().add(max));
+		}
+		else if(boxMin != null && boxMax != null)
+			return new Box(getPos().add(boxMin), getPos().add(boxMax));
+		
+		return Box.from(getPos());
+    }
 
 	@Override
 	public boolean isAttackable()
@@ -130,8 +190,10 @@ public class MovingCraftEntity extends Entity
 		this.dataTracker.startTracking(TRACKED_VELOCITY, new Vector3f());
 		this.dataTracker.startTracking(TRACKED_ANGULAR_VELOCITY, new Vector3f());
 		this.dataTracker.startTracking(TRACKED_ANGLES, new Vector3f());
+		this.dataTracker.startTracking(TRACKED_BOX_MIN, new Vector3f());
+		this.dataTracker.startTracking(TRACKED_BOX_MAX, new Vector3f());
 	}
-
+	
 	public void setInitialBlockPos(BlockPos pos)
 	{
 		this.dataTracker.set(INITIAL_BLOCK_POS, pos);
@@ -160,6 +222,32 @@ public class MovingCraftEntity extends Entity
 	public void setTrackedAngles(Vector3f angles)
 	{
 		this.dataTracker.set(TRACKED_ANGLES, angles);
+	}
+	
+	public void updateTrackedBox()
+	{
+		this.dataTracker.set(TRACKED_BOX_MIN, boxMin.toVector3f());
+		this.dataTracker.set(TRACKED_BOX_MAX, boxMax.toVector3f());
+	}
+	
+	public double getLowerHeight()
+	{
+		return boxMin.getY();
+	}
+	
+	public double getUpperHeight()
+	{
+		return boxMax.getY();
+	}
+	
+	public double getXWidth()
+	{
+		return boxMax.getX() - boxMin.getX();
+	}
+	
+	public double getZWidth()
+	{
+		return boxMax.getZ() - boxMin.getZ();
 	}
 
 	public BlockPos getInitialBlockPos()
@@ -215,6 +303,11 @@ public class MovingCraftEntity extends Entity
 	public double getInitialMass()
 	{
 		return craftMassInitial;
+	}
+	
+	public double getDisplacementVolume()
+	{
+		return craftVolume;
 	}
 	
 	public float getIXX()
@@ -544,7 +637,7 @@ public class MovingCraftEntity extends Entity
 			onBlockReleased(blockData, blockPos);
 		}
 		
-		this.setRemoved(RemovalReason.DISCARDED);
+		blockDataList.clear();
 	}
 	
 	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
@@ -571,6 +664,13 @@ public class MovingCraftEntity extends Entity
 		nbt.putFloat("miz2", momentOfInertia2.z());
 		nbt.putDouble("mass", craftMass);
 		nbt.putDouble("massInitial", craftMassInitial);
+		nbt.putDouble("volume", craftVolume);
+		nbt.putDouble("minX", boxMin.getX());
+		nbt.putDouble("minY", boxMin.getY());
+		nbt.putDouble("minZ", boxMin.getZ());
+		nbt.putDouble("maxX", boxMax.getX());
+		nbt.putDouble("maxY", boxMax.getY());
+		nbt.putDouble("maxZ", boxMax.getZ());
 		int blockCount = blockDataList.size();
 		nbt.putInt("blockCount", blockCount);
 		int[] x = new int[blockCount];
@@ -620,6 +720,9 @@ public class MovingCraftEntity extends Entity
 		momentOfInertia2 = new Vector3f(nbt.getFloat("mix2"), nbt.getFloat("miy2"), nbt.getFloat("miz2"));
 		craftMass = nbt.getDouble("mass");
 		craftMassInitial = nbt.getDouble("massInitial");
+		craftVolume = nbt.getDouble("volume");
+		boxMin = new Vec3d(nbt.getDouble("minX"), nbt.getDouble("minY"), nbt.getDouble("minZ"));
+		boxMax = new Vec3d(nbt.getDouble("maxX"), nbt.getDouble("maxY"), nbt.getDouble("maxZ"));
 		int blockCount = nbt.getInt("blockCount");
 		int[] x = nbt.getIntArray("x");
 		int[] y = nbt.getIntArray("y");

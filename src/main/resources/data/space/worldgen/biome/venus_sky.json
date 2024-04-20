@@ -21,7 +21,7 @@
       {
         "type": "space:stratofish",
         "maxCount": 1,
-        "minCount": 4,
+        "minCount": 1,
         "weight": 10
       }
     ],

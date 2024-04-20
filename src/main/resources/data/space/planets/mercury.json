@@ -38,7 +38,7 @@
             "hasLowClouds": false,
             "hasWeather": false,
             "hasOxygen": false,
-            "temperatureCategory": 2,
+            "temperatureCategory": 3,
             "pressure": 0
         }
     ]

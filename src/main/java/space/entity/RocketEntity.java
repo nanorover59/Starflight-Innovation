@@ -16,7 +16,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -30,7 +29,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -82,9 +80,6 @@ public class RocketEntity extends MovingCraftEntity
 	private double hydrogenCapacity;
 	private double oxygenSupply;
 	private double oxygenCapacity;
-	private double lowerHeight;
-	private double upperHeight;
-	private double maxWidth;
 	private float rollTorque;
 	private float pitchTorque;
 	private float yawTorque;
@@ -111,9 +106,9 @@ public class RocketEntity extends MovingCraftEntity
         super(entityType, world);
     }
 	
-	public RocketEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, Direction forward, double mass, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double hydrogenSupply, double hydrogenCapacity, double oxygenSupply, double oxygenCapacity)
+	public RocketEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double hydrogenSupply, double hydrogenCapacity, double oxygenSupply, double oxygenCapacity)
 	{
-		super(StarflightEntities.ROCKET, world, blockPos, blockDataList, mass, momentOfInertia1, momentOfInertia2);
+		super(StarflightEntities.ROCKET, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		this.pausePhysics = false;
 		this.autoState = 1;
 		this.arrivalDirection = forward.getHorizontal();
@@ -123,51 +118,8 @@ public class RocketEntity extends MovingCraftEntity
 		this.oxygenSupply = oxygenSupply;
 		this.oxygenCapacity = oxygenCapacity;
 		setForwardDirection(forward.getHorizontal());
-		BlockPos min = new BlockPos(blockDataList.get(0).getPosition());
-		BlockPos max = new BlockPos(blockDataList.get(0).getPosition());
-    	
-		for(MovingCraftBlockData blockData : blockDataList)
-		{
-			BlockPos pos = blockData.getPosition();
-			
-			if(pos.getX() < min.getX())
-				min = new BlockPos(pos.getX(), min.getY(), min.getZ());
-			else if(pos.getX() > max.getX())
-				max = new BlockPos(pos.getX(), max.getY(), max.getZ());
-			
-			if(pos.getY() < min.getY())
-				min = new BlockPos(min.getX(), pos.getY(), min.getZ());
-			else if(pos.getY() > max.getY())
-				max = new BlockPos(max.getX(), pos.getY(), max.getZ());
-			
-			if(pos.getZ() < min.getZ())
-				min = new BlockPos(min.getX(), min.getY(), pos.getZ());
-			else if(pos.getZ() > max.getZ())
-				max = new BlockPos(max.getX(), max.getY(), pos.getZ());
-		}
-		
-		lowerHeight = -min.getY();
-		upperHeight = max.getY();
-		maxWidth = Math.max(max.getX() - min.getX(), max.getZ() - min.getZ());
-		Box box = Box.enclosing(min, max.up()).offset(blockPos);
-		
-		for(Entity entity : world.getOtherEntities(this, box))
-		{
-			if(entity instanceof LivingEntity)
-			{
-				BlockPos offset = entity.getBlockPos().subtract(blockPos);
-				pickUpEntity(entity, offset);
-			}
-		}
-		
 		initializePropulsion();
 	}
-	
-	@Override
-	protected Box calculateBoundingBox()
-	{
-        return new Box(getPos().add(-maxWidth, -lowerHeight, -maxWidth), getPos().add(maxWidth, upperHeight, maxWidth));
-    }
 	
 	@Override
 	protected void initDataTracker()
@@ -270,7 +222,8 @@ public class RocketEntity extends MovingCraftEntity
 		if(this.clientMotion())
 		{
 			// Spawn thruster particles.
-			spawnThrusterParticles();
+			if(getOxygenLevel() > 0.0f && getOxygenLevel() > 0.0f)
+				spawnThrusterParticles();
 			
 			this.clientQuaternionPrevious = this.clientQuaternion;
 			this.clientQuaternion = this.getQuaternion();
@@ -281,17 +234,26 @@ public class RocketEntity extends MovingCraftEntity
 			return;
 		}
 		
+		if(blockDataList.isEmpty())
+		{
+			setRemoved(RemovalReason.DISCARDED);
+			return;
+		}
+		
 		if(pausePhysics)
 			return;
 		
 		// Play the rocket engine sound effect.
-		if(getThrottle() > 0.0f && soundEffectTimer <= 0)
+		if(getThrottle() > 0.0f && oxygenSupply > 0.0f && hydrogenSupply > 0.0f)
 		{
-			playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
-			soundEffectTimer = 5;
+			if(soundEffectTimer <= 0)
+			{
+				playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
+				soundEffectTimer = 5;
+			}
+			else
+				soundEffectTimer--;
 		}
-		else
-			soundEffectTimer--;
 		
 		tickPhysics();
 		checkDimensionChange();
@@ -308,7 +270,7 @@ public class RocketEntity extends MovingCraftEntity
 			// Crash landing effects go here.
 			if((verticalCollision || horizontalCollision) && craftSpeed > 10.0)
 			{
-				BlockPos bottom = getBlockPos().add(0, (int) -lowerHeight, 0);
+				BlockPos bottom = getBlockPos().add(0, (int) -getLowerHeight(), 0);
 				float power = Math.min(craftSpeed / 5.0f, 10.0f);
 				int count = random.nextBetween(4, 5);
 				
@@ -351,7 +313,7 @@ public class RocketEntity extends MovingCraftEntity
 		// Update thruster state tracked data.
 		setThrottle((float) throttle);
 		setUserInput(autoState == 0);
-		setAltitude((float) (getY() - lowerHeight - arrivalPos.getY()));
+		setAltitude((float) (getY() - getLowerHeight() - arrivalPos.getY()));
 		setTrackedVelocity(getVelocity().toVector3f());
 		setTrackedAngularVelocity(getAngularVelocity());
 		setOxygenLevel((float) (oxygenSupply / oxygenCapacity));
@@ -589,7 +551,7 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		else if(autoState == 2)
 		{
-			double currentHeight = getY() - lowerHeight - arrivalPos.getY();
+			double currentHeight = getY() - getLowerHeight() - arrivalPos.getY();
 			double vy = getVelocity().getY() * 20.0; // Vertical velocity in m/s.
 			double f = (getMass() * (0.5 * vy * vy + gravity * currentHeight)) / currentHeight; // Force to cancel vertical velocity.
 			double t = Math.min(f / nominalThrust, 1.0); // Throttle to cancel vertical velocity.
@@ -640,6 +602,16 @@ public class RocketEntity extends MovingCraftEntity
 		// Apply the net force and moment then move.
 		netForce.rotate(quaternion);
 		netForce.add(0.0f, (float) (-gravity * getMass()), 0.0f);
+		
+		if(data.getPressure() > 0)
+		{
+			float t = 90.0f + data.getTemperatureCategory() * 100.0f;
+			float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
+			float drag = 0.5f * airDensity * (float) (getXWidth() * getZWidth() * Math.pow(getVelocity().length() * 10.0, 2.0));
+			netForce.add(getVelocity().normalize().toVector3f().mul(-drag));
+			netForce.add(0.0f, (float) (airDensity * gravity * getDisplacementVolume()), 0.0f);
+		}
+		 
 		applyForce(netForce);
 		applyMomentXYZ(netMoment);
 		move(MovementType.SELF, getVelocity());
@@ -824,9 +796,6 @@ public class RocketEntity extends MovingCraftEntity
 		nbt.putDouble("oxygenCapacity", oxygenCapacity);
 		nbt.putDouble("hydrogenSupply", hydrogenSupply);
 		nbt.putDouble("oxygenSupply", oxygenSupply);
-		nbt.putDouble("lowerHeight", lowerHeight);
-		nbt.putDouble("upperHeight", upperHeight);
-		nbt.putDouble("maxWidth", maxWidth);
 		nbt.putFloat("rollTorque", rollTorque);
 		nbt.putFloat("pitchTorque", pitchTorque);
 		nbt.putFloat("yawTorque", yawTorque);
@@ -865,9 +834,6 @@ public class RocketEntity extends MovingCraftEntity
 		oxygenCapacity = nbt.getDouble("oxygenCapacity");
 		hydrogenSupply = nbt.getDouble("hydrogenSupply");
 		oxygenSupply = nbt.getDouble("oxygenSupply");
-		lowerHeight = nbt.getDouble("lowerHeight");
-		upperHeight = nbt.getDouble("upperHeight");
-		maxWidth = nbt.getDouble("maxWidth");
 		rollTorque = nbt.getFloat("rollTorque");
 		pitchTorque = nbt.getFloat("pitchTorque");
 		yawTorque = nbt.getFloat("yawTorque");

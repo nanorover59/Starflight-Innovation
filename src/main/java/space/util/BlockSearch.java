@@ -14,6 +14,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
+import space.block.SimpleFacingBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
 import space.block.entity.EnergyBlockEntity;
@@ -232,19 +233,43 @@ public class BlockSearch
 		}
 	}
 	
-	public static void movingCraftSearch(World world, BlockPos blockPos, ArrayList<BlockPos> positionList, int limit)
+	public static void movingCraftSearch(World world, BlockPos pos, ArrayList<BlockPos> positionList, Set<BlockPos> set, int limit, int distance)
 	{
-		BiPredicate<World, BlockPos> include = (w, p) -> {
-			BlockState b = w.getBlockState(p);
-			return b.getBlock() != Blocks.AIR && !b.isIn(StarflightBlocks.EXCLUDED_BLOCK_TAG) && !b.isIn(StarflightBlocks.EDGE_CASE_TAG);
-		};
-		
-		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
-			BlockState b = w.getBlockState(p);
-			return b.isIn(StarflightBlocks.EDGE_CASE_TAG);
-		};
-		
-		BlockSearch.search(world, blockPos, positionList, include, edgeCase, limit, true);
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		stack.push(pos);
+
+		while(stack.size() > 0 && set.size() < limit)
+		{
+			BlockPos blockPos = stack.pop();
+			BlockState blockState = world.getBlockState(blockPos);
+
+			if(!pos.isWithinDistance(blockPos, distance))
+				return;
+
+			if(!set.contains(blockPos) && !blockState.isAir() && !blockState.isIn(StarflightBlocks.EXCLUDED_BLOCK_TAG))
+			{
+				set.add(blockPos);
+				positionList.add(blockPos);
+
+				if(!blockState.isIn(StarflightBlocks.EDGE_CASE_TAG))
+				{
+					for(Direction checkDirection : DIRECTIONS)
+					{
+						if(blockState.getBlock() == StarflightBlocks.BUFFER && blockState.get(SimpleFacingBlock.FACING) == checkDirection)
+							continue;
+
+						BlockPos offset = blockPos.offset(checkDirection);
+						BlockState offsetState = world.getBlockState(offset);
+
+						if(!(offsetState.getBlock() == StarflightBlocks.BUFFER && offsetState.get(SimpleFacingBlock.FACING) == checkDirection.getOpposite()))
+							stack.push(offset);
+					}
+				}
+			}
+		}
+
+		if(positionList.size() >= limit)
+			positionList.clear();
 	}
 	
 	public static void energyConnectionSearch(World world, BlockPos pos)
@@ -288,7 +313,6 @@ public class BlockSearch
 					{
 						BlockPos offset = blockPos.offset(direction);
 						
-						// Continue searching through a side if it is a pass through or an input of the starting block.
 						if(!set.contains(offset))
 						{
 							boolean continueSearch = false;
@@ -348,12 +372,12 @@ public class BlockSearch
 				{
 					EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
 					energyBlockEntity.clearOutputs();
-					System.out.println("Updated: " + energyBlockEntity);
+					//System.out.println("Updated: " + energyBlockEntity);
 					
 					for(BlockPos consumerBlockPos : energyConsumers)
 					{
 						energyBlockEntity.addOutput(consumerBlockPos);
-						System.out.println("        " + consumerBlockPos.toShortString());
+						//System.out.println("        " + consumerBlockPos.toShortString());
 					}
 				}
 			}

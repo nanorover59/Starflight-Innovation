@@ -50,7 +50,7 @@
             "hasLowClouds": false,
             "hasWeather": false,
             "hasOxygen": false,
-            "temperatureCategory": 2,
+            "temperatureCategory": 4,
             "pressure": 92.0
         }
     ]

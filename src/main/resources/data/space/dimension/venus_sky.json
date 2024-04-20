@@ -28,7 +28,12 @@
         "fluid_level_floodedness": 0,
         "fluid_level_spread": 0,
         "lava": 0,
-        "temperature": 0,
+        "temperature": {
+          "type": "minecraft:noise",
+          "noise": "minecraft:erosion",
+          "xz_scale": 0.75,
+          "y_scale": 2
+        },
         "vegetation": 0,
         "continents": 0,
         "erosion": 0,
@@ -49,9 +54,31 @@
         "sequence": []
       }
     },
-    "biome_source": {
-      "type": "minecraft:fixed",
-      "biome": "space:venus_sky"
+    "biome_source" : {
+      "type" : "minecraft:multi_noise",
+      "biomes" : [ {
+        "biome" : "space:venus_sky",
+        "parameters" : {
+          "temperature" : [ -1, 0.75 ],
+          "humidity" : 0,
+          "continentalness" : 0,
+          "erosion" : 0,
+          "weirdness" : 0,
+          "depth" : 0,
+          "offset" : 0
+        }
+      }, {
+        "biome" : "space:venus_plankton_bloom",
+        "parameters" : {
+          "temperature" : [ 0.75, 1 ],
+          "humidity" : 0,
+          "continentalness" : 0,
+          "erosion" : 0,
+          "weirdness" : 0,
+          "depth" : 0,
+          "offset" : 0
+        }
+      } ]
     }
   }
 }

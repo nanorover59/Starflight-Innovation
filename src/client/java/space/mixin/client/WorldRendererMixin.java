@@ -36,7 +36,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import space.StarflightMod;
-import space.client.render.StarflightSkyFeatures;
+import space.client.render.StarflightClientEffects;
 import space.planet.ClientPlanet;
 import space.planet.ClientPlanetList;
 import space.planet.PlanetDimensionData;
@@ -130,12 +130,12 @@ public abstract class WorldRendererMixin
 				RenderSystem.setShader(GameRenderer::getPositionProgram);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
-				StarflightSkyFeatures.milkyWay.bind();
-				StarflightSkyFeatures.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexProgram());
+				StarflightClientEffects.milkyWay.bind();
+				StarflightClientEffects.milkyWay.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexProgram());
 				RenderSystem.setShaderColor(starFactor, starFactor, starFactor, starFactor);
 				RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/environment/stars.png"));
-				StarflightSkyFeatures.stars.bind();
-				StarflightSkyFeatures.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexProgram());
+				StarflightClientEffects.stars.bind();
+				StarflightClientEffects.stars.draw(matrix4f3, projectionMatrix, GameRenderer.getPositionTexProgram());
 	            VertexBuffer.unbind();
 			}
 			
@@ -151,12 +151,10 @@ public abstract class WorldRendererMixin
 					planetRenderer.doRender(bufferBuilder, matrices, tickDelta, celestialFactor, s < 0.95f);
 			}
 			
-			//RenderSystem.disableTexture();
-			
 			// Apply the bloom shader effect for players with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightSkyFeatures.bloomShader != null && starFactor > 0.5f)
+			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightClientEffects.bloomShader != null && starFactor > 0.5f)
 			{
-				StarflightSkyFeatures.bloomShader.render(tickDelta);
+				StarflightClientEffects.bloomShader.render(tickDelta);
 				client.getFramebuffer().beginWrite(false);
 			}
 			
@@ -255,6 +253,12 @@ public abstract class WorldRendererMixin
 				}
 			}
 			
+			if(StarflightClientEffects.interferenceShader != null)
+			{
+				StarflightClientEffects.interferenceShader.render(tickDelta);
+				client.getFramebuffer().beginWrite(false);
+			}
+			
 			// End of custom sky rendering.
 			//RenderSystem.enableTexture();
 			RenderSystem.depthMask(true);
@@ -273,19 +277,23 @@ public abstract class WorldRendererMixin
 	@Inject(method = "renderStars()V", at = @At("HEAD"))
 	public void renderStarsInject(CallbackInfo info)
 	{
-		StarflightSkyFeatures.initializeBuffers();
+		StarflightClientEffects.initializeBuffers();
 	}
 	
 	@Inject(method = "reload(Lnet/minecraft/resource/ResourceManager;)V", at = @At("TAIL"))
 	public void reloadInject(ResourceManager manager, CallbackInfo info)
 	{
-		StarflightSkyFeatures.loadBloomShader(client);
+		StarflightClientEffects.bloomShader = StarflightClientEffects.loadShader(client, "bloom");
+		StarflightClientEffects.interferenceShader = StarflightClientEffects.loadShader(client, "interference");
 	}
 	
 	@Inject(method = "onResized(II)V", at = @At("TAIL"))
 	public void onResizedInject(int width, int height, CallbackInfo info)
 	{
-		if(StarflightSkyFeatures.bloomShader != null)
-			StarflightSkyFeatures.bloomShader.setupDimensions(width, height);
+		if(StarflightClientEffects.bloomShader != null)
+			StarflightClientEffects.bloomShader.setupDimensions(width, height);
+		
+		if(StarflightClientEffects.interferenceShader != null)
+			StarflightClientEffects.interferenceShader.setupDimensions(width, height);
 	}
 }

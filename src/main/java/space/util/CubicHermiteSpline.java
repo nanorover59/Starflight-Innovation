@@ -21,22 +21,22 @@ public class CubicHermiteSpline
 	
 	private double hermite00(double x)
 	{
-		return (2.0 * Math.pow(x, 3)) - (3.0 * Math.pow(x, 2)) + 1.0;
+		return (2.0 * Math.pow(x, 3.0)) - (3.0 * Math.pow(x, 2.0)) + 1.0;
 	}
 	
 	private double hermite10(double x)
 	{
-		return Math.pow(x, 3) - (2.0 * Math.pow(x, 2)) + x;
+		return Math.pow(x, 3.0) - (2.0 * Math.pow(x, 2.0)) + x;
 	}
 	
 	private double hermite01(double x)
 	{
-		return (-2.0 * Math.pow(x, 3)) + (3.0 * Math.pow(x, 2));
+		return (-2.0 * Math.pow(x, 3.0)) + (3.0 * Math.pow(x, 2.0));
 	}
 	
 	private double hermite11(double x)
 	{
-		return Math.pow(x, 3) - Math.pow(x, 2);
+		return Math.pow(x, 3.0) - Math.pow(x, 2.0);
 	}
 	
 	/**
@@ -50,6 +50,7 @@ public class CubicHermiteSpline
 		else if(x > endX)
 			return endY;
 		
-		return (hermite00(x) * startY) + (hermite10(x) * (endX - startX) * startSlope) + (hermite01(x) * endY) + (hermite11(x) * (endX - startX) * endSlope);
+		double fraction = (x - startX) / (endX - startX);
+		return (hermite00(fraction) * startY) + (hermite10(fraction) * (endX - startX) * startSlope) + (hermite01(fraction) * endY) + (hermite11(fraction) * (endX - startX) * endSlope);
 	}
 }

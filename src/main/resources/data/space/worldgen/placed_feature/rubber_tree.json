@@ -33,7 +33,7 @@
       "predicate": {
         "type": "minecraft:would_survive",
         "state": {
-          "Name": "space:rubber_tree",
+          "Name": "space:rubber_sapling",
           "Properties": {
             "stage": "0"
           }

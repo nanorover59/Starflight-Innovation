@@ -1,0 +1,35 @@
+{
+  "carvers": {},
+  "downfall": 0.0,
+  "effects": {
+    "sky_color": 7907327,
+    "fog_color": 16777215,
+    "water_color": 4159204,
+    "water_fog_color": 329011
+  },
+  "features": [
+  	[
+  	  "space:aeroplankton_dense"
+  	]
+  ],
+  "has_precipitation": false,
+  "spawn_costs": {},
+  "spawners": {
+    "ambient": [],
+    "axolotls": [],
+    "creature": [
+      {
+        "type": "space:stratofish",
+        "maxCount": 1,
+        "minCount": 4,
+        "weight": 10
+      }
+    ],
+    "misc": [],
+    "monster": [],
+    "underground_water_creature": [],
+    "water_ambient": [],
+    "water_creature": []
+  },
+  "temperature": 0.5
+}

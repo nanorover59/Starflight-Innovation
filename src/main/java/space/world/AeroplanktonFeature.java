@@ -8,6 +8,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
@@ -28,53 +29,29 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		BlockPos origin = context.getOrigin();
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		int typeSelection = random.nextInt(3);
 		
-		if(typeSelection == 0)
-		{
-			// Fingers
-			int divisions = random.nextBetween(6, 12);
-			int reach = Math.round(powerLaw(random, 2.5f, 2.0f, 16.0f));
-			Vector3f vector = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
-			Vector3f axis = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
-			vector.rotateAxis((float) (Math.PI * 2.0) * random.nextFloat(), axis.x(), axis.y(), axis.z());
+		int divisions = random.nextBetween(6, 12);
+		int reach = Math.round(powerLaw(random, 2.5f, 4.0f, 16.0f));
+		Vector3f vector = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
+		Vector3f axis = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
+		vector.rotateAxis((float) (Math.PI * 2.0) * random.nextFloat(), axis.x(), axis.y(), axis.z());
 			
-			for(int i = 0; i < divisions; i++)
-			{
-				Vector3f pos = new Vector3f(origin.getX(), origin.getY(), origin.getZ());
-				Mutable mutable = new Mutable();
-				
-				for(int j = 0; j < reach; j++)
-				{
-					pos.add(vector);
-					mutable.set(pos.x(), pos.y(), pos.z());
-					placeAeroplanktonBlock(structureWorldAccess, random, mutable, origin);
-				}
-				
-				vector.rotateAxis((float) ((Math.PI * 2.0) / divisions), axis.x(), axis.y(), axis.z());
-			}
-		}
-		else
+		for(int i = 0; i < divisions; i++)
 		{
-			// Orb
-			int radius = Math.round(powerLaw(random, 2.5f, 2.0f, 8.0f));
-			int boundary = Math.round(powerLaw(random, 2.5f, 4.0f, 16.0f));
+			Vector3f pos = new Vector3f(origin.getX(), origin.getY(), origin.getZ());
 			Mutable mutable = new Mutable();
 			
-			for(int x = origin.getX() - radius; x <= origin.getX() + radius; x++)
+			for(int j = 0; j < reach; j++)
 			{
-				for(int y = origin.getY() - radius; y <= origin.getY() + radius; y++)
-				{
-					for(int z = origin.getZ() - radius; z <= origin.getZ() + radius; z++)
-					{
-						mutable.set(x, y, z);
-						double sd = mutable.getSquaredDistance(origin);
-						
-						if(sd < radius * radius && sd > radius * radius - boundary)
-							placeAeroplanktonBlock(structureWorldAccess, random, mutable, origin);
-					}
-				}
+				pos.add(vector);
+				mutable.set(pos.x(), pos.y(), pos.z());
+				placeAeroplanktonBlock(structureWorldAccess, random, mutable, origin);
+				
+				for(Direction direction : Direction.values())
+					placeAeroplanktonBlock(structureWorldAccess, random, mutable.offset(direction), origin);
 			}
+			
+			vector.rotateAxis((float) ((Math.PI * 2.0) / divisions), axis.x(), axis.y(), axis.z());
 		}
 		
 		return true;
@@ -85,7 +62,7 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		double r = blockPos.getSquaredDistance(originPos);
 		BlockState state;
 		
-		if(random.nextDouble() * 256.0 < r)
+		if(random.nextDouble() * 128.0 < r)
 			state = StarflightBlocks.RED_AEROPLANKTON.getDefaultState();
 		else
 			state = StarflightBlocks.AEROPLANKTON.getDefaultState();

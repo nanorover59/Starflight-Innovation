@@ -1,0 +1,14 @@
+{
+  "structures" : [
+    {
+      "structure" : "space:biodome",
+      "weight" : 1
+    }
+  ],
+  "placement" : {
+    "salt" : 37512902,
+    "spacing" : 24,
+    "separation" : 16,
+    "type" : "minecraft:random_spread"
+  }
+}

@@ -58,7 +58,7 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		this.vacuumISP = vacuumISP * ISP_MULTIPLIER;
 		this.atmISP = atmISP * ISP_MULTIPLIER;
 		this.maxExitPressure = maxExitPressure;
-		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, this.vacuumISP, this.atmISP, -20.0, -1.0);
+		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, this.vacuumISP, this.atmISP, -10.0, -1.0);
 		this.splineISP2 = new CubicHermiteSpline(1.0, this.maxExitPressure, this.atmISP, 0.0001, -1.0, -0.0001);
 		this.massFlow = vacuumThrust / (this.vacuumISP * standardGravity);
 		this.atmThrust = atmISP * massFlow * standardGravity;

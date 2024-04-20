@@ -34,6 +34,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import space.StarflightMod;
+import space.client.render.StarflightClientEffects;
 import space.planet.ClientPlanet;
 import space.planet.ClientPlanetList;
 
@@ -108,7 +109,8 @@ public class SpaceNavigationScreen extends Screen
 			mouseHold = false;
 		
 		// Render the displayed planets.
-		context.fill(0, 0, width, height, 0xFF000000);
+		context.fill(0, 0, width, height, -100, 0xFF000000);
+		StarflightClientEffects.renderScreenGUIOverlay(client, context, width, height, delta);
 		
 		for(int i = 0; i < ClientPlanetList.getPlanets(false).size(); i++)
 		{

@@ -11,7 +11,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "weight": 10,
+          "weight": 5,
           "name": "space:cheese",
           "functions": [
             {
@@ -28,7 +28,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:enchanted_golden_apple",
-          "weight": 5
+          "weight": 2
         },
         {
           "type": "minecraft:item",
@@ -48,7 +48,7 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:name_tag",
-          "weight": 10
+          "weight": 2
         },
         {
           "type": "minecraft:item",
@@ -58,7 +58,7 @@
             }
           ],
           "name": "minecraft:book",
-          "weight": 10
+          "weight": 5
         },
         {
           "type": "minecraft:item",
@@ -67,7 +67,7 @@
         },
         {
           "type": "loot_table",
-          "weight": 2,
+          "weight": 3,
           "name": "space:chests/beverages"
         },
         {
@@ -150,8 +150,8 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 5,
-          "name": "minecraft:lapis_lazuli",
+          "weight": 4,
+          "name": "space:titanium_ingot",
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -257,7 +257,7 @@
         {
           "type": "minecraft:item",
           "weight": 20,
-          "name": "minecraft:rail",
+          "name": "space:linear_track",
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -273,7 +273,7 @@
         {
           "type": "minecraft:item",
           "weight": 5,
-          "name": "minecraft:powered_rail",
+          "name": "space:call_track",
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -288,15 +288,15 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 5,
-          "name": "minecraft:detector_rail",
+          "weight": 2,
+          "name": "space:linear_actuator",
           "functions": [
             {
               "function": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 4
+                "max": 2
               },
               "add": false
             }
@@ -305,7 +305,7 @@
         {
           "type": "minecraft:item",
           "weight": 5,
-          "name": "minecraft:activator_rail",
+          "name": "space:buffer",
           "functions": [
             {
               "function": "minecraft:set_count",
@@ -352,7 +352,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 15,
+          "weight": 20,
           "name": "space:riveted_aluminum",
           "functions": [
             {
@@ -368,7 +368,7 @@
         },
         {
           "type": "minecraft:item",
-          "weight": 2,
+          "weight": 3,
           "name": "minecraft:iron_block",
           "functions": [
             {

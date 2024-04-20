@@ -1,16 +1,16 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "bab",
-        "ced",
-        "aaa"
+        "ebe",
+        "cad",
+        "efe"
     ],
     "key": {
         "a": {
-            "item": "space:aluminum_ingot"
+            "item": "space:iron_machine_casing"
         },
         "b": {
-            "item": "space:copper_cable"
+            "item": "space:water_pipe"
         },
         "c": {
             "item": "space:oxygen_pipe"
@@ -19,7 +19,10 @@
             "item": "space:hydrogen_pipe"
         },
         "e": {
-            "item": "minecraft:bucket"
+            "item": "space:copper_cable"
+        },
+        "f": {
+            "item": "space:water_tank"
         }
     },
     "result": {

@@ -43,13 +43,19 @@ public class SimpleFacingBlock extends FacingBlock
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation)
 	{
-		return (BlockState) state.with(FACING, rotation.rotate(state.get(FACING)));
+		if(rotation != null)
+			return (BlockState) state.with(FACING, rotation.rotate(state.get(FACING)));
+		else
+			return state;
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, BlockMirror mirror)
 	{
-		return state.rotate(mirror.getRotation(state.get(FACING)));
+		if(mirror != null)
+			return state.rotate(mirror.getRotation(state.get(FACING)));
+		else
+			return state;
 	}
 
 	@Override

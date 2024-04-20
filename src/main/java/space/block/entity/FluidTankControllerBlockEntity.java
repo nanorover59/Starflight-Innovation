@@ -2,6 +2,7 @@ package space.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
@@ -20,6 +21,15 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	{
 		super(StarflightBlocks.FLUID_TANK_CONTROLLER_BLOCK_ENTITY, pos, state);
 		this.fluid = ((FluidTankControllerBlock) state.getBlock()).getFluidType();
+		this.storageCapacity = 0;
+		this.storedFluid = 0;
+		this.centerOfMass = new BlockPos(0, 0, 0);
+	}
+	
+	public FluidTankControllerBlockEntity(BlockEntityType<?> type, FluidResourceType fluid, BlockPos pos, BlockState state)
+	{
+		super(type, pos, state);
+		this.fluid = fluid;
 		this.storageCapacity = 0;
 		this.storedFluid = 0;
 		this.centerOfMass = new BlockPos(0, 0, 0);

@@ -25,6 +25,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.client.StarflightModClient;
@@ -38,16 +39,16 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	private final FluidResourceType fluid;
 	private final double capacity;
 	
-	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid)
+	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid, double capacity)
 	{
 		super(settings);
 		this.fluid = fluid;
-		this.capacity = fluid.getStorageDensity();
+		this.capacity = capacity;
 	}
 	
 	public FluidTankControllerBlock(Settings settings)
 	{
-		this(settings, FluidResourceType.WATER);
+		this(settings, FluidResourceType.WATER, FluidResourceType.WATER.getStorageDensity());
 	}
 	
 	@Override
@@ -137,18 +138,24 @@ public class FluidTankControllerBlock extends BlockWithEntity
 
 	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
+		BiPredicate<World, BlockPos> include;
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
 		fluidTankController.setStoredFluid(0);
+		
+		if(fluidTankController instanceof BalloonControllerBlockEntity)
+			include = (w, p) -> {
+				return !world.getBlockState(p).isIn(StarflightBlocks.BALLOON_BLOCK_TAG);
+			};
+		else
+			include = (w, p) -> {
+				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
+			};
 
 		for(Direction direction : Direction.values())
 		{
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
 			ArrayList<BlockPos> actionList = new ArrayList<BlockPos>(); // List of all fluid tank controller and interface blocks found.
-			
-			BiPredicate<World, BlockPos> include = (w, p) -> {
-				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
-			};
 			
 			BlockSearch.search(world, position.offset(direction), checkList, include, BlockSearch.MAX_VOLUME, true);
 			
@@ -200,7 +207,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 						valve = true;
 				}
 				
-				if(!valve)
+				if(!valve && !(world.getBlockState(position).getBlock() instanceof FluidUtilityBlock))
 					return 3;
 
 				for(BlockPos p : actionList)

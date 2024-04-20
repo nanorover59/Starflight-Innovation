@@ -4,6 +4,7 @@ import java.util.BitSet;
 import java.util.List;
 
 import org.joml.Quaternionf;
+import org.lwjgl.opengl.GL11;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -29,7 +30,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
-import space.entity.MovingCraftEntity;
 import space.mixin.client.BlockModelRendererInvokerMixin;
 
 @Environment(value=EnvType.CLIENT)
@@ -87,7 +87,7 @@ public class MovingCraftBlockRenderData
 		}
 	}
 	
-	public void renderBlock(BlockRenderView world, MovingCraftEntity entity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
+	public void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
 	{
 		// Block entity render.
 		if(blockState.getRenderType() == BlockRenderType.ENTITYBLOCK_ANIMATED && blockState.getBlock() instanceof BlockWithEntity)

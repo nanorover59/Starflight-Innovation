@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a ",
+        "cbc",
+        " c "
+    ],
+    "key": {
+        "a": {
+            "item": "space:valve"
+        },
+        "b": {
+            "item": "space:hydrogen_tank"
+        },
+        "c": {
+            "item": "space:reinforced_fabric"
+        }
+    },
+    "result": {
+        "item": "space:balloon_controller",
+        "count": 1
+    }
+}

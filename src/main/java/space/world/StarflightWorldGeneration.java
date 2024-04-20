@@ -12,6 +12,7 @@ import net.minecraft.structure.rule.BlockMatchRuleTest;
 import net.minecraft.structure.rule.RuleTest;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.carver.Carver;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
@@ -44,9 +45,9 @@ public class StarflightWorldGeneration
 	public static final StructurePieceType LANDING_SITE_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "landing_site_piece"), LandingSiteGenerator.Piece::new);
 	public static final StructureType<LandingSiteStructure> LANDING_SITE_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "landing_site"), () -> LandingSiteStructure.CODEC);
 	
-	// Surface Outpost Structure
-	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "outpost_piece"), OutpostGenerator.Piece::new);
-	public static final StructureType<OutpostStructure> OUTPOST_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "outpost"), () -> OutpostStructure.CODEC);
+	// Bio Dome Structure
+	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "biodome_piece"), BioDomeGenerator.Piece::new);
+	public static final StructureType<BioDomeStructure> OUTPOST_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "biodome"), () -> BioDomeStructure.CODEC);
 	
 	// Moonshaft Structure
 	public static final StructurePieceType MOONSHAFT_CORRIDOR = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_corridor"), MoonshaftGenerator.MoonshaftCorridor::new);
@@ -67,6 +68,6 @@ public class StarflightWorldGeneration
 
 		// Trees
 		//BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree")));
-		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree")));
+		BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree")));
 	}
 }

@@ -3,9 +3,12 @@ package space.client.render;
 import java.io.IOException;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Math;
+import org.joml.Matrix4f;
 import org.slf4j.Logger;
 
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 
 import net.fabricmc.api.EnvType;
@@ -13,21 +16,26 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.PostEffectProcessor;
 import net.minecraft.client.gl.VertexBuffer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferBuilder.BuiltBuffer;
+import net.minecraft.client.render.BufferRenderer;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 
 @Environment(EnvType.CLIENT)
-public class StarflightSkyFeatures
+public class StarflightClientEffects
 {
 	public static VertexBuffer stars;
 	public static VertexBuffer milkyWay;
 	
 	@Nullable public static PostEffectProcessor bloomShader;
+	@Nullable public static PostEffectProcessor interferenceShader;
 	
 	public static void initializeBuffers()
 	{
@@ -148,28 +156,53 @@ public class StarflightSkyFeatures
 		return buffer.end();
 	}
 	
-	public static void loadBloomShader(MinecraftClient client)
+	public static void renderScreenGUIOverlay(MinecraftClient client, DrawContext context, int width, int height, float tickDelta)
 	{
-		if(bloomShader != null)
-			bloomShader.close();
+		for(int i = 0; i < height / 4; i++)
+			context.fill(0, i * 4, width, (i * 4) + 1, -100, 0x108C1860);
 		
+		RenderSystem.enableBlend();
+		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuffer();
+        Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
+		bufferBuilder.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+		bufferBuilder.vertex(matrix, (width / 2), (height / 2), -100.0f).color(0x00000000).next();
+
+		for(int i = 0; i <= 16; i++)
+		{
+			float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+			float sinTheta = MathHelper.sin(theta);
+			float cosTheta = MathHelper.cos(theta);
+			float a = 280.0f;
+			float b = 200.0f;
+			float radius = (a * b) / (float) (MathHelper.hypot(b * cosTheta, a * sinTheta));
+			bufferBuilder.vertex(matrix, (width / 2) + (radius * cosTheta), (height / 2) - (radius * sinTheta), -100.0f).color(0x168C1860).next();
+		}
+
+		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+		RenderSystem.disableBlend();
+	}
+	
+	public static PostEffectProcessor loadShader(MinecraftClient client, String shaderName)
+	{
 		Logger logger = LogUtils.getLogger();
-        Identifier identifier = new Identifier("shaders/post/bloom.json");
+        Identifier identifier = new Identifier("shaders/post/" + shaderName + ".json");
         
         try
         {
-        	bloomShader = new PostEffectProcessor(client.getTextureManager(), client.getResourceManager(), client.getFramebuffer(), identifier);
-        	bloomShader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
+        	PostEffectProcessor shader = new PostEffectProcessor(client.getTextureManager(), client.getResourceManager(), client.getFramebuffer(), identifier);
+        	shader.setupDimensions(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight());
+        	return shader;
         }
         catch (IOException iOException)
         {
         	logger.warn("Failed to load shader: {}", (Object) identifier, (Object) iOException);
-            bloomShader = null;
         }
         catch (JsonSyntaxException jsonSyntaxException)
         {
         	logger.warn("Failed to parse shader: {}", (Object) identifier, (Object) jsonSyntaxException);
-            bloomShader = null;
         }
+        
+        return null;
 	}
 }

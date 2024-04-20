@@ -49,6 +49,9 @@ public class StarflightItems
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings());
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings());
 	public static final Item RUBBER = new Item(new FabricItemSettings());
+	public static final Item IRON_PLATE = new Item(new FabricItemSettings());
+	public static final Item ALUMINUM_PLATE = new Item(new FabricItemSettings());
+	public static final Item TITANIUM_PLATE = new Item(new FabricItemSettings());
 	public static final Item COIL = new Item(new FabricItemSettings());
 	public static final Item ELECTRIC_MOTOR = new Item(new FabricItemSettings());
 	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE));
@@ -108,6 +111,9 @@ public class StarflightItems
 		registerItem(RUBBER_SAP, "rubber_sap");
 		registerItem(RUBBER_RESIN, "rubber_resin");
 		registerItem(RUBBER, "rubber");
+		registerItem(IRON_PLATE, "iron_plate");
+		registerItem(ALUMINUM_PLATE, "aluminum_plate");
+		registerItem(TITANIUM_PLATE, "titanium_plate");
 		registerItem(CHEESE, "cheese");
 		registerItem(COIL, "coil");
 		registerItem(ELECTRIC_MOTOR, "electric_motor");

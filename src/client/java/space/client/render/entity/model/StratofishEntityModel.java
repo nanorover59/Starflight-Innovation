@@ -32,8 +32,6 @@ public class StratofishEntityModel<T extends StratofishEntity> extends SinglePar
 		modelPartData.addChild("right", ModelPartBuilder.create().uv(0, 0).cuboid(-16.0F, 0.0F, -3.0F, 15.0F, 0.0F, 8.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 24.0F, 0.0F));
 		modelPartData.addChild("base", ModelPartBuilder.create().uv(0, 16).cuboid(-1.0F, -2.0F, -7.0F, 2.0F, 4.0F, 14.0F, new Dilation(0.0F))
 		.uv(0, 20).cuboid(-1.0F, -1.0F, -11.0F, 2.0F, 3.0F, 4.0F, new Dilation(0.0F))
-		.uv(0, 7).cuboid(1.0F, -1.0F, -10.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F))
-		.uv(0, 4).cuboid(-2.0F, -1.0F, -10.0F, 1.0F, 1.0F, 2.0F, new Dilation(0.0F))
 		.uv(18, 16).cuboid(-5.0F, 0.0F, 6.0F, 4.0F, 0.0F, 8.0F, new Dilation(0.0F))
 		.uv(10, 16).cuboid(1.0F, 0.0F, 6.0F, 4.0F, 0.0F, 8.0F, new Dilation(0.0F))
 		.uv(0, 12).cuboid(0.0F, -4.0F, 3.0F, 0.0F, 2.0F, 6.0F, new Dilation(0.0F))

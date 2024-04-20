@@ -8,6 +8,11 @@
     "space:deepslate_ilmenite_ore",
     "space:ferric_ilmenite_ore",
     "space:ilmenite_block",
-    "space:titanium_block"
+    "space:titanium_block",
+    "space:titanium_frame",
+    "space:titanium_machine_casing",
+    "space:linear_actuator",
+    "space:linear_track",
+    "space:call_track"
   ]
 }

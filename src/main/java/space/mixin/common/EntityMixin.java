@@ -51,8 +51,10 @@ public abstract class EntityMixin
 				if(next != null)
 				{
 					TeleportTarget target = new TeleportTarget(arrivalPos, entity.getVelocity(), entity.getYaw(), entity.getPitch());
-					Entity trasferred = FabricDimensions.teleport(entity, next, target);
-					trasferred.setPortalCooldown(60);
+					Entity transferred = FabricDimensions.teleport(entity, next, target);
+					
+					if(transferred != null)
+						transferred.setPortalCooldown(60);
 				}
 			}
 		}

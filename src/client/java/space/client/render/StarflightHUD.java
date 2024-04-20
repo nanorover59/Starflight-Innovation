@@ -92,7 +92,7 @@ public class StarflightHUD
         
         quaternion.getEulerAnglesZXY(angles);
         float roll = angles.y() * -MathHelper.DEGREES_PER_RADIAN;
-        Vector3f upRotated = new Vector3f(0.0f, 0.0f, 1.0f).rotate(quaternion);
+        //Vector3f upRotated = new Vector3f(0.0f, 0.0f, 1.0f).rotate(quaternion);
         //float heading = Math.atan2(upRotated.x(), upRotated.z()) * MathHelper.DEGREES_PER_RADIAN;
         scaledWidth /= hudScale;
 		scaledHeight /= hudScale;

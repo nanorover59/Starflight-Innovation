@@ -10,11 +10,11 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.StructureType;
 
-public class OutpostStructure extends Structure
+public class BioDomeStructure extends Structure
 {
-	public static final Codec<OutpostStructure> CODEC = OutpostStructure.createCodec(OutpostStructure::new);
+	public static final Codec<BioDomeStructure> CODEC = BioDomeStructure.createCodec(BioDomeStructure::new);
 
-	public OutpostStructure(Structure.Config config)
+	public BioDomeStructure(Structure.Config config)
 	{
 		super(config);
 	}
@@ -28,12 +28,12 @@ public class OutpostStructure extends Structure
 	@Override
 	public Optional<Structure.StructurePosition> getStructurePosition(Structure.Context context)
 	{
-		return OutpostStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE, collector -> OutpostStructure.addPieces((StructurePiecesCollector) collector, context));
+		return BioDomeStructure.getStructurePosition(context, Heightmap.Type.WORLD_SURFACE, collector -> BioDomeStructure.addPieces((StructurePiecesCollector) collector, context));
 	}
 
 	private static void addPieces(StructurePiecesCollector collector, Structure.Context context)
 	{
 		BlockPos blockPos = new BlockPos(context.chunkPos().getStartX(), 0, context.chunkPos().getStartZ());
-		OutpostGenerator.addPieces(context, blockPos, collector);
+		BioDomeGenerator.addPieces(context, blockPos, collector);
 	}
 }

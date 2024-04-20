@@ -3,6 +3,9 @@ package space.world;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.enums.DoorHinge;
+import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.state.property.Properties;
@@ -22,12 +25,13 @@ import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
+import space.block.SolidLeverBlock;
 import space.block.StarflightBlocks;
 
-public class OutpostGenerator
+public class BioDomeGenerator
 {
 	private static final int SHELL_RADIUS = 32;
-	private static final int CENTER_RADIUS = 8;
+	private static final int CENTER_RADIUS = 6;
 	private static final int CENTER_HEIGHT = 24;
 	private static final int LEVEL_HEIGHT = 6;
 	private static final int TUNNEL_RADIUS = 5;
@@ -50,7 +54,7 @@ public class OutpostGenerator
 				BlockPos startPos = new BlockPos(pos.getX() + (x << 4), 0, pos.getZ() + (z << 4));
 				
 				if(MathHelper.hypot(x, z) <= chunkRadius)
-					holder.addPiece(new Piece(startPos, center.getX(), center.getY(), center.getZ()));
+					holder.addPiece(new Piece(startPos, center.getX(), center.getY(), center.getZ(), Direction.fromHorizontal(random.nextInt(4))));
 			}
 		}
 	}
@@ -61,9 +65,10 @@ public class OutpostGenerator
 		private final int centerY;
 		private final int centerZ;
 		
-		public Piece(BlockPos start, int x, int y, int z)
+		public Piece(BlockPos start, int x, int y, int z, Direction orientation)
 		{
 			super(StarflightWorldGeneration.OUTPOST_PIECE, 0, new BlockBox(start));
+			this.setOrientation(orientation);
 			this.centerX = x;
 			this.centerY = y;
 			this.centerZ = z;
@@ -96,8 +101,8 @@ public class OutpostGenerator
 		{
 			BlockPos center = new BlockPos(centerX, centerY, centerZ);
 			BlockPos startPos = chunkPos.getBlockPos(0, centerY, 0);
+			BlockPos chunkCenterPos = new BlockPos(8, centerY, 8);
 			boolean spiral = false;
-			//world.setBlockState(startPos, Blocks.GLOWSTONE.getDefaultState(), Block.NOTIFY_LISTENERS);
 			
 			for(int x = 0; x < 16; x++)
 			{
@@ -165,7 +170,6 @@ public class OutpostGenerator
 									else
 										state = Blocks.AIR.getDefaultState();
 								}
-									
 								
 								//if(y <= 0)
 								//	state = BRICKS.getDefaultState();
@@ -225,10 +229,25 @@ public class OutpostGenerator
 			
 			if(spiral)
 			{
-				fillWithOutline(world, chunkBox, centerX - 3, centerY - SHELL_RADIUS + 2, centerZ - 3, centerX + 3, centerY + CENTER_HEIGHT - 1, centerZ - 3, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-				fillWithOutline(world, chunkBox, centerX - 3, centerY - SHELL_RADIUS + 2, centerZ + 3, centerX + 3, centerY + CENTER_HEIGHT - 1, centerZ + 3, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-				fillWithOutline(world, chunkBox, centerX - 3, centerY - SHELL_RADIUS + 2, centerZ - 3, centerX - 3, centerY + CENTER_HEIGHT - 1, centerZ + 3, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
-				fillWithOutline(world, chunkBox, centerX + 3, centerY - SHELL_RADIUS + 2, centerZ - 3, centerX + 3, centerY + CENTER_HEIGHT - 1, centerZ + 3, Blocks.AIR.getDefaultState(), Blocks.AIR.getDefaultState(), false);
+				fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 3, -3, -3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
+				fill(world, chunkBox, 3, chunkCenterPos.getY() - SHELL_RADIUS + 3, -3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
+				fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 3, -3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, -3);
+				fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 3, 3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
+				
+				for(int y = -SHELL_RADIUS; y < 0; y++)
+				{
+					if(y % LEVEL_HEIGHT != 0)
+						continue;
+					
+					fill(world, chunkBox, -CENTER_RADIUS, centerY + y + 1, -1, -CENTER_RADIUS, centerY + y + 4, 1);
+					fill(world, chunkBox, CENTER_RADIUS, centerY + y + 1, -1, CENTER_RADIUS, centerY + y + 4, 1);
+					fill(world, chunkBox, -1, centerY + y + 1, -CENTER_RADIUS, 1, centerY + y + 4, -CENTER_RADIUS);
+					fill(world, chunkBox, -1, centerY + y + 1, CENTER_RADIUS, 1, centerY + y + 4, CENTER_RADIUS);
+					fill(world, chunkBox, -CENTER_RADIUS, centerY + y + 2, -2, -CENTER_RADIUS, centerY + y + 3, 2);
+					fill(world, chunkBox, CENTER_RADIUS, centerY + y + 2, -2, CENTER_RADIUS, centerY + y + 3, 2);
+					fill(world, chunkBox, -2, centerY + y + 2, -CENTER_RADIUS, 2, centerY + y + 3, -CENTER_RADIUS);
+					fill(world, chunkBox, -2, centerY + y + 2, CENTER_RADIUS, 2, centerY + y + 3, CENTER_RADIUS);
+				}
 				
 				BlockState bottomSlab = SLAB.getDefaultState();
 				BlockState topSlab = SLAB.getDefaultState().with(Properties.SLAB_TYPE, SlabType.TOP);
@@ -252,7 +271,20 @@ public class OutpostGenerator
 					spiralPos = spiralPos.up(3).offset(spiralDirection, 6);
 					spiralDirection = spiralDirection.rotateYClockwise();
 				}
+				
+				placeDoor(world, chunkBox, 0, chunkCenterPos.getY() + 1, -6);
 			}
+			
+			world.setBlockState(chunkPos.getStartPos().up(centerY + 2), Blocks.GLOWSTONE.getDefaultState(), Block.NOTIFY_LISTENERS);
+		}
+		
+		public void placeDoor(StructureWorldAccess world, BlockBox chunkBox, int x, int y, int z)
+		{
+			this.fillWithOutline(world, chunkBox, x - 1, y, z, x + 1, y + 1, z, StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState(), StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState(), false);
+			this.fillWithOutline(world, chunkBox, x - 1, y + 2, z, x + 1, y + 2, z, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), false);
+			this.addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState(), x, y, z, chunkBox);
+			this.addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState().with(DoorBlock.HALF, DoubleBlockHalf.UPPER), x, y + 1, z, chunkBox);
+			this.addBlock(world, StarflightBlocks.LEVER_BLOCK.getDefaultState().with(SolidLeverBlock.FACING, Direction.NORTH), x - 1, y + 1, z, chunkBox);
 		}
 	}
 }

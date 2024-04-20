@@ -1,22 +1,16 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "aaa",
+        "aa ",
         "aba",
-        "aaa"
+        " aa"
     ],
     "key": {
         "a": {
-            "item": "minecraft:iron_ingot"
+            "item": "space:iron_plate"
         },
         "b": {
-            "ingredient": {
-                "item": "space:wrench",
-                "consumeItem": false
-            },
-            "damagingItem": {
-                 "damage": 2
-            }
+            "item": "space:iron_frame"
         }
     },
     "result": {

@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " b ",
+        "aba",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_plate"
+        },
+        "b": {
+            "item": "space:iron_frame"
+        },
+        "c": {
+            "item": "minecraft:heavy_weighted_pressure_plate"
+        }
+    },
+    "result": {
+        "item": "space:buffer",
+        "count": 1
+    }
+}

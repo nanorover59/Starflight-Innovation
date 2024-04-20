@@ -368,12 +368,12 @@
                 "offset": 4,
                 "surface_type": "floor",
                 "add_surface_depth": false,
-                "secondary_depth_range": 2
+                "secondary_depth_range": 4
               },
               "then_run": {
                 "type": "minecraft:block",
                 "result_state": {
-                  "Name": "minecraft:blackstone"
+                  "Name": "space:volcanic_slate"
                 }
               }
             },

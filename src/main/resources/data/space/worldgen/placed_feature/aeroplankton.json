@@ -2,14 +2,14 @@
   "feature": "space:aeroplankton",
   "placement": [
     {
+      "type": "minecraft:rarity_filter",
+      "chance": 256
+    },
+    {
       "type": "minecraft:count",
       "count": {
         "type": "minecraft:weighted_list",
         "distribution": [
-          {
-            "weight": 10,
-            "data": 0
-          },
           {
             "weight": 5,
             "data": 1
@@ -29,10 +29,10 @@
       "height": {
         "type": "minecraft:uniform",
         "min_inclusive": {
-          "absolute": -48
+          "absolute": -16
         },
         "max_inclusive": {
-          "absolute": 320
+          "absolute": 128
         }
       }
     },

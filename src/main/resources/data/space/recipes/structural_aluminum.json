@@ -1,15 +1,20 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "space:aluminum_frame"
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aa ",
+        "aba",
+        " aa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_plate"
+        },
+        "b": {
+            "item": "space:aluminum_frame"
+        }
     },
-    {
-      "item": "space:aluminum_ingot"
+    "result": {
+        "item": "space:structural_aluminum",
+        "count": 1
     }
-  ],
-  "result": {
-    "item": "space:structural_aluminum",
-    "count": 1
-  }
 }

@@ -1,13 +1,13 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "cac",
-        "a a",
-        "bab"
+        "   ",
+        " a ",
+        "   "
     ],
     "key": {
         "a": {
-            "item": "minecraft:iron_ingot"
+            "item": "space:iron_machine_casing"
         },
         "b": {
             "item": "space:copper_cable"

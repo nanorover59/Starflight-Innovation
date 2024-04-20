@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "space:block/linear_track_end",
+    "side": "space:block/linear_track_side"
+  }
+}

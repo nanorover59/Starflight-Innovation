@@ -29,6 +29,7 @@ public class StarflightEffects
 	public static SoundEvent STORAGE_CUBE_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "storage_cube"));
 	public static SoundEvent THRUSTER_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "thruster"));
 	public static SoundEvent LEAK_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "leak"));
+	public static SoundEvent ELECTRIC_MOTOR_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "electric_motor"));
 	public static SoundEvent MARS_WIND_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "mars_wind"));
 	public static SoundEvent NOISE_SOUND_EVENT = SoundEvent.of(new Identifier(StarflightMod.MOD_ID, "noise"));
 	
@@ -39,6 +40,7 @@ public class StarflightEffects
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "storage_cube"), STORAGE_CUBE_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "thruster"), THRUSTER_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "leak"), LEAK_SOUND_EVENT);
+		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "electric_motor"), ELECTRIC_MOTOR_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "mars_wind"), MARS_WIND_SOUND_EVENT);
 		Registry.register(Registries.SOUND_EVENT, new Identifier(StarflightMod.MOD_ID, "noise"), NOISE_SOUND_EVENT);
 	}

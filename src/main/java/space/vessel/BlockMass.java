@@ -12,7 +12,7 @@ import net.minecraft.world.World;
 
 public class BlockMass
 {
-	private static double volumeForBlock(BlockState blockState, World world, BlockPos pos)
+	public static double volumeForBlock(BlockState blockState, World world, BlockPos pos)
 	{
 		double volume = 0;
 		

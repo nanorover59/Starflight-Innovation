@@ -34,6 +34,12 @@
       "space:leak"
     ]
   },
+  "electric_motor": {
+    "subtitle": "subtitles.space.electric_motor",
+    "sounds": [
+      "space:electric_motor"
+    ]
+  },
   "mars_wind": {
     "subtitle": "subtitles.space.wind",
     "sounds": [
