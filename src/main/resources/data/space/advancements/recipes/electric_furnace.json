@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_iron_ingot": {
+    "has_iron_machine_casing": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "minecraft:iron_ingot"
+              "space:iron_machine_casing"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_iron_ingot",
+      "has_iron_machine_casing",
       "has_the_recipe"
     ]
   ]

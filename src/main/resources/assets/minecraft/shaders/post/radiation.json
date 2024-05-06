@@ -1,0 +1,43 @@
+{
+    "targets": [
+        "0",
+        "1"
+    ],
+    "passes": [
+        {
+            "name": "aberration",
+            "intarget": "minecraft:main",
+            "outtarget": "0",
+            "uniforms": [
+                {
+                    "name": "FocusPoint",
+                    "values": [ 0.5, 0.5 ]
+                },
+                {
+                    "name": "Strength",
+                    "values": [ 1.0 ]
+                }
+            ]
+        },
+        {
+            "name": "gold_noise",
+            "intarget": "0",
+            "outtarget": "1",
+            "uniforms": [
+                {
+                    "name": "Seed",
+                    "values": [ 1.0 ]
+                },
+                {
+                    "name": "Threshold",
+                    "values": [ 0.9 ]
+                }
+            ]
+        },
+        {
+            "name": "blit",
+            "intarget": "1",
+            "outtarget": "minecraft:main"
+        }
+    ]
+}

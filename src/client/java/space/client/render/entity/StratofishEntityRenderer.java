@@ -22,13 +22,13 @@ public class StratofishEntityRenderer extends MobEntityRenderer<StratofishEntity
 	}
 	
 	@Override
-	protected void scale(StratofishEntity StratofishEntity, MatrixStack matrixStack, float f)
+	protected void scale(StratofishEntity entity, MatrixStack matrixStack, float f)
 	{
 		matrixStack.scale(2.0f, 2.0f, 2.0f);
 	}
 
 	@Override
-	public Identifier getTexture(StratofishEntity stratofishEntity)
+	public Identifier getTexture(StratofishEntity entity)
 	{
 		return TEXTURE;
 	}

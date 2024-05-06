@@ -1,7 +1,8 @@
 {
-  "parent": "minecraft:block/cube_column_horizontal",
+  "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "end": "space:block/vent",
-    "side": "space:block/riveted_iron"
+    "bottom": "space:block/riveted_iron",
+    "side": "space:block/riveted_iron",
+    "top": "space:block/vent"
   }
 }

@@ -50,7 +50,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.item.StarflightItems;
 
-public class CeruleanEntity extends TameableEntity implements Angerable
+public class CeruleanEntity extends TameableEntity implements Angerable, AlienMobEntity
 {
 	private static final TrackedData<Integer> ANGER_TIME = DataTracker.registerData(CeruleanEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	private static final UniformIntProvider ANGER_TIME_RANGE = TimeHelper.betweenSeconds(30, 60);
@@ -124,6 +124,24 @@ public class CeruleanEntity extends TameableEntity implements Angerable
 	protected SoundEvent getDeathSound()
 	{
 		return SoundEvents.BLOCK_AMETHYST_CLUSTER_BREAK;
+	}
+	
+	@Override
+	public boolean isPressureSafe(double pressure)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isTemperatureSafe(int temperature)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean requiresOxygen()
+	{
+		return false;
 	}
 
 	@Override

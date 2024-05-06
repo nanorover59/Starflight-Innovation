@@ -11,6 +11,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -132,7 +134,10 @@ public class HabitableAirBlock extends AirBlock
 						AirUtil.fillVolume(world, volumeList, updateList);
 					else
 						AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
-
+					
+					if(volumeList.size() > 64)
+						((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, world.random.nextLong());
+					
 					return;
 				}
 			}

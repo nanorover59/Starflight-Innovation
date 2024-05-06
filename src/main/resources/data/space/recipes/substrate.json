@@ -1,18 +1,8 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "minecraft:redstone"
-    },
-    {
-      "item": "minecraft:gold_nugget"
-    },
-    {
-      "item": "minecraft:amethyst_shard"
-    }
-  ],
-  "result": {
-    "item": "space:substrate",
-    "count": 1
-  }
+  "type": "space:vacuum_furnace",
+  "ingredient": {
+    "item": "minecraft:glass"
+  },
+  "result": "space:substrate",
+  "experience": 0.2
 }

@@ -13,6 +13,7 @@ public class StarflightParticleTypes
 	public static final DefaultParticleType RCS_THRUSTER = FabricParticleTypes.simple();
 	public static final DefaultParticleType AIR_FILL = FabricParticleTypes.simple();
 	public static final DefaultParticleType MARS_DUST = FabricParticleTypes.simple();
+	public static final DefaultParticleType EYE = FabricParticleTypes.simple();
 
 	public static void initializeParticles()
 	{
@@ -20,5 +21,6 @@ public class StarflightParticleTypes
 		Registry.register(Registries.PARTICLE_TYPE, new Identifier(StarflightMod.MOD_ID, "rcs_thruster"), RCS_THRUSTER);
 		Registry.register(Registries.PARTICLE_TYPE, new Identifier(StarflightMod.MOD_ID, "air_fill"), AIR_FILL);
 		Registry.register(Registries.PARTICLE_TYPE, new Identifier(StarflightMod.MOD_ID, "mars_dust"), MARS_DUST);
+		Registry.register(Registries.PARTICLE_TYPE, new Identifier(StarflightMod.MOD_ID, "eye"), EYE);
 	}
 }

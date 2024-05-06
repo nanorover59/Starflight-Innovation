@@ -19,6 +19,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.StarflightMod;
 import space.util.IWorldMixin;
+import space.world.persistent.StarflightPlayerState;
 
 public class PlanetList
 {
@@ -284,7 +285,7 @@ public class PlanetList
 				buffer.writeDouble(p.getPrecession());
 				buffer.writeDouble(p.getCloudRotation());
 				buffer.writeInt(p.getCloudLevel());
-				buffer.writeBoolean(true);
+				buffer.writeBoolean(StarflightPlayerState.get(server).isPlanetUnlocked(player, p.getName()));
 			}
 			
 			if(initialize)

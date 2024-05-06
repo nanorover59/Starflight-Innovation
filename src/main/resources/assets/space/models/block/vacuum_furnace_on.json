@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "up": "space:block/vacuum_furnace_top_on",
+    "down": "space:block/vacuum_furnace_top_on",
+    "north": "space:block/vacuum_furnace_front_on",
+    "east": "space:block/vacuum_furnace_left_on",
+    "south": "space:block/vacuum_furnace_back_on",
+    "west": "space:block/vacuum_furnace_right_on",
+    "particle": "space:block/vacuum_furnace_top_on"
+  }
+}

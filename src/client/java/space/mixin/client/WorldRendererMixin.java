@@ -253,12 +253,6 @@ public abstract class WorldRendererMixin
 				}
 			}
 			
-			if(StarflightClientEffects.interferenceShader != null)
-			{
-				StarflightClientEffects.interferenceShader.render(tickDelta);
-				client.getFramebuffer().beginWrite(false);
-			}
-			
 			// End of custom sky rendering.
 			//RenderSystem.enableTexture();
 			RenderSystem.depthMask(true);
@@ -284,7 +278,7 @@ public abstract class WorldRendererMixin
 	public void reloadInject(ResourceManager manager, CallbackInfo info)
 	{
 		StarflightClientEffects.bloomShader = StarflightClientEffects.loadShader(client, "bloom");
-		StarflightClientEffects.interferenceShader = StarflightClientEffects.loadShader(client, "interference");
+		StarflightClientEffects.radiationShader = StarflightClientEffects.loadShader(client, "radiation");
 	}
 	
 	@Inject(method = "onResized(II)V", at = @At("TAIL"))
@@ -293,7 +287,7 @@ public abstract class WorldRendererMixin
 		if(StarflightClientEffects.bloomShader != null)
 			StarflightClientEffects.bloomShader.setupDimensions(width, height);
 		
-		if(StarflightClientEffects.interferenceShader != null)
-			StarflightClientEffects.interferenceShader.setupDimensions(width, height);
+		if(StarflightClientEffects.radiationShader != null)
+			StarflightClientEffects.radiationShader.setupDimensions(width, height);
 	}
 }

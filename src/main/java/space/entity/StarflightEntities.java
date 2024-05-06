@@ -24,7 +24,8 @@ public class StarflightEntities
 	public static final EntityType<DustEntity> DUST = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<DustEntity>) DustEntity::new).dimensions(EntityDimensions.changing(1.0f, 2.8f)).build();
 	public static final EntityType<CeruleanEntity> CERULEAN = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<CeruleanEntity>) CeruleanEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.5f)).build();
 	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<AncientHumanoidEntity>) AncientHumanoidEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.8f)).build();
-	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarSpectreEntity>) SolarSpectreEntity::new).dimensions(EntityDimensions.changing(1.5f, 1.5f)).build();
+	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarSpectreEntity>) SolarSpectreEntity::new).dimensions(EntityDimensions.fixed(2.5f, 2.5f)).build();
+	public static final EntityType<SolarEyesEntity> SOLAR_EYES = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarEyesEntity>) SolarEyesEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).build();
 	public static final EntityType<StratofishEntity> STRATOFISH = FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, (EntityType.EntityFactory<StratofishEntity>) StratofishEntity::new).dimensions(EntityDimensions.fixed(1.5f, 0.5f)).build();
 
 	// Entity Tags
@@ -40,6 +41,7 @@ public class StarflightEntities
 		registerMobEntity(CERULEAN, "cerulean", CeruleanEntity.createCeruleanAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 		registerMobEntity(ANCIENT_HUMANOID, "ancient_humanoid", AncientHumanoidEntity.createZombieAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 		registerMobEntity(SOLAR_SPECTRE, "solar_spectre", SolarSpectreEntity.createSolarSpectreAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
+		registerMobEntity(SOLAR_EYES, "solar_eyes", SolarEyesEntity.createSolarEyesAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 		registerMobEntity(STRATOFISH, "stratofish", StratofishEntity.createStratofishAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
 	}
 

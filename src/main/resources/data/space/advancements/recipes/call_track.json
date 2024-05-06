@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:call_track"
+    ]
+  },
+  "criteria": {
+    "has_linear_track": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:linear_track"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:call_track"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_linear_track",
+      "has_the_recipe"
+    ]
+  ]
+}

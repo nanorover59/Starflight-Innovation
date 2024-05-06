@@ -45,6 +45,7 @@ import net.minecraft.world.World;
 import space.block.ElectricFurnaceBlock;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
+import space.recipe.StarflightRecipes;
 import space.screen.ElectricFurnaceScreenHandler;
 
 public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, EnergyBlockEntity
@@ -159,6 +160,8 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, this, world).get();
 		else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, this, world).isEmpty())
 			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, this, world).get();
+		else if(!world.getRecipeManager().getFirstMatch(StarflightRecipes.VACUUM_FURNACE, this, world).isEmpty())
+			recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(StarflightRecipes.VACUUM_FURNACE, this, world).get();
 		else
 			recipe = null;
 		
@@ -433,6 +436,8 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, blockEntity, world).get();
 			else if(!world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).isEmpty())
 				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, blockEntity, world).get();
+			else if(!world.getRecipeManager().getFirstMatch(StarflightRecipes.VACUUM_FURNACE, blockEntity, world).isEmpty())
+				recipe = (RecipeEntry<?>) world.getRecipeManager().getFirstMatch(StarflightRecipes.VACUUM_FURNACE, blockEntity, world).get();
 			else
 				recipe = null;
 			

@@ -4,7 +4,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -50,20 +49,6 @@ public class LeakBlock extends BlockWithEntity
 	}
 
 	@Override
-	public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify)
-	{
-		if(world.isClient)
-			return;
-
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-
-		if(blockEntity instanceof LeakBlockEntity)
-		{
-
-		}
-	}
-
-	@Override
 	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
 	{
 		double vx = 0.0;
@@ -88,11 +73,11 @@ public class LeakBlock extends BlockWithEntity
 		if(world.getBlockState(pos.north()).getBlock() == Blocks.AIR)
 			vz -= 1.0;
 		
-		double vf = 1.0 - random.nextDouble() * 0.1;
-		int i = random.nextBetween(1, 4);
-		
-		for(int j = 0; j < i; j++)
-		{
+		double vf = 1.0 - random.nextDouble() * 0.25;
+		int count = 2 + random.nextInt(3);
+        	
+        for(int i = 0; i < count; i++)
+        {
 			double xOffset = 0.5 + random.nextDouble() - random.nextDouble();
 			double yOffset = 0.5 + random.nextDouble() - random.nextDouble();
 			double zOffset = 0.5 + random.nextDouble() - random.nextDouble();

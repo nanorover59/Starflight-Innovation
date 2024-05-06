@@ -464,7 +464,7 @@ public class MovingCraftEntity extends Entity
 		
 		// Fill the block data array list.
 		for(BlockPos pos : positionList)
-			blockDataList.add(MovingCraftBlockData.fromBlock(world, pos, centerPos, isBlockSolid(world, pos)));
+			blockDataList.add(MovingCraftBlockData.fromBlock(world, positionList, pos, centerPos, isBlockSolid(world, pos)));
 
 		return blockDataList;
 	}

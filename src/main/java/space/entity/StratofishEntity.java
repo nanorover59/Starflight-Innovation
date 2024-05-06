@@ -21,7 +21,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 
-public class StratofishEntity extends FlyingEntity
+public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 {
 	Vec3d targetPosition = Vec3d.ZERO;
     BlockPos circlingCenter = BlockPos.ORIGIN;
@@ -42,6 +42,24 @@ public class StratofishEntity extends FlyingEntity
 	{
         this.goalSelector.add(1, new CircleMovementGoal());
     }
+	
+	@Override
+	public boolean isPressureSafe(double pressure)
+	{
+		return pressure > 0.9;
+	}
+
+	@Override
+	public boolean isTemperatureSafe(int temperature)
+	{
+		return temperature == 2;
+	}
+
+	@Override
+	public boolean requiresOxygen()
+	{
+		return false;
+	}
 	
 	@Override
     public boolean shouldRender(double distance)

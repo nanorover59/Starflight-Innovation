@@ -18,6 +18,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.client.gui.SpaceNavigationScreen;
+import space.item.StarflightItems;
 
 public class PlanetariumBlock extends Block
 {
@@ -44,6 +45,9 @@ public class PlanetariumBlock extends Block
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
 	{
+		if(player.getStackInHand(hand).isOf(StarflightItems.PLANETARIUM_CARD))
+			return ActionResult.PASS;
+		
 		if(world.isClient)
 		{
 			MinecraftClient minecraft = MinecraftClient.getInstance();

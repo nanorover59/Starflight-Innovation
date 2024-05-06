@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a ",
+        "aba",
+        " a "
+    ],
+    "key": {
+        "a": {
+            "item": "space:linear_track"
+        },
+        "b": {
+            "item": "space:control_unit"
+        }
+    },
+    "result": {
+        "item": "space:call_track",
+        "count": 1
+    }
+}

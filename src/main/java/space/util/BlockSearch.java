@@ -246,7 +246,7 @@ public class BlockSearch
 			if(!pos.isWithinDistance(blockPos, distance))
 				return;
 
-			if(!set.contains(blockPos) && !blockState.isAir() && !blockState.isIn(StarflightBlocks.EXCLUDED_BLOCK_TAG))
+			if(!set.contains(blockPos) && !blockState.isAir())
 			{
 				set.add(blockPos);
 				positionList.add(blockPos);

@@ -18,6 +18,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -236,5 +238,45 @@ public class EnergyCableBlock extends Block implements EnergyBlock, Waterloggabl
 	public boolean canConnectToCables(World world, BlockPos pos, BlockState state, Direction direction)
 	{
 		return true;
+	}
+	
+	@Override
+	public BlockState rotate(BlockState state, BlockRotation rotation)
+	{
+		BlockState newState = state.getBlock().getDefaultState();
+		newState = newState.with(UP, state.get(UP));
+		newState = newState.with(DOWN, state.get(DOWN));
+		newState = newState.with(WATERLOGGED, state.get(WATERLOGGED));
+		
+		if(rotation == BlockRotation.NONE)
+		{
+			newState = newState.with(NORTH, state.get(NORTH));
+			newState = newState.with(EAST, state.get(EAST));
+			newState = newState.with(SOUTH, state.get(SOUTH));
+			newState = newState.with(WEST, state.get(WEST));
+		}
+		else if(rotation == BlockRotation.CLOCKWISE_180)
+		{
+			newState = newState.with(NORTH, state.get(SOUTH));
+			newState = newState.with(EAST, state.get(WEST));
+			newState = newState.with(SOUTH, state.get(NORTH));
+			newState = newState.with(WEST, state.get(EAST));
+		}
+		else if(rotation == BlockRotation.COUNTERCLOCKWISE_90)
+		{
+			newState = newState.with(NORTH, state.get(EAST));
+			newState = newState.with(EAST, state.get(SOUTH));
+			newState = newState.with(SOUTH, state.get(WEST));
+			newState = newState.with(WEST, state.get(NORTH));
+		}
+		else if(rotation == BlockRotation.CLOCKWISE_90)
+		{
+			newState = newState.with(NORTH, state.get(WEST));
+			newState = newState.with(EAST, state.get(NORTH));
+			newState = newState.with(SOUTH, state.get(EAST));
+			newState = newState.with(WEST, state.get(SOUTH));
+		}
+		
+		return newState;
 	}
 }

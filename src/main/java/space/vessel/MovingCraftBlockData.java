@@ -1,5 +1,7 @@
 package space.vessel;
 
+import java.util.ArrayList;
+
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
@@ -51,7 +53,7 @@ public class MovingCraftBlockData
 		this.storedFluid = storedFluid;
 	}
 	
-	public static MovingCraftBlockData fromBlock(World world, BlockPos blockPos, BlockPos centerPos, boolean placeFirst)
+	public static MovingCraftBlockData fromBlock(World world, ArrayList<BlockPos> positionList, BlockPos blockPos, BlockPos centerPos, boolean placeFirst)
 	{
 		BlockState blockState = world.getBlockState(blockPos);
 		BlockEntity blockEntity = world.getBlockEntity(blockPos);
@@ -68,7 +70,9 @@ public class MovingCraftBlockData
 		{
 			BlockState otherBlockState = world.getBlockState(offsets[i]);
 			
-			if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
+			if(!positionList.contains(offsets[i]))
+				sidesShowing[i] = true;
+			else if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
 				sidesShowing[i] = false;
 			else if(!otherBlockState.isOpaqueFullCube(world, offsets[i]))
 				sidesShowing[i] = true;

@@ -15,6 +15,7 @@ import space.event.StarflightEvents;
 import space.item.StarflightItems;
 import space.particle.StarflightParticleTypes;
 import space.planet.PlanetList;
+import space.recipe.StarflightRecipes;
 import space.util.StarflightEffects;
 import space.world.StarflightWorldGeneration;
 
@@ -34,6 +35,7 @@ public class StarflightMod implements ModInitializer
 		StarflightEvents.registerEvents();
 		StarflightEffects.initializeSounds();
 		StarflightCommands.initializeCommands();
+		StarflightRecipes.initializeRecipes();
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_button"), (server1, player, handler1, buf, sender) -> RocketControllerBlockEntity.receiveButtonPress(server1, player, handler1, buf, sender));
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_input"), (server1, player, handler1, buf, sender) -> RocketEntity.receiveInput(server1, player, handler1, buf, sender));
 		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_travel_button"), (server1, player, handler1, buf, sender) -> RocketEntity.receiveTravelInput(server1, player, handler1, buf, sender));

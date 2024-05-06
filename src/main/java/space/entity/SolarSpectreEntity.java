@@ -8,13 +8,14 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
 
-public class SolarSpectreEntity extends ZeroGravityMobEntity
+public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMobEntity
 {
 	private int targetCooldown;
 	
@@ -37,6 +38,36 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
         this.goalSelector.add(3, new TrackTargetGoal(15.0, 200, true));
         this.goalSelector.add(4, new RandomFlightGoal(15.0, 200, 16));
     }
+	
+	@Override
+	public boolean isPressureSafe(double pressure)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean isTemperatureSafe(int temperature)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean requiresOxygen()
+	{
+		return false;
+	}
+	
+	@Override
+	public int getRadiationRange()
+	{
+		return 128;
+	}
+	
+	@Override
+	public float getRadiationStrength()
+	{
+		return 1.0f;
+	}
 	
 	@Override public boolean isDisallowedInPeaceful()
 	{
@@ -67,40 +98,8 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
 		super.tick();
 		World world = getWorld();
 		
-		if(world.isClient && getTarget() != null)
-		{
-			/*Vec3f direction = Vec3f.POSITIVE_Z.copy();
-			direction.rotate(clientQuaternion);
-
-			for(int i = 0; i < 2; i++)
-			{
-				double x = getPos().getX() + random.nextDouble() - random.nextDouble();
-				double y = getPos().getY() + random.nextDouble() - random.nextDouble();
-				double z = getPos().getZ() + random.nextDouble() - random.nextDouble();
-				double vx = direction.getX() * 8.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-				double vy = direction.getY() * 8.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-				double vz = direction.getZ() * 8.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-				world.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, vx, vy, vz);
-			}*/
-			
-			double d = distanceTo(getTarget());
-			
-			if(d < 16.0)
-			{
-				Vec3d direction = getTarget().getEyePos().subtract(getPos()).normalize();
-
-				for(int i = 0; i < 2; i++)
-				{
-					double x = getPos().getX() + random.nextDouble() - random.nextDouble();
-					double y = getPos().getY() + random.nextDouble() - random.nextDouble();
-					double z = getPos().getZ() + random.nextDouble() - random.nextDouble();
-					double vx = direction.getX() * 4.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-					double vy = direction.getY() * 4.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-					double vz = direction.getZ() * 4.0 + (random.nextDouble() - random.nextDouble()) * 0.1;
-					world.addParticle(ParticleTypes.ELECTRIC_SPARK, x, y, z, vx, vy, vz);
-				}
-			}
-		}
+		if(world.isClient)
+			return;
 		
 		if(targetCooldown > 0)
 			targetCooldown--;
@@ -114,11 +113,24 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
 			else
 				setTarget(null);
 			
-			if(getTarget() != null && distanceTo(getTarget()) < 3.0)
+			if(getTarget() != null)
 			{
-				if(tryAttack(getTarget()))
+				double distance = distanceTo(getTarget());
+				Vec3d direction = getTarget().getEyePos().subtract(getPos()).normalize();
+				
+				if(distance < 16.0)
 				{
-					playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
+					tryAttack(getTarget());
+					
+					for(int i = 0; i < distance * 2; i++)
+					{
+						double px = getPos().getX() + direction.getX() * i;
+						double py = getPos().getY() + direction.getY() * i;
+						double pz = getPos().getZ() + direction.getZ() * i;
+						((ServerWorld) world).spawnParticles(ParticleTypes.GLOW, px, py, pz, 4, 0.1, 0.1, 0.1, 0.05);
+					}
+					
+					playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 10.0f, 1.0f);
 					targetCooldown = 50;
 				}
 			}
@@ -167,7 +179,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity
 
 		public boolean shouldContinue()
 		{
-			return ticks < 600;
+			return true;
 		}
 	}
 }

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/damaged_titanium_panels"
+      },
+      {
+        "model": "space:block/damaged_titanium_panels",
+        "y": 90
+      },
+      {
+        "model": "space:block/damaged_titanium_panels",
+        "y": 180
+      },
+      {
+        "model": "space:block/damaged_titanium_panels",
+        "y": 270
+      }
+    ]
+  }
+}

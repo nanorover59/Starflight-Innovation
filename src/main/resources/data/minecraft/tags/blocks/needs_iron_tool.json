@@ -10,7 +10,13 @@
     "space:ilmenite_block",
     "space:titanium_block",
     "space:titanium_frame",
+    "space:titanium_panels",
+    "space:damaged_titanium_panels",
     "space:titanium_machine_casing",
+    "space:titanium_glass",
+    "space:titanium_door",
+    "space:extractor",
+    "space:vacuum_furnace",
     "space:linear_actuator",
     "space:linear_track",
     "space:call_track"

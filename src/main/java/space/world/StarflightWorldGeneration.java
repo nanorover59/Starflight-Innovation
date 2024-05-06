@@ -41,10 +41,6 @@ public class StarflightWorldGeneration
 	public static final StructurePieceType CRATER_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "crater_piece"), CraterGenerator.Piece::new);
 	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
 	
-	// Landing Site Structure
-	public static final StructurePieceType LANDING_SITE_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "landing_site_piece"), LandingSiteGenerator.Piece::new);
-	public static final StructureType<LandingSiteStructure> LANDING_SITE_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "landing_site"), () -> LandingSiteStructure.CODEC);
-	
 	// Bio Dome Structure
 	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "biodome_piece"), BioDomeGenerator.Piece::new);
 	public static final StructureType<BioDomeStructure> OUTPOST_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "biodome"), () -> BioDomeStructure.CODEC);
@@ -54,6 +50,10 @@ public class StarflightWorldGeneration
     public static final StructurePieceType MOONSHAFT_CROSSING = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "moonshaft_crossing"), MoonshaftGenerator.MoonshaftCrossing::new);
 	public static final StructureType<MoonshaftStructure> MOONSHAFT_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "moonshaft"), () -> MoonshaftStructure.CODEC);
 
+	// Airship Structure
+	public static final StructurePieceType AIRSHIP_PIECE = Registry.register(Registries.STRUCTURE_PIECE, new Identifier(StarflightMod.MOD_ID, "airship_piece"), AirshipGenerator.Piece::new);
+	public static final StructureType<AirshipStructure> AIRSHIP_TYPE = Registry.register(Registries.STRUCTURE_TYPE, new Identifier(StarflightMod.MOD_ID, "airship"), () -> AirshipStructure.CODEC);
+	
 	// Impact Crater Carver
 	public static final Carver<CraterCarverConfig> CRATER = Registry.register(Registries.CARVER, new Identifier(StarflightMod.MOD_ID, "crater"), new CraterCarver(CraterCarverConfig.CRATER_CODEC));
 	

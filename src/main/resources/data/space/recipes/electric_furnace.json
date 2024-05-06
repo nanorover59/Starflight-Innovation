@@ -1,19 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "   ",
-        " a ",
-        "   "
+        " c ",
+        "bab",
+        " c "
     ],
     "key": {
         "a": {
             "item": "space:iron_machine_casing"
         },
         "b": {
-            "item": "space:copper_cable"
+            "item": "space:coil"
         },
         "c": {
-            "item": "minecraft:redstone"
+            "item": "space:copper_cable"
         }
     },
     "result": {

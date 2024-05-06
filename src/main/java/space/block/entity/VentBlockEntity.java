@@ -11,19 +11,26 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.FluidPipeBlock;
+import space.block.PumpBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
 import space.block.VentBlock;
 import space.util.FluidResourceType;
+import space.util.StarflightEffects;
 
 public class VentBlockEntity extends BlockEntity
 {
 	private boolean water;
 	private BlockPos pump;
+	private int particleTimer = 0;
+	private int soundTimer = 0;
 	
 	public VentBlockEntity(BlockPos pos, BlockState state)
 	{
@@ -151,13 +158,11 @@ public class VentBlockEntity extends BlockEntity
 		if(world.isClient)
 			return;
 		
-		int ventState = state.get(VentBlock.VENT_STATE);
-		
 		if(blockEntity.water && blockEntity.getPump() != null)
 		{
 			PumpBlockEntity pumpBlockEntity = blockEntity.getPump();
 			
-			if(pumpBlockEntity.getEnergyStored() > 0)
+			if(pumpBlockEntity.getEnergyStored() > 0 && pumpBlockEntity.getCachedState().get(PumpBlock.LIT))
 			{
 				for(Direction direction : Direction.values())
 				{
@@ -171,15 +176,21 @@ public class VentBlockEntity extends BlockEntity
 						if(adjacentBlockEntity.getFluidType().getID() == FluidResourceType.WATER.getID())
 						{
 							adjacentBlockEntity.changeStoredFluid(adjacentBlockEntity.getStorageCapacity());
-							
-							if(ventState == 0)
-								world.setBlockState(pos, state.with(VentBlock.VENT_STATE, 2), Block.NOTIFY_LISTENERS);
+
+							if(blockEntity.particleTimer == 0)
+							{
+								Direction ventDirection = state.get(VentBlock.FACING);
+								BlockPos forwardPos = pos.offset(ventDirection);
+								int count = 2 + world.random.nextInt(4);
+								((ServerWorld) world).spawnParticles(ParticleTypes.BUBBLE, forwardPos.getX() + 0.5, forwardPos.getY() + 0.5, forwardPos.getZ() + 0.5, count, 0.5, 0.5, 0.5, 0.01);
+								blockEntity.particleTimer = 10 + world.random.nextInt(5);
+							}
+							else
+								blockEntity.particleTimer--;
 						}
 					}
 				}
 			}
-			else if(ventState > 0)
-				world.setBlockState(pos, state.with(VentBlock.VENT_STATE, 0), Block.NOTIFY_LISTENERS);
 		}
 		else if(world.isReceivingRedstonePower(pos))
 		{
@@ -194,15 +205,31 @@ public class VentBlockEntity extends BlockEntity
 					
 					if(adjacentBlockEntity.getFluidType().getID() == FluidResourceType.OXYGEN.getID() || adjacentBlockEntity.getFluidType().getID() == FluidResourceType.HYDROGEN.getID())
 					{
-						adjacentBlockEntity.changeStoredFluid(-adjacentBlockEntity.getStoredFluid());
+						if(adjacentBlockEntity.getStoredFluid() > 0.1)
+						{
+							if(blockEntity.particleTimer == 0)
+							{
+								Direction ventDirection = state.get(VentBlock.FACING);
+								BlockPos forwardPos = pos.offset(ventDirection);
+								StarflightEffects.sendOutgas(world, forwardPos, forwardPos.offset(ventDirection), false);
+								blockEntity.particleTimer = 5 + world.random.nextInt(5);
+							}
+							else
+								blockEntity.particleTimer--;
+							
+							if(blockEntity.soundTimer == 0)
+							{
+								((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), StarflightEffects.LEAK_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, world.random.nextLong());
+								blockEntity.soundTimer = 70 + world.random.nextInt(10);
+							}
+							else
+								blockEntity.soundTimer--;
+						}
 						
-						if(ventState == 0)
-							world.setBlockState(pos, state.with(VentBlock.VENT_STATE, 1), Block.NOTIFY_LISTENERS);
+						adjacentBlockEntity.changeStoredFluid(-adjacentBlockEntity.getStoredFluid());
 					}
 				}
 			}
 		}
-		else if(ventState > 0)
-			world.setBlockState(pos, state.with(VentBlock.VENT_STATE, 0), Block.NOTIFY_LISTENERS);
     }
 }

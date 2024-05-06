@@ -61,7 +61,7 @@ public class StarflightEffects
 		
 		client.execute(() -> {
 			if(client.world != null)
-				client.world.playSound(null, pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f);
+				client.world.playSound(client.player, pos, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 0.5f, 0.4f);
 		});
 	}
 	
@@ -86,13 +86,13 @@ public class StarflightEffects
 		client.execute(() -> {
 			Random random = Random.createLocal();
 			Vec3i unitVector = pos2.subtract(pos1);
-			int particleCount = 10 + random.nextInt(6);
+			int particleCount = 4 + random.nextInt(6);
 			
 			if(client.world == null)
 				return;
 			
 			if(sound)
-				client.world.playSound(null, pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f);
+				client.world.playSound(client.player, pos1, SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f);
 			
 			for(int i = 0; i < particleCount; i++)
 			{

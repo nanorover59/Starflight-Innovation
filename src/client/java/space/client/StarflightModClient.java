@@ -25,6 +25,7 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
@@ -44,10 +45,12 @@ import space.client.gui.SpaceNavigationScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
 import space.client.render.StarflightClientEffects;
+import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
@@ -55,13 +58,13 @@ import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.client.render.entity.model.StratofishEntityModel;
+import space.entity.AlienMobEntity;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
 import space.particle.StarflightParticleTypes;
 import space.planet.ClientPlanetList;
-import space.render.client.block.entity.WaterTankBlockEntityRenderer;
 import space.screen.StarflightScreens;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftRenderList;
@@ -100,9 +103,12 @@ public class StarflightModClient implements ClientModInitializer
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WALKWAY, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.IRON_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_FRAME, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_GLASS, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.REDSTONE_GLASS, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WATER_TANK, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_TOP, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_STEM, RenderLayer.getCutout());
@@ -116,6 +122,23 @@ public class StarflightModClient implements ClientModInitializer
 			StarflightItems.SPACE_SUIT_CHESTPLATE,
 			StarflightItems.SPACE_SUIT_LEGGINGS,
 			StarflightItems.SPACE_SUIT_BOOTS
+		);
+		
+		ColorProviderRegistry.ITEM.register(
+			(stack, tintIndex) -> {
+				NbtCompound nbt = stack.getNbt();
+				
+				if(nbt == null)
+					return -1;
+				
+				if(tintIndex == 0)
+					return nbt.getInt("secondaryColor");
+				else if(tintIndex == 1)
+					return nbt.getInt("primaryColor");
+				else
+					return -1;
+			},
+			StarflightItems.PLANETARIUM_CARD
 		);
 		
 		// Block Entity Rendering
@@ -135,6 +158,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_SPECTRE, (context) -> new SolarSpectreEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.SOLAR_EYES, (context) -> new SolarEyesEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
@@ -179,6 +203,30 @@ public class StarflightModClient implements ClientModInitializer
 							client.world.addParticle(StarflightParticleTypes.MARS_DUST, x, y, z, -1.0 + random.nextDouble() * 2.0, -1.0 + random.nextDouble() * 2.0, -1.0 + random.nextDouble() * 2.0);
 					}
 				}
+			}
+			
+			// Radiation Shader Effect
+			if(client.world != null && client.player != null)
+			{
+				float maxRadiation = 0.0f;
+				
+				for(Entity entity : client.world.getEntities())
+				{
+					if(entity instanceof AlienMobEntity)
+					{
+						float distance = entity.distanceTo(client.player);
+						
+						if(distance < ((AlienMobEntity) entity).getRadiationRange())
+						{
+							float radiation = (1.0f - (distance / ((AlienMobEntity) entity).getRadiationRange())) * ((AlienMobEntity) entity).getRadiationStrength();
+							
+							if(radiation > maxRadiation)
+								maxRadiation = radiation;
+						}
+					}
+				}
+				
+				StarflightClientEffects.radiation = maxRadiation;
 			}
 		});
 	}

@@ -3,5 +3,5 @@
   "biomes" : "#space:biodome",
   "step" : "surface_structures",
   "spawn_overrides" : {},
-  "terrain_adaptation" : "beard_thin"
+  "terrain_adaptation" : "none"
 }

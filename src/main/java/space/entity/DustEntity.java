@@ -30,7 +30,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 
-public class DustEntity extends HostileEntity
+public class DustEntity extends HostileEntity implements AlienMobEntity
 {
 	private static final TrackedData<Integer> STAMINA = DataTracker.registerData(DustEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	public static final int INITIAL_STAMINA = 1600;
@@ -56,11 +56,23 @@ public class DustEntity extends HostileEntity
         return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 24.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
     }
 	
-	/*@Override
-    public boolean isAttackable()
+	@Override
+	public boolean isPressureSafe(double pressure)
 	{
-        return false;
-    }*/
+		return pressure > 0;
+	}
+
+	@Override
+	public boolean isTemperatureSafe(int temperature)
+	{
+		return true;
+	}
+
+	@Override
+	public boolean requiresOxygen()
+	{
+		return false;
+	}
 	
 	@Override
     public boolean isCollidable()

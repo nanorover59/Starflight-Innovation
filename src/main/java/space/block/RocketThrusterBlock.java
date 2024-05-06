@@ -2,15 +2,16 @@ package space.block;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.MapCodec;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
+import net.minecraft.block.FacingBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
@@ -22,20 +23,23 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
+import net.minecraft.util.BlockMirror;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
-import net.minecraft.world.WorldView;
 import space.client.StarflightModClient;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.CubicHermiteSpline;
 
-public class RocketThrusterBlock extends Block implements Waterloggable
+public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 {
+	public static final MapCodec<RocketThrusterBlock> CODEC = RocketThrusterBlock.createCodec(RocketThrusterBlock::new);
+	
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	private static final double ISP_MULTIPLIER = 2.0;
 	private final double standardGravity = 9.80665;
@@ -47,13 +51,11 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	private final double maxExitPressure;
 	private final CubicHermiteSpline splineISP1;
 	private final CubicHermiteSpline splineISP2;
-	private VoxelShape shape;
 	
-	public RocketThrusterBlock(Settings settings, VoxelShape shape, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
+	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
 	{
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
-		this.shape = shape;
 		this.vacuumThrust = vacuumThrust;
 		this.vacuumISP = vacuumISP * ISP_MULTIPLIER;
 		this.atmISP = atmISP * ISP_MULTIPLIER;
@@ -64,9 +66,21 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		this.atmThrust = atmISP * massFlow * standardGravity;
 	}
 	
+	public RocketThrusterBlock(Settings settings)
+	{
+		this(settings, 0.0, 0.0, 0.0, 0.0);
+	}
+	
+	@Override
+	public MapCodec<? extends RocketThrusterBlock> getCodec()
+	{
+		return CODEC;
+	}
+	
 	@Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
 	{
+		builder.add(FACING);
         builder.add(WATERLOGGED);
     }
 	
@@ -77,27 +91,9 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	}
 
 	@Override
-	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
-	{
-		return shape;
-	}
-
-	@Override
-	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
-	{
-		return shape;
-	}
-
-	@Override
 	public VoxelShape getCullingShape(BlockState state, BlockView world, BlockPos pos)
 	{
 		return VoxelShapes.empty();
-	}
-	
-	@Override
-	public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos)
-	{
-		return shape;
 	}
 	
 	@Override
@@ -116,40 +112,12 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 	}
 	
 	@Override
-	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos)
-	{
-		Iterator<BlockState> iterator = world.getStatesInBox(shape.getBoundingBox().offset(pos)).iterator();
-		int nonAir = 0;
-
-		while(iterator.hasNext())
-		{
-			BlockState iteratorBlockState = iterator.next();
-			
-			if(!iteratorBlockState.isAir())
-				nonAir++;
-		}
-		
-		if(nonAir <= 1 && !(shape.getBoundingBox().minY < 0.0 && world.getBlockState(pos.down()).blocksMovement()))
-			return true;
-		else
-		{
-			if(world.isClient())
-			{
-				MinecraftClient client = MinecraftClient.getInstance();
-				client.player.sendMessage(Text.translatable("block.space.thruster.error"), true);
-			}
-			
-			return false;
-		}
-	}
-	
-	@Override
 	@Nullable
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
 		BlockPos blockPos = context.getBlockPos();
 		FluidState fluidState = context.getWorld().getFluidState(blockPos);
-		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
+		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill()).with(FACING, context.getPlayerLookDirection());
 	}
 	
 	@Override
@@ -161,6 +129,18 @@ public class RocketThrusterBlock extends Block implements Waterloggable
 		return state;
 	}
 	
+	@Override
+	public BlockState rotate(BlockState state, BlockRotation rotation)
+	{
+		return (BlockState) state.with(FACING, rotation.rotate(state.get(FACING)));
+	}
+
+	@Override
+	public BlockState mirror(BlockState state, BlockMirror mirror)
+	{
+		return state.rotate(mirror.getRotation(state.get(FACING)));
+	}
+
 	/**
 	 * Get the maximum mass flow of this rocket engine.
 	 */

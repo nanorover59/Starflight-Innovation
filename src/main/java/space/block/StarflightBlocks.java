@@ -29,6 +29,7 @@ import net.minecraft.block.SaplingBlock;
 import net.minecraft.block.SaplingGenerator;
 import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
+import net.minecraft.block.TransparentBlock;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.block.piston.PistonBehavior;
@@ -79,18 +80,22 @@ public class StarflightBlocks
 	public static final Block ALUMINUM_BLOCK = new Block(FabricBlockSettings.create().mapColor(MapColor.IRON_GRAY).instrument(Instrument.IRON_XYLOPHONE).requiresTool().strength(4.0f, 5.0f).sounds(BlockSoundGroup.COPPER));
 	public static final Block STRUCTURAL_ALUMINUM = new Block(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block RIVETED_ALUMINUM = new Block(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
-	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(3.0f, 3.0f).nonOpaque());
-	public static final Block WALKWAY = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
-	public static final Block IRON_FRAME = new FrameBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(4.0f, 4.0f).nonOpaque());
-	public static final Block IRON_MACHINE_CASING = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK));
+	public static final Block DAMAGED_ALUMINUM = new Block(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
 	public static final Block STRUCTURAL_ALUMINUM_STAIRS = new StairsBlock(STRUCTURAL_ALUMINUM.getDefaultState(), FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
 	public static final Block STRUCTURAL_ALUMINUM_SLAB = new SlabBlock(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
-	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.copyOf(Blocks.WHITE_WOOL).strength(2.0f, 3.0f));
+	public static final Block ALUMINUM_FRAME = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(3.0f, 3.0f).nonOpaque());
+	public static final Block WALKWAY = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
 	public static final Block BAUXITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.RAW_IRON_BLOCK));
 	public static final Block BAUXITE_ORE = new ExperienceDroppingBlock(ConstantIntProvider.create(0), FabricBlockSettings.copyOf(Blocks.IRON_ORE));
 	public static final Block DEEPSLATE_BAUXITE_ORE = new ExperienceDroppingBlock(ConstantIntProvider.create(0), AbstractBlock.Settings.copy(Blocks.DEEPSLATE_IRON_ORE));
+	public static final Block IRON_FRAME = new FrameBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).strength(4.0f, 4.0f).nonOpaque());
+	public static final Block IRON_MACHINE_CASING = new Block(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK));
+	public static final Block REINFORCED_FABRIC = new Block(FabricBlockSettings.copyOf(Blocks.WHITE_WOOL).strength(2.0f, 3.0f));
 	public static final Block TITANIUM_BLOCK = new Block(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(6.0f, 7.0f).sounds(BlockSoundGroup.COPPER));
 	public static final Block TITANIUM_FRAME = new FrameBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).strength(4.0f, 4.0f).nonOpaque());
+	public static final Block TITANIUM_PANELS = new Block(FabricBlockSettings.copyOf(TITANIUM_BLOCK));
+	public static final Block DAMAGED_TITANIUM_PANELS = new Block(FabricBlockSettings.copyOf(TITANIUM_BLOCK));
+	public static final Block TITANIUM_GLASS = new TransparentBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).nonOpaque().allowsSpawning(Blocks::never).solidBlock(Blocks::never).suffocates(Blocks::never).blockVision(Blocks::never));
 	public static final Block TITANIUM_MACHINE_CASING = new Block(FabricBlockSettings.copyOf(TITANIUM_BLOCK));
 	public static final Block ILMENITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.RAW_GOLD_BLOCK));
 	public static final Block ILMENITE_ORE = new ExperienceDroppingBlock(ConstantIntProvider.create(0), FabricBlockSettings.copyOf(Blocks.GOLD_ORE));
@@ -102,7 +107,7 @@ public class StarflightBlocks
 	public static final Block SAPPY_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.SPRUCE_BROWN);
 	public static final Block STRIPPED_RUBBER_LOG = createLogBlock(MapColor.OAK_TAN, MapColor.OAK_TAN);
 	public static final Block RUBBER_LEAVES = createLeavesBlock(BlockSoundGroup.WET_GRASS);
-	public static final Block RUBBER_SAPLING = new SaplingBlock(new SaplingGenerator("rubber", Optional.of(RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree"))), Optional.empty(), Optional.empty()), FabricBlockSettings.copyOf(Blocks.OAK_SAPLING));
+	public static final Block RUBBER_SAPLING = new SaplingBlock(new SaplingGenerator("rubber", Optional.empty(), Optional.of(RegistryKey.of(RegistryKeys.CONFIGURED_FEATURE, new Identifier(StarflightMod.MOD_ID, "rubber_tree"))), Optional.empty()), FabricBlockSettings.copyOf(Blocks.OAK_SAPLING));
 	public static final Block CHEESE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.WET_SPONGE).strength(1.0f, 1.0f));
 	public static final Block REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.LIGHT_GRAY).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), FabricBlockSettings.copyOf(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
@@ -123,6 +128,7 @@ public class StarflightBlocks
 	public static final Block FERRIC_REDSTONE_ORE = new RedstoneOreBlock(FabricBlockSettings.copyOf(Blocks.REDSTONE_ORE));
 	public static final Block HEMATITE_ORE = new ExperienceDroppingBlock(UniformIntProvider.create(0, 2), FabricBlockSettings.copyOf(Blocks.IRON_ORE));
 	public static final Block HEMATITE_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.STONE).strength(3.0f, 8.0f));
+	public static final Block REDSTONE_GLASS = new RedstoneDopedBlock(FabricBlockSettings.copyOf(Blocks.GLASS).strength(0.6f).luminance(createLightLevelFromLitBlockState(5)));
 	public static final Block DRY_SNOW_BLOCK = new Block(FabricBlockSettings.copyOf(Blocks.SNOW_BLOCK).strength(0.1F));
 	public static final Block ARES_MOSS_CARPET = new CarpetBlock(FabricBlockSettings.copyOf(Blocks.MOSS_CARPET).mapColor(MapColor.PURPLE));
 	public static final Block ARES_MOSS_BLOCK = new MossBlock(FabricBlockSettings.copyOf(Blocks.MOSS_BLOCK).mapColor(MapColor.PURPLE));
@@ -143,6 +149,7 @@ public class StarflightBlocks
 	public static final Block PUMP = new PumpBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block EXTRACTOR = new ExtractorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block VACUUM_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
 	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -168,25 +175,31 @@ public class StarflightBlocks
 	public static final Block OXYGEN_SENSOR = new OxygenSensorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block HABITABLE_AIR = new HabitableAirBlock(FabricBlockSettings.create().replaceable().noCollision().dropsNothing().air());
 	public static final Block LEAK = new LeakBlock(FabricBlockSettings.create().replaceable().noCollision().dropsNothing().air());
-	public static final Block DAMAGED_ALUMINUM = new Block(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
 	public static final Block LEVER_BLOCK = new SolidLeverBlock(FabricBlockSettings.copyOf(STRUCTURAL_ALUMINUM));
 	public static final Block STORAGE_CUBE = new StorageCubeBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).nonOpaque());
 	public static final Block AIRLOCK_TRAPDOOR = new SealedTrapdoorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).nonOpaque());
+	public static final Block TITANIUM_DOOR = new SealedDoorBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).nonOpaque());
 	public static final Block IRON_LADDER = new LadderBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
 	public static final Block REACTION_WHEEL = new ReactionWheelBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), 100e3f);
 	public static final Block RCS_BLOCK = new ReactionControlThrusterBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK), ReactionControlThrusterBlock.DIAGONAL);
 	public static final Block BUFFER = new SimpleFacingBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(FabricBlockSettings.copyOf(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
-	public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), Block.createCuboidShape(0.01, 0.01, 0.01, 15.99, 15.99, 15.99), 1.05e6, 400, 360, 100.0);
-	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.0, 1.0, 15.0, 15.99, 15.0), 0.8e6, 450, 400, 100.0);
-	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(0.0, -15.0, 0.0, 16.0, 15.99, 16.0), 0.5e6, 480, 200, 100.0);
-	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), Block.createCuboidShape(1.0, 0.3, 1.0, 15.0, 15.99, 15.0), 0.8e6, 460, 440, 100.0);
+	
+	public static final Block ENGINE_0 = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), 1.0e6, 400, 350, 100.0);
+	public static final Block ENGINE_1 = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0);
+	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0);
+	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0);
+	
+	/*public static final Block THRUSTER_INITIAL = new RocketThrusterBlock(FabricBlockSettings.copyOf(Blocks.IRON_BLOCK), 1.05e6, 400, 360, 100.0);
+	public static final Block THRUSTER_SMALL = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0);
+	public static final Block THRUSTER_VACUUM = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.5e6, 480, 200, 100.0);
+	public static final Block AEROSPIKE = new RocketThrusterBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK), 0.8e6, 460, 440, 100.0);*/
 
 	// Block Entities
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
-	public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, ELECTRIC_FURNACE).build(null);
+	public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectricFurnaceBlockEntity::new, ELECTRIC_FURNACE, VACUUM_FURNACE).build(null);
 	public static final BlockEntityType<SolarPanelBlockEntity> SOLAR_PANEL_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(SolarPanelBlockEntity::new, SOLAR_PANEL).build(null);
 	public static final BlockEntityType<BatteryBlockEntity> BATTERY_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(BatteryBlockEntity::new, BATTERY).build(null);
 	public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(FluidPipeBlockEntity::new, WATER_PIPE, OXYGEN_PIPE, HYDROGEN_PIPE, WATER_PIPE_AL, OXYGEN_PIPE_AL, HYDROGEN_PIPE_AL).build(null);
@@ -216,18 +229,22 @@ public class StarflightBlocks
 		initializeBlock(ALUMINUM_BLOCK, "aluminum_block");
 		initializeBlock(STRUCTURAL_ALUMINUM, "structural_aluminum");
 		initializeBlock(RIVETED_ALUMINUM, "riveted_aluminum");
-		initializeBlock(ALUMINUM_FRAME, "aluminum_frame");
-		initializeBlock(WALKWAY, "walkway");
-		initializeBlock(IRON_FRAME, "iron_frame");
-		initializeBlock(IRON_MACHINE_CASING, "iron_machine_casing");
+		initializeBlock(DAMAGED_ALUMINUM, "damaged_aluminum");
 		initializeBlock(STRUCTURAL_ALUMINUM_STAIRS, "structural_aluminum_stairs");
 		initializeBlock(STRUCTURAL_ALUMINUM_SLAB, "structural_aluminum_slab");
-		initializeBlock(REINFORCED_FABRIC, "reinforced_fabric");
+		initializeBlock(ALUMINUM_FRAME, "aluminum_frame");
+		initializeBlock(WALKWAY, "walkway");
 		initializeBlock(BAUXITE_BLOCK, "bauxite_block");
 		initializeBlock(BAUXITE_ORE, "bauxite_ore");
 		initializeBlock(DEEPSLATE_BAUXITE_ORE, "deepslate_bauxite_ore");
+		initializeBlock(IRON_FRAME, "iron_frame");
+		initializeBlock(IRON_MACHINE_CASING, "iron_machine_casing");
+		initializeBlock(REINFORCED_FABRIC, "reinforced_fabric");
 		initializeBlock(TITANIUM_BLOCK, "titanium_block");
 		initializeBlock(TITANIUM_FRAME, "titanium_frame");
+		initializeBlock(TITANIUM_PANELS, "titanium_panels");
+		initializeBlock(DAMAGED_TITANIUM_PANELS, "damaged_titanium_panels");
+		initializeBlock(TITANIUM_GLASS, "titanium_glass");
 		initializeBlock(TITANIUM_MACHINE_CASING, "titanium_machine_casing");
 		initializeBlock(ILMENITE_BLOCK, "ilmenite_block");
 		initializeBlock(ILMENITE_ORE, "ilmenite_ore");
@@ -260,6 +277,7 @@ public class StarflightBlocks
 		initializeBlock(FERRIC_REDSTONE_ORE, "ferric_redstone_ore");
 		initializeBlock(HEMATITE_ORE, "hematite_ore");
 		initializeBlock(HEMATITE_BLOCK, "hematite_block");
+		initializeBlock(REDSTONE_GLASS, "redstone_glass");
 		initializeBlock(DRY_SNOW_BLOCK, "dry_snow_block");
 		initializeBlock(ARES_MOSS_CARPET, "mars_moss_carpet");
 		initializeBlock(ARES_MOSS_BLOCK, "mars_moss_block");
@@ -280,6 +298,7 @@ public class StarflightBlocks
 		initializeBlock(PUMP, "pump");
 		initializeBlock(ELECTROLYZER, "electrolyzer");
 		initializeBlock(EXTRACTOR, "extractor");
+		initializeBlock(VACUUM_FURNACE, "vacuum_furnace");
 		initializeBlock(SOLAR_PANEL, "solar_panel");
 		initializeBlock(BATTERY, "battery");
 		initializeBlock(BREAKER_SWITCH, "breaker_switch", true, List.of(), List.of(Text.translatable("block.space.breaker_switch.description")));
@@ -305,21 +324,27 @@ public class StarflightBlocks
 		initializeBlock(OXYGEN_SENSOR, "oxygen_sensor", false, List.of(), List.of(Text.translatable("block.space.oxygen_sensor.description_1"), Text.translatable("block.space.oxygen_sensor.description_2")));
 		initializeBlock(HABITABLE_AIR, "habitable_air", false, List.of(), List.of());
 		initializeBlock(LEAK, "leak", false, List.of(), List.of());
-		initializeBlock(DAMAGED_ALUMINUM, "damaged_aluminum");
 		initializeBlock(LEVER_BLOCK, "lever_block");
 		initializeBlock(STORAGE_CUBE, "storage_cube");
 		initializeBlock(AIRLOCK_DOOR, "airlock_door");
 		initializeBlock(AIRLOCK_TRAPDOOR, "airlock_trapdoor");
+		initializeBlock(TITANIUM_DOOR, "titanium_door");
 		initializeBlock(IRON_LADDER, "iron_ladder");
 		initializeBlock(REACTION_WHEEL, "reaction_wheel");
 		initializeBlock(RCS_BLOCK, "rcs_block");
 		initializeBlock(BUFFER, "buffer");
 		initializeBlock(LANDING_LEG, "landing_leg", true, List.of(), List.of(Text.translatable("block.space.landing_leg.description")));
 		initializeBlock(ROCKET_CONTROLLER, "rocket_controller");
-		initializeBlock(THRUSTER_INITIAL, "thruster_initial");
+		
+		initializeBlock(ENGINE_0, "engine_0");
+		initializeBlock(ENGINE_1, "engine_1");
+		initializeBlock(ENGINE_1_GIMBAL, "engine_1_gimbal");
+		initializeBlock(ENGINE_1_VACUUM, "engine_1_vacuum");
+		
+		/*initializeBlock(THRUSTER_INITIAL, "thruster_initial");
 		initializeBlock(THRUSTER_SMALL, "thruster_small");
 		initializeBlock(THRUSTER_VACUUM, "thruster_vacuum");
-		initializeBlock(AEROSPIKE, "aerospike");
+		initializeBlock(AEROSPIKE, "aerospike");*/
 		
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "stirling_engine"), STIRLING_ENGINE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "electric_furnace"), ELECTRIC_FURNACE_BLOCK_ENTITY);

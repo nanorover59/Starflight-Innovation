@@ -24,6 +24,9 @@ public class StarflightEvents
 	
 	public static void registerEvents()
 	{
+		// Resource Reload Event
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PlanetResourceListener());
+		
 		// Server Started Event
 		ServerLifecycleEvents.SERVER_STARTED.register((server) ->
 	    {
@@ -37,6 +40,11 @@ public class StarflightEvents
 	    	saveData(server);
 	    	PlanetList.clear();
 	    });
+		
+		// Server Disconnect Event
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
+			PlanetList.deactivateClient(handler.getPlayer());
+		});
 		
 		// Server Tick Event
 		ServerTickEvents.END_SERVER_TICK.register((server) ->
@@ -54,14 +62,38 @@ public class StarflightEvents
 			}
 	    });
 		
-		// Server Disconnect Event
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
-		{
-			PlanetList.deactivateClient(handler.getPlayer());
-        });
-		
-		// Resource Reload Event
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new PlanetResourceListener());
+		// World Tick Event
+		/*ServerTickEvents.END_WORLD_TICK.register((world) ->
+	    {
+	    	PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+			EntityVelocityState state = EntityVelocityState.get(world);
+			
+			if(data != null && data.overridePhysics())
+			{
+				double gravity = data.getGravity();
+				double air = data.getPressure();
+				
+				for(Entity entity : world.iterateEntities())
+				{
+					if(!entity.isOnGround() && entity instanceof PlayerEntity)
+					{
+						float pitch = entity.getPitch();
+						float yaw = entity.getYaw();
+						Vec3d velocity = entity.getVelocity();
+						Vec3d previousVelocity = state.getVelocity(entity);
+						Vec3d difference = velocity.subtract(previousVelocity);
+						
+						double vy = difference.getY() < 0 ? previousVelocity.getY() + difference.getY() * gravity : velocity.getY();
+						
+						Vec3d newVelocity = new Vec3d(velocity.getX(), vy, velocity.getZ());
+						
+						entity.setVelocity(newVelocity);
+						entity.velocityModified = true;
+						state.setVelocity(entity, newVelocity);
+					}
+				}
+			}
+	    });*/
 	}
 	
 	private static void saveData(MinecraftServer server)

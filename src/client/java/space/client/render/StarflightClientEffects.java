@@ -33,9 +33,10 @@ public class StarflightClientEffects
 {
 	public static VertexBuffer stars;
 	public static VertexBuffer milkyWay;
+	public static float radiation;
 	
 	@Nullable public static PostEffectProcessor bloomShader;
-	@Nullable public static PostEffectProcessor interferenceShader;
+	@Nullable public static PostEffectProcessor radiationShader;
 	
 	public static void initializeBuffers()
 	{

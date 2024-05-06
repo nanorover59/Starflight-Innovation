@@ -15,6 +15,7 @@ import net.minecraft.item.ShovelItem;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolMaterials;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -22,6 +23,7 @@ import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Rarity;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.entity.StarflightEntities;
@@ -49,28 +51,28 @@ public class StarflightItems
 	public static final Item RUBBER_SAP = new Item(new FabricItemSettings());
 	public static final Item RUBBER_RESIN = new Item(new FabricItemSettings());
 	public static final Item RUBBER = new Item(new FabricItemSettings());
+	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE));
 	public static final Item IRON_PLATE = new Item(new FabricItemSettings());
 	public static final Item ALUMINUM_PLATE = new Item(new FabricItemSettings());
 	public static final Item TITANIUM_PLATE = new Item(new FabricItemSettings());
+	public static final Item ALUMINUM_SHAFT = new Item(new FabricItemSettings());
 	public static final Item COIL = new Item(new FabricItemSettings());
 	public static final Item ELECTRIC_MOTOR = new Item(new FabricItemSettings());
-	public static final Item CHEESE = new Item(new FabricItemSettings().food(FoodComponents.APPLE));
-	public static final Item ALUMINUM_SHAFT = new Item(new FabricItemSettings());
+	public static final Item SUBSTRATE = new Item(new FabricItemSettings());
+	public static final Item CONTROL_UNIT = new Item(new FabricItemSettings());
+	public static final Item SOLAR_CELL = new Item(new FabricItemSettings());
+	public static final Item COPPER_INJECTOR = new Item(new FabricItemSettings());
+	public static final Item BATTERY_CELL = new BatteryCellItem(new FabricItemSettings().maxCount(1), 2048.0);
+	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new FabricItemSettings().maxCount(1));
+	public static final Item MULTIMETER = new MultimeterItem(new FabricItemSettings().maxCount(1));
+	public static final Item WRENCH = new WrenchItem(new FabricItemSettings().maxCount(1));
+	public static final Item GUIDE_BOOK = new GuideBookItem(new FabricItemSettings().maxCount(1));
 	public static final Item TITANIUM_SWORD = new SwordItem(ToolMaterials.DIAMOND, 3, -2.4f, new Item.Settings());
     public static final Item TITANIUM_SHOVEL = new ShovelItem(ToolMaterials.DIAMOND, 1.5f, -3.0f, new Item.Settings());
     public static final Item TITANIUM_PICKAXE = new PickaxeItem(ToolMaterials.DIAMOND, 1, -2.8f, new Item.Settings());
     public static final Item TITANIUM_AXE = new AxeItem(ToolMaterials.DIAMOND, 5.0f, -3.1f, new Item.Settings());
     public static final Item TITANIUM_HOE = new CustomHoeItem(ToolMaterials.DIAMOND, -3, -1.0f, new Item.Settings());
-	public static final Item BATTERY_CELL = new BatteryCellItem(new FabricItemSettings().maxCount(1), 2048.0);
-	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new FabricItemSettings().maxCount(1));
-	public static final Item SUBSTRATE = new Item(new FabricItemSettings());
-	public static final Item CONTROL_UNIT = new Item(new FabricItemSettings());
-	public static final Item SOLAR_CELL = new Item(new FabricItemSettings());
-	public static final Item ROCKET_CORE_1 = new Item(new FabricItemSettings());
-	public static final Item ROCKET_CORE_2 = new Item(new FabricItemSettings());
-	public static final Item MULTIMETER = new MultimeterItem(new FabricItemSettings().maxCount(1));
-	public static final Item WRENCH = new WrenchItem(new FabricItemSettings().maxCount(1));
-	public static final Item GUIDE_BOOK = new GuideBookItem(new FabricItemSettings().maxCount(1));
+	public static final Item PLANETARIUM_CARD = new PlanetariumCardItem(new FabricItemSettings().maxCount(1).rarity(Rarity.RARE));
 	public static final Item OXYGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), FluidResourceType.OXYGEN);
 	public static final Item HYDROGEN_LOADER = new LoaderItem(new FabricItemSettings().maxCount(1), FluidResourceType.HYDROGEN);
 	public static final Item DIVIDER = new DividerItem(new FabricItemSettings().maxCount(1));
@@ -111,31 +113,27 @@ public class StarflightItems
 		registerItem(RUBBER_SAP, "rubber_sap");
 		registerItem(RUBBER_RESIN, "rubber_resin");
 		registerItem(RUBBER, "rubber");
+		registerItem(CHEESE, "cheese");
 		registerItem(IRON_PLATE, "iron_plate");
 		registerItem(ALUMINUM_PLATE, "aluminum_plate");
 		registerItem(TITANIUM_PLATE, "titanium_plate");
-		registerItem(CHEESE, "cheese");
+		registerItem(ALUMINUM_SHAFT, "aluminum_shaft");
 		registerItem(COIL, "coil");
 		registerItem(ELECTRIC_MOTOR, "electric_motor");
-		registerItem(ALUMINUM_SHAFT, "aluminum_shaft");
+		registerItem(SUBSTRATE, "substrate");
+		registerItem(CONTROL_UNIT, "control_unit");
+		registerItem(SOLAR_CELL, "solar_cell");
+		registerItem(COPPER_INJECTOR, "copper_injector");
+		registerItem(BATTERY_CELL, "battery_cell");
+		registerItem(OXYGEN_TANK_ITEM, "oxygen_tank_item");
+		registerItem(MULTIMETER, "multimeter");
+		registerItem(WRENCH, "wrench");
+		registerItem(GUIDE_BOOK, "guide_book");
 		registerItem(TITANIUM_SWORD, "titanium_sword");
 		registerItem(TITANIUM_SHOVEL, "titanium_shovel");
 		registerItem(TITANIUM_PICKAXE, "titanium_pickaxe");
 		registerItem(TITANIUM_AXE, "titanium_axe");
 		registerItem(TITANIUM_HOE, "titanium_hoe");
-		registerItem(BATTERY_CELL, "battery_cell");
-		registerItem(OXYGEN_TANK_ITEM, "oxygen_tank_item");
-		registerItem(SUBSTRATE, "substrate");
-		registerItem(CONTROL_UNIT, "control_unit");
-		registerItem(SOLAR_CELL, "solar_cell");
-		registerItem(ROCKET_CORE_1, "rocket_core_1");
-		registerItem(ROCKET_CORE_2, "rocket_core_2");
-		registerItem(MULTIMETER, "multimeter");
-		registerItem(WRENCH, "wrench");
-		registerItem(OXYGEN_LOADER, "oxygen_loader");
-		registerItem(HYDROGEN_LOADER, "hydrogen_loader");
-		registerItem(DIVIDER, "divider");
-		registerItem(GUIDE_BOOK, "guide_book");
 		registerItemHidden(WAND, "item_wand");
 		
 		// Armor Items
@@ -144,7 +142,16 @@ public class StarflightItems
 		registerItem(SPACE_SUIT_LEGGINGS, "space_suit_leggings");
 		registerItem(SPACE_SUIT_BOOTS, "space_suit_boots");
 		
-		// Structure Placer Items
+		// Planetarium Card
+		registerItemHidden(PLANETARIUM_CARD, "planetarium_card");
+		enterPlanetariumCardItem("mercury", 0x6F6076, 0x605C75);
+		enterPlanetariumCardItem("venus", 0xFFF980, 0xFFAA00);
+		enterPlanetariumCardItem("mars", 0xBF6A41, 0xDC4D18);
+		
+		// Creative Items
+		registerItem(OXYGEN_LOADER, "oxygen_loader");
+		registerItem(HYDROGEN_LOADER, "hydrogen_loader");
+		registerItem(DIVIDER, "divider");
 		registerItem(ROCKET_1, "rocket_1");
 		
 		// Spawn Egg Items
@@ -164,5 +171,16 @@ public class StarflightItems
 	private static void registerItemHidden(Item item, String name)
 	{
 		Registry.register(Registries.ITEM, new Identifier(StarflightMod.MOD_ID, name), item);
+	}
+	
+	private static void enterPlanetariumCardItem(String name, int primaryColor, int secondaryColor)
+	{
+		NbtCompound nbt = new NbtCompound();
+		nbt.putString("name", name);
+		nbt.putInt("primaryColor", primaryColor);
+		nbt.putInt("secondaryColor", secondaryColor);
+		ItemStack stack = new ItemStack(PLANETARIUM_CARD);
+		stack.setNbt(nbt);
+		ItemGroupEvents.modifyEntriesEvent(ITEM_GROUP).register(content -> content.add(stack));
 	}
 }

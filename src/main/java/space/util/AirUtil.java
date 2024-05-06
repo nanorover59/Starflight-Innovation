@@ -24,6 +24,7 @@ import space.block.OxygenSensorBlock;
 import space.block.SealedDoorBlock;
 import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
+import space.block.ValveBlock;
 import space.block.entity.FluidPipeBlockEntity;
 import space.block.entity.LeakBlockEntity;
 import space.block.entity.ValveBlockEntity;
@@ -321,7 +322,7 @@ public class AirUtil
 					FluidPipeBlockEntity fluidContainerBlockEntity = (FluidPipeBlockEntity) blockEntity;
 					oxygen += fluidContainerBlockEntity.getStoredFluid();
 				}
-				else if(blockState.getBlock() == StarflightBlocks.VALVE)
+				else if(blockState.getBlock() == StarflightBlocks.VALVE && blockState.get(ValveBlock.MODE) == 1)
 				{
 					ValveBlockEntity valveBlockEntity = (ValveBlockEntity) blockEntity;
 					
@@ -381,11 +382,9 @@ public class AirUtil
 	
 	public static void createLeak(World world, BlockPos pos, int leakTime)
 	{
-		BlockState blockState = world.getBlockState(pos);
+        world.breakBlock(pos, true);
+		world.setBlockState(pos, StarflightBlocks.LEAK.getDefaultState(), Block.NOTIFY_ALL);
 		BlockEntity blockEntity = world.getBlockEntity(pos);
-        Block.dropStacks(blockState, world, pos, blockEntity, null, ItemStack.EMPTY);
-		world.setBlockState(pos, StarflightBlocks.LEAK.getDefaultState());
-		blockEntity = world.getBlockEntity(pos);
 
 		if(blockEntity instanceof LeakBlockEntity)
 			((LeakBlockEntity) blockEntity).setLeakTime(leakTime);

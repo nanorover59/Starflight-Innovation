@@ -244,7 +244,7 @@ public abstract class LivingEntityMixin extends Entity
 			}
 		}
 	}
-	
+	/*
 	/**
 	 * Modify the variable for living entity gravity.
 	 */

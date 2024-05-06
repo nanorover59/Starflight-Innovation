@@ -96,8 +96,6 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Energ
 		
 		if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 		{
-			blockEntity.changeEnergy(-0.125);
-		
 			if(blockEntity.energy == 0 && !frontState.get(HabitableAirBlock.UNSTABLE))
 			{
 				HabitableAirBlock.setUnstable(world, frontPos, frontState);
@@ -109,6 +107,8 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Energ
 		            	player.sendMessage(text, true);
 		        }
 			}
+			
+			blockEntity.changeEnergy(-0.125);
 		}
 	}
 }

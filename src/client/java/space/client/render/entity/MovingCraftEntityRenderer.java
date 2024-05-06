@@ -46,7 +46,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		
 		ArrayList<MovingCraftBlockRenderData> blockList = MovingCraftRenderList.getBlocksForEntity(entityUUID);
 		World world = entity.getEntityWorld();
-		Random random = world.getRandom();
+		Random random = Random.createLocal();
 		BlockPos centerBlockPos = entity.getBlockPos();
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);

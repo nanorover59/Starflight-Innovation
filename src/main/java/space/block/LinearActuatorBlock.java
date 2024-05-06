@@ -29,11 +29,11 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 	@Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify)
     {
-		if(world.isClient || world.getReceivedRedstonePower(pos) == 0)
+		if(world.isClient || !world.isReceivingRedstonePower(pos))
 			return;
 		
-		Direction direction = state.get(FACING).getOpposite();
-		BlockPos offsetPos = pos.offset(direction);
+		Direction direction = state.get(FACING);
+		BlockPos offsetPos = pos.offset(direction.getOpposite());
 		BlockState offsetState = world.getBlockState(offsetPos);
 		
 		if(offsetState.getBlock() == StarflightBlocks.LINEAR_TRACK || offsetState.getBlock() == StarflightBlocks.CALL_TRACK)
@@ -46,12 +46,18 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 			Set<BlockPos> set = new HashSet<BlockPos>();
 			Mutable mutable = offsetPos.mutableCopy();
 			int distance = 0;
+			boolean junctionFlag = false;
 
 			while((world.getBlockState(mutable).getBlock() == StarflightBlocks.LINEAR_TRACK && world.getBlockState(mutable).get(PillarBlock.AXIS).test(redstoneDirection)) || world.getBlockState(mutable).getBlock() == StarflightBlocks.CALL_TRACK)
 			{
+				if(!mutable.equals(offsetPos) && world.getBlockState(mutable).getBlock() == StarflightBlocks.CALL_TRACK)
+					junctionFlag = true;
+				
+				if(!junctionFlag)
+					distance++;
+				
 				set.add(mutable.toImmutable());
 				mutable.move(redstoneDirection);
-				distance++;
 			}
 			
 			mutable = offsetPos.mutableCopy();
@@ -62,7 +68,10 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 				mutable.move(redstoneDirection.getOpposite());
 			}
 			
-			distance--;
+			if(!junctionFlag)
+				distance--;
+			
+			System.out.println(distance);
 			
 			if(distance > 0)
 				spawnEntity(world, pos, pos.offset(redstoneDirection, distance), set);

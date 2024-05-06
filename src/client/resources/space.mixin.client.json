@@ -12,7 +12,9 @@
     "CameraMixin",
     "InGameHudMixin",
     "KeyBindingInvokerMixin",
-    "ClientPlayerInteractionManagerMixin"
+    "ClientPlayerInteractionManagerMixin",
+    "PostEffectProcessorAccessorMixin",
+    "GameRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 0

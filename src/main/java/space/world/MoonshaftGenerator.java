@@ -354,45 +354,6 @@ public class MoonshaftGenerator
 				this.fillWithOutline(world, chunkBox, this.boundingBox.getBlockCountX() - 1, this.boundingBox.getBlockCountY() - 1, i * 3, this.boundingBox.getBlockCountX() - 1, y - 1, i * 3, FRAME_BLOCK.getDefaultState(), FRAME_BLOCK.getDefaultState(), false);
 				y++;
 			}
-			
-			/*this.fill(world, chunkBox, this.boundingBox.getMinX() + 3, this.boundingBox.getMinY() + 1, this.boundingBox.getMinZ() + 3, this.boundingBox.getMaxX() - 3, y, this.boundingBox.getMaxZ() - 3);
-			this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMinX(), y, this.boundingBox.getMinZ(), SOLID_BLOCK.getDefaultState(), SOLID_BLOCK.getDefaultState(), false);
-			this.fillWithOutline(world, chunkBox, this.boundingBox.getMaxX(), this.boundingBox.getMinY(), this.boundingBox.getMinZ(), this.boundingBox.getMaxX(), y, this.boundingBox.getMinZ(), SOLID_BLOCK.getDefaultState(), SOLID_BLOCK.getDefaultState(), false);
-			this.fillWithOutline(world, chunkBox, this.boundingBox.getMinX(), this.boundingBox.getMinY(), this.boundingBox.getMaxZ(), this.boundingBox.getMinX(), y, this.boundingBox.getMaxZ(), SOLID_BLOCK.getDefaultState(), SOLID_BLOCK.getDefaultState(), false);
-			this.fillWithOutline(world, chunkBox, this.boundingBox.getMaxX(), this.boundingBox.getMinY(), this.boundingBox.getMaxZ(), this.boundingBox.getMaxX(), y, this.boundingBox.getMaxZ(), SOLID_BLOCK.getDefaultState(), SOLID_BLOCK.getDefaultState(), false);
-			
-			BlockState bottomSlab = getBrickSlabType(world.toServerWorld());
-			BlockState topSlab = getBrickSlabType(world.toServerWorld()).with(Properties.SLAB_TYPE, SlabType.TOP);
-			Direction spiralDirection = Direction.fromHorizontal(random.nextInt(4));
-			BlockPos spiralOffset = new BlockPos(3, 0, 3);
-
-			for(int i = 0; i <= spiralDirection.getHorizontal(); i++)
-				spiralOffset = spiralOffset.rotate(BlockRotation.CLOCKWISE_90);
-
-			BlockPos spiralPos = new BlockPos(this.boundingBox.getCenter().getX() - spiralOffset.getX(), this.boundingBox.getMinY(), this.boundingBox.getCenter().getZ() - spiralOffset.getZ());
-			this.fillWithOutline(world, boundingBox, this.boundingBox.getCenter().getX(), this.boundingBox.getMinY(), this.boundingBox.getCenter().getZ(), this.boundingBox.getCenter().getX(), y, this.boundingBox.getCenter().getZ(), FRAME_BLOCK.getDefaultState(), AIR, false);
-			
-			while(spiralPos.getY() <= y)
-			{
-				this.fillWithOutline(world, chunkBox, spiralPos.getX() - 1, spiralPos.getY(), spiralPos.getZ() - 1, spiralPos.getX() + 1, spiralPos.getY(), spiralPos.getZ() + 1, bottomSlab, bottomSlab, false);
-				spiralPos = spiralPos.offset(spiralDirection, 3);
-				this.fillWithOutline(world, chunkBox, spiralPos.getX() - 1, spiralPos.getY(), spiralPos.getZ() - 1, spiralPos.getX() + 1, spiralPos.getY(), spiralPos.getZ() + 1, topSlab, topSlab, false);
-				spiralPos = spiralPos.up().offset(spiralDirection, 3);
-				spiralDirection = spiralDirection.rotateYClockwise();
-			}
-			
-			BlockRotation rotation = BlockRotation.random(random);
-			StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(SOLAR_ROOF).get();
-			StructurePlacementData placementdata = new StructurePlacementData().setRotation(rotation);
-			center = new BlockPos(center.getX(), this.boundingBox.getMaxY(), center.getZ());
-			BlockPos pos = template.offsetByTransformedSize(new BlockPos(this.boundingBox.getMinX(), y, this.boundingBox.getMinZ()), placementdata.getMirror(), placementdata.getRotation());
-			template.place(world, pos, pos, placementdata, random, Block.NOTIFY_LISTENERS);*/
-			
-			/*template = world.toServerWorld().getStructureTemplateManager().getTemplate(EXTRACTOR_SHELF).get();
-			placementdata = new StructurePlacementData().setRotation(rotation);
-			pos = new BlockPos(this.boundingBox.getMinX() - 16, y, this.boundingBox.getMinZ());
-			
-			template.place(world, pos, center, placementdata, random, Block.NOTIFY_LISTENERS);*/
 		}
 	}
 	

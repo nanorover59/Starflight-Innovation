@@ -19,6 +19,7 @@ import space.StarflightMod;
 import space.client.StarflightModClient;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.entity.SolarSpectreEntity;
+import space.entity.StratofishEntity;
 import space.util.QuaternionUtil;
 
 @Environment(value = EnvType.CLIENT)
@@ -56,9 +57,15 @@ public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEn
         vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEyes(EYES_TEXTURE));
         this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), 1.0f, 1.0f, 1.0f, alpha);
 	}
+	
+	@Override
+	protected void scale(SolarSpectreEntity entity, MatrixStack matrixStack, float f)
+	{
+		matrixStack.scale(2.0f, 2.0f, 2.0f);
+	}
 
 	@Override
-	public Identifier getTexture(SolarSpectreEntity SolarSpectreEntity)
+	public Identifier getTexture(SolarSpectreEntity entity)
 	{
 		return TEXTURE;
 	}

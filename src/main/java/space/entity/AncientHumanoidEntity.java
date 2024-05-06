@@ -21,7 +21,7 @@ import net.minecraft.world.World;
 import space.item.StarflightItems;
 import space.util.StarflightEffects;
 
-public class AncientHumanoidEntity extends ZombieEntity
+public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntity
 {
 	private static final Item[] HELD_ITEMS = {StarflightItems.TITANIUM_PICKAXE, StarflightItems.TITANIUM_SWORD, StarflightItems.WRENCH};
 	
@@ -75,19 +75,35 @@ public class AncientHumanoidEntity extends ZombieEntity
 	{
 		return SoundEvents.BLOCK_STONE_STEP;
 	}
+	
+	@Override
+	public boolean isPressureSafe(double pressure)
+	{
+		return true;
+	}
 
 	@Override
-	public boolean tryAttack(Entity target)
+	public boolean isTemperatureSafe(int temperature)
 	{
-		boolean bl = super.tryAttack(target);
-		
-		/*if(bl && this.getMainHandStack().isEmpty() && target instanceof LivingEntity)
-		{
-			float f = this.world.getLocalDifficulty(this.getBlockPos()).getLocalDifficulty();
-			((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 140 * (int) f), this);
-		}*/
-		
-		return bl;
+		return true;
+	}
+
+	@Override
+	public boolean requiresOxygen()
+	{
+		return false;
+	}
+	
+	@Override
+	public int getRadiationRange()
+	{
+		return 16;
+	}
+	
+	@Override
+	public float getRadiationStrength()
+	{
+		return 0.5f;
 	}
 	
 	@Override

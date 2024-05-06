@@ -3,7 +3,6 @@ package space.block;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3f;
 
 import com.mojang.serialization.MapCodec;
 
@@ -16,10 +15,8 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.IntProperty;
@@ -29,14 +26,12 @@ import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.PumpBlockEntity;
 import space.block.entity.VentBlockEntity;
 import space.client.StarflightModClient;
-import space.particle.StarflightParticleTypes;
 import space.util.FluidResourceType;
 
 public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
@@ -74,33 +69,6 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.MODEL;
-	}
-	
-	@Override
-    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
-	{
-        if(state.get(VENT_STATE) > 0)
-        {
-        	Direction direction = state.get(FACING);
-        	BlockPos forwardPos = pos.offset(direction);
-        	Vector3f vector = direction.getUnitVector();
-        	int count = 2 + random.nextInt(3);
-        	
-        	for(int i = 0; i < count; i++)
-        	{
-	        	double x = forwardPos.getX() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-	        	double y = forwardPos.getY() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-	        	double z = forwardPos.getZ() + 0.5 + random.nextDouble() * 0.5 - random.nextDouble() * 0.5;
-	        	double vx = vector.x() * 0.25;
-	        	double vy = vector.y() * 0.25;
-	        	double vz = vector.z() * 0.25;
-	        	
-	        	if(state.get(VENT_STATE) == 1 && world.getBlockState(forwardPos).isAir())
-	        		world.addImportantParticle(StarflightParticleTypes.AIR_FILL, x, y, z, vx, vy, vz);
-	        	else if(state.get(VENT_STATE) == 2 && world.getFluidState(forwardPos).isOf(Fluids.WATER))
-	        		world.addImportantParticle(ParticleTypes.BUBBLE, x, y, z, -vx, -vy, -vz);
-        	}
-        }
 	}
 	
 	@Override

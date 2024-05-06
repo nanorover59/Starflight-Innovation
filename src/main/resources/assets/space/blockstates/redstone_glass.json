@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "space:block/redstone_glass" },
+    "lit=true": { "model": "space:block/redstone_glass_on" }
+  }
+}

@@ -1,0 +1,8 @@
+{
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "space:item/planetarium_card_base",
+        "layer1": "space:item/planetarium_card_overlay",
+        "layer2": "space:item/planetarium_card_contacts"
+    }
+}
