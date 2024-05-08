@@ -66,6 +66,7 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.SolarPanelBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.entity.StorageCubeBlockEntity;
+import space.block.entity.VacuumFurnaceBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.block.entity.VentBlockEntity;
 import space.block.entity.WaterTankBlockEntity;
@@ -149,7 +150,7 @@ public class StarflightBlocks
 	public static final Block PUMP = new PumpBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block ELECTROLYZER = new ElectrolyzerBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block EXTRACTOR = new ExtractorBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
-	public static final Block VACUUM_FURNACE = new ElectricFurnaceBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block VACUUM_FURNACE = new VacuumFurnaceBlock(FabricBlockSettings.copyOf(TITANIUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
 	public static final Block BATTERY = new BatteryBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
 	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(FabricBlockSettings.copyOf(ALUMINUM_BLOCK));
@@ -211,6 +212,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<PumpBlockEntity> PUMP_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(PumpBlockEntity::new, PUMP).build(null);
 	public static final BlockEntityType<ExtractorBlockEntity> EXTRACTOR_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ExtractorBlockEntity::new, EXTRACTOR).build(null);
 	public static final BlockEntityType<ElectrolyzerBlockEntity> ELECTROLYZER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(ElectrolyzerBlockEntity::new, ELECTROLYZER).build(null);
+	public static final BlockEntityType<VacuumFurnaceBlockEntity> VACUUM_FURNACE_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(VacuumFurnaceBlockEntity::new, VACUUM_FURNACE).build(null);
 	public static final BlockEntityType<RocketControllerBlockEntity> ROCKET_CONTROLLER_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(RocketControllerBlockEntity::new, ROCKET_CONTROLLER).build(null);
 	public static final BlockEntityType<AtmosphereGeneratorBlockEntity> ATMOSPHERE_GENERATOR_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(AtmosphereGeneratorBlockEntity::new, ATMOSPHERE_GENERATOR).build(null);
 	public static final BlockEntityType<LeakBlockEntity> LEAK_BLOCK_ENTITY = FabricBlockEntityTypeBuilder.create(LeakBlockEntity::new, LEAK).build(null);
@@ -359,6 +361,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "pump"), PUMP_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "extractor"), EXTRACTOR_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "electrolyzer"), ELECTROLYZER_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "vacuum_furnace"), VACUUM_FURNACE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "rocket_controller"), ROCKET_CONTROLLER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "atmosphere_generator"), ATMOSPHERE_GENERATOR_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "leak"), LEAK_BLOCK_ENTITY);

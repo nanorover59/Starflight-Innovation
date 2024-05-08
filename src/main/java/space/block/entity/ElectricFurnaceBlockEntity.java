@@ -19,7 +19,6 @@ import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
@@ -168,7 +167,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		return ElectricFurnaceBlockEntity.canAcceptRecipeOutput(world.getRegistryManager(), recipe, inventory, i);
 	}
 
-	private static int getCookTime(World world, Inventory inventory)
+	public int getCookTime()
 	{
 		//return (Integer) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(200)));
 		return 64;
@@ -221,7 +220,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 		if(slot == 0 && !bl)
 		{
-			this.cookTimeTotal = getCookTime(this.world, this);
+			this.cookTimeTotal = getCookTime();
 			this.cookTime = 0;
 			this.markDirty();
 		}
@@ -451,7 +450,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				if(blockEntity.cookTime == blockEntity.cookTimeTotal)
 				{
 					blockEntity.cookTime = 0;
-					blockEntity.cookTimeTotal = getCookTime(world, blockEntity);
+					blockEntity.cookTimeTotal = blockEntity.getCookTime();
 
 					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
 						blockEntity.setLastRecipe(recipe);

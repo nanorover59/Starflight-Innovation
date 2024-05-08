@@ -44,7 +44,6 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.ElectricFurnaceBlockEntity;
-import space.client.StarflightModClient;
 import space.util.BlockSearch;
 import space.util.StarflightEffects;
 

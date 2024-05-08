@@ -168,21 +168,21 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	@Override
     public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
 	{
-		double p = 0.0;
+		double pressure = 1.0;
 		MinecraftClient client = MinecraftClient.getInstance();
 		
 		if(client.player != null)
 		{
 			PlanetDimensionData data = PlanetList.viewpointDimensionData;
-			p = data == null ? 1.0 : data.getPressure();
+			pressure = data == null ? 1.0 : data.getPressure();
 		}
 		
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.vacuum_thrust").append(df.format(vacuumThrust / 1000.0)).append("kN"));
 		textList.add(Text.translatable("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
-		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(p) / 1000.0)).append("kN"));
-		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(p))).append("s"));
+		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(pressure) / 1000.0)).append("kN"));
+		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(pressure))).append("s"));
 		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
 		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
