@@ -1,8 +1,0 @@
-{
-  "type": "space:vacuum_furnace",
-  "ingredient": {
-    "item": "minecraft:glass"
-  },
-  "result": "space:substrate",
-  "experience": 0.2
-}

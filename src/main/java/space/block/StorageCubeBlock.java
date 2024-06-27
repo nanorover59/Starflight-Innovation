@@ -10,11 +10,9 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
@@ -24,7 +22,6 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -64,7 +61,7 @@ public class StorageCubeBlock extends BlockWithEntity
 	}
 	
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(world.isClient)
 			return ActionResult.SUCCESS;
@@ -108,15 +105,6 @@ public class StorageCubeBlock extends BlockWithEntity
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new StorageCubeBlockEntity(pos, state);
-	}
-
-	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack)
-	{
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-
-		if(itemStack.hasCustomName() && blockEntity instanceof StorageCubeBlockEntity)
-			((StorageCubeBlockEntity) blockEntity).setCustomName(itemStack.getName());
 	}
 
 	@Override

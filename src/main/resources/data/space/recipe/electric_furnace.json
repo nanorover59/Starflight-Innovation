@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        " c "
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_machine_casing"
+        },
+        "b": {
+            "item": "space:coil"
+        },
+        "c": {
+            "item": "space:copper_cable"
+        }
+    },
+    "result": {
+        "id": "space:electric_furnace",
+        "count": 1
+    }
+}

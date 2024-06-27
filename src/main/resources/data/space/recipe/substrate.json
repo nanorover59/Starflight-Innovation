@@ -1,0 +1,13 @@
+{
+  "type": "space:vacuum_furnace",
+  "category": "misc",
+  "ingredient": {
+    "item": "minecraft:quartz"
+  },
+  "result": {
+    "id": "space:substrate",
+    "count": 1
+  },
+  "experience": 0.2,
+  "cookingtime": 200
+}

@@ -3,11 +3,13 @@ package space.planet;
 import java.util.ArrayList;
 
 import net.darkhax.ess.DataCompound;
+import net.minecraft.network.PacketByteBuf;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import space.util.VectorUtil;
 
-public class Planet
+public class Planet implements Comparable<Planet>
 {
 	public static final double G = 6.67430e-11;
 	public static final double EARTH_MASS = 5.97e24;
@@ -49,6 +51,9 @@ public class Planet
 	private Vec3d acceleration;
 	private Vec3d surfaceViewpoint;
 	private Vec3d parkingOrbitViewpoint;
+	private Vec3d positionPrevious;
+	private Vec3d surfaceViewpointPrevious;
+	private Vec3d parkingOrbitViewpointPrevious;
 	private int temperatureCategory;
 	private boolean simpleTexture;
 	private boolean drawClouds;
@@ -76,6 +81,9 @@ public class Planet
 		acceleration = new Vec3d(0.0, 0.0, 0.0);
 		surfaceViewpoint = new Vec3d(0.0, 0.0, 0.0);
 		parkingOrbitViewpoint = new Vec3d(0.0, 0.0, 0.0);
+		positionPrevious = new Vec3d(0.0, 0.0, 0.0);
+		surfaceViewpointPrevious = new Vec3d(0.0, 0.0, 0.0);
+		parkingOrbitViewpointPrevious = new Vec3d(0.0, 0.0, 0.0);
 		satellites = new ArrayList<Planet>();
 	}
 	
@@ -92,6 +100,17 @@ public class Planet
 		
 		return false;	
 	}
+	
+	@Override
+    public int compareTo(Planet other)
+	{
+		if(PlanetList.getClient().getViewpointPlanet() == null)
+			return 0;
+		
+		double r1 = position.subtract(PlanetList.getClient().getViewpointPlanet().getPosition()).length();
+		double r2 = other.getPosition().subtract(PlanetList.getClient().getViewpointPlanet().getPosition()).length();
+        return (int) (r2 - r1);
+    }
 	
 	public void setOrbitParameters(double periapsis_, double apoapsis_, double argumentOfPeriapsis_, double trueAnomaly_, double ascendingNode_, double inclination_)
 	{
@@ -171,48 +190,6 @@ public class Planet
 		}
 	}
 	
-	public DataCompound saveData(DataCompound data)
-	{
-		DataCompound planetData = new DataCompound();
-		planetData.setValue("positionX", position.getX());
-		planetData.setValue("positionY", position.getY());
-		planetData.setValue("positionZ", position.getZ());
-		planetData.setValue("velocityX", velocity.getX());
-		planetData.setValue("velocityY", velocity.getY());
-		planetData.setValue("velocityZ", velocity.getZ());
-		planetData.setValue("rotation", rotation);
-		planetData.setValue("precession", precession);
-		planetData.setValue("parkingOrbitAngle", parkingOrbitAngle);
-		planetData.setValue("cloudRotation", cloudRotation);
-		planetData.setValue("cloudLevel", cloudLevel);
-		planetData.setValue("cloudTimer", cloudTimer);
-		data.setValue(name, planetData);
-		return data;
-	}
-	
-	public void loadData(DataCompound data, ArrayList<String> checkList)
-	{
-		if(!data.hasName(name) || checkList.contains(name))
-			return;
-			
-		DataCompound planetData = data.getDataCompound(name);
-		position = new Vec3d(planetData.getDouble("positionX"), planetData.getDouble("positionY"), planetData.getDouble("positionZ"));
-		velocity = new Vec3d(planetData.getDouble("velocityX"), planetData.getDouble("velocityY"), planetData.getDouble("velocityZ"));
-		rotation = planetData.getDouble("rotation");
-		precession = planetData.getDouble("precession");
-		parkingOrbitAngle = planetData.getDouble("parkingOrbitAngle");
-		cloudRotation = planetData.getDouble("cloudRotation");
-		cloudLevel = planetData.getInt("cloudLevel");
-		cloudTimer = planetData.getInt("cloudTimer");
-		checkList.add(name);
-		
-		if(satellites.isEmpty())
-			return;
-		
-		for(Planet p : satellites)
-			p.loadData(data, checkList);
-	}
-	
 	/**
 	 * The object's database name.
 	 */
@@ -234,9 +211,6 @@ public class Planet
 	 */
 	public Planet getParent()
 	{
-		if(parent == null)
-			parent = PlanetList.getByName(parentName);
-		
 		return parent;
 	}
 	
@@ -485,7 +459,7 @@ public class Planet
 	}
 	
 	/**
-	 * Get the multiplier for solar panel power depending on distance to the sun and the presence of heavy cloud cover.
+	 * Get the multiplier for solar panel power depending on distance to the sun.
 	 */
 	public double getSolarMultiplier()
 	{
@@ -495,7 +469,46 @@ public class Planet
 			return 0.0;
 		
 		d /= 2.238016e22; // Convert the distance from meters to astronomical units.
-		return (1.0 / d) * (hasCloudCover() ? 0.5 : 1.0);
+		return (1.0 / d);
+	}
+	
+	/**
+	 * Get the interpolated position of this object's surface viewpoint measured in meters.
+	 * Used for rendering on the client side.
+	 */
+	public Vec3d getInterpolatedPosition(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, positionPrevious.getX(), position.getX());
+		double y = MathHelper.lerp(partialTicks, positionPrevious.getY(), position.getY());
+		double z = MathHelper.lerp(partialTicks, positionPrevious.getZ(), position.getZ());
+		Vec3d interpolated = new Vec3d(x, y, z);
+		return interpolated;
+	}
+	
+	/**
+	 * Get the interpolated position of this object's surface viewpoint measured in meters.
+	 * Used for rendering on the client side.
+	 */
+	public Vec3d getInterpolatedSurfaceViewpoint(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getX(), surfaceViewpoint.getX());
+		double y = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getY(), surfaceViewpoint.getY());
+		double z = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getZ(), surfaceViewpoint.getZ());
+		Vec3d interpolated = new Vec3d(x, y, z);
+		return interpolated;
+	}
+	
+	/**
+	 * Get the interpolated position of this object's parking orbit viewpoint measured in meters.
+	 * Used for rendering on the client side.
+	 */
+	public Vec3d getInterpolatedParkingOrbitViewpoint(float partialTicks)
+	{
+		double x = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getX(), parkingOrbitViewpoint.getX());
+		double y = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getY(), parkingOrbitViewpoint.getY());
+		double z = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getZ(), parkingOrbitViewpoint.getZ());
+		Vec3d interpolated = new Vec3d(x, y, z);
+		return interpolated;
 	}
 	
 	/**
@@ -536,8 +549,6 @@ public class Planet
 	{
 		if(checkList.contains(name))
 			return;
-		
-		//System.out.println(name + " " + satelliteLevel);
 		
 		if(satelliteLevel > 0)
 		{
@@ -588,9 +599,6 @@ public class Planet
 	 */
 	public void simulatePositionAndRotationChange(double timeStep)
 	{
-		Vec3d absolutePosition = getPosition();
-		Vec3d axisOfRotation = new Vec3d(0.0, 1.0, 0.0);
-		
 		if(satelliteLevel > 0)
 			position = position.add(velocity.multiply(timeStep));
 		
@@ -608,18 +616,6 @@ public class Planet
 		
 		if(parkingOrbitAngle <= 2.0 * Math.PI)
 			parkingOrbitAngle += 2.0 * Math.PI;
-		
-		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
-		axisOfRotation = axisOfRotation.rotateY((float) precession);
-		surfaceViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
-		parkingOrbitViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
-		
-		if(isTidallyLocked)
-			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));
-		
-		// Update sky angle variables.
-		sunAngle = getSunAngleXZ(false);
-		sunAngleOrbit = getSunAngleXZ(true);
 		
 		// Update the clouds animation if this planet has one.
 		if(drawClouds)
@@ -639,6 +635,32 @@ public class Planet
 			if(cloudRotation >= 2.0 * Math.PI)
 				cloudRotation -= 2.0 * Math.PI;
 		}
+		
+		updateViewpoints();
+	}
+	
+	private void updateViewpoints()
+	{
+		Vec3d absolutePosition = getPosition();
+		Vec3d axisOfRotation = new Vec3d(0.0, 1.0, 0.0);
+		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
+		axisOfRotation = axisOfRotation.rotateY((float) precession);
+		surfaceViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
+		parkingOrbitViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
+		
+		if(isTidallyLocked)
+			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));
+		
+		// Update sky angle variables.
+		sunAngle = getSunAngleXZ(false);
+		sunAngleOrbit = getSunAngleXZ(true);
+	}
+	
+	public void movePreviousPositions()
+	{
+		positionPrevious = position;
+		surfaceViewpointPrevious = surfaceViewpoint;
+		parkingOrbitViewpointPrevious = parkingOrbitViewpoint;
 	}
 	
 	/**
@@ -796,5 +818,85 @@ public class Planet
 				p = p.parent;
 			}
 		}
+	}
+	
+	public DynamicData getDynamicData()
+	{
+		return new DynamicData(position, velocity, rotation, precession, parkingOrbitAngle, cloudRotation, cloudLevel, cloudTimer);
+	}
+	
+	public void readDynamicData(DynamicData data)
+	{
+		position = data.position();
+		velocity = data.velocity();
+		rotation = data.rotation();
+		precession = data.precession();
+		parkingOrbitAngle = data.parkingOrbitAngle();
+		cloudRotation = data.cloudRotation();
+		cloudLevel = data.cloudLevel();
+		cloudTimer = data.cloudTimer();
+		updateViewpoints();
+	}
+	
+	public DataCompound saveData(DataCompound data)
+	{
+		DataCompound planetData = new DataCompound();
+		planetData.setValue("positionX", position.getX());
+		planetData.setValue("positionY", position.getY());
+		planetData.setValue("positionZ", position.getZ());
+		planetData.setValue("velocityX", velocity.getX());
+		planetData.setValue("velocityY", velocity.getY());
+		planetData.setValue("velocityZ", velocity.getZ());
+		planetData.setValue("rotation", rotation);
+		planetData.setValue("precession", precession);
+		planetData.setValue("parkingOrbitAngle", parkingOrbitAngle);
+		planetData.setValue("cloudRotation", cloudRotation);
+		planetData.setValue("cloudLevel", cloudLevel);
+		planetData.setValue("cloudTimer", cloudTimer);
+		data.setValue(name, planetData);
+		return data;
+	}
+	
+	public void loadData(DataCompound data, ArrayList<String> checkList)
+	{
+		if(!data.hasName(name) || checkList.contains(name))
+			return;
+			
+		DataCompound planetData = data.getDataCompound(name);
+		position = new Vec3d(planetData.getDouble("positionX"), planetData.getDouble("positionY"), planetData.getDouble("positionZ"));
+		velocity = new Vec3d(planetData.getDouble("velocityX"), planetData.getDouble("velocityY"), planetData.getDouble("velocityZ"));
+		rotation = planetData.getDouble("rotation");
+		precession = planetData.getDouble("precession");
+		parkingOrbitAngle = planetData.getDouble("parkingOrbitAngle");
+		cloudRotation = planetData.getDouble("cloudRotation");
+		cloudLevel = planetData.getInt("cloudLevel");
+		cloudTimer = planetData.getInt("cloudTimer");
+		checkList.add(name);
+		
+		if(satellites.isEmpty())
+			return;
+		
+		for(Planet p : satellites)
+			p.loadData(data, checkList);
+	}
+	
+	public static void writeDynamicData(PacketByteBuf buffer, DynamicData data)
+	{
+		buffer.writeVec3d(data.position());
+		buffer.writeVec3d(data.velocity());
+		buffer.writeDouble(data.rotation());
+		buffer.writeDouble(data.precession());
+		buffer.writeDouble(data.parkingOrbitAngle());
+		buffer.writeDouble(data.cloudRotation());
+		buffer.writeInt(data.cloudLevel());
+		buffer.writeInt(data.cloudTimer());
+	}
+	
+	public record DynamicData(Vec3d position, Vec3d velocity, double rotation, double precession, double parkingOrbitAngle, double cloudRotation, int cloudLevel, int cloudTimer)
+	{
+		public DynamicData(PacketByteBuf buffer)
+	    {
+	    	this(buffer.readVec3d(), buffer.readVec3d(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readInt(), buffer.readInt());
+	    }
 	}
 }

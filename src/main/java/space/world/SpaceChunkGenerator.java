@@ -2,9 +2,8 @@ package space.world;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.block.BlockState;
@@ -32,7 +31,7 @@ import space.StarflightMod;
 
 public class SpaceChunkGenerator extends ChunkGenerator
 {
-	public static final Codec<SpaceChunkGenerator> CODEC = RecordCodecBuilder.create(instance -> instance.group(RegistryOps.getEntryCodec(RegistryKey.of(RegistryKeys.BIOME, new Identifier(StarflightMod.MOD_ID, "space")))).apply(instance, instance.stable(SpaceChunkGenerator::new)));
+	public static final MapCodec<SpaceChunkGenerator> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(RegistryOps.getEntryCodec(RegistryKey.of(RegistryKeys.BIOME, Identifier.of(StarflightMod.MOD_ID, "space")))).apply(instance, instance.stable(SpaceChunkGenerator::new)));
 
 	public SpaceChunkGenerator(RegistryEntry.Reference<Biome> biomeEntry)
 	{
@@ -40,7 +39,7 @@ public class SpaceChunkGenerator extends ChunkGenerator
 	}
 
 	@Override
-	protected Codec<? extends ChunkGenerator> getCodec()
+	protected MapCodec<? extends ChunkGenerator> getCodec()
 	{
 		return CODEC;
 	}
@@ -56,7 +55,7 @@ public class SpaceChunkGenerator extends ChunkGenerator
 	}
 
 	@Override
-	public CompletableFuture<Chunk> populateNoise(Executor executor, Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk)
+	public CompletableFuture<Chunk> populateNoise(Blender blender, NoiseConfig noiseConfig, StructureAccessor structureAccessor, Chunk chunk)
 	{
 		return CompletableFuture.completedFuture(chunk);
 	}

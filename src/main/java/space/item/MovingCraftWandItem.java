@@ -1,6 +1,8 @@
 package space.item;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -24,7 +26,7 @@ public class MovingCraftWandItem extends Item
 	{
         BlockPos pos = player.getBlockPos();
 		ItemStack stack = player.getStackInHand(hand);
-		NbtCompound nbt = stack.getOrCreateNbt();
+		NbtCompound nbt = stack.get(DataComponentTypes.CUSTOM_DATA).copyNbt();
 		
 		if(world.isClient)
 			return TypedActionResult.success(stack);
@@ -35,16 +37,16 @@ public class MovingCraftWandItem extends Item
 			nbt.put("radial", NbtHelper.fromBlockPos(pos));
 		else
 		{
-			BlockPos centerPos = NbtHelper.toBlockPos(nbt.getCompound("center"));
-			BlockPos radialPos = NbtHelper.toBlockPos(nbt.getCompound("radial"));
+			BlockPos centerPos = NbtHelper.toBlockPos(nbt, "center").get();
+			BlockPos radialPos = NbtHelper.toBlockPos(nbt, "radial").get();
 			int baseRadius = (int) Math.hypot(centerPos.getX() - radialPos.getX(), centerPos.getZ() - radialPos.getZ());
 			int height = pos.getY() - centerPos.getY();
 			buildRocket(world, centerPos, baseRadius, height);
-			stack.setNbt(null);
+			stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(new NbtCompound()));
 			return TypedActionResult.success(stack);
 		}
 		
-		stack.setNbt(nbt);
+		stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
 		return TypedActionResult.success(stack);
     }
 	

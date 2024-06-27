@@ -5,6 +5,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
@@ -108,16 +109,16 @@ public class LeakBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.timer = nbt.getInt("timer");
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putInt("timer", timer);
 	}
 }

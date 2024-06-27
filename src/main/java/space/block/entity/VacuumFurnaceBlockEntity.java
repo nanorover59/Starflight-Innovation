@@ -2,12 +2,15 @@ package space.block.entity;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.recipe.AbstractCookingRecipe;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import space.block.ElectricFurnaceBlock;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
+import space.recipe.StarflightRecipes;
 
 public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 {
@@ -16,6 +19,7 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 	public VacuumFurnaceBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
 		super(blockPos, blockState);
+		this.recipeTypes.add(StarflightRecipes.VACUUM_FURNACE);
 	}
 	
 	/**
@@ -43,13 +47,11 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 		pressure = 1.0;
 	}
 	
-	/*@Override
+	@Override
 	public int getCookTime()
 	{
-		//return (Integer) world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, inventory, world).map(AbstractCookingRecipe::getCookTime).orElse(200)));
-		int localCookTime = (int) (64.0 * (1.0 + Math.min(pressure * pressure, 1.0)));
-		return localCookTime;
-	}*/
+		return (Integer) getFirstMatchRecipeOptional().map(recipe -> ((AbstractCookingRecipe) recipe.value()).getCookingTime()).orElse(200) / 4;
+	}
 	
 	@Override
 	public double getInput()
@@ -58,15 +60,17 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 		return localPower / world.getTickManager().getTickRate();
 	}
 	
-	public void writeNbt(NbtCompound nbt)
+	@Override
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("pressure", this.pressure);
 	}
 	
-	public void readNbt(NbtCompound nbt)
+	@Override
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.pressure = nbt.getDouble("pressure");
 	}
 }

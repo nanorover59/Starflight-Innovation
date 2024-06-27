@@ -1,6 +1,7 @@
 package space.block;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,10 +16,11 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -31,7 +33,6 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.ElectrolyzerBlockEntity;
@@ -66,11 +67,14 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
+		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.electrolyzer.description_1"), Text.translatable("block.space.electrolyzer.description_2"));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.electrolyzer.description_1"));
+		textList.add(Text.translatable("block.space.electrolyzer.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -82,13 +86,13 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	@Override
 	public double getInput()
 	{
-		return 16.0;
+		return 64.0;
 	}
 	
 	@Override
 	public double getEnergyCapacity()
 	{
-		return 64.0;
+		return 128.0;
 	}
 	
 	@Override

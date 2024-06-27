@@ -118,7 +118,9 @@ public class BlockSearch
 			if(distanceLimit && tooFar(pos, blockPos))
 				return;
 			
-			if(include.test(world, blockPos))
+			if(edgeCase.test(world, blockPos))
+				foundSet.add(blockPos);
+			else if(include.test(world, blockPos))
 			{
 				set.add(blockPos);
 				
@@ -128,8 +130,6 @@ public class BlockSearch
 					stack.push(offset);
 				}
 			}
-			else if(edgeCase.test(world, blockPos))
-				foundSet.add(blockPos);
 		}
 		
 		if(set.size() < limit)

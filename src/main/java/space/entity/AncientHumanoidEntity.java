@@ -1,6 +1,5 @@
 package space.entity;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.SpawnReason;
@@ -30,7 +29,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 		super((EntityType<? extends ZombieEntity>) entityType, world);
 	}
 	
-	public static DefaultAttributeContainer.Builder createSolarSpectreAttributes()
+	public static DefaultAttributeContainer.Builder createAncientHumanoidAttributes()
 	{
         return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 60.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 1.0f).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
     }
@@ -50,6 +49,12 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	protected boolean burnsInDaylight()
 	{
 		return false;
+	}
+	
+	@Override
+	public float getMovementSpeed()
+	{
+		return super.getMovementSpeed() * (getTarget() == null ? 1.0f : 2.0f);
 	}
 
 	@Override

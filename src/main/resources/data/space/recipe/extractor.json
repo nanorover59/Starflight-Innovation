@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        "dcd"
+    ],
+    "key": {
+        "a": {
+            "item": "space:titanium_machine_casing"
+        },
+        "b": {
+            "item": "space:coil"
+        },
+        "c": {
+            "item": "space:copper_cable"
+        },
+        "d": {
+            "item": "space:water_pipe"
+        }
+    },
+    "result": {
+        "id": "space:extractor",
+        "count": 1
+    }
+}

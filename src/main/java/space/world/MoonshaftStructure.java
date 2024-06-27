@@ -3,7 +3,7 @@ package space.world;
 import java.util.Optional;
 
 import com.mojang.datafixers.util.Either;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.util.math.BlockBox;
@@ -19,7 +19,7 @@ import space.world.MoonshaftGenerator.MoonshaftCore;
 
 public class MoonshaftStructure extends Structure
 {
-	public static final Codec<MoonshaftStructure> CODEC = MoonshaftStructure.createCodec(MoonshaftStructure::new);
+	public static final MapCodec<MoonshaftStructure> CODEC = MoonshaftStructure.createCodec(MoonshaftStructure::new);
 
 	public MoonshaftStructure(Config config)
 	{

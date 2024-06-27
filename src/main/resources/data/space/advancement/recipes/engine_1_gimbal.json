@@ -1,0 +1,47 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:engine_1_gimbal"
+    ]
+  },
+  "criteria": {
+    "has_engine_1_assembly": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:engine_1_assembly"
+            ]
+          }
+        ]
+      }
+    },
+    "has_engine_1_nozzle": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:engine_1_nozzle"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:engine_1"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_engine_1_assembly",
+      "has_engine_1_nozzle",
+      "has_the_recipe"
+    ]
+  ]
+}

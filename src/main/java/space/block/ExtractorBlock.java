@@ -1,6 +1,7 @@
 package space.block;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,12 +16,13 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -34,13 +36,11 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.ExtractorBlockEntity;
@@ -75,11 +75,13 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
+		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.extractor.description"));
+		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.extractor.description"));
+		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -95,7 +97,7 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 	}
 	
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(!world.isClient)
 		{
@@ -138,13 +140,7 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		if(itemStack.hasCustomName())
-		{
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-
-			if(blockEntity instanceof ExtractorBlockEntity)
-				((ExtractorBlockEntity) blockEntity).setCustomName(itemStack.getName());
-		}
+		super.onPlaced(world, pos, state, placer, itemStack);
 		
 		if(!world.isClient)
 			BlockSearch.energyConnectionSearch(world, pos);

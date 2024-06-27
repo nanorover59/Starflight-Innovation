@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "bcb"
+    ],
+    "key": {
+        "a": {
+            "item": "space:solar_cell"
+        },
+        "b": {
+            "item": "space:aluminum_ingot"
+        },
+        "c": {
+            "item": "space:copper_cable"
+        }
+    },
+    "result": {
+        "id": "space:solar_panel",
+        "count": 1
+    }
+}

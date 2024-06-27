@@ -8,7 +8,7 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.SimpleParticleType;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
@@ -28,7 +28,7 @@ public class ThrusterParticle extends SpriteBillboardParticle
 		this.scale = scale;
 		this.spriteProvider = spriteProvider;
 		this.setSpriteForAge(spriteProvider);
-		double m = Math.max(-0.5 * pressure + 0.5, 0.25);
+		double m = Math.max(-0.25 * pressure + 0.25, 0.1);
 		this.velocityX = vx + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityY = vy + (random.nextDouble() - random.nextDouble()) * m;
 		this.velocityZ = vz + (random.nextDouble() - random.nextDouble()) * m;
@@ -74,7 +74,7 @@ public class ThrusterParticle extends SpriteBillboardParticle
 	}
 
 	@Environment(value = EnvType.CLIENT)
-	public static class Factory implements ParticleFactory<DefaultParticleType>
+	public static class Factory implements ParticleFactory<SimpleParticleType>
 	{
 		private final SpriteProvider spriteProvider;
 
@@ -84,7 +84,7 @@ public class ThrusterParticle extends SpriteBillboardParticle
 		}
 
 		@Override
-		public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double x, double y, double z, double vx, double vy, double vz)
+		public Particle createParticle(SimpleParticleType defaultParticleType, ClientWorld clientWorld, double x, double y, double z, double vx, double vy, double vz)
 		{
 			double pressure = 1.0;
 			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(clientWorld);

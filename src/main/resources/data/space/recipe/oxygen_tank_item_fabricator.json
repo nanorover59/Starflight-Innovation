@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "default",
+  "ingredient": {
+    "item": "space:aluminum_ingot"
+  },
+  "result": {
+    "id": "space:oxygen_tank_item",
+    "count": 1
+  },
+  "machiningTime": 200
+}

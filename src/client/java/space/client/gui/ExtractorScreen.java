@@ -15,7 +15,7 @@ import space.screen.ExtractorScreenHandler;
 @Environment(EnvType.CLIENT)
 public class ExtractorScreen extends HandledScreen<ScreenHandler>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/extractor.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/gui/extractor.png");
 
 	public ExtractorScreen(ScreenHandler handler, PlayerInventory inventory, Text title)
 	{

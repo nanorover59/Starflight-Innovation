@@ -9,7 +9,10 @@ import net.minecraft.block.ButtonBlock;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.inventory.LootableInventory;
+import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BiomeTags;
 import net.minecraft.state.property.Properties;
 import net.minecraft.structure.StructureContext;
@@ -43,9 +46,7 @@ public class MoonshaftGenerator
 	private static final Block SOLID_BLOCK = StarflightBlocks.RIVETED_ALUMINUM;
 	private static final Block FRAME_BLOCK = StarflightBlocks.ALUMINUM_FRAME;
 	private static final Block SLAB = StarflightBlocks.STRUCTURAL_ALUMINUM_SLAB;
-	private static final Identifier LOOT_TABLE = new Identifier(StarflightMod.MOD_ID, "chests/moonshaft");
-	private static final Identifier SOLAR_ROOF = new Identifier(StarflightMod.MOD_ID, "moonshaft_solar_roof");
-	private static final Identifier EXTRACTOR_SHELF = new Identifier(StarflightMod.MOD_ID, "extractor_shelf");
+	private static final RegistryKey<LootTable> LOOT_TABLE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(StarflightMod.MOD_ID, "chests/moonshaft"));
 	
 	public static MoonshaftGenerator.MoonshaftPart pickPiece(StructurePiecesHolder holder, Random random, int x, int y, int z, @Nullable Direction orientation, int chainLength, boolean allowCrossing)
 	{
@@ -96,18 +97,10 @@ public class MoonshaftGenerator
 	
 	private static BlockState getBrickType(World world)
 	{
-		if(world.getDimensionKey().getValue().getPath().equals("mars"))
+		if(world.getDimensionEntry().getIdAsString().contains("mars"))
 			return StarflightBlocks.REDSLATE_BRICKS.getDefaultState();
 		
 		return Blocks.STONE_BRICKS.getDefaultState();
-	}
-	
-	private static BlockState getBrickSlabType(World world)
-	{
-		if(world.getDimensionKey().getValue().getPath().equals("mars"))
-			return StarflightBlocks.REDSLATE_BRICK_SLAB.getDefaultState();
-		
-		return Blocks.STONE_BRICK_SLAB.getDefaultState();
 	}
 	
 	static abstract class MoonshaftPart extends StructurePiece
@@ -501,7 +494,7 @@ public class MoonshaftGenerator
 		}
 
 		@Override
-		protected boolean addChest(StructureWorldAccess world, BlockBox boundingBox, Random random, int x, int y, int z, Identifier lootTableId)
+		protected boolean addChest(StructureWorldAccess world, BlockBox boundingBox, Random random, int x, int y, int z, RegistryKey<LootTable> lootTable)
 		{
 			BlockPos.Mutable blockPos = this.offsetPos(x, y, z);
 			

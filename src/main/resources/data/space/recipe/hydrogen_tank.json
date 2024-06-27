@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bab",
+        "aca",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "minecraft:orange_dye"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:hydrogen_tank",
+        "count": 1
+    }
+}

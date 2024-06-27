@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:turbo_pump"
+    ]
+  },
+  "criteria": {
+    "has_impeller": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:impeller"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:turbo_pump"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_impeller",
+      "has_the_recipe"
+    ]
+  ]
+}

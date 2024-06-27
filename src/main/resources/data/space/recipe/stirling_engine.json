@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_machine_casing"
+        },
+        "b": {
+            "item": "minecraft:copper_ingot"
+        },
+        "c": {
+            "item": "space:electric_motor"
+        }
+    },
+    "result": {
+        "id": "space:stirling_engine",
+        "count": 1
+    }
+}

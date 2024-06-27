@@ -13,11 +13,11 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.item.ItemStack;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.AirwayBlock;
 import space.block.AtmosphereGeneratorBlock;
 import space.block.FluidPipeBlock;
 import space.block.OxygenSensorBlock;
@@ -135,7 +135,7 @@ public class AirUtil
 		
 		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
 			BlockState blockState = w.getBlockState(p);
-			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR;
+			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR || (blockState.getBlock() == StarflightBlocks.AIRWAY && !blockState.get(AirwayBlock.CLOSED));
 		};
 		
 		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
@@ -170,6 +170,8 @@ public class AirUtil
 				world.setBlockState(pos, (BlockState) blockState.with(AtmosphereGeneratorBlock.LIT, false));
 			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR)
 				world.setBlockState(pos, (BlockState) blockState.with(OxygenSensorBlock.LIT, false));
+			else if(blockState.getBlock() == StarflightBlocks.AIRWAY)
+				world.setBlockState(pos, (BlockState) blockState.with(AirwayBlock.CLOSED, true));
 		}
 	}
 	
@@ -185,7 +187,7 @@ public class AirUtil
 		
 		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
 			BlockState blockState = w.getBlockState(p);
-			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR;
+			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR || blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR || (blockState.getBlock() == StarflightBlocks.AIRWAY && !blockState.get(AirwayBlock.CLOSED));
 		};
 		
 		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
@@ -226,6 +228,8 @@ public class AirUtil
 				world.setBlockState(pos, (BlockState) blockState.with(AtmosphereGeneratorBlock.LIT, false));
 			else if(blockState.getBlock() == StarflightBlocks.OXYGEN_SENSOR)
 				world.setBlockState(pos, (BlockState) blockState.with(OxygenSensorBlock.LIT, false));
+			else if(blockState.getBlock() == StarflightBlocks.AIRWAY)
+				world.setBlockState(pos, (BlockState) blockState.with(AirwayBlock.CLOSED, true));
 		}
 	}
 	
@@ -270,6 +274,21 @@ public class AirUtil
 			}	
 			
 			return true;
+		}
+		else if(block instanceof AirwayBlock && blockState.get(AirwayBlock.CLOSED))
+		{
+			int solidCount = 0;
+			
+			for(Direction direction : Direction.values())
+			{
+				if(direction == blockState.get(AirwayBlock.FACING) || direction == blockState.get(AirwayBlock.FACING).getOpposite())
+					continue;
+				
+				if(world.getBlockState(position.offset(direction)).isSideSolidFullSquare(world, position.offset(direction), direction.getOpposite()))
+					solidCount++;
+			}
+			
+			return solidCount == 4;
 		}
 		else
 			return blockState.isFullCube(world, position);

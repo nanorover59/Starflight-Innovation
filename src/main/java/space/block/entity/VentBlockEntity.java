@@ -12,13 +12,13 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.FluidPipeBlock;
-import space.block.PumpBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
 import space.block.VentBlock;
@@ -138,19 +138,19 @@ public class VentBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putBoolean("water", water);
 		nbt.put("fluidTankController", NbtHelper.fromBlockPos(pump));
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.water = nbt.getBoolean("water");
-		this.pump = NbtHelper.toBlockPos(nbt.getCompound("pump"));
+		this.pump = NbtHelper.toBlockPos(nbt, "pump").get();
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, VentBlockEntity blockEntity)
@@ -162,7 +162,7 @@ public class VentBlockEntity extends BlockEntity
 		{
 			PumpBlockEntity pumpBlockEntity = blockEntity.getPump();
 			
-			if(pumpBlockEntity.getEnergyStored() > 0 && pumpBlockEntity.getCachedState().get(PumpBlock.LIT))
+			if(pumpBlockEntity.getEnergyStored() > 0 && pumpBlockEntity.getEnergyStored() > 0)
 			{
 				for(Direction direction : Direction.values())
 				{

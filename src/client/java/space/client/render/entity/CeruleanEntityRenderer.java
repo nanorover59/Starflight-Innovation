@@ -13,7 +13,7 @@ import space.entity.CeruleanEntity;
 @Environment(value = EnvType.CLIENT)
 public class CeruleanEntityRenderer extends MobEntityRenderer<CeruleanEntity, CeruleanEntityModel<CeruleanEntity>>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/cerulean.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/cerulean.png");
 
 	public CeruleanEntityRenderer(EntityRendererFactory.Context context)
 	{

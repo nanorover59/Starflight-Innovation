@@ -14,7 +14,7 @@ import space.entity.StratofishEntity;
 @Environment(value = EnvType.CLIENT)
 public class StratofishEntityRenderer extends MobEntityRenderer<StratofishEntity, StratofishEntityModel<StratofishEntity>>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/stratofish.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/stratofish.png");
 
 	public StratofishEntityRenderer(EntityRendererFactory.Context context)
 	{

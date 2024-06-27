@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a",
+        "a",
+        "b"
+    ],
+    "key": {
+        "a": {
+            "item": "space:titanium_ingot"
+        },
+        "b": {
+            "item": "space:aluminum_shaft"
+        }
+    },
+    "result": {
+        "id": "space:titanium_sword",
+        "count": 1
+    }
+}

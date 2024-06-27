@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a a",
+        "b b"
+    ],
+    "key": {
+        "a": {
+            "item": "space:reinforced_fabric"
+        },
+        "b": {
+            "item": "space:aluminum_ingot"
+        }
+    },
+    "result": {
+        "id": "space:space_suit_boots",
+        "count": 1
+    }
+}

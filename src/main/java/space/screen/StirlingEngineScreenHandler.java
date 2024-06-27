@@ -8,6 +8,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeInputProvider;
 import net.minecraft.recipe.RecipeMatcher;
+import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
@@ -59,9 +61,9 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		this.getSlot(0).setStack(ItemStack.EMPTY);
 	}
 
-	public boolean matches(Recipe<? super Inventory> recipe)
+	public boolean matches(Recipe<? super RecipeInput> recipe)
 	{
-		return recipe.matches(this.inventory, this.world);
+		return recipe.matches(new SingleStackRecipeInput(this.inventory.getStack(0)), this.world);
 	}
 
 	public boolean canUse(PlayerEntity player)

@@ -3,14 +3,12 @@ package space.item;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -29,7 +27,7 @@ public class MultimeterItem extends Item
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.multimeter.description_1"), Text.translatable("item.space.multimeter.description_2"));
 	}

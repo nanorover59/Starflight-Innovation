@@ -1,53 +1,45 @@
 package space.entity;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EntityType.Builder;
 import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.SpawnRestriction.Location;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.Heightmap;
 import space.StarflightMod;
 
 public class StarflightEntities
 {
-	public static final EntityType<MovingCraftEntity> MOVING_CRAFT = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<MovingCraftEntity>) MovingCraftEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
-	public static final EntityType<RocketEntity> ROCKET = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<RocketEntity>) RocketEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
-	public static final EntityType<LinearPlatformEntity> LINEAR_PLATFORM = FabricEntityTypeBuilder.create(SpawnGroup.MISC, (EntityType.EntityFactory<LinearPlatformEntity>) LinearPlatformEntity::new).dimensions(EntityDimensions.changing(0.5f, 0.5f)).build();
-	public static final EntityType<DustEntity> DUST = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<DustEntity>) DustEntity::new).dimensions(EntityDimensions.changing(1.0f, 2.8f)).build();
-	public static final EntityType<CeruleanEntity> CERULEAN = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<CeruleanEntity>) CeruleanEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.5f)).build();
-	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<AncientHumanoidEntity>) AncientHumanoidEntity::new).dimensions(EntityDimensions.fixed(0.5f, 1.8f)).build();
-	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarSpectreEntity>) SolarSpectreEntity::new).dimensions(EntityDimensions.fixed(2.5f, 2.5f)).build();
-	public static final EntityType<SolarEyesEntity> SOLAR_EYES = FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, (EntityType.EntityFactory<SolarEyesEntity>) SolarEyesEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).build();
-	public static final EntityType<StratofishEntity> STRATOFISH = FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, (EntityType.EntityFactory<StratofishEntity>) StratofishEntity::new).dimensions(EntityDimensions.fixed(1.5f, 0.5f)).build();
+	public static final EntityType<MovingCraftEntity> MOVING_CRAFT = registerEntity(Identifier.of(StarflightMod.MOD_ID, "moving_craft"), EntityType.Builder.<MovingCraftEntity>create(MovingCraftEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
+	public static final EntityType<RocketEntity> ROCKET = registerEntity(Identifier.of(StarflightMod.MOD_ID, "rocket"), EntityType.Builder.<RocketEntity>create(RocketEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
+	public static final EntityType<LinearPlatformEntity> LINEAR_PLATFORM = registerEntity(Identifier.of(StarflightMod.MOD_ID, "linear_platform"), EntityType.Builder.<LinearPlatformEntity>create(LinearPlatformEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
+	public static final EntityType<PlasmaBallEntity> PLASMA_BALL = registerEntity(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), EntityType.Builder.<PlasmaBallEntity>create(PlasmaBallEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f));
+	public static final EntityType<DustEntity> DUST = registerEntity(Identifier.of(StarflightMod.MOD_ID, "dust"), EntityType.Builder.<DustEntity>create(DustEntity::new, SpawnGroup.MONSTER).dimensions(1.0f, 2.8f));
+	public static final EntityType<CeruleanEntity> CERULEAN = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cerulean"), EntityType.Builder.<CeruleanEntity>create(CeruleanEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.5f));
+	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = registerEntity(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), EntityType.Builder.<AncientHumanoidEntity>create(AncientHumanoidEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.8f));
+	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), EntityType.Builder.<SolarSpectreEntity>create(SolarSpectreEntity::new, SpawnGroup.MONSTER).dimensions(2.5f, 2.5f));
+	public static final EntityType<SolarEyesEntity> SOLAR_EYES = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_eyes"), EntityType.Builder.<SolarEyesEntity>create(SolarEyesEntity::new, SpawnGroup.AMBIENT).dimensions(0.5f, 0.5f));
+	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.5f));
 
 	// Entity Tags
-	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(RegistryKeys.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "no_oxygen"));
+	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "no_oxygen"));
 
 	public static void initializeEntities()
 	{
-		Registry.register(Registries.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "moving_craft"), MOVING_CRAFT);
-		Registry.register(Registries.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "rocket"), ROCKET);
-		Registry.register(Registries.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, "linear_platform"), LINEAR_PLATFORM);
-
-		registerMobEntity(DUST, "dust", DustEntity.createDustAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
-		registerMobEntity(CERULEAN, "cerulean", CeruleanEntity.createCeruleanAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
-		registerMobEntity(ANCIENT_HUMANOID, "ancient_humanoid", AncientHumanoidEntity.createZombieAttributes(), Location.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
-		registerMobEntity(SOLAR_SPECTRE, "solar_spectre", SolarSpectreEntity.createSolarSpectreAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
-		registerMobEntity(SOLAR_EYES, "solar_eyes", SolarEyesEntity.createSolarEyesAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
-		registerMobEntity(STRATOFISH, "stratofish", StratofishEntity.createStratofishAttributes(), Location.NO_RESTRICTIONS, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES);
+		FabricDefaultAttributeRegistry.register(DUST, DustEntity.createDustAttributes());
+		FabricDefaultAttributeRegistry.register(CERULEAN, CeruleanEntity.createCeruleanAttributes());
+		FabricDefaultAttributeRegistry.register(ANCIENT_HUMANOID, AncientHumanoidEntity.createAncientHumanoidAttributes());
+		FabricDefaultAttributeRegistry.register(SOLAR_SPECTRE, SolarSpectreEntity.createSolarSpectreAttributes());
+		FabricDefaultAttributeRegistry.register(SOLAR_EYES, SolarEyesEntity.createSolarEyesAttributes());
+		FabricDefaultAttributeRegistry.register(STRATOFISH, StratofishEntity.createStratofishAttributes());
 	}
-
-	private static <T extends MobEntity> void registerMobEntity(EntityType<T> entityType, String name, DefaultAttributeContainer.Builder attributes, Location location, Heightmap.Type heightmap)
+	
+	private static <T extends Entity> EntityType<T> registerEntity(Identifier id, Builder<T> type)
 	{
-		Registry.register(Registries.ENTITY_TYPE, new Identifier(StarflightMod.MOD_ID, name), entityType);
-		FabricDefaultAttributeRegistry.register(entityType, attributes);
-	}
+        return Registry.register(Registries.ENTITY_TYPE, id, type.build());
+    }
 }

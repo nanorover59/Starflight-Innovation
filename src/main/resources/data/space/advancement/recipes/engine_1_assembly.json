@@ -1,0 +1,60 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:engine_1_assembly"
+    ]
+  },
+  "criteria": {
+    "has_copper_injector": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:copper_injector"
+            ]
+          }
+        ]
+      }
+    },
+    "has_cooled_copper": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:cooled_copper"
+            ]
+          }
+        ]
+      }
+    },
+    "has_turbo_pump": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:turbo_pump"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:engine_1_assembly"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_copper_injector",
+      "has_cooled_copper",
+      "has_turbo_pump",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "default",
+  "ingredient": {
+    "item": "space:aluminum_ingot"
+  },
+  "result": {
+    "id": "space:aluminum_plate",
+    "count": 12
+  },
+  "machiningTime": 200
+}

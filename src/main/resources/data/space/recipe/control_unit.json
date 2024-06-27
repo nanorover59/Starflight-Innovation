@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " b ",
+        "cac",
+        " b "
+    ],
+    "key": {
+        "a": {
+            "item": "space:substrate"
+        },
+        "b": {
+            "item": "minecraft:redstone"
+        },
+        "c": {
+            "item": "minecraft:gold_nugget"
+        }
+    },
+    "result": {
+        "id": "space:control_unit",
+        "count": 1
+    }
+}

@@ -16,7 +16,7 @@ import space.entity.AncientHumanoidEntity;
 @Environment(value = EnvType.CLIENT)
 public class AncientHumanoidEntityRenderer extends BipedEntityRenderer<AncientHumanoidEntity, AncientHumanoidEntityModel<AncientHumanoidEntity>>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/ancient_humanoid.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/ancient_humanoid.png");
 
 	public AncientHumanoidEntityRenderer(EntityRendererFactory.Context context)
 	{

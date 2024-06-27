@@ -2,7 +2,7 @@ package space.world;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +12,7 @@ import net.minecraft.world.gen.structure.StructureType;
 
 public class AirshipStructure extends Structure
 {
-	public static final Codec<AirshipStructure> CODEC = AirshipStructure.createCodec(AirshipStructure::new);
+	public static final MapCodec<AirshipStructure> CODEC = AirshipStructure.createCodec(AirshipStructure::new);
 
 	public AirshipStructure(Structure.Config config)
 	{

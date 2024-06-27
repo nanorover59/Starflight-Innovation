@@ -73,10 +73,10 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
     }
 	
 	@Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt)
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData)
 	{
         this.circlingCenter = this.getBlockPos().up(5);
-        return super.initialize(world, difficulty, spawnReason, entityData, entityNbt);
+        return super.initialize(world, difficulty, spawnReason, entityData);
 	}
 	
 	@Override

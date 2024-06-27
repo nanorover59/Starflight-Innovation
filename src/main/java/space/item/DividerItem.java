@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
@@ -30,7 +28,7 @@ public class DividerItem extends Item
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.divider.description_1"), Text.translatable("item.space.divider.description_2"));

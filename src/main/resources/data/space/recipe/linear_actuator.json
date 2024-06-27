@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        " d "
+    ],
+    "key": {
+        "a": {
+            "item": "space:titanium_frame"
+        },
+        "b": {
+            "item": "space:titanium_plate"
+        },
+        "c": {
+            "item": "space:control_unit"
+        },
+        "d": {
+            "item": "space:electric_motor"
+        }
+    },
+    "result": {
+        "id": "space:linear_actuator",
+        "count": 1
+    }
+}

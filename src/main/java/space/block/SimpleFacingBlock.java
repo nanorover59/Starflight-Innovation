@@ -59,8 +59,8 @@ public class SimpleFacingBlock extends FacingBlock
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx)
+	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getPlayerLookDirection().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerLookDirection().getOpposite());
 	}
 }

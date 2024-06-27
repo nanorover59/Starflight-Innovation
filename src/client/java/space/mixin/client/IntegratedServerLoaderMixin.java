@@ -12,13 +12,13 @@ import net.minecraft.server.integrated.IntegratedServerLoader;
 @Mixin(IntegratedServerLoader.class)
 public abstract class IntegratedServerLoaderMixin
 {
-	@ModifyVariable(method = "start(Lnet/minecraft/world/level/storage/LevelStorage$Session;Lcom/mojang/serialization/Dynamic;ZZLjava/lang/Runnable;)V", at = @At("HEAD"), index = 4, argsOnly = true)
+	@ModifyVariable(method = "start(Lnet/minecraft/world/level/storage/LevelStorage$Session;Lcom/mojang/serialization/Dynamic;ZLjava/lang/Runnable;)V", at = @At("HEAD"), ordinal = 1)
 	private boolean modifyCanShowBackupPrompt(boolean b)
 	{
 		return false;
 	}
 	
-	@ModifyVariable(method = "tryLoad(Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/client/gui/screen/world/CreateWorldScreen;Lcom/mojang/serialization/Lifecycle;Ljava/lang/Runnable;Z)V", at = @At("HEAD"), index = 4, argsOnly = true)
+	@ModifyVariable(method = "tryLoad(Lnet/minecraft/client/MinecraftClient;Lnet/minecraft/client/gui/screen/world/CreateWorldScreen;Lcom/mojang/serialization/Lifecycle;Ljava/lang/Runnable;Z)V", at = @At("HEAD"), ordinal = 1)
 	private static boolean modifyBypassWarnings(boolean b)
 	{
 		return true;

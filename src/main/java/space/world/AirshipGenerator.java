@@ -11,7 +11,10 @@ import net.minecraft.block.LadderBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.inventory.LootableInventory;
+import net.minecraft.loot.LootTable;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
 import net.minecraft.structure.StructurePiecesHolder;
@@ -41,8 +44,7 @@ public class AirshipGenerator
 	private static final int SHIP_RADIUS = 8;
 	private static final int CONE_Z = 16;
 	private static final int PROP_RADIUS = 4;
-	
-	private static final Identifier LOOT_TABLE = new Identifier(StarflightMod.MOD_ID, "chests/moonshaft");
+	private static final RegistryKey<LootTable> LOOT_TABLE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(StarflightMod.MOD_ID, "chests/moonshaft"));
 	
 	public static void addPieces(Structure.Context context, BlockPos pos, StructurePiecesHolder holder)
 	{
@@ -262,6 +264,8 @@ public class AirshipGenerator
 					this.addBlock(world, StarflightBlocks.TITANIUM_DOOR.getDefaultState().with(DoorBlock.HALF, DoubleBlockHalf.UPPER), pos.getX(), pos.getY() + 1, pos.getZ(), chunkBox);
 					this.addBlock(world, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE.getDefaultState(), pos.getX(), pos.getY(), pos.getZ() - 1, chunkBox);
 					this.addBlock(world, Blocks.HEAVY_WEIGHTED_PRESSURE_PLATE.getDefaultState(), pos.getX(), pos.getY(), pos.getZ() + 1, chunkBox);
+					this.addBlock(world, StarflightBlocks.AIRWAY.getDefaultState(), pos.getX() - 2, pos.getY() + 1, pos.getZ(), chunkBox);
+					this.addBlock(world, StarflightBlocks.AIRWAY.getDefaultState(), pos.getX() + 2, pos.getY() + 1, pos.getZ(), chunkBox);
 				}
 				else if(type == 1)
 				{

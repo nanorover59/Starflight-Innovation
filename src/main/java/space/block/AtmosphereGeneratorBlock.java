@@ -17,11 +17,12 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -33,7 +34,6 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
@@ -69,19 +69,20 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		tooltip.addAll(textList);
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.multimeter.description_1"), Text.translatable("block.space.multimeter.description_2"));
+		textList.add(Text.translatable("block.space.multimeter.description_1"));
+		textList.add(Text.translatable("block.space.multimeter.description_2"));
+		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
 	public double getInput()
 	{
-		return 8.0;
+		return 4.0;
 	}
 	
 	@Override

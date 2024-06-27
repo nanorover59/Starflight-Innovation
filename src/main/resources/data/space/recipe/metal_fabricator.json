@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "cb ",
+        "bab",
+        " bc"
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_machine_casing"
+        },
+        "b": {
+            "item": "space:electric_motor"
+        },
+        "c": {
+            "item": "space:control_unit"
+        }
+    },
+    "result": {
+        "id": "space:metal_fabricator",
+        "count": 1
+    }
+}

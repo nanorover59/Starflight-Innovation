@@ -12,7 +12,6 @@ import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -43,9 +42,9 @@ public class PlanetariumBlock extends Block
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
-		if(player.getStackInHand(hand).isOf(StarflightItems.PLANETARIUM_CARD))
+		if(player.getMainHandStack().isOf(StarflightItems.PLANETARIUM_CARD))
 			return ActionResult.PASS;
 		
 		if(world.isClient)

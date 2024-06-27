@@ -2,18 +2,17 @@
 
 import java.util.ArrayList;
 
+import org.joml.AxisAngle4f;
+import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FacingBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MovementType;
@@ -21,19 +20,15 @@ import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.StarflightMod;
 import space.block.FluidTankControllerBlock;
 import space.block.ReactionControlThrusterBlock;
 import space.block.ReactionWheelBlock;
@@ -42,6 +37,9 @@ import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
 import space.client.gui.SpaceNavigationScreen;
+import space.network.c2s.RocketInputC2SPacket;
+import space.network.c2s.RocketTravelButtonC2SPacket;
+import space.network.s2c.RocketOpenTravelScreenS2CPacket;
 import space.particle.StarflightParticleTypes;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
@@ -122,17 +120,17 @@ public class RocketEntity extends MovingCraftEntity
 	}
 	
 	@Override
-	protected void initDataTracker()
+	protected void initDataTracker(DataTracker.Builder builder)
 	{
-		super.initDataTracker();
-		this.dataTracker.startTracking(USER_INPUT, Boolean.valueOf(false));
-		this.dataTracker.startTracking(HOLD_STOP, Integer.valueOf(0));
-		this.dataTracker.startTracking(THROTTLE, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(ALTITUDE, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(OXYGEN_LEVEL, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(HYDROGEN_LEVEL, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(ATTITUDE_CONTROL, new Vector3f());
-		this.dataTracker.startTracking(TRANSLATION_CONTROL, new Vector3f());
+		super.initDataTracker(builder);
+		builder.add(USER_INPUT, Boolean.valueOf(false));
+		builder.add(HOLD_STOP, Integer.valueOf(0));
+		builder.add(THROTTLE, Float.valueOf(0.0f));
+		builder.add(ALTITUDE, Float.valueOf(0.0f));
+		builder.add(OXYGEN_LEVEL, Float.valueOf(0.0f));
+		builder.add(HYDROGEN_LEVEL, Float.valueOf(0.0f));
+		builder.add(ATTITUDE_CONTROL, new Vector3f());
+		builder.add(TRANSLATION_CONTROL, new Vector3f());
 	}
 	
 	public void setUserInput(boolean b)
@@ -258,7 +256,7 @@ public class RocketEntity extends MovingCraftEntity
 		tickPhysics();
 		checkDimensionChange();
 		
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
+		PlanetDimensionData data = PlanetList.get().getDimensionDataForWorld(getWorld());
 		Vector3f trackedVelocity = getTrackedVelocity();
 		float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
 		
@@ -345,13 +343,14 @@ public class RocketEntity extends MovingCraftEntity
 			Block block = blockState.getBlock();
 			BlockPos blockPos = blockData.getPosition();
 			
-			if(block instanceof RocketThrusterBlock && !blockData.redstonePower())
+			if(block instanceof RocketThrusterBlock && !blockData.redstonePower() && blockData.getPosition().getY() < 0)
         	{
 				double thrustVacuum = ((RocketThrusterBlock) block).getThrust(0.0);
         		double thrust = ((RocketThrusterBlock) block).getThrust(pressure);
         		double ispVacuum = ((RocketThrusterBlock) block).getISP(0.0);
         		double isp = ((RocketThrusterBlock) block).getISP(pressure);
-        		mainThrusters.add(new Thruster(new Vector3f(blockPos.getX(), blockPos.getY(), blockPos.getZ()), new Vector3f(0.0f, -1.0f, 0.0f), thrust, isp));
+        		double gimbal = ((RocketThrusterBlock) block).getMaxGimbal();
+        		mainThrusters.add(new Thruster(new Vector3f(blockPos.getX(), blockPos.getY(), blockPos.getZ()), new Vector3f(0.0f, -1.0f, 0.0f), thrust, isp, gimbal));
         		nominalThrustVacuum += thrustVacuum;
         		nominalThrust += thrust;
         		massFlowSumVacuum += thrustVacuum / (SG * ispVacuum);
@@ -366,7 +365,7 @@ public class RocketEntity extends MovingCraftEntity
 				{
 					Vector3f position = new Vector3f(thruster.getLeft()).rotate(blockFacingQuaternion).add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 					Vector3f direction = new Vector3f(thruster.getRight()).rotate(blockFacingQuaternion);
-					rcsThrusters.add(new Thruster(position, direction, 2.0e4, 300.0));
+					rcsThrusters.add(new Thruster(position, direction, 2.0e4, 400.0, 0.0));
 				}
 			}
 			else if(block instanceof ReactionWheelBlock)
@@ -563,7 +562,8 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		
 		// Stability Assist System
-		getStabilityAssist(rollTorque, pitchTorque, yawTorque);
+		if(xControl == 0.0f && yControl == 0.0f && zControl == 0.0f)
+			getStabilityAssist(rollTorque, pitchTorque, yawTorque);
 		
 		// Apply pure moments about the center of mass.
 		boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
@@ -577,7 +577,7 @@ public class RocketEntity extends MovingCraftEntity
 				for(Thruster thruster : mainThrusters)
 				{
 					Vector3f position = thruster.getPosition();
-					Vector3f force = thruster.getForce(quaternion, throttle);
+					Vector3f force = thruster.gimbal > 0 ? thruster.getForceWithGimbal(quaternion, throttle, rollControl, pitchControl, yawControl, b) : thruster.getForce(quaternion, throttle);
 					forceAtPosition(force, position, netForce, netMoment);
 					totalMassFlow += thruster.getMassFlow(throttle);
 				}
@@ -716,10 +716,7 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			if(entity instanceof ServerPlayerEntity)
 			{
-				ServerPlayerEntity player = (ServerPlayerEntity) entity;
-				PacketByteBuf buffer = PacketByteBufs.create();
-				buffer.writeDouble(getDeltaV());
-				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "rocket_open_travel_screen"), buffer);
+				ServerPlayNetworking.send((ServerPlayerEntity) entity, new RocketOpenTravelScreenS2CPacket(getDeltaV()));
 				pausePhysics = true;
 				return;
 			}
@@ -728,9 +725,8 @@ public class RocketEntity extends MovingCraftEntity
 	
 	private void spawnThrusterParticles()
 	{
-		ArrayList<MovingCraftBlockRenderData> blocks = MovingCraftRenderList.getBlocksForEntity(getUuid());
+		ArrayList<MovingCraftBlockRenderData> blocks = MovingCraftRenderList.getBlocksForEntity(getId());
 		Quaternionf quaternion = getQuaternion();
-		Vector3f upAxis = new Vector3f(0.0f, 1.0f, 0.0f).rotate(quaternion);
 		Vector3f craftVelocity = getTrackedVelocity();
 		Vector3f craftAngularVelocity = getTrackedAngularVelocity();
 		
@@ -739,17 +735,28 @@ public class RocketEntity extends MovingCraftEntity
 		
 		for(MovingCraftBlockRenderData block : blocks)
 		{
-			if(getThrottle() > 0.0f && block.getBlockState().getBlock() instanceof RocketThrusterBlock && !block.redstonePower())
+			if(getThrottle() > 0.0f && block.getBlockState().getBlock() instanceof RocketThrusterBlock && !block.redstonePower() && block.getPosition().getY() < 0)
 			{
-				BlockPos pos = block.getPosition();
-				Vector3f rotated = new Vector3f(pos.getX(), pos.getY() - 3.0f, pos.getZ()).rotate(quaternion);
+				float gimbal = (float) ((RocketThrusterBlock) block.getBlockState().getBlock()).getMaxGimbal();
+				Vector3f direction = block.getBlockState().get(RocketThrusterBlock.FACING).getUnitVector();
+				Vector3f position = new Vector3f(block.getPosition().getX(), block.getPosition().getY(), block.getPosition().getZ()).sub(new Vector3f(direction).mul(1.5f));
+				
+				if(gimbal > 0.0f)
+				{
+					boolean rollOnZAxis = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
+					Vector3f attitudeControl = getAttitudeControl();
+					direction = getDirectionWithGimbal(position, direction, gimbal, attitudeControl.x(), attitudeControl.y(), attitudeControl.z(), rollOnZAxis);
+				}
+				
+				Vector3f rotated = position.rotate(quaternion);
 				Vector3f rotationVelocity = new Vector3f(craftAngularVelocity).cross(rotated);
-				Vec3d velocity = new Vec3d(-upAxis.x(), -upAxis.y(), -upAxis.z()).multiply(0.5 + this.random.nextDouble() * 0.1).add(craftVelocity.x() + rotationVelocity.x(), craftVelocity.y() + rotationVelocity.y(), craftVelocity.z() + rotationVelocity.z());
+				Vector3f axis = direction.rotate(quaternion);
+				Vec3d velocity = new Vec3d(-axis.x(), -axis.y(), -axis.z()).multiply(0.5 + this.random.nextDouble() * 0.1).add(craftVelocity.x() + rotationVelocity.x(), craftVelocity.y() + rotationVelocity.y(), craftVelocity.z() + rotationVelocity.z());
 				
 				for(int i = 0; i < 4; i++)
 				{
 					getWorld().addParticle(StarflightParticleTypes.THRUSTER, true, (float) getX() + rotated.x(), (float) getY() + rotated.y(), (float) getZ() + rotated.z(), velocity.getX(), velocity.getY(), velocity.getZ());
-					rotated.add((this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f, (this.random.nextFloat() - this.random.nextFloat()) * 0.25f);
+					rotated.add((this.random.nextFloat() - this.random.nextFloat()) * 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.1f, (this.random.nextFloat() - this.random.nextFloat()) * 0.1f);
 				}
 			}
 			
@@ -847,16 +854,19 @@ public class RocketEntity extends MovingCraftEntity
 			rcsThrusters.add(new Thruster(nbt.getCompound("rcs" + i)));
 	}
 	
-	public static void receiveInput(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
+	public static void receiveInput(RocketInputC2SPacket payload, ServerPlayNetworking.Context context)
 	{
-		int throttleState = buffer.readInt();
-		int rollState = buffer.readInt();
-		int pitchState = buffer.readInt();
-		int yawState = buffer.readInt();
-		int xState = buffer.readInt();
-		int yState = buffer.readInt();
-		int zState = buffer.readInt();
-		int stopState = buffer.readInt();
+		int[] inputStates = payload.inputStates();
+		int throttleState = inputStates[0];
+		int rollState = inputStates[1];
+		int pitchState = inputStates[2];
+		int yawState = inputStates[3];
+		int xState = inputStates[4];
+		int yState = inputStates[5];
+		int zState = inputStates[6];
+		int stopState = inputStates[7];
+		ServerPlayerEntity player = context.player();
+		MinecraftServer server = player.getServer();
 		
 		server.execute(() -> {
 			Entity entity = player.getVehicle();
@@ -900,11 +910,13 @@ public class RocketEntity extends MovingCraftEntity
 		});
 	}
 	
-	public static void receiveTravelInput(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
+	public static void receiveTravelInput(RocketTravelButtonC2SPacket payload, ServerPlayNetworking.Context context)
 	{
-		String planetName = buffer.readString();
-		double requiredDeltaV = buffer.readDouble();
-		boolean landing = buffer.readBoolean();
+		String planetName = payload.planetName();
+		double requiredDeltaV = payload.requiredDeltaV();
+		boolean landing = payload.landing();
+		ServerPlayerEntity player = context.player();
+		MinecraftServer server = player.getServer();
 		
 		server.execute(() -> {
 			Entity entity = player.getVehicle();
@@ -912,7 +924,7 @@ public class RocketEntity extends MovingCraftEntity
 			if(entity != null && entity instanceof RocketEntity)
 			{
 				RocketEntity rocketEntity = (RocketEntity) entity;
-				Planet planet = PlanetList.getByName(planetName);
+				Planet planet = PlanetList.get().getByName(planetName);
 				int arrivalY = TRAVEL_CEILING;
 	
 				if(planet != null)
@@ -978,10 +990,33 @@ public class RocketEntity extends MovingCraftEntity
 		});
 	}
 	
-	public static void receiveOpenTravelScreen(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
+	public static void receiveOpenTravelScreen(RocketOpenTravelScreenS2CPacket payload, ClientPlayNetworking.Context context)
 	{
-		double deltaV = buffer.readDouble();
-		client.execute(() -> client.setScreen(new SpaceNavigationScreen(deltaV)));
+		double deltaV = payload.deltaV();
+		context.client().execute(() -> context.client().setScreen(new SpaceNavigationScreen(deltaV)));
+	}
+	
+	private static Vector3f getDirectionWithGimbal(Vector3f position, Vector3f direction, float gimbal, float rollControl, float pitchControl, float yawControl, boolean rollOnZAxis)
+	{
+		Vector3f rotatedDirection = new Vector3f(direction);
+		Vector3f axis = new Vector3f(position.x(), 0.0f, position.z()).normalize();
+		
+		if((yawControl < -0.5f || yawControl > 0.5f) && axis.length() > 0.0f)
+		{
+			Matrix3f matrix = new Matrix3f().rotate(gimbal * yawControl, axis);
+			matrix.transform(rotatedDirection);
+		}
+		else
+		{
+			Vector3f rollAxis = rollOnZAxis ? new Vector3f(0.0f, 0.0f, 1.0f) : new Vector3f(1.0f, 0.0f, 0.0f);
+		    Vector3f pitchAxis = rollOnZAxis ? new Vector3f(1.0f, 0.0f, 0.0f) : new Vector3f(0.0f, 0.0f, 1.0f);
+		    Matrix3f rollMatrix = new Matrix3f().rotate(new AxisAngle4f(gimbal * rollControl, rollAxis));
+		    Matrix3f pitchMatrix = new Matrix3f().rotate(new AxisAngle4f(gimbal * pitchControl, pitchAxis));
+		    rollMatrix.transform(rotatedDirection);
+		    pitchMatrix.transform(rotatedDirection);
+		}
+		
+		return rotatedDirection;
 	}
 	
 	private static class Thruster
@@ -990,13 +1025,15 @@ public class RocketEntity extends MovingCraftEntity
 		private Vector3f direction;
 		private double thrust;
 		private double isp;
+		private double gimbal;
 		
-		public Thruster(Vector3f position, Vector3f direction, double thrust, double isp)
+		public Thruster(Vector3f position, Vector3f direction, double thrust, double isp, double gimbal)
 		{
 			this.position = position;
 			this.direction = direction;
 			this.thrust = thrust;
 			this.isp = isp;
+			this.gimbal = gimbal;
 		}
 		
 		public Thruster(NbtCompound nbt)
@@ -1014,6 +1051,12 @@ public class RocketEntity extends MovingCraftEntity
 			return new Vector3f(direction).mul((float) (-thrust * throttle));
 		}
 		
+		public Vector3f getForceWithGimbal(Quaternionf quaternion, double throttle, float rollControl, float pitchControl, float yawControl, boolean rollOnZAxis)
+		{
+			Vector3f rotatedDirection = getDirectionWithGimbal(position, direction, (float) gimbal, rollControl, pitchControl, yawControl, rollOnZAxis);
+			return rotatedDirection.mul((float) (-thrust * throttle));
+		}
+		
 		public double getMassFlow(double throttle)
 		{
 			return ((thrust * throttle) / (SG * isp)) * 0.05;
@@ -1029,6 +1072,7 @@ public class RocketEntity extends MovingCraftEntity
 			nbt.putFloat("dz", direction.z());
 			nbt.putDouble("thrust", thrust);
 			nbt.putDouble("isp", isp);
+			nbt.putDouble("gimbal", gimbal);
 		}
 		
 		public void readCustomDataFromNbt(NbtCompound nbt)
@@ -1037,6 +1081,7 @@ public class RocketEntity extends MovingCraftEntity
 			direction = new Vector3f(nbt.getFloat("dx"), nbt.getFloat("dy"), nbt.getFloat("dz"));
 			thrust = nbt.getDouble("thrust");
 			isp = nbt.getDouble("isp");
+			gimbal = nbt.getDouble("gimbal");
 		}
 	}
 }

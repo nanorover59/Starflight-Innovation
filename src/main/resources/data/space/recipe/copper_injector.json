@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "item.space.copper_injector",
+  "ingredient": {
+    "item": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "space:copper_injector",
+    "count": 1
+  },
+  "machiningTime": 400
+}

@@ -18,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -60,7 +61,7 @@ public class MovingCraftBlockData
 		NbtCompound blockEntityData = null;
 		
 		if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
-			blockEntityData = blockEntity.createNbt();
+			blockEntityData = blockEntity.createNbt((RegistryWrapper.WrapperLookup) world.getRegistryManager());
 		
 		boolean[] sidesShowing = new boolean[6];
 		Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN};
@@ -118,7 +119,7 @@ public class MovingCraftBlockData
 			BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
 			
 			if(blockEntity != null && blockEntityData != null)
-				blockEntity.readNbt(blockEntityData);
+				blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup)world.getRegistryManager());
 			
             Block.dropStacks(blockState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
             return;
@@ -140,7 +141,7 @@ public class MovingCraftBlockData
 		BlockEntity blockEntity = world.getBlockEntity(blockPos);
 		
 		if(blockEntity != null && blockEntityData != null)
-			blockEntity.readNbt(blockEntityData);
+			blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup)world.getRegistryManager());
 	}
 
 	public BlockState getBlockState()
@@ -201,7 +202,7 @@ public class MovingCraftBlockData
 	public static MovingCraftBlockData loadData(NbtCompound data)
 	{
 		BlockState blockState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), data.getCompound("blockState"));
-		BlockPos position = NbtHelper.toBlockPos(data.getCompound("position"));
+		BlockPos position = NbtHelper.toBlockPos(data, "position").get();
 		NbtCompound blockEntityData = data.contains("blockEntityData") ? data.getCompound("blockEntityData") : null;
 		boolean[] booleanArray = BooleanByteUtil.toBooleanArray(data.getByte("sidesShowing"));
 		boolean[] sidesShowing = new boolean[6];

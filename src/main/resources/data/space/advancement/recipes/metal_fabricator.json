@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:metal_fabricator"
+    ]
+  },
+  "criteria": {
+    "has_iron_machine_casing": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:iron_machine_casing"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:metal_fabricator"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_iron_machine_casing",
+      "has_the_recipe"
+    ]
+  ]
+}

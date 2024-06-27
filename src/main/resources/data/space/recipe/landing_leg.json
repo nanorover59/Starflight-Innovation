@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " b ",
+        " b ",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "item": "space:structural_aluminum_slab"
+        },
+        "b": {
+            "item": "minecraft:iron_ingot"
+        }
+    },
+    "result": {
+        "id": "space:landing_leg",
+        "count": 4
+    }
+}

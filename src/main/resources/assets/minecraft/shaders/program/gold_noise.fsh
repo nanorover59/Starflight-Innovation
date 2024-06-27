@@ -14,7 +14,7 @@ float GOLDEN_RATIO = 1.618033988749894848204586834365638117720309179805762862135
 
 float gold_noise(in vec2 xy, in float seed)
 {
-	return fract(1000000.0 * tan(distance(xy * GOLDEN_RATIO, xy) * seed) * xy.x);
+	return fract(100000.0 * tan(distance(xy * GOLDEN_RATIO, xy) * seed) * distance(xy, vec2(0.5, 0.5)));
 }
 
 void main()
@@ -26,7 +26,7 @@ void main()
 	float noise = gold_noise(texCoord, seed2);
 	
 	if(noise > Threshold)
-		fragColor = vec4(noise, noise, noise, 1.0);
+		fragColor = color + vec4(noise, noise, noise, 1.0);
 	else
 		fragColor = color;
 }

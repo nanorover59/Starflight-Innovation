@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bab",
+        "aca",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "tag": "minecraft:wool"
+        },
+        "b": {
+            "item": "space:rubber"
+        },
+        "c": {
+            "item": "minecraft:gold_nugget"
+        }
+    },
+    "result": {
+        "id": "space:reinforced_fabric",
+        "count": 4
+    }
+}

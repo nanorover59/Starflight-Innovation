@@ -9,6 +9,8 @@ import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeInputProvider;
 import net.minecraft.recipe.RecipeMatcher;
 import net.minecraft.recipe.RecipeType;
+import net.minecraft.recipe.input.RecipeInput;
+import net.minecraft.recipe.input.SingleStackRecipeInput;
 import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
@@ -61,9 +63,9 @@ public class ExtractorScreenHandler extends ScreenHandler
 		this.getSlot(0).setStack(ItemStack.EMPTY);
 	}
 
-	public boolean matches(Recipe<? super Inventory> recipe)
+	public boolean matches(Recipe<? super RecipeInput> recipe)
 	{
-		return recipe.matches(this.inventory, this.world);
+		return recipe.matches(new SingleStackRecipeInput(this.inventory.getStack(0)), this.world);
 	}
 
 	public int getCraftingResultSlotIndex()
@@ -140,9 +142,9 @@ public class ExtractorScreenHandler extends ScreenHandler
 
 	protected boolean isSmeltable(ItemStack itemStack)
 	{
-		return this.world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, new SimpleInventory(new ItemStack[] {itemStack}), this.world).isPresent()
-			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, new SimpleInventory(new ItemStack[] {itemStack}), this.world).isPresent()
-			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(new ItemStack[] {itemStack}), this.world).isPresent();
+		return this.world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
+			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
+			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(itemStack), this.world).isPresent();
 	}
 
 	public int getCookProgress()

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " d ",
+        "cbc",
+        " a "
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_block"
+        },
+        "b": {
+            "item": "minecraft:flint_and_steel"
+        },
+        "c": {
+            "item": "space:valve"
+        },
+        "d": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:engine_0",
+        "count": 1
+    }
+}

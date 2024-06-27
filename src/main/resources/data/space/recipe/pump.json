@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        "   "
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_machine_casing"
+        },
+        "b": {
+            "item": "space:water_pipe"
+        },
+        "c": {
+            "item": "space:electric_motor"
+        }
+    },
+    "result": {
+        "id": "space:pump",
+        "count": 1
+    }
+}

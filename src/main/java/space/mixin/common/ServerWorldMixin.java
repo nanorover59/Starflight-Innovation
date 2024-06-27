@@ -99,10 +99,11 @@ public abstract class ServerWorldMixin extends World
 		}
 		
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(server.getWorld(selectedWorldKey));
+		PlanetList planetList = PlanetList.get();
 		
 		if(data != null)
-			PlanetList.skipToMorning(data.getPlanet());
+			planetList.skipToMorning(data.getPlanet());
 		else
-			PlanetList.skipToMorning(PlanetList.getByName("earth"));
+			planetList.skipToMorning(PlanetList.get().getByName("earth"));
 	}
 }

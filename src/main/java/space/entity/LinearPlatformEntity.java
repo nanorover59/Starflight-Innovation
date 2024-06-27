@@ -99,6 +99,6 @@ public class LinearPlatformEntity extends MovingCraftEntity
 	protected void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		targetPos = NbtHelper.toBlockPos(nbt.getCompound("targetPos"));
+		targetPos = NbtHelper.toBlockPos(nbt, "targetPos").get();
 	}
 }

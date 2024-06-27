@@ -15,11 +15,12 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
@@ -30,13 +31,12 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.BatteryBlockEntity;
+import space.client.StarflightModClient;
 import space.util.BlockSearch;
 
 public class BatteryBlock extends BlockWithEntity implements EnergyBlock
@@ -65,25 +65,25 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		tooltip.addAll(textList);
+		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
 	public double getOutput()
 	{
-		return 8.0;
+		return 16.0;
 	}
 	
 	@Override
 	public double getInput()
 	{
-		return 8.0;
+		return 16.0;
 	}
 	
 	@Override
@@ -102,8 +102,13 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		if(!world.isClient)
-			BlockSearch.energyConnectionSearch(world, pos);
+		if(!state.isOf(newState.getBlock()))
+		{
+			if(!world.isClient)
+				BlockSearch.energyConnectionSearch(world, pos);
+			
+			super.onStateReplaced(state, world, pos, newState, moved);
+		}
 	}
 	
 	public BlockRenderType getRenderType(BlockState state)
@@ -112,7 +117,7 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(!world.isClient)
 		{

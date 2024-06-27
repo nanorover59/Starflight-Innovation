@@ -5,7 +5,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
@@ -50,8 +49,8 @@ public abstract class EntityMixin
 				
 				if(next != null)
 				{
-					TeleportTarget target = new TeleportTarget(arrivalPos, entity.getVelocity(), entity.getYaw(), entity.getPitch());
-					Entity transferred = FabricDimensions.teleport(entity, next, target);
+					TeleportTarget target = new TeleportTarget(next, arrivalPos, entity.getVelocity(), entity.getYaw(), entity.getPitch(), false, TeleportTarget.NO_OP);
+					Entity transferred = entity.teleportTo(target);
 					
 					if(transferred != null)
 						transferred.setPortalCooldown(60);

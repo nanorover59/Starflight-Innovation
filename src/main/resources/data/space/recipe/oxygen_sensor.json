@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a ",
+        "cbc",
+        " a "
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "space:vent"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:oxygen_sensor",
+        "count": 1
+    }
+}

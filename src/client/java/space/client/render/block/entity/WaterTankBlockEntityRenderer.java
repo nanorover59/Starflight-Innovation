@@ -1,6 +1,5 @@
 package space.client.render.block.entity;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import net.fabricmc.api.EnvType;
@@ -45,7 +44,6 @@ public class WaterTankBlockEntityRenderer implements BlockEntityRenderer<WaterTa
 		matrices.push();
         MatrixStack.Entry entry = matrices.peek();
         Matrix4f matrix4f = entry.getPositionMatrix();
-        Matrix3f matrix3f = entry.getNormalMatrix();
         VertexConsumer vertexConsumer = vertices.getBuffer(RenderLayers.getFluidLayer(Fluids.WATER.getDefaultState()));
         
         // Up
@@ -54,52 +52,52 @@ public class WaterTankBlockEntityRenderer implements BlockEntityRenderer<WaterTa
         	if(h == 1.0f)
         		h -= b;
         	
-        	vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, b, u1, v1);
-        	vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, 1.0f - b, u2, v1);
-        	vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u2, v2);
-        	vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, b, u1, v2);
+        	vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, b, u1, v1);
+        	vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, 1.0f - b, u2, v1);
+        	vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u2, v2);
+        	vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, b, u1, v2);
         }
         
         // Down
         if(blockEntity.canRenderBottom())
         {
-	        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, b, b, u1, v1);
-	        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, b, b, u2, v1);
-	        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, b, 1.0f - b, u2, v2);
-	        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, b, 1.0f - b, u1, v2);
+	        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, b, b, u1, v1);
+	        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, b, b, u2, v1);
+	        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, b, 1.0f - b, u2, v2);
+	        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, b, 1.0f - b, u1, v2);
         }
         
         v1 = MathHelper.lerp(h, v2, v1);
         
         // East
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, b, u1, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u2, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, l, 1.0f - b, u2, v2);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, l, b, u1, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, b, u1, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u2, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, l, 1.0f - b, u2, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, l, b, u1, v2);
         
         // West
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, 1.0f - b, u1, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, b, u2, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, l, b, u2, v2);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, l, 1.0f - b, u1, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, 1.0f - b, u1, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, b, u2, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, l, b, u2, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, l, 1.0f - b, u1, v2);
         
         // North
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, b, u1, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, b, u2, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, l, b, u2, v2);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, l, b, u1, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, b, u1, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, b, u2, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, l, b, u2, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, l, b, u1, v2);
         
         // South
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u1, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, h, 1.0f - b, u2, v1);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, b, l, 1.0f - b, u2, v2);
-        vertex(matrix4f, matrix3f, vertexConsumer, light, overlay, 1.0f - b, l, 1.0f - b, u1, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, h, 1.0f - b, u1, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, h, 1.0f - b, u2, v1);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, b, l, 1.0f - b, u2, v2);
+        vertex(matrix4f, entry, vertexConsumer, light, overlay, 1.0f - b, l, 1.0f - b, u1, v2);
         
         matrices.pop();
 	}
 	
-	private void vertex(Matrix4f positionMatrix, Matrix3f normalMatrix, VertexConsumer vertexConsumer, int light, int overlay, float x, float y, float z, float u, float v)
+	private void vertex(Matrix4f positionMatrix, MatrixStack.Entry entry, VertexConsumer vertexConsumer, int light, int overlay, float x, float y, float z, float u, float v)
 	{
-		vertexConsumer.vertex(positionMatrix, x, y, z).color(0.2471f, 0.4627f, 0.8941f, 1.0f).texture(u, v).overlay(overlay).light(light).normal(normalMatrix, 0.0f, 1.0f, 0.0f).next();
+		vertexConsumer.vertex(positionMatrix, x, y, z).color(0.2471f, 0.4627f, 0.8941f, 1.0f).texture(u, v).overlay(overlay).light(light).normal(entry, 0.0f, 1.0f, 0.0f);
     }
 }

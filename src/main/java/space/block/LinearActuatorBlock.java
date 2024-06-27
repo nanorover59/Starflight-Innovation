@@ -71,8 +71,6 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 			if(!junctionFlag)
 				distance--;
 			
-			System.out.println(distance);
-			
 			if(distance > 0)
 				spawnEntity(world, pos, pos.offset(redstoneDirection, distance), set);
 		}

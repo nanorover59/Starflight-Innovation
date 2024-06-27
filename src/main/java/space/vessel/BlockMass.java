@@ -29,10 +29,10 @@ public class BlockMass
 		if(blockState.isAir())
 			return 0.0;
 		
-		double density = 100; // Assume a density of 25kg per cubic meter by default.
+		double density = 50; // Assume a density of 50kg per cubic meter by default.
 		
 		//if(blockState.isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG))
-		//	density = 20;
+		//	density = 10;
 		
 		double mass = volumeForBlock(blockState, world, pos) * density;
 		BlockEntity blockEntity = world.getBlockEntity(pos);

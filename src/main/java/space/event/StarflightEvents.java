@@ -9,7 +9,6 @@ import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
@@ -38,18 +37,12 @@ public class StarflightEvents
 	    {
 	    	// Save planet and vessel data when the server is stopping.
 	    	saveData(server);
-	    	PlanetList.clear();
 	    });
-		
-		// Server Disconnect Event
-		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-			PlanetList.deactivateClient(handler.getPlayer());
-		});
 		
 		// Server Tick Event
 		ServerTickEvents.END_SERVER_TICK.register((server) ->
 	    {
-			PlanetList.serverTick(server);
+			PlanetList.get().serverTick(server);
 			MobSpawningUtil.doCustomMobSpawning(server);
 			
 			saveTimer++;
@@ -61,39 +54,6 @@ public class StarflightEvents
 				saveData(server);
 			}
 	    });
-		
-		// World Tick Event
-		/*ServerTickEvents.END_WORLD_TICK.register((world) ->
-	    {
-	    	PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
-			EntityVelocityState state = EntityVelocityState.get(world);
-			
-			if(data != null && data.overridePhysics())
-			{
-				double gravity = data.getGravity();
-				double air = data.getPressure();
-				
-				for(Entity entity : world.iterateEntities())
-				{
-					if(!entity.isOnGround() && entity instanceof PlayerEntity)
-					{
-						float pitch = entity.getPitch();
-						float yaw = entity.getYaw();
-						Vec3d velocity = entity.getVelocity();
-						Vec3d previousVelocity = state.getVelocity(entity);
-						Vec3d difference = velocity.subtract(previousVelocity);
-						
-						double vy = difference.getY() < 0 ? previousVelocity.getY() + difference.getY() * gravity : velocity.getY();
-						
-						Vec3d newVelocity = new Vec3d(velocity.getX(), vy, velocity.getZ());
-						
-						entity.setVelocity(newVelocity);
-						entity.velocityModified = true;
-						state.setVelocity(entity, newVelocity);
-					}
-				}
-			}
-	    });*/
 	}
 	
 	private static void saveData(MinecraftServer server)
@@ -104,7 +64,7 @@ public class StarflightEvents
     	try
 		{
 			Files.createDirectories(Paths.get(directory));
-			DataCompound planetData = PlanetList.saveDynamicData();
+			DataCompound planetData = PlanetList.get().saveDynamicData();
 			ESSHelper.writeCompound(planetData, planetsFile);
 		}
 		catch(IOException e)

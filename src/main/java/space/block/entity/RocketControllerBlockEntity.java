@@ -5,18 +5,14 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -25,12 +21,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.StarflightMod;
 import space.block.RocketControllerBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
+import space.network.c2s.RocketControllerButtonC2SPacket;
+import space.network.s2c.RocketControllerDataS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -189,7 +186,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 					}
 				}
 			}
-        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock && !redstone)
+        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock && !redstone && pos.getY() < centerOfMass.getY())
         	{
         		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
         		double pressure = 0.0;
@@ -230,11 +227,13 @@ public class RocketControllerBlockEntity extends BlockEntity
 		return averageVEVacuum * Math.log(initialMass / finalMass);
 	}
 	
-	public static void receiveButtonPress(MinecraftServer server, ServerPlayerEntity player, ServerPlayNetworkHandler handler, PacketByteBuf buffer, PacketSender sender)
+	public static void receiveButtonPress(RocketControllerButtonC2SPacket payload, ServerPlayNetworking.Context context)
 	{
-		RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, new Identifier(buffer.readString()));
-		BlockPos position = buffer.readBlockPos();
-		int action = buffer.readInt();
+		RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(payload.worldID()));
+		BlockPos position = payload.blockPos();
+		int action = payload.action();
+		ServerPlayerEntity player = context.player();
+		MinecraftServer server = player.getServer();
 		
 		server.execute(() -> {
 			ServerWorld world = server.getWorld(worldKey);
@@ -277,7 +276,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		nbt.putDouble("cx", centerOfMass.getX());
 		nbt.putDouble("cy", centerOfMass.getY());
@@ -323,7 +322,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		centerOfMass = new Vec3d(nbt.getDouble("cx"), nbt.getDouble("cy"), nbt.getDouble("cz"));
 		momentOfInertia1 = new Vec3d(nbt.getDouble("mix1"), nbt.getDouble("miy1"), nbt.getDouble("miz1"));
@@ -360,31 +359,26 @@ public class RocketControllerBlockEntity extends BlockEntity
 	
 	public void sendDisplayData(ServerPlayerEntity player)
 	{
-		PacketByteBuf buffer = PacketByteBufs.create();
-		buffer.writeDouble(mass);
-		buffer.writeDouble(volume);
-		buffer.writeDouble(thrust);
-		buffer.writeDouble(buoyancy);
-		buffer.writeDouble(hydrogen);
-		buffer.writeDouble(hydrogenCapacity);
-		buffer.writeDouble(oxygen);
-		buffer.writeDouble(oxygenCapacity);
-		buffer.writeDouble(deltaV);
-		buffer.writeDouble(deltaVCapacity);
-		buffer.writeDouble(requiredDeltaV1);
-		buffer.writeDouble(requiredDeltaV2);
-		buffer.writeInt(this.blockDataList.size());
-
-		for(MovingCraftBlockData data : this.blockDataList)
-		{
-			buffer.writeNbt(NbtHelper.fromBlockState(data.getBlockState()));
-			buffer.writeBlockPos(data.getPosition());
-			buffer.writeBoolean(data.redstonePower());
-
-			for(int i = 0; i < 6; i++)
-				buffer.writeBoolean(data.getSidesShowing()[i]);
-		}
+		double[] stats = {
+			mass,
+			volume,
+			thrust,
+			buoyancy,
+			hydrogen,
+			hydrogenCapacity,
+			oxygen,
+			oxygenCapacity,
+			deltaV,
+			deltaVCapacity,
+			requiredDeltaV1,
+			requiredDeltaV2
+		};
 		
-		ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "rocket_controller_data"), buffer);
+		ArrayList<MovingCraftEntity.BlockRenderData> bufferedBlockList = new ArrayList<MovingCraftEntity.BlockRenderData>();
+		
+		for(MovingCraftBlockData blockData : this.blockDataList)
+			bufferedBlockList.add(new MovingCraftEntity.BlockRenderData(blockData));
+		
+		ServerPlayNetworking.send(player, new RocketControllerDataS2CPacket(stats, bufferedBlockList));
 	}
 }

@@ -37,8 +37,8 @@ public abstract class ServerPlayerEntityMixin
 
 		if(data != null && spawnPointPosition != null && !AirUtil.canEntityBreathe(player, spawnPointPosition, data))
 		{
-			BlockPos defaultSpawn = new BlockPos(world.getLevelProperties().getSpawnX(), world.getLevelProperties().getSpawnY(), world.getLevelProperties().getSpawnZ());
-			player.setSpawnPoint(World.OVERWORLD, defaultSpawn, 0.0f, true, false);
+			BlockPos defaultSpawn = world.getLevelProperties().getSpawnPos();
+			player.setSpawnPoint(World.OVERWORLD, defaultSpawn, world.getLevelProperties().getSpawnAngle(), true, false);
 			info.setReturnValue(defaultSpawn);
 			info.cancel();
 		}

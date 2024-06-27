@@ -13,7 +13,7 @@ import space.entity.AncientHumanoidEntity;
 @Environment(value = EnvType.CLIENT)
 public class AncientHumanoidEyesFeatureRenderer<T extends AncientHumanoidEntity> extends EyesFeatureRenderer<T, AncientHumanoidEntityModel<T>>
 {
-	private static final RenderLayer SKIN = RenderLayer.getEyes(new Identifier(StarflightMod.MOD_ID, "textures/entity/ancient_humanoid_eyes.png"));
+	private static final RenderLayer SKIN = RenderLayer.getEyes(Identifier.of(StarflightMod.MOD_ID, "textures/entity/ancient_humanoid_eyes.png"));
 
 	public AncientHumanoidEyesFeatureRenderer(FeatureRendererContext<T, AncientHumanoidEntityModel<T>> featureRendererContext)
 	{

@@ -11,7 +11,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
-import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -20,7 +20,7 @@ import net.minecraft.world.Heightmap.Type;
 import net.minecraft.world.World;
 import space.util.QuaternionUtil;
 
-public class ZeroGravityMobEntity extends MobEntity
+public class ZeroGravityMobEntity extends PathAwareEntity
 {
 	private static final TrackedData<Float> QX = DataTracker.registerData(ZeroGravityMobEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> QY = DataTracker.registerData(ZeroGravityMobEntity.class, TrackedDataHandlerRegistry.FLOAT);
@@ -36,19 +36,19 @@ public class ZeroGravityMobEntity extends MobEntity
 
 	protected ZeroGravityMobEntity(EntityType<? extends ZeroGravityMobEntity> entityType, World world)
 	{
-		super((EntityType<? extends MobEntity>) entityType, world);
+		super((EntityType<? extends PathAwareEntity>) entityType, world);
 		pointOfInterest = getPos().add(0.0, -1.0, 0.0);
 	}
 
 	@Override
-	protected void initDataTracker()
+	protected void initDataTracker(DataTracker.Builder builder)
 	{
-		super.initDataTracker();
-		this.dataTracker.startTracking(QX, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(QY, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(QZ, Float.valueOf(0.0f));
-		this.dataTracker.startTracking(QW, Float.valueOf(1.0f));
-		this.dataTracker.startTracking(ROLL_EXTRA, Float.valueOf(0.0f));
+		super.initDataTracker(builder);
+		builder.add(QX, Float.valueOf(0.0f));
+		builder.add(QY, Float.valueOf(0.0f));
+		builder.add(QZ, Float.valueOf(0.0f));
+		builder.add(QW, Float.valueOf(1.0f));
+		builder.add(ROLL_EXTRA, Float.valueOf(0.0f));
 	}
 
 	@Override
@@ -97,8 +97,8 @@ public class ZeroGravityMobEntity extends MobEntity
 	protected Box calculateBoundingBox()
 	{
 		EntityDimensions dimensions = getDimensions(getPose());
-		double f = dimensions.width / 2.0;
-        double g = dimensions.height / 2.0;
+		double f = dimensions.width() / 2.0;
+        double g = dimensions.height() / 2.0;
         return new Box(getX() - f, getY() - g, getZ() - f, getX() + f, getY() + g, getZ() + f);
 	}
 
@@ -161,6 +161,11 @@ public class ZeroGravityMobEntity extends MobEntity
 	
 	public void setRollExtra(float rollExtra)
 	{
+		if(rollExtra <= -180.0f)
+			rollExtra += 360.0f;
+		else if(rollExtra > 180.0f)
+			rollExtra -= 360.0f;
+		
 		this.dataTracker.set(ROLL_EXTRA, rollExtra);
 	}
 	
@@ -171,19 +176,15 @@ public class ZeroGravityMobEntity extends MobEntity
 	
 	public void updateMotion(Vec3d direction, double thrust, boolean ignoreDifference)
 	{
-		Vector3f directionF = direction.toVector3f();
-		directionF.normalize();
-		Quaternionf current = getQuaternion();
+		Vector3f directionF = direction.toVector3f().normalize();
+		Quaternionf current = getQuaternion().normalize();
 		Vector3f axis = new Vector3f(0.0f, 0.0f, -1.0f);
 		axis.cross(directionF);
-		axis.normalize();
 		float angle = (float) Math.acos(-directionF.z());
 		Quaternionf target = new Quaternionf().rotateAxis(angle, axis);
-		target.normalize();
 		float difference = QuaternionUtil.difference(current, target);
 		Quaternionf step = QuaternionUtil.interpolate(current, target, getTurningFactor());
-		step.normalize();
-		setQuaternion(step);
+		setQuaternion(step.normalize());
 		
 		if(ignoreDifference || difference < 0.2f)
 			applyThrust(thrust);
@@ -236,7 +237,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public boolean canStart()
 		{
-			return goalSelector.getRunningGoals().count() == 0 && getVelocity().length() > 0.05;
+			return getVelocity().length() > 0.05;
 		}
 
 		public void start()
@@ -282,7 +283,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public boolean canStart()
 		{
-			return goalSelector.getRunningGoals().count() == 0 && getVelocity().length() < 0.1;
+			return getVelocity().length() < 0.1;
 		}
 
 		public void start()
@@ -331,7 +332,7 @@ public class ZeroGravityMobEntity extends MobEntity
 			this.thrust = thrust;
 			this.maximumDuration = maximumDuration;
 			this.rolling = rolling;
-			this.rollSpeed = (0.05f + random.nextFloat() * 0.05f) * (random.nextBoolean() ? -1.0f : 1.0f);
+			this.rollSpeed = (5.0f + random.nextFloat() * 5.0f) * (random.nextBoolean() ? -1.0f : 1.0f);
 			
 			if(getTarget() != null)
 				this.initialDistance = getTarget().getEyePos().subtract(getPos()).length();
@@ -339,7 +340,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public boolean canStart()
 		{
-			return goalSelector.getRunningGoals().count() == 0 && getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			return getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
 		}
 
 		public void start()
@@ -357,10 +358,11 @@ public class ZeroGravityMobEntity extends MobEntity
 			if(getTarget() != null)
 			{
 				trackTargetEntity();
-				updateMotion(targetDirection, thrust, true);
 				
 				if(distance < 16.0)
-					setVelocity(getVelocity().multiply(0.98));
+					updateMotion(targetDirection, thrust * -0.5f, true);
+				else
+					updateMotion(targetDirection, thrust, true);
 			}
 			
 			setRollExtra(getRollExtra() + rollSpeed);
@@ -371,7 +373,7 @@ public class ZeroGravityMobEntity extends MobEntity
 
 		public boolean shouldContinue()
 		{
-			return ticks < 40 || (ticks < maximumDuration && getTarget() != null);
+			return getTarget() != null && ticks < maximumDuration;
 		}
 		
 		private void trackTargetEntity()

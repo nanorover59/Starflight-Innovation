@@ -16,12 +16,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import space.StarflightMod;
 import space.entity.RocketEntity;
-import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 
 public class StarflightHUD
 {
-	private static final Identifier ROCKET_HUD = new Identifier(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png");
+	private static final Identifier ROCKET_HUD = Identifier.of(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png");
 	
 	public static void renderPlayerHUD(MinecraftClient client, DrawContext context, float tickDelta)
 	{
@@ -31,7 +30,7 @@ public class StarflightHUD
 		{
 			if(stack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE)
 			{
-				float oxygenLevel = (float) (stack.getNbt().getDouble("oxygen") / SpaceSuitItem.MAX_OXYGEN);
+				float oxygenLevel = stack.get(StarflightItems.OXYGEN) / stack.get(StarflightItems.MAX_OXYGEN);
 				int barHeight = 64;
 				int oxygenX = scaledWidth - 24;
 				int oxygenY = 8;

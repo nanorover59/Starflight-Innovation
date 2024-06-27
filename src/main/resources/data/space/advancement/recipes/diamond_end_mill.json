@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:diamond_end_mill"
+    ]
+  },
+  "criteria": {
+    "has_diamond": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "minecraft:diamond"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:diamond_end_mill"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_diamond",
+      "has_the_recipe"
+    ]
+  ]
+}

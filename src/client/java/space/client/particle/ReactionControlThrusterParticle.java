@@ -8,7 +8,7 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.SimpleParticleType;
 
 @Environment(EnvType.CLIENT)
 public class ReactionControlThrusterParticle extends SpriteBillboardParticle
@@ -63,7 +63,7 @@ public class ReactionControlThrusterParticle extends SpriteBillboardParticle
 	}
 
 	@Environment(value = EnvType.CLIENT)
-	public static class Factory implements ParticleFactory<DefaultParticleType>
+	public static class Factory implements ParticleFactory<SimpleParticleType>
 	{
 		private final SpriteProvider spriteProvider;
 
@@ -73,7 +73,7 @@ public class ReactionControlThrusterParticle extends SpriteBillboardParticle
 		}
 
 		@Override
-		public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double x, double y, double z, double vx, double vy, double vz)
+		public Particle createParticle(SimpleParticleType defaultParticleType, ClientWorld clientWorld, double x, double y, double z, double vx, double vy, double vz)
 		{
 			return new ReactionControlThrusterParticle(clientWorld, x, y, z, vx, vy, vz, 0.25f, this.spriteProvider);
 		}

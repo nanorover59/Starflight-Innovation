@@ -30,7 +30,7 @@
                 },
                 {
                     "name": "Threshold",
-                    "values": [ 0.9 ]
+                    "values": [ 0.8 ]
                 }
             ]
         },

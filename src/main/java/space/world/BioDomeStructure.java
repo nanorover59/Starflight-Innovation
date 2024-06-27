@@ -2,7 +2,7 @@ package space.world;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +12,7 @@ import net.minecraft.world.gen.structure.StructureType;
 
 public class BioDomeStructure extends Structure
 {
-	public static final Codec<BioDomeStructure> CODEC = BioDomeStructure.createCodec(BioDomeStructure::new);
+	public static final MapCodec<BioDomeStructure> CODEC = BioDomeStructure.createCodec(BioDomeStructure::new);
 
 	public BioDomeStructure(Structure.Config config)
 	{

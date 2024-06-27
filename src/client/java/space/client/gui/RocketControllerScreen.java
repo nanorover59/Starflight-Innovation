@@ -10,18 +10,12 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.util.NarratorManager;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -30,14 +24,17 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import space.StarflightMod;
 import space.client.render.StarflightClientEffects;
-import space.planet.ClientPlanet;
-import space.planet.ClientPlanetList;
+import space.entity.MovingCraftEntity;
+import space.network.c2s.RocketControllerButtonC2SPacket;
+import space.network.s2c.RocketControllerDataS2CPacket;
+import space.planet.Planet;
+import space.planet.PlanetList;
 import space.vessel.MovingCraftBlockRenderData;
 
 @Environment(EnvType.CLIENT)
 public class RocketControllerScreen extends Screen
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/rocket_controller.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/gui/rocket_controller.png");
 	private static final int MARGIN = 12;
     private static final int GREEN = 0xFF6ABE30;
 	private static final int RED = 0xFFDC3222;
@@ -56,8 +53,8 @@ public class RocketControllerScreen extends Screen
 	public static double deltaVCapacity;
 	public static double requiredDeltaV1;
 	public static double requiredDeltaV2;
+	private static float scaleFactor = 1.0f;
 	private boolean mouseHold = false;
-	private double scaleFactor = 3.0e-10;
 
 	public RocketControllerScreen(String worldKeyName, BlockPos blockPos)
 	{
@@ -94,14 +91,14 @@ public class RocketControllerScreen extends Screen
 		
 		int x = MARGIN;
 		int y = MARGIN;
-		boolean inOrbit = ClientPlanetList.isViewpointInOrbit();
-		ClientPlanet currentPlanet = ClientPlanetList.getViewpointPlanet();
+		boolean inOrbit = PlanetList.getClient().getViewpointDimensionData().isOrbit();
+		Planet currentPlanet = PlanetList.getClient().getViewpointPlanet();
 		context.fill(0, 0, width, height, -100, 0xFF000000);
 		StarflightClientEffects.renderScreenGUIOverlay(client, context, width, height, delta);
-		float rotation = (client.world.getTime()) * 0.05f; // Adjust rotation speed as needed
+		float rotation = (client.world.getTime()) * 0.05f; // Adjust rotation speed as needed.
 		context.getMatrices().push();
 		context.getMatrices().translate(width / 2, height / 2, -10.0f);
-		context.getMatrices().multiplyPositionMatrix(new Matrix4f().scaling(1.0f, -1.0f, 1.0f));
+		context.getMatrices().multiplyPositionMatrix(new Matrix4f().scaling(scaleFactor, -scaleFactor, scaleFactor));
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
 		
 		for(MovingCraftBlockRenderData blockData : blockList)
@@ -116,7 +113,7 @@ public class RocketControllerScreen extends Screen
 			DecimalFormat df = new DecimalFormat("#.#");
 			double ttw = 0;
 			MutableText ttwText = Text.translatable("block.space.ttw");
-			double weight = mass * currentPlanet.surfaceGravity * 9.81;
+			double weight = mass * currentPlanet.getSurfaceGravity() * 9.81;
 			
 			if(!inOrbit && currentPlanet != null)
 			{
@@ -139,7 +136,10 @@ public class RocketControllerScreen extends Screen
 			context.drawText(textRenderer, Text.translatable("block.space.oxygen_container.level").append(df.format((oxygen / oxygenCapacity) * 100)).append("%"), x, y1 += 14, GREEN, true);
 			context.drawText(textRenderer, Text.translatable("block.space.weight").append(df.format(weight / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
 			context.drawText(textRenderer, Text.translatable("block.space.thrust").append(df.format(thrust / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
-			context.drawText(textRenderer, Text.translatable("block.space.buoyancy").append(df.format(buoyancy / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
+			
+			if(buoyancy > weight * 0.1)
+				context.drawText(textRenderer, Text.translatable("block.space.buoyancy").append(df.format(buoyancy / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
+			
 			context.drawText(textRenderer, ttwText, x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
 			context.drawText(textRenderer, Text.translatable("block.space.deltav").append(df.format(deltaV)).append("m/s"), x, y1 += 14, GREEN, true);
 			context.drawText(textRenderer, Text.translatable("block.space.deltav_capacity").append(df.format(deltaVCapacity)).append("m/s"), x, y1 += 14, GREEN, true);
@@ -158,11 +158,7 @@ public class RocketControllerScreen extends Screen
         
         if(hover && mouseDown && !mouseHold)
         {
-        	PacketByteBuf buffer = PacketByteBufs.create();
-        	buffer.writeString(worldKey);
-        	buffer.writeBlockPos(position);
-    		buffer.writeInt(action);
-    		ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_controller_button"), buffer);
+    		ClientPlayNetworking.send(new RocketControllerButtonC2SPacket(worldKey, position, action));
     		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
     		mouseHold = true;
     		
@@ -171,36 +167,51 @@ public class RocketControllerScreen extends Screen
         }
 	}
 	
-	public static void receiveDisplayDataUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
+	public static void receiveDisplayDataUpdate(RocketControllerDataS2CPacket payload, ClientPlayNetworking.Context context)
 	{
-		mass = buffer.readDouble();
-		volume = buffer.readDouble();
-		thrust = buffer.readDouble();
-		buoyancy = buffer.readDouble();
-		hydrogen = buffer.readDouble();
-		hydrogenCapacity = buffer.readDouble();
-		oxygen = buffer.readDouble();
-		oxygenCapacity = buffer.readDouble();
-		deltaV = buffer.readDouble();
-		deltaVCapacity = buffer.readDouble();
-		requiredDeltaV1 = buffer.readDouble();
-		requiredDeltaV2 = buffer.readDouble();
-		int blockCount = buffer.readInt();
+		double[] stats = payload.stats();
+		mass = stats[0];
+		volume = stats[1];
+		thrust = stats[2];
+		buoyancy = stats[3];
+		hydrogen = stats[4];
+		hydrogenCapacity = stats[5];
+		oxygen = stats[6];
+		oxygenCapacity = stats[7];
+		deltaV = stats[8];
+		deltaVCapacity = stats[9];
+		requiredDeltaV1 = stats[10];
+		requiredDeltaV2 = stats[11];
+		
+		int minY = 0;
+		int maxY = 0;
 		ArrayList<MovingCraftBlockRenderData> bufferedBlockList = new ArrayList<MovingCraftBlockRenderData>();
 		
-		for(int i = 0; i < blockCount; i++)
+		for(MovingCraftEntity.BlockRenderData blockRenderData : payload.blockDataList())
 		{
-			BlockState blockState = NbtHelper.toBlockState(client.world.createCommandRegistryWrapper(RegistryKeys.BLOCK), buffer.readNbt());
-			BlockPos blockPos = buffer.readBlockPos();
-			boolean redstone = buffer.readBoolean();
+			BlockState blockState = blockRenderData.blockState();
+			BlockPos blockPos = blockRenderData.position();
+			boolean redstone = (blockRenderData.flags() & (1 << 0)) != 0;
 			boolean[] sidesShowing = new boolean[6];
 			
-			for(int j = 0; j < 6; j++)
-				sidesShowing[j] = buffer.readBoolean();
+			for (int i = 0; i < 6; i++)
+				sidesShowing[i] = (blockRenderData.sidesShowing() & (1 << i)) != 0;
 			
 			bufferedBlockList.add(new MovingCraftBlockRenderData(blockState, blockPos, redstone, sidesShowing));
+			
+			if(blockPos.getY() < minY)
+				minY = blockPos.getY();
+			
+			if(blockPos.getY() > maxY)
+				maxY = blockPos.getY();
 		}
 		
-		client.execute(() -> blockList.addAll(bufferedBlockList));
+		float scale = 100.0f / (maxY - minY);
+		
+		context.client().execute(() -> {
+			blockList.clear();
+			blockList.addAll(bufferedBlockList);
+			scaleFactor = scale;
+		});
 	}
 }

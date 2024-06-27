@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:blasting",
-  "ingredient": {
-    "item": "space:ferric_sulfur_ore"
-  },
-  "result": "space:sulfur",
-  "experience": 0.6,
-  "cookingtime": 200
-}

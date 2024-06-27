@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:hydrogen_pipe"
+    },
+    {
+      "item": "space:riveted_aluminum"
+    }
+  ],
+  "result": {
+    "id": "space:hydrogen_pipe_al",
+    "count": 1
+  }
+}

@@ -91,7 +91,7 @@ public class BatteryScreenHandler extends ScreenHandler
 
 		public static boolean matches(ItemStack stack)
 		{
-			return stack.isOf(StarflightItems.BATTERY_CELL) && stack.hasNbt();
+			return stack.isOf(StarflightItems.BATTERY_CELL);
 		}
 
 		@Override

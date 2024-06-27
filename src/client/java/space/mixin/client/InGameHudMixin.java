@@ -15,6 +15,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
 import space.client.render.StarflightHUD;
@@ -26,21 +27,21 @@ public abstract class InGameHudMixin
 {
 	@Shadow @Final private MinecraftClient client;
 	
-	@Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;F)V", at = @At("HEAD"), cancellable = true)
-	public void renderInject(DrawContext context, float tickDelta, CallbackInfo info)
+	@Inject(method = "render(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/client/render/RenderTickCounter;)V", at = @At("HEAD"), cancellable = true)
+	public void renderInject(DrawContext context, RenderTickCounter tickCounter, CallbackInfo info)
 	{
 		if(client.player != null && !client.options.hudHidden)
 		{
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-            RenderSystem.setShaderTexture(0, new Identifier(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png"));
+            RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png"));
 			
 			if(client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
 			{
-				StarflightHUD.renderSpacecraftHUD(client, context, tickDelta);
+				StarflightHUD.renderSpacecraftHUD(client, context, tickCounter.getTickDelta(false));
 	            info.cancel();
 			}
 			else if(!client.player.isCreative() && !client.player.isSpectator())
-				StarflightHUD.renderPlayerHUD(client, context, tickDelta);
+				StarflightHUD.renderPlayerHUD(client, context, tickCounter.getTickDelta(false));
 		}
 	}
 }

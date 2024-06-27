@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
@@ -13,17 +11,16 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
@@ -58,7 +55,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	}
 	
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.fluid_tank.description_1"), Text.translatable("block.space.fluid_tank.description_2"));
 	}
@@ -91,7 +88,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(world.isClient)
 			return ActionResult.PASS;

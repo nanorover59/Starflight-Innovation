@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "default",
+  "ingredient": {
+    "item": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "space:iron_frame",
+    "count": 2
+  },
+  "machiningTime": 200
+}

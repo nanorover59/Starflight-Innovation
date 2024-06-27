@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.AnimalMateGoal;
 import net.minecraft.entity.ai.goal.AttackWithOwnerGoal;
@@ -47,7 +46,7 @@ import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
 import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.WorldView;
 import space.item.StarflightItems;
 
 public class CeruleanEntity extends TameableEntity implements Angerable, AlienMobEntity
@@ -69,7 +68,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
 		this.goalSelector.add(2, new SitGoal(this));
 		this.goalSelector.add(4, new PounceAtTargetGoal(this, 0.1f));
 		this.goalSelector.add(5, new MeleeAttackGoal(this, 1.0, true));
-		this.goalSelector.add(6, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f, false));
+		this.goalSelector.add(6, new FollowOwnerGoal(this, 1.0, 10.0f, 2.0f));
 		this.goalSelector.add(7, new AnimalMateGoal(this, 1.0));
 		this.goalSelector.add(8, new TemptGoal(this, 1.0, Ingredient.ofItems(StarflightItems.CHEESE), false));
 		this.goalSelector.add(9, new WanderAroundFarGoal(this, 1.0));
@@ -88,10 +87,10 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
 	}
 
 	@Override
-	protected void initDataTracker()
+	protected void initDataTracker(DataTracker.Builder builder)
 	{
-		super.initDataTracker();
-		this.dataTracker.startTracking(ANGER_TIME, 0);
+		super.initDataTracker(builder);
+		builder.add(ANGER_TIME, 0);
 	}
 
 	@Override
@@ -145,7 +144,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
 	}
 
 	@Override
-	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
+	public boolean canSpawn(WorldView world)
 	{
         return this.getRandom().nextInt(16) == 0 && this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos()) && world.getBlockState(this.getBlockPos().down()).getBlock() == Blocks.STONE;
     }
@@ -177,7 +176,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
         if(uuid != null)
         {
         	ceruleanEntity.setOwnerUuid(uuid);
-        	ceruleanEntity.setTamed(true);
+        	ceruleanEntity.setTamed(true, false);
         }
         
 		return ceruleanEntity;

@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bab",
+        "bab",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "item": "space:impeller"
+        },
+        "b": {
+            "item": "space:titanium_plate"
+        }
+    },
+    "result": {
+        "id": "space:turbo_pump",
+        "count": 1
+    }
+}

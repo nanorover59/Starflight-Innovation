@@ -1,9 +1,12 @@
 package space.block.entity;
 
+import java.util.Optional;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -56,17 +59,20 @@ public class ValveBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.put("fluidTankController", NbtHelper.fromBlockPos(fluidTankController));
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
-		this.fluidTankController = NbtHelper.toBlockPos(nbt.getCompound("fluidTankController"));
+		super.readNbt(nbt, registryLookup);
+		Optional<BlockPos> fluidTankControllerPos = NbtHelper.toBlockPos(nbt, "fluidTankController");
+		
+		if(fluidTankControllerPos.isPresent())
+			this.fluidTankController = fluidTankControllerPos.get();
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, ValveBlockEntity blockEntity)

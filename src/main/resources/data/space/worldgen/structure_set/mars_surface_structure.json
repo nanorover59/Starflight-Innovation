@@ -3,6 +3,14 @@
     {
       "structure" : "space:moon_small_structure",
       "weight" : 1
+    },
+    {
+      "structure" : "space:biodome",
+      "weight" : 1
+    },
+    {
+      "structure" : "space:moonshaft",
+      "weight" : 1
     }
   ],
   "placement" : {

@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
@@ -62,18 +63,18 @@ public class WaterTankBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("storedFluid", storedFluid);
 		nbt.putBoolean("top", renderTop);
 		nbt.putBoolean("bottom", renderBottom);
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.storedFluid = nbt.getDouble("storedFluid");
 		this.renderTop = nbt.getBoolean("top");
 		this.renderBottom = nbt.getBoolean("bottom");
@@ -87,9 +88,9 @@ public class WaterTankBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public NbtCompound toInitialChunkDataNbt()
+	public NbtCompound toInitialChunkDataNbt(RegistryWrapper.WrapperLookup registryLookup)
 	{
-		return createNbt();
+		return createNbt(registryLookup);
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, WaterTankBlockEntity blockEntity)

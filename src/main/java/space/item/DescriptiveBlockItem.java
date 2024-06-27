@@ -2,14 +2,11 @@ package space.item;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.Block;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 import space.client.StarflightModClient;
 
 public class DescriptiveBlockItem extends BlockItem
@@ -25,7 +22,7 @@ public class DescriptiveBlockItem extends BlockItem
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		if(!description.isEmpty())
 			tooltip.addAll(description);

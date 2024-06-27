@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -18,7 +19,7 @@ import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
 import space.inventory.ImplementedInventory;
-import space.item.BatteryCellItem;
+import space.item.StarflightItems;
 import space.screen.BatteryScreenHandler;
 
 public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory, EnergyBlockEntity
@@ -68,10 +69,10 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		
 		for(ItemStack stack : this.inventory)
 		{
-			if(stack.isEmpty())
+			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY))
 				continue;
 			else
-				d += stack.getNbt().getDouble("charge");
+				d += stack.get(StarflightItems.ENERGY);
 		}
 		
 		return d;
@@ -84,10 +85,10 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		
 		for(ItemStack stack : this.inventory)
 		{
-			if(stack.isEmpty())
+			if(stack.isEmpty() || !stack.contains(StarflightItems.MAX_ENERGY))
 				continue;
 			else
-				d += ((BatteryCellItem) stack.getItem()).getMaxCharge();
+				d += stack.get(StarflightItems.MAX_ENERGY);
 		}
 		
 		return d;
@@ -100,40 +101,40 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		
 		for(ItemStack stack : this.inventory)
 		{
-			if(stack.isEmpty())
+			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
 				continue;
 			
-			double charge = stack.getNbt().getDouble("charge");
+			double charge = stack.get(StarflightItems.ENERGY);
 			
-			if(charge < ((BatteryCellItem) stack.getItem()).getMaxCharge())
+			if(charge < stack.get(StarflightItems.MAX_ENERGY))
 				batteryCount++;
 		}
 		
 		if(batteryCount == 0)
 			return 0;
 		
-		double fraction = amount / batteryCount;
+		float fraction = (float) (amount / batteryCount);
 		
 		for(ItemStack stack : this.inventory)
 		{
-			if(stack.isEmpty())
+			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
 				continue;
 			
-			double maxCharge = ((BatteryCellItem) stack.getItem()).getMaxCharge();
-			double previousCharge = stack.getNbt().getDouble("charge");
+			float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
+			float previousCharge = stack.get(StarflightItems.ENERGY);
 			
 			if(previousCharge + fraction > maxCharge)
 			{
-				stack.getNbt().putDouble("charge", maxCharge);
+				stack.set(StarflightItems.ENERGY, maxCharge);
 				amount -= (previousCharge + fraction) - maxCharge;
 			}
 			else if(previousCharge + fraction < 0)
 			{
-				stack.getNbt().putDouble("charge", 0);
+				stack.set(StarflightItems.ENERGY, 0.0f);
 				amount -= previousCharge + fraction;
 			}
 			else
-				stack.getNbt().putDouble("charge", previousCharge + fraction);
+				stack.set(StarflightItems.ENERGY, previousCharge + fraction);
 		}
 		
 		world.updateComparators(pos, world.getBlockState(pos).getBlock());
@@ -159,18 +160,18 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 	}
 	
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
-		Inventories.writeNbt(nbt, this.inventory);
+		super.writeNbt(nbt, registryLookup);
+		Inventories.writeNbt(nbt, this.inventory, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
-		Inventories.readNbt(nbt, this.inventory);
+		super.readNbt(nbt, registryLookup);
+		Inventories.readNbt(nbt, this.inventory, registryLookup);
 		outputs.addAll(EnergyBlockEntity.outputsFromNBT(nbt));
 	}
 	

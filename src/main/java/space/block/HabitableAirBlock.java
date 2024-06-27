@@ -91,7 +91,7 @@ public class HabitableAirBlock extends AirBlock
 		if(block == StarflightBlocks.HABITABLE_AIR || block == StarflightBlocks.LEAK)
 			return;
 		
-		if(currentNeighborState.getBlock() == block && !(block instanceof SealedDoorBlock || block instanceof SealedTrapdoorBlock))
+		if(currentNeighborState.getBlock() == block && !(block instanceof SealedDoorBlock || block instanceof SealedTrapdoorBlock || block instanceof AirwayBlock))
 			return;
 
 		//long time = System.currentTimeMillis();

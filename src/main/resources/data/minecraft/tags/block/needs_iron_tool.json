@@ -1,0 +1,25 @@
+{
+  "replace": false,
+  "values": [
+    "space:ferric_gold_ore",
+    "space:ferric_diamond_ore",
+    "space:ferric_redstone_ore",
+    "space:ilmenite_ore",
+    "space:deepslate_ilmenite_ore",
+    "space:ferric_ilmenite_ore",
+    "space:ilmenite_block",
+    "space:titanium_block",
+    "space:titanium_frame",
+    "space:titanium_panels",
+    "space:damaged_titanium_panels",
+    "space:titanium_machine_casing",
+    "space:titanium_glass",
+    "space:titanium_door",
+    "space:extractor",
+    "space:vacuum_furnace",
+    "space:metal_fabricator",
+    "space:linear_actuator",
+    "space:linear_track",
+    "space:call_track"
+  ]
+}

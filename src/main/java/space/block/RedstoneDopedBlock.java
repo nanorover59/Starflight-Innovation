@@ -17,7 +17,6 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -36,7 +35,7 @@ public class RedstoneDopedBlock extends TransparentBlock
 	public RedstoneDopedBlock(int pressTicks, Settings settings)
 	{
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(LIT, false)));
+		this.setDefaultState(this.stateManager.getDefaultState().with(LIT, false));
 		this.pressTicks = pressTicks;
 	}
 	
@@ -58,7 +57,7 @@ public class RedstoneDopedBlock extends TransparentBlock
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(state.get(LIT).booleanValue())
 			return ActionResult.CONSUME;

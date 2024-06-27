@@ -17,12 +17,14 @@ import net.minecraft.block.Waterloggable;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -35,8 +37,9 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.SolarPanelBlockEntity;
 import space.client.StarflightModClient;
-import space.planet.ClientPlanet;
-import space.planet.ClientPlanetList;
+import space.planet.Planet;
+import space.planet.PlanetDimensionData;
+import space.planet.PlanetList;
 import space.util.BlockSearch;
 
 public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, EnergyBlock
@@ -64,19 +67,27 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		double solarMultiplier = 1.0;
-		ClientPlanet viewpointPlanet = ClientPlanetList.getViewpointPlanet();
+		MinecraftClient client = MinecraftClient.getInstance();
 		
-		if(viewpointPlanet != null)
+		if(client.world == null)
+			return;
+		
+		Planet viewpointPlanet = PlanetList.getClient().getViewpointPlanet();
+		PlanetDimensionData dimensionData = PlanetList.getClient().getViewpointDimensionData();
+		double solarMultiplier = 1.0;
+		
+		if(!client.world.getDimension().hasSkyLight())
+			solarMultiplier = 0.0;
+		else if(viewpointPlanet != null && dimensionData != null)
 		{
 			double d = viewpointPlanet.getPosition().lengthSquared();
 			
 			if(d > 0.0)
 			{
 				d /= 2.238016e22; // Convert the distance from meters to astronomical units.
-				solarMultiplier = (1.0 / d) * (viewpointPlanet.hasCloudCover ? 0.5 : 1.0);
+				solarMultiplier = (1.0 / d) * (dimensionData.isCloudy() ? 0.1 : 1.0);
 			}
 		}
 		
@@ -84,8 +95,8 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_producer_nominal").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
 		textList.add(Text.translatable("block.space.energy_producer_local").append(String.valueOf(df.format(getOutput() * solarMultiplier))).append("kJ/s").formatted(Formatting.GOLD));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.solar_panel.description"));
-		tooltip.addAll(textList);
+		textList.add(Text.translatable("block.space.solar_panel.description"));
+		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -97,7 +108,7 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 	@Override
 	public double getEnergyCapacity()
 	{
-		return 16.0;
+		return 8.0;
 	}
 
 	@Override

@@ -9,10 +9,8 @@
     "vegetation_chance": 0.25,
     "xz_radius": {
       "type": "minecraft:uniform",
-      "value": {
-        "min_inclusive": 4,
-        "max_inclusive": 7
-      }
+      "min_inclusive": 4,
+      "max_inclusive": 7
     },
     "replaceable": "#minecraft:base_stone_overworld",
     "ground_state": {
@@ -41,10 +39,8 @@
                       {
                         "height": {
                           "type": "minecraft:biased_to_bottom",
-                          "value": {
-                            "min_inclusive": 0,
-                            "max_inclusive": 4
-                          }
+                          "min_inclusive": 0,
+                          "max_inclusive": 4
                         },
                         "provider": {
                           "type": "minecraft:simple_state_provider",

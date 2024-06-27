@@ -15,12 +15,13 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.world.ServerWorld;
@@ -34,22 +35,21 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.ElectricFurnaceBlockEntity;
+import space.client.StarflightModClient;
 import space.util.BlockSearch;
 import space.util.StarflightEffects;
 
 public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 {
-	public static final MapCodec<ElectricFurnaceBlock> CODEC = BatteryBlock.createCodec(ElectricFurnaceBlock::new);
+	public static final MapCodec<ElectricFurnaceBlock> CODEC = ElectricFurnaceBlock.createCodec(ElectricFurnaceBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final BooleanProperty LIT = Properties.LIT;
 
@@ -73,16 +73,16 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		tooltip.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 	}
 	
 	@Override
 	public double getInput()
 	{
-		return 16.0;
+		return 32.0;
 	}
 	
 	@Override
@@ -98,7 +98,7 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(!world.isClient)
 		{
@@ -141,13 +141,7 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		if(itemStack.hasCustomName())
-		{
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-
-			if(blockEntity instanceof ElectricFurnaceBlockEntity)
-				((ElectricFurnaceBlockEntity) blockEntity).setCustomName(itemStack.getName());
-		}
+		super.onPlaced(world, pos, state, placer, itemStack);
 		
 		if(!world.isClient)
 			BlockSearch.energyConnectionSearch(world, pos);
@@ -159,6 +153,7 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 		if(!state.isOf(newState.getBlock()))
 		{
 			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
 			if(blockEntity instanceof ElectricFurnaceBlockEntity)
 			{
 				if(world instanceof ServerWorld)

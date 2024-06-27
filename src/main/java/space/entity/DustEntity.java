@@ -20,7 +20,6 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.mob.PathAwareEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -43,12 +42,12 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
 	@Override
     protected void initGoals()
 	{
-        this.goalSelector.add(2, new AttackGoal(this));
-        this.goalSelector.add(7, new DustWanderAroundGoal(this, 1.0));
-        this.goalSelector.add(8, new LookAtEntityGoal(this, PlayerEntity.class, 8.0f));
-        this.goalSelector.add(9, new LookAroundGoal(this));
+        this.goalSelector.add(3, new AttackGoal(this));
+        this.goalSelector.add(4, new DustWanderAroundGoal(this, 1.0));
+        this.goalSelector.add(5, new LookAtEntityGoal(this, PlayerEntity.class, 8.0f));
+        this.goalSelector.add(6, new LookAroundGoal(this));
         this.targetSelector.add(1, new RevengeGoal(this, new Class[0]));
-        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>((MobEntity)this, PlayerEntity.class, true));
+        this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
     }
 	
 	public static DefaultAttributeContainer.Builder createDustAttributes()
@@ -87,10 +86,10 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
     }
 	
 	@Override
-    protected void initDataTracker()
+    protected void initDataTracker(DataTracker.Builder builder)
 	{
-        super.initDataTracker();
-        this.dataTracker.startTracking(STAMINA, INITIAL_STAMINA);
+        super.initDataTracker(builder);
+        builder.add(STAMINA, INITIAL_STAMINA);
     }
 	
 	public int getStamina()

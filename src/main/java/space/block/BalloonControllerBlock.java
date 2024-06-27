@@ -11,18 +11,17 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.BalloonControllerBlockEntity;
@@ -53,7 +52,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	}
 	
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.balloon.description_1"), Text.translatable("block.space.balloon.description_2"));
 	}
@@ -71,7 +70,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(world.isClient)
 			return ActionResult.PASS;
@@ -83,7 +82,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 			return ActionResult.CONSUME;
 		}
 
-		return super.onUse(state, world, pos, player, hand, hit);
+		return super.onUse(state, world, pos, player, hit);
 	}
 	
 	@Override

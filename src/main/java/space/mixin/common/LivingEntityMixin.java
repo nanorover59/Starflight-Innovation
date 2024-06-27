@@ -21,10 +21,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -32,7 +29,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import space.entity.StarflightEntities;
-import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -46,7 +42,7 @@ public abstract class LivingEntityMixin extends Entity
 	private float airMultiplier = 1.0f;
 	private int jumpTime = 0;
 	
-	@Shadow @Nullable abstract StatusEffectInstance getStatusEffect(StatusEffect effect);
+	@Shadow @Nullable abstract StatusEffectInstance getStatusEffect(RegistryEntry<StatusEffect> jumpBoost);
 	
 	protected LivingEntityMixin(EntityType<? extends LivingEntity> entityType, World world)
 	{
@@ -121,7 +117,7 @@ public abstract class LivingEntityMixin extends Entity
 			airMultiplier = 1.0f;
 		
 		// Run oxygen supply and mob low gravity jump mechanics on the server side.
-		if(!this.getWorld().isClient)
+		if(!this.getWorld().isClient())
 		{
 			LivingEntity thisEntity = (LivingEntity) this.getWorld().getEntityById(getId());
 			
@@ -132,22 +128,23 @@ public abstract class LivingEntityMixin extends Entity
 				boolean survivalPlayer = thisEntity instanceof PlayerEntity && !((PlayerEntity) thisEntity).isCreative() && !((PlayerEntity) thisEntity).isSpectator();
 				boolean creativeFlying = thisEntity instanceof PlayerEntity && ((PlayerEntity) thisEntity).getAbilities().flying;
 				ItemStack chestplate = null;
+				float oxygen = 0.0f;
 				
 				for(ItemStack stack : thisEntity.getArmorItems())
 				{
 					if(stack.getItem() == StarflightItems.SPACE_SUIT_HELMET || stack.getItem() == StarflightItems.SPACE_SUIT_LEGGINGS || stack.getItem() == StarflightItems.SPACE_SUIT_BOOTS)
 						spaceSuitCheck++;
-					else if(stack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && stack.getNbt() != null && stack.getNbt().getDouble("oxygen") > 0.0)
+					else if(stack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE)
 					{
 						spaceSuitCheck++;
 						chestplate = stack;
 					}
 				}
 				
-				double oxygen = spaceSuitCheck == 4 ? chestplate.getNbt().getDouble("oxygen") : 0.0;
-				double oxygenUsed = 0.0;
+				if(chestplate != null && chestplate.contains(StarflightItems.OXYGEN))
+					oxygen = chestplate.get(StarflightItems.OXYGEN);
 				
-				if(spaceSuitCheck < 4 && !(thisEntity.isSubmergedInWater() || habitableAir))
+				if((spaceSuitCheck < 4 || oxygen == 0.0f) && !(thisEntity.isSubmergedInWater() || habitableAir))
 				{
 					if(!thisEntity.isInLava())
 						thisEntity.setFireTicks(0);
@@ -155,17 +152,17 @@ public abstract class LivingEntityMixin extends Entity
 					if(!thisEntity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
 						thisEntity.damage(thisEntity.getDamageSources().generic(), 0.5f);
 				}
-				else if(spaceSuitCheck == 4 && (thisEntity.isSubmergedInWater() || !habitableAir) && survivalPlayer)
-					oxygenUsed += 4.0 / 24000.0; // 4kg of oxygen should last for 20 minutes (24000 ticks) without using maneuvering jets.
-				
-				if(spaceSuitCheck == 4)
+				else if(spaceSuitCheck == 4)
 				{
-					NbtCompound nbt = chestplate.getNbt();
+					float oxygenUsed = 0.0f;
+					
+					if(survivalPlayer && (thisEntity.isSubmergedInWater() || !habitableAir))
+						oxygenUsed += 4.0f / 24000.0f; // 4kg of oxygen should last for 20 minutes (24000 ticks) without using maneuvering jets.
 					
 					// Use space suit thrust jets when sneaking.
 					if(thisEntity.isSneaking() && !creativeFlying && data.isOrbit())
 					{
-						oxygenUsed += 0.05 * 0.05;
+						oxygenUsed += 0.05f * 0.05f;
 						Vec3d deltaV = thisEntity.getRotationVector().multiply(0.1 * 0.05);
 						thisEntity.addVelocity(deltaV.getX(), deltaV.getY(), deltaV.getZ());
 						thisEntity.velocityModified = true;
@@ -173,51 +170,7 @@ public abstract class LivingEntityMixin extends Entity
 					}
 					
 					thisEntity.setAir(thisEntity.getMaxAir());
-					nbt.putDouble("oxygen", oxygen - oxygenUsed < 0.0 ? 0.0 : oxygen - oxygenUsed);
-					
-					// Oxygen level warning messages.
-					if(thisEntity instanceof PlayerEntity)
-					{
-						PlayerEntity player = (PlayerEntity) thisEntity;
-						int percent = (int) Math.ceil((oxygen / SpaceSuitItem.MAX_OXYGEN) * 100.0);
-						MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
-						
-						if(!nbt.contains("message1"))
-							nbt.putBoolean("message1", false);
-						
-						if(!nbt.contains("message2"))
-							nbt.putBoolean("message2", false);
-						
-						if(!nbt.contains("message3"))
-							nbt.putBoolean("message3", false);
-						
-						if(percent <= 50 && !nbt.getBoolean("message1"))
-						{
-							text.append(percent + "%").formatted(Formatting.BOLD, Formatting.YELLOW);
-							player.sendMessage(text, false);
-							nbt.putBoolean("message1", true);
-						}
-						else if(percent > 50)
-							nbt.putBoolean("message1", false);
-						
-						if(percent <= 25 && !nbt.getBoolean("message2"))
-						{
-							text.append(percent + "%").formatted(Formatting.BOLD, Formatting.YELLOW);
-							player.sendMessage(text, false);
-							nbt.putBoolean("message2", true);
-						}
-						else if(percent > 25)
-							nbt.putBoolean("message2", false);
-						
-						if(percent <= 10 && !nbt.getBoolean("message3"))
-						{
-							text.append(percent + "%").formatted(Formatting.BOLD, Formatting.RED);
-							player.sendMessage(text, false);
-							nbt.putBoolean("message3", true);
-						}
-						else if(percent > 10)
-							nbt.putBoolean("message3", false);
-					}
+					chestplate.set(StarflightItems.OXYGEN, oxygen - oxygenUsed < 0.0f ? 0.0f : oxygen - oxygenUsed);
 				}
 				
 				// Mobs auto jump further away in low gravity.

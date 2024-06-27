@@ -3,15 +3,12 @@ package space.client;
 import org.lwjgl.glfw.GLFW;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
-import space.StarflightMod;
 import space.entity.RocketEntity;
 import space.mixin.client.KeyBindingInvokerMixin;
+import space.network.c2s.RocketInputC2SPacket;
 
 public class StarflightControls
 {
@@ -124,16 +121,7 @@ public class StarflightControls
 					((KeyBindingInvokerMixin) key).callReset();
 			}
 			
-			PacketByteBuf buffer = PacketByteBufs.create();
-			buffer.writeInt(throttleState);
-			buffer.writeInt(rollState);
-			buffer.writeInt(pitchState);
-			buffer.writeInt(yawState);
-			buffer.writeInt(xState);
-			buffer.writeInt(yState);
-			buffer.writeInt(zState);
-			buffer.writeInt(stopState);
-			ClientPlayNetworking.send(new Identifier(StarflightMod.MOD_ID, "rocket_input"), buffer);
+			ClientPlayNetworking.send(new RocketInputC2SPacket(new int[] {throttleState, rollState, pitchState, yawState, xState, yState, zState, stopState}));
 		}
 	}
 }

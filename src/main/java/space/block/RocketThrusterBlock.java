@@ -14,11 +14,12 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.FacingBlock;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
@@ -49,10 +50,11 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	private final double vacuumISP;
 	private final double atmISP;
 	private final double maxExitPressure;
+	private final double gimbal;
 	private final CubicHermiteSpline splineISP1;
 	private final CubicHermiteSpline splineISP2;
 	
-	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure)
+	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure, double gimbal)
 	{
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
@@ -60,6 +62,7 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 		this.vacuumISP = vacuumISP * ISP_MULTIPLIER;
 		this.atmISP = atmISP * ISP_MULTIPLIER;
 		this.maxExitPressure = maxExitPressure;
+		this.gimbal = gimbal;
 		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, this.vacuumISP, this.atmISP, -10.0, -1.0);
 		this.splineISP2 = new CubicHermiteSpline(1.0, this.maxExitPressure, this.atmISP, 0.0001, -1.0, -0.0001);
 		this.massFlow = vacuumThrust / (this.vacuumISP * standardGravity);
@@ -68,7 +71,7 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	
 	public RocketThrusterBlock(Settings settings)
 	{
-		this(settings, 0.0, 0.0, 0.0, 0.0);
+		this(settings, 0.0, 0.0, 0.0, 0.0, 0.0);
 	}
 	
 	@Override
@@ -165,15 +168,20 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 		return getISP(p) * massFlow * standardGravity;
 	}
 	
+	public double getMaxGimbal()
+	{
+		return gimbal;
+	}
+	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext options)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		double pressure = 1.0;
 		MinecraftClient client = MinecraftClient.getInstance();
 		
 		if(client.player != null)
 		{
-			PlanetDimensionData data = PlanetList.viewpointDimensionData;
+			PlanetDimensionData data = PlanetList.getClient().getViewpointDimensionData();
 			pressure = data == null ? 1.0 : data.getPressure();
 		}
 		

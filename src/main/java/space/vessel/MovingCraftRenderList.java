@@ -2,70 +2,67 @@ package space.vessel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.UUID;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.math.BlockPos;
+import space.entity.MovingCraftEntity;
+import space.network.s2c.MovingCraftRenderDataS2CPacket;
 
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftRenderList
 {
-	private static HashMap<UUID, ArrayList<MovingCraftBlockRenderData>> craftList = new HashMap<UUID, ArrayList<MovingCraftBlockRenderData>>();
+	private static HashMap<Integer, ArrayList<MovingCraftBlockRenderData>> craftList = new HashMap<Integer, ArrayList<MovingCraftBlockRenderData>>();
 	
-	public static void addCraft(UUID entityUUID, ArrayList<MovingCraftBlockRenderData> blockList)
+	public static void addCraft(int entityID, ArrayList<MovingCraftBlockRenderData> blockList)
 	{
-		craftList.put(entityUUID, blockList);
+		craftList.put(entityID, blockList);
 	}
 	
-	public static void removeCraft(UUID entityUUID)
+	public static void removeCraft(int entityID)
 	{
-		craftList.remove(entityUUID);
+		craftList.remove(entityID);
 	}
 	
-	public static boolean hasBlocksForEntity(UUID entityUUID)
+	public static boolean hasBlocksForEntity(int entityID)
 	{
-		return craftList.containsKey(entityUUID);
+		return craftList.containsKey(entityID);
 	}
 	
-	public static ArrayList<MovingCraftBlockRenderData> getBlocksForEntity(UUID entityUUID)
+	public static ArrayList<MovingCraftBlockRenderData> getBlocksForEntity(int entityID)
 	{
-		return craftList.get(entityUUID);
+		return craftList.get(entityID);
 	}
 	
-	public static void receiveCraftListUpdate(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
+	public static void receiveCraftListUpdate(MovingCraftRenderDataS2CPacket payload, ClientPlayNetworking.Context context)
 	{
-		boolean b = buffer.readBoolean(); // Load render data if the boolean value is true or remove render data if it is false.
-		UUID entityUUID = buffer.readUuid();
+		int entityID = payload.entityID();
+		ArrayList<MovingCraftEntity.BlockRenderData> blockRenderDataList = payload.blockDataList();
+		MinecraftClient client = context.client();
 		
-		if(client.world != null && b)
+		if(client.world != null && !blockRenderDataList.isEmpty())
 		{
-			int blockCount = buffer.readInt();
 			ArrayList<MovingCraftBlockRenderData> blockList = new ArrayList<MovingCraftBlockRenderData>();
 			
-			for(int i = 0; i < blockCount; i++)
+			for(MovingCraftEntity.BlockRenderData blockRenderData : blockRenderDataList)
 			{
-				BlockState blockState = NbtHelper.toBlockState(client.world.createCommandRegistryWrapper(RegistryKeys.BLOCK), buffer.readNbt());
-				BlockPos blockPos = buffer.readBlockPos();
-				boolean redstone = buffer.readBoolean();
+				BlockState blockState = blockRenderData.blockState();
+				BlockPos blockPos = blockRenderData.position();
+				boolean redstone = (blockRenderData.flags() & (1 << 0)) != 0;
 				boolean[] sidesShowing = new boolean[6];
 				
-				for(int j = 0; j < 6; j++)
-					sidesShowing[j] = buffer.readBoolean();
+				for (int i = 0; i < 6; i++)
+					sidesShowing[i] = (blockRenderData.sidesShowing() & (1 << i)) != 0;
 				
 				blockList.add(new MovingCraftBlockRenderData(blockState, blockPos, redstone, sidesShowing));
 			}
 			
-			client.execute(() -> craftList.put(entityUUID, blockList));
+			client.execute(() -> craftList.put(entityID, blockList));
 		}
 		else
-			client.execute(() -> craftList.remove(entityUUID));
+			client.execute(() -> craftList.remove(entityID));
 	}
 }

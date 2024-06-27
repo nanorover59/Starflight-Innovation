@@ -3,13 +3,10 @@ package space.item;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -26,57 +23,47 @@ public class OxygenTankItem extends Item
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		if(stack.getNbt() != null)
+		if(stack.contains(StarflightItems.OXYGEN))
 		{
 			DecimalFormat df = new DecimalFormat("#.##");
-			tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
+			tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.get(StarflightItems.OXYGEN)) + "kg"));
 		}
-		else
-		{
-			NbtCompound nbt = stack.getOrCreateNbt();
-			nbt.putDouble("oxygen", 0);
-		}
-	}
-
-	public double getMaxOxygen()
-	{
-		return 2.0;
 	}
 
 	@Override
 	public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand)
 	{
-		ItemStack itemStack = player.getStackInHand(hand);
+		ItemStack stack = player.getStackInHand(hand);
 		
-		if(world.isClient || itemStack.getNbt() == null || itemStack.getNbt().getDouble("oxygen") <= 0)
-			return TypedActionResult.pass(itemStack);
+		if(world.isClient || !stack.contains(StarflightItems.OXYGEN) || stack.get(StarflightItems.OXYGEN) <= 0.0f)
+			return TypedActionResult.pass(stack);
 		
-		double availableOxygen = itemStack.getNbt().getDouble("oxygen");
+		float availableOxygen = stack.get(StarflightItems.OXYGEN);
 		
 		for(ItemStack armorStack : player.getArmorItems())
 		{
-			if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
+			if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.contains(StarflightItems.OXYGEN) && armorStack.contains(StarflightItems.MAX_OXYGEN))
 			{
-				double previousOxygen = armorStack.getNbt().getDouble("oxygen");
-				double requiredOxygen = SpaceSuitItem.MAX_OXYGEN - previousOxygen;
+				float previousOxygen = armorStack.get(StarflightItems.OXYGEN);
+				float requiredOxygen = armorStack.get(StarflightItems.MAX_OXYGEN) - previousOxygen;
 				
-				if(requiredOxygen > 0.0)
+				if(requiredOxygen > 0.0f)
 				{
 					StarflightEffects.sendFizz(world, player.getBlockPos());
-					double oxygenToTransfer = Math.min(requiredOxygen, availableOxygen);
-					itemStack.getNbt().putDouble("oxygen", availableOxygen - oxygenToTransfer);
-					armorStack.getNbt().putDouble("oxygen", previousOxygen + oxygenToTransfer);
+					float oxygenToTransfer = Math.min(requiredOxygen, availableOxygen);
+					stack.set(StarflightItems.OXYGEN, availableOxygen - oxygenToTransfer);
+					armorStack.set(StarflightItems.OXYGEN, availableOxygen + oxygenToTransfer);
 					MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
-					int percent = (int) Math.ceil((armorStack.getNbt().getDouble("oxygen") / SpaceSuitItem.MAX_OXYGEN) * 100.0);
+					int percent = (int) Math.ceil((armorStack.get(StarflightItems.OXYGEN) / armorStack.get(StarflightItems.MAX_OXYGEN)) * 100.0f);
 					text.append(percent + "%").formatted(Formatting.BOLD, Formatting.GREEN);
 					player.sendMessage(text, false);
-					return TypedActionResult.success(itemStack, true);
+					return TypedActionResult.success(stack, true);
 				}
 			}
 		}
 		
-		return TypedActionResult.pass(itemStack);
+		return TypedActionResult.pass(stack);
 	}
 }

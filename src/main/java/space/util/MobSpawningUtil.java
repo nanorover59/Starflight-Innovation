@@ -30,6 +30,7 @@ public class MobSpawningUtil
 {
 	private static int solarSpectreTimer = 0;
 	private static int dustTimer = 0;
+	private static int stratofishTimer = 0;
 	
 	public static void doCustomMobSpawning(MinecraftServer server)
 	{
@@ -42,10 +43,10 @@ public class MobSpawningUtil
 				if(data != null && (data.isOrbit() || data.getPressure() == 0.0))
 					doSolarSpectreSpawning(world, data);
 				
-				if(world.getDimensionEntry().matchesId(new Identifier(StarflightMod.MOD_ID, "mars")))
+				if(world.getDimensionEntry().matchesId(Identifier.of(StarflightMod.MOD_ID, "mars")))
 					doDustSpawning(world);
 				
-				if(world.getDimensionEntry().matchesId(new Identifier(StarflightMod.MOD_ID, "venus_sky")))
+				if(world.getDimensionEntry().matchesId(Identifier.of(StarflightMod.MOD_ID, "venus_sky")))
 					doStratofishSpawning(world);
 			}
 		}
@@ -163,13 +164,13 @@ public class MobSpawningUtil
 	
 	private static void doStratofishSpawning(ServerWorld world)
 	{
-		if(dustTimer > 0)
+		if(stratofishTimer > 0)
 		{
-			dustTimer--;
+			stratofishTimer--;
 			return;
 		}
 		
-		dustTimer = world.random.nextBetween(20, 60);
+		stratofishTimer = world.random.nextBetween(20, 60);
 		ArrayList<ChunkPos> chunkPosList = getChunkPosList(world, 2, 6, Predicates.alwaysTrue());
 		
 		for(ChunkPos chunkPos : chunkPosList)

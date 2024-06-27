@@ -3,22 +3,18 @@ package space.item;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import space.block.BalloonControllerBlock;
 import space.block.FluidTankControllerBlock;
-import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.client.StarflightModClient;
 import space.util.FluidResourceType;
@@ -34,7 +30,7 @@ public class LoaderItem extends Item
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space." + fluid.getName() + "_loader.description_1"), Text.translatable("item.space." + fluid.getName() + "_loader.description_2"));

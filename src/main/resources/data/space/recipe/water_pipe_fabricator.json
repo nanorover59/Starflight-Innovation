@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "default",
+  "ingredient": {
+    "item": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "space:water_pipe",
+    "count": 4
+  },
+  "machiningTime": 200
+}

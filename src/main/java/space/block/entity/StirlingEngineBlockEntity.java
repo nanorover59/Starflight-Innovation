@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.registry.tag.TagKey;
@@ -234,6 +235,18 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	{
 		return this.inventory.size();
 	}
+	
+	@Override
+	protected DefaultedList<ItemStack> getHeldStacks()
+	{
+		return this.inventory;
+	}
+
+	@Override
+	protected void setHeldStacks(DefaultedList<ItemStack> inventory)
+	{
+		this.inventory = inventory;
+	}
 
 	public boolean isEmpty()
 	{
@@ -355,10 +368,10 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	}
 	
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
-		Inventories.writeNbt(nbt, this.inventory);
+		super.writeNbt(nbt, registryLookup);
+		Inventories.writeNbt(nbt, this.inventory, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
 		nbt.putDouble("energy", this.energy);
 		nbt.putInt("burnTime", this.burnTime);
@@ -366,11 +379,11 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-		Inventories.readNbt(nbt, this.inventory);
+		Inventories.readNbt(nbt, this.inventory, registryLookup);
 		this.outputs = EnergyBlockEntity.outputsFromNBT(nbt);
 		this.energy = nbt.getDouble("energy");
 		this.burnTime = nbt.getInt("burnTime");
@@ -386,7 +399,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 		{
 			blockEntity.burnTime--;
 			blockEntity.powerState = 1;
-			blockEntity.changeEnergy(blockEntity.getOutput()); // Generate 0.5kJ/tick
+			blockEntity.changeEnergy(blockEntity.getOutput());
 			EnergyBlockEntity.transferEnergy(blockEntity, blockEntity.getOutput());
 			world.markDirty(pos);
 		}

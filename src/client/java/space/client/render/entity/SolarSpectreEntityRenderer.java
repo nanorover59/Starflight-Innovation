@@ -11,22 +11,21 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import space.StarflightMod;
 import space.client.StarflightModClient;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.entity.SolarSpectreEntity;
-import space.entity.StratofishEntity;
 import space.util.QuaternionUtil;
 
 @Environment(value = EnvType.CLIENT)
 public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEntity, SolarSpectreEntityModel<SolarSpectreEntity>>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/solar_spectre.png");
-	private static final Identifier EYES_TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/entity/solar_spectre_eyes.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/solar_spectre.png");
+	private static final Identifier EYES_TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/solar_spectre_eyes.png");
 
 	public SolarSpectreEntityRenderer(EntityRendererFactory.Context context)
 	{
@@ -36,26 +35,24 @@ public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEn
 	@Override
 	public void render(SolarSpectreEntity entity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i)
 	{
-        if(((Entity) entity).isInvisible())
+        if(entity.isInvisible())
             return;
         
         if(entity.clientQuaternionPrevious != null && entity.clientQuaternion != null)
 		{
-			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g);
+			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g).normalize();
 			matrixStack.multiply(quaternion);
 		}
 		else if(entity.clientQuaternion != null)
 			matrixStack.multiply(entity.clientQuaternion);
         
-        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotation((MathHelper.lerp(g, entity.clientRollExtraPrevious, entity.clientRollExtra))));   
+        matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((MathHelper.lerpAngleDegrees(g, entity.clientRollExtraPrevious, entity.clientRollExtra))));   
         float alpha = 0.8f;
-        
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucentEmissive(this.getTexture(entity)));
-        //((SolarSpectreEntityModel<SolarSpectreEntity>) this.getModel()).copyStateTo(this.model);
-        //this.model.setAngles(entity, entity.limbAngle, entity.limbDistance, getAnimationProgress(entity, g), 0.0f, 0.0f);
-        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), 1.0f, 1.0f, 1.0f, alpha);
+        int argb = ColorHelper.Argb.fromFloats(alpha, 1.0f, 1.0f, 1.0f);
+        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), argb);
         vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEyes(EYES_TEXTURE));
-        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), 1.0f, 1.0f, 1.0f, alpha);
+        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), argb);
 	}
 	
 	@Override

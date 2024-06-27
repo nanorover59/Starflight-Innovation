@@ -3,14 +3,12 @@ package space.item;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
@@ -21,7 +19,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import space.StarflightMod;
 import space.block.FluidTankControllerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
@@ -38,11 +35,11 @@ public class StructurePlacerItem extends Item
 		this.size = new BlockPos(xSize, ySize, zSize);
 		
 		for(String path : structurePaths)
-			structureList.add(new Identifier(StarflightMod.MOD_ID, path));
+			structureList.add(Identifier.of(StarflightMod.MOD_ID, path));
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.structure_placer.description"), Text.translatable("item.space.structure_placer.size").append("X: " + size.getX() + "  Y: " + size.getY() + "  Z: " + size.getZ()));

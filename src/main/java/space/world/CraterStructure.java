@@ -2,7 +2,7 @@ package space.world;
 
 import java.util.Optional;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
 import net.minecraft.structure.StructurePiecesCollector;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +12,7 @@ import net.minecraft.world.gen.structure.StructureType;
 
 public class CraterStructure extends Structure
 {
-	public static final Codec<CraterStructure> CODEC = CraterStructure.createCodec(CraterStructure::new);
+	public static final MapCodec<CraterStructure> CODEC = CraterStructure.createCodec(CraterStructure::new);
 
 	public CraterStructure(Structure.Config config)
 	{

@@ -5,9 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.PersistentState;
 import net.minecraft.world.PersistentStateManager;
 
@@ -48,7 +48,7 @@ public class StarflightPlayerState extends PersistentState
 	}
 
 	@Override
-	public NbtCompound writeNbt(NbtCompound nbt)
+	public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		for(Map.Entry<UUID, StarflightPlayerData> entry : playerData.entrySet())
 		{
@@ -60,7 +60,7 @@ public class StarflightPlayerState extends PersistentState
 		return nbt;
 	}
 
-	public static StarflightPlayerState createFromNbt(NbtCompound nbt)
+	public static StarflightPlayerState createFromNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		StarflightPlayerState state = new StarflightPlayerState();
 		

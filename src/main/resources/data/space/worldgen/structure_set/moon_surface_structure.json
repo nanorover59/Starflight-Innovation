@@ -3,11 +3,19 @@
     {
       "structure" : "space:moon_small_structure",
       "weight" : 1
+    },
+    {
+      "structure" : "space:biodome",
+      "weight" : 1
+    },
+    {
+      "structure" : "space:moonshaft",
+      "weight" : 1
     }
   ],
   "placement" : {
     "salt" : 95426513,
-    "spacing" : 16,
+    "spacing" : 12,
     "separation" : 8,
     "type" : "minecraft:random_spread"
   }

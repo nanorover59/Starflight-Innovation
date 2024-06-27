@@ -1,7 +1,6 @@
 package space.client.render.entity;
 
 import java.util.ArrayList;
-import java.util.UUID;
 
 import org.joml.Quaternionf;
 
@@ -34,9 +33,9 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 	@Override
     public void render(MovingCraftEntity entity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i)
 	{
-		UUID entityUUID = entity.getUuid();
+		int entityID = entity.getId();
 		
-		if(!MovingCraftRenderList.hasBlocksForEntity(entityUUID))
+		if(!MovingCraftRenderList.hasBlocksForEntity(entityID))
 			return;
 		
 		if(entity.clientQuaternionPrevious != null && entity.clientQuaternion != null)
@@ -44,7 +43,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		else if(entity.clientQuaternion != null)
 			matrixStack.multiply(entity.clientQuaternion);
 		
-		ArrayList<MovingCraftBlockRenderData> blockList = MovingCraftRenderList.getBlocksForEntity(entityUUID);
+		ArrayList<MovingCraftBlockRenderData> blockList = MovingCraftRenderList.getBlocksForEntity(entityID);
 		World world = entity.getEntityWorld();
 		Random random = Random.createLocal();
 		BlockPos centerBlockPos = entity.getBlockPos();

@@ -3,15 +3,11 @@ package space.vessel;
 import java.util.BitSet;
 import java.util.List;
 
-import org.joml.Quaternionf;
-import org.lwjgl.opengl.GL11;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.OverlayTexture;
@@ -90,23 +86,15 @@ public class MovingCraftBlockRenderData
 	public void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
 	{
 		// Block entity render.
-		if(blockState.getRenderType() == BlockRenderType.ENTITYBLOCK_ANIMATED && blockState.getBlock() instanceof BlockWithEntity)
+		if(blockState.getRenderType() == BlockRenderType.ENTITYBLOCK_ANIMATED && blockState.getBlock() instanceof BlockEntityProvider)
 		{
-			BlockWithEntity blockWithEntity = (BlockWithEntity) blockState.getBlock();
+			BlockEntityProvider blockWithEntity = (BlockEntityProvider) blockState.getBlock();
 			BlockEntity blockEntity = blockWithEntity.createBlockEntity(position.add(centerBlockPosInitial), blockState);
 			blockEntity.setWorld((World) world);
 			BlockEntityRenderDispatcher blockEntityRenderDispatcher = MinecraftClient.getInstance().getBlockEntityRenderDispatcher();
 			int light = WorldRenderer.getLightmapCoordinates(world, blockState, position.add(centerBlockPos));
 			matrixStack.push();
-			matrixStack.translate(position.getX(), position.getY(), position.getZ());
-			
-			if(blockState.getProperties().contains(HorizontalFacingBlock.FACING))
-			{
-				Direction direction = blockState.get(HorizontalFacingBlock.FACING).getOpposite();
-				matrixStack.multiply(new Quaternionf().rotationY(direction == Direction.NORTH || direction == Direction.SOUTH ? direction.asRotation() + 180.0f : direction.asRotation()));
-			}
-			
-			matrixStack.translate(-0.5, -0.5, -0.5);
+			matrixStack.translate(position.getX() - 0.5, position.getY() - 0.5, position.getZ() - 0.5);
 			blockEntityRenderDispatcher.get(blockEntity).render(blockEntity, 0.0F, matrixStack, vertexConsumerProvider, light, OverlayTexture.DEFAULT_UV);
 			matrixStack.pop();
 			return;

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " d ",
+        "cac",
+        " b "
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_ingot"
+        },
+        "b": {
+            "item": "minecraft:yellow_dye"
+        },
+        "c": {
+            "item": "space:copper_cable"
+        },
+        "d": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:multimeter",
+        "count": 1
+    }
+}

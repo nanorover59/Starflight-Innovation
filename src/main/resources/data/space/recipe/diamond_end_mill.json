@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a",
+        "b"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:diamond"
+        },
+        "b": {
+            "item": "space:titanium_ingot"
+        }
+    },
+    "result": {
+        "id": "space:diamond_end_mill",
+        "count": 1
+    }
+}

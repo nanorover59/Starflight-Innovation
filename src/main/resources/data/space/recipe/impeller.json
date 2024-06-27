@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "item.space.impeller",
+  "ingredient": {
+    "item": "space:titanium_ingot"
+  },
+  "result": {
+    "id": "space:impeller",
+    "count": 1
+  },
+  "machiningTime": 400
+}

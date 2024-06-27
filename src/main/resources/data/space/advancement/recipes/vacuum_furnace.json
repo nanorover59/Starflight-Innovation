@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:vacuum_furnace"
+    ]
+  },
+  "criteria": {
+    "has_electric_furnace": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:electric_furnace"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:vacuum_furnace"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_electric_furnace",
+      "has_the_recipe"
+    ]
+  ]
+}

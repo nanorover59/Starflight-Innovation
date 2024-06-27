@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "bcb",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_ingot"
+        },
+        "b": {
+            "item": "space:copper_cable"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:battery",
+        "count": 1
+    }
+}

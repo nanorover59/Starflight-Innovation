@@ -2,8 +2,6 @@ package space.block;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
@@ -12,19 +10,19 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.WallMountedBlock;
 import net.minecraft.block.Waterloggable;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -60,7 +58,7 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	}
 	
 	@Override
-	public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.tree_tap.description"));
 	}
@@ -124,12 +122,6 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	}
 
 	@Override
-	public boolean hasRandomTicks(BlockState state)
-	{
-		return !state.get(RUBBER_SAP).booleanValue();
-	}
-
-	@Override
 	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos)
 	{
 		Direction direction = state.get(FACING).getOpposite();
@@ -138,7 +130,7 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(!state.get(RUBBER_SAP).booleanValue() || world.getBlockState(pos).getBlock() != StarflightBlocks.TREE_TAP)
 			return ActionResult.CONSUME;
@@ -152,9 +144,9 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	}
 
 	@Override
-	public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random)
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random)
 	{
-		if(state.get(RUBBER_SAP).booleanValue() || world.getBlockState(pos).getBlock() != StarflightBlocks.TREE_TAP)
+		if(state.get(RUBBER_SAP).booleanValue() || random.nextInt(4) == 0)
 			return;
 
 		world.setBlockState(pos, world.getBlockState(pos).with(RUBBER_SAP, true), Block.NOTIFY_LISTENERS);

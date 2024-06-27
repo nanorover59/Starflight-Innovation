@@ -1,0 +1,88 @@
+{
+  "type": "minecraft:chest",
+  "pools": [
+    {
+      "rolls": 1,
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.cooled_copper\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.copper_injector\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.impeller\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.engine_1_nozzle\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.engine_1_extension\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.cooled_copper,item.space.copper_injector\"}"
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 1,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "set_nbt",
+              "tag": "{parts:\"item.space.engine_1_nozzle,item.space.engine_1_extension\"}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

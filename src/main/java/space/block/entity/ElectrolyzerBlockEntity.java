@@ -6,6 +6,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -18,7 +19,7 @@ import space.util.FluidResourceType;
 
 public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
-	private static double WATER_FLOW = 1.0; // Mass of water to electrolyze per tick.
+	private static double WATER_FLOW = 10.0; // Mass of water to electrolyze per tick.
 	private static double OXYGEN_FLOW = WATER_FLOW * (8.0 / 9.0);
 	private static double HYDROGEN_FLOW = WATER_FLOW * (1.0 / 9.0);
 	private double energy;
@@ -173,17 +174,17 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockE
 	}
 	
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("energy", this.energy);
 		nbt.putBoolean("hasWater", this.hasWater);
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.energy = nbt.getDouble("energy");
 		this.hasWater = nbt.getBoolean("hasWater");
 	}

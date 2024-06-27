@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:blasting",
-  "ingredient": {
-    "item": "space:ferric_ilmenite_ore"
-  },
-  "result": "space:titanium_ingot",
-  "experience": 0.7,
-  "cookingtime": 100
-}

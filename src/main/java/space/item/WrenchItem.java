@@ -2,20 +2,19 @@ package space.item;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.AirwayBlock;
 import space.block.ValveBlock;
 import space.client.StarflightModClient;
 import space.util.StarflightEffects;
@@ -28,7 +27,7 @@ public class WrenchItem extends Item
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.wrench.description"));
 	}
@@ -50,6 +49,12 @@ public class WrenchItem extends Item
         else if(blockState.getProperties().contains(ValveBlock.MODE))
         {
         	world.setBlockState(position, blockState.cycle(ValveBlock.MODE));
+        	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
+        	return ActionResult.success(world.isClient);
+        }
+        else if(blockState.getProperties().contains(AirwayBlock.CLOSED))
+        {
+        	world.setBlockState(position, blockState.cycle(AirwayBlock.CLOSED));
         	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
         	return ActionResult.success(world.isClient);
         }

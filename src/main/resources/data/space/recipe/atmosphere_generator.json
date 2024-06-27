@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "dcd",
+        "aba",
+        " a "
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "space:vent"
+        },
+        "c": {
+            "item": "space:oxygen_pipe"
+        },
+        "d": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:atmosphere_generator",
+        "count": 1
+    }
+}

@@ -1,0 +1,18 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "space:block/shelf_0"
+      },
+      {
+        "model": "space:block/shelf_1"
+      },
+      {
+        "model": "space:block/shelf_2"
+      },
+      {
+        "model": "space:block/shelf_3"
+      }
+    ]
+  }
+}

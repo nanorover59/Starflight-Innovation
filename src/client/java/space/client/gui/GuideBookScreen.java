@@ -32,7 +32,7 @@ import space.item.StarflightItems;
 @Environment(EnvType.CLIENT)
 public class GuideBookScreen extends Screen
 {
-	public static final Identifier BOOK_TEXTURE = new Identifier("space:textures/gui/guide/guide_book_screen.png");
+	public static final Identifier BOOK_TEXTURE = Identifier.of("space:textures/gui/guide/guide_book_screen.png");
 	private static final ItemStack[] ALUMINUM = {new ItemStack(StarflightBlocks.BAUXITE_ORE), new ItemStack(StarflightItems.BAUXITE), new ItemStack(StarflightItems.ALUMINUM_INGOT), new ItemStack(StarflightBlocks.ALUMINUM_BLOCK), new ItemStack(StarflightBlocks.ALUMINUM_FRAME), new ItemStack(StarflightBlocks.STRUCTURAL_ALUMINUM)};
 	private static final ItemStack[] SULFUR = {new ItemStack(StarflightBlocks.SULFUR_ORE), new ItemStack(StarflightItems.SULFUR), new ItemStack(StarflightBlocks.SULFUR_BLOCK)};
 	private static final ItemStack[] RUBBER_SAP = {new ItemStack(StarflightBlocks.RUBBER_LOG), new ItemStack(StarflightBlocks.TREE_TAP), new ItemStack(StarflightItems.RUBBER_SAP)};
@@ -186,7 +186,7 @@ public class GuideBookScreen extends Screen
 		
 		public GuideBookSection addImage(int position, String image)
 		{
-			imageList.put(position, new Identifier("space:textures/gui/guide/" + image + ".png"));
+			imageList.put(position, Identifier.of("space:textures/gui/guide/" + image + ".png"));
 			return this;
 		}
 		

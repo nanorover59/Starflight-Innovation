@@ -1,9 +1,0 @@
-{
-  "type": "minecraft:blasting",
-  "ingredient": {
-    "item": "space:deepslate_bauxite_ore"
-  },
-  "result": "space:aluminum_ingot",
-  "experience": 0.6,
-  "cookingtime": 100
-}

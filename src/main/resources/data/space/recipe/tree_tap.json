@@ -1,0 +1,19 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bb",
+        " a"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:bucket"
+        },
+        "b": {
+            "item": "minecraft:iron_ingot"
+        }
+    },
+    "result": {
+        "id": "space:tree_tap",
+        "count": 1
+    }
+}

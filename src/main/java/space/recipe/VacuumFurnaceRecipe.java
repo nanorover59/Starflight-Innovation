@@ -1,11 +1,11 @@
 package space.recipe;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.recipe.AbstractCookingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.recipe.book.CookingRecipeCategory;
+import space.block.StarflightBlocks;
 
 public class VacuumFurnaceRecipe extends AbstractCookingRecipe
 {
@@ -17,7 +17,7 @@ public class VacuumFurnaceRecipe extends AbstractCookingRecipe
 	@Override
 	public ItemStack createIcon()
 	{
-		return new ItemStack(Items.BLACKSTONE);
+		return new ItemStack(StarflightBlocks.VACUUM_FURNACE);
 	}
 
 	@Override

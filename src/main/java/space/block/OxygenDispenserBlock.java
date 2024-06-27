@@ -3,16 +3,15 @@ package space.block;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.text.MutableText;
@@ -20,16 +19,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.client.StarflightModClient;
 import space.item.OxygenTankItem;
-import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 import space.util.AirUtil;
 import space.util.FluidResourceType;
@@ -46,7 +42,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable BlockView world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.oxygen_dispenser.description_1"), Text.translatable("block.space.oxygen_dispenser.description_2"));
 	}
@@ -64,58 +60,50 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	}
 
 	@Override
-	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit)
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(world.isClient)
 			return ActionResult.PASS;
 		
-		double requiredOxygen = 0; // Start by finding the amount of oxygen needed.
-		ItemStack heldStack = player.getMainHandStack();
-
-		if(heldStack.getItem() instanceof OxygenTankItem)
-			requiredOxygen = ((OxygenTankItem) heldStack.getItem()).getMaxOxygen() - heldStack.getNbt().getDouble("oxygen");
+		ItemStack stackToFill = null;
+		
+		if(player.getMainHandStack().getItem() instanceof OxygenTankItem)
+			stackToFill = player.getMainHandStack();
 		else
 		{
 			for(ItemStack armorStack : player.getArmorItems())
 			{
-				if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
+				if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE)
 				{
-					requiredOxygen = SpaceSuitItem.MAX_OXYGEN - armorStack.getNbt().getDouble("oxygen");
+					stackToFill = armorStack;
 					break;
 				}
 			}
 		}
 		
-		// Return now if no oxygen is needed.
-		if(requiredOxygen <= 0)
-			return ActionResult.PASS;
-
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		double availableOxygen = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
-		
-		// Do effects and transfer oxygen.
-		if(availableOxygen >= requiredOxygen)
+		if(stackToFill != null && stackToFill.contains(StarflightItems.OXYGEN) && stackToFill.contains(StarflightItems.MAX_OXYGEN))
 		{
-			StarflightEffects.sendFizz(world, pos);
-			MutableText text = Text.translatable("block.space.oxygen_dispenser.message");
-			player.sendMessage(text, true);
+			float oxygen = stackToFill.get(StarflightItems.OXYGEN);
+			float maxOxygen = stackToFill.get(StarflightItems.MAX_OXYGEN);
+			float requiredOxygen = maxOxygen - oxygen;
+			
+			// Return if no oxygen is needed.
+			if(requiredOxygen <= 0.0f)
+				return ActionResult.PASS;
 
-			if(heldStack.getItem() instanceof OxygenTankItem)
-				heldStack.getNbt().putDouble("oxygen", ((OxygenTankItem) heldStack.getItem()).getMaxOxygen());
-			else
+			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+			double availableOxygen = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
+			
+			// Do effects and transfer oxygen.
+			if(availableOxygen >= requiredOxygen)
 			{
-				for(ItemStack armorStack : player.getArmorItems())
-				{
-					if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.getNbt() != null)
-					{
-						armorStack.getNbt().putDouble("oxygen", SpaceSuitItem.MAX_OXYGEN);
-						break;
-					}
-				}
+				StarflightEffects.sendFizz(world, pos);
+				MutableText text = Text.translatable("block.space.oxygen_dispenser.message");
+				player.sendMessage(text, true);
+				stackToFill.set(StarflightItems.OXYGEN, maxOxygen);
+				AirUtil.useSupply(world, checkList, requiredOxygen);
+				return ActionResult.SUCCESS;
 			}
-
-			AirUtil.useSupply(world, checkList, requiredOxygen);
-			return ActionResult.SUCCESS;
 		}
 		
 		return ActionResult.PASS;

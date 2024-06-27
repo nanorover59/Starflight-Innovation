@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aa ",
+        "aba",
+        " aa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:titanium_plate"
+        },
+        "b": {
+            "item": "space:titanium_frame"
+        }
+    },
+    "result": {
+        "id": "space:titanium_machine_casing",
+        "count": 1
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        " c "
+    ],
+    "key": {
+        "a": {
+            "item": "space:electric_furnace"
+        },
+        "b": {
+            "item": "space:pump"
+        },
+        "c": {
+            "item": "space:copper_cable"
+        }
+    },
+    "result": {
+        "id": "space:vacuum_furnace",
+        "count": 1
+    }
+}

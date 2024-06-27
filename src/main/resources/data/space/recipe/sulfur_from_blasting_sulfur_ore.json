@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:blasting",
+  "ingredient": {
+    "item": "space:sulfur_ore"
+  },
+  "result": {
+    "id": "space:sulfur"
+  },
+  "experience": 0.6,
+  "cookingtime": 100
+}

@@ -1,0 +1,26 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a ",
+        "dbd",
+        " c "
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:redstone"
+        },
+        "b": {
+            "item": "minecraft:charcoal"
+        },
+        "c": {
+            "item": "minecraft:gold_nugget"
+        },
+        "d": {
+            "item": "minecraft:iron_nugget"
+        }
+    },
+    "result": {
+        "id": "space:battery_cell",
+        "count": 1
+    }
+}

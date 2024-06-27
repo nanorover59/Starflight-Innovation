@@ -1,0 +1,8 @@
+{
+  "parent" : "space:block/airway",
+  "textures" : {
+    "0" : "space:block/airway_side",
+    "1" : "space:block/airway_closed",
+    "particle" : "space:block/airway_side"
+  }
+}

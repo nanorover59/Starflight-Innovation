@@ -19,7 +19,7 @@ public class TimeStepsCommand
 	
 	public static int timeSteps(CommandContext<ServerCommandSource> context, int integerArgument)
 	{
-		PlanetList.setTimeSteps(integerArgument);
+		PlanetList.get().setTimeSteps(integerArgument);
 		return 1;
 	}
 }

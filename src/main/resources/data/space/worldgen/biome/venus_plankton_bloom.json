@@ -20,8 +20,8 @@
     "creature": [
       {
         "type": "space:stratofish",
-        "maxCount": 1,
-        "minCount": 4,
+        "maxCount": 2,
+        "minCount": 1,
         "weight": 10
       }
     ],

@@ -15,7 +15,7 @@ import space.screen.StirlingEngineScreenHandler;
 @Environment(EnvType.CLIENT)
 public class StirlingEngineScreen extends HandledScreen<ScreenHandler>
 {
-	private static final Identifier TEXTURE = new Identifier(StarflightMod.MOD_ID, "textures/gui/stirling_engine.png");
+	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/gui/stirling_engine.png");
 
 	public StirlingEngineScreen(ScreenHandler handler, PlayerInventory inventory, Text title)
 	{

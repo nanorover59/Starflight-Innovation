@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -32,7 +33,7 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 	@Override
 	public double getEnergyCapacity()
 	{
-		return 10;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
@@ -74,17 +75,17 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 	}
 	
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
 		nbt.putDouble("energy", this.energy);
 	}
 		
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.outputs = EnergyBlockEntity.outputsFromNBT(nbt);
 		this.energy = nbt.getDouble("energy");
 	}
@@ -98,7 +99,7 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
 
 		if(data != null)
-			solarMultiplier = data.getPlanet().getSolarMultiplier() * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit()) ? world.getRainGradient(1.0f) : 0.0f));
+			solarMultiplier = data.getPlanet().getSolarMultiplier() * (data.isCloudy() ? 0.1 : 1.0) * (1.0f - ((data.getPlanet().hasWeather() && !data.isOrbit()) ? world.getRainGradient(1.0f) : 0.0f));
 		else
 			solarMultiplier = 1.0f - world.getRainGradient(1.0f);
 

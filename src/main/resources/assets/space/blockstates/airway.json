@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,closed=false": {
+      "model": "space:block/airway",
+      "x": 180
+    },
+    "facing=down,closed=true": {
+      "model": "space:block/airway_closed",
+      "x": 180
+    },
+    "facing=east,closed=false": {
+      "model": "space:block/airway",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,closed=true": {
+      "model": "space:block/airway_closed",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,closed=false": {
+      "model": "space:block/airway",
+      "x": 90
+    },
+    "facing=north,closed=true": {
+      "model": "space:block/airway_closed",
+      "x": 90
+    },
+    "facing=south,closed=false": {
+      "model": "space:block/airway",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,closed=true": {
+      "model": "space:block/airway_closed",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,closed=false": {
+      "model": "space:block/airway"
+    },
+    "facing=up,closed=true": {
+      "model": "space:block/airway_closed"
+    },
+    "facing=west,closed=false": {
+      "model": "space:block/airway",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,closed=true": {
+      "model": "space:block/airway_closed",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

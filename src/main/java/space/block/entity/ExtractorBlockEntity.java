@@ -24,6 +24,7 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
@@ -91,37 +92,37 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 				return 3;
 			}
 		};
-		
+
 		if(iceMap.isEmpty())
 			iceMap = createIceMap();
 	}
-	
+
 	public static Map<Item, Integer> createIceMap()
 	{
-        LinkedHashMap<Item, Integer> map = Maps.newLinkedHashMap();
-        addIce(map, Blocks.ICE, 1000);
-        addIce(map, Blocks.PACKED_ICE, 1000);
-        addIce(map, Blocks.BLUE_ICE, 1000);
-        addIce(map, Blocks.SNOW_BLOCK, 40);
-        addIce(map, Blocks.POWDER_SNOW, 10);
-        addIce(map, Items.SNOWBALL, 10);
-        return map;
-    }
+		LinkedHashMap<Item, Integer> map = Maps.newLinkedHashMap();
+		addIce(map, Blocks.ICE, 1000);
+		addIce(map, Blocks.PACKED_ICE, 1000);
+		addIce(map, Blocks.BLUE_ICE, 1000);
+		addIce(map, Blocks.SNOW_BLOCK, 40);
+		addIce(map, Blocks.POWDER_SNOW, 10);
+		addIce(map, Items.SNOWBALL, 10);
+		return map;
+	}
 
 	public static void addIce(Map<Item, Integer> iceMap, ItemConvertible item, int iceMass)
 	{
 		iceMap.put(item.asItem(), iceMass);
 	}
-	
+
 	public boolean hasValidItem()
 	{
 		ItemStack itemStack = (ItemStack) inventory.get(0);
 		return iceMap.containsKey(itemStack.getItem());
 	}
-	
+
 	public int[] getAvailableSlots(Direction side)
 	{
-		return new int[] {0};
+		return new int[] { 0 };
 	}
 
 	public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir)
@@ -137,6 +138,18 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	public int size()
 	{
 		return this.inventory.size();
+	}
+
+	@Override
+	protected DefaultedList<ItemStack> getHeldStacks()
+	{
+		return this.inventory;
+	}
+
+	@Override
+	protected void setHeldStacks(DefaultedList<ItemStack> inventory)
+	{
+		this.inventory = inventory;
 	}
 
 	public boolean isEmpty()
@@ -173,7 +186,7 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	public void setStack(int slot, ItemStack stack)
 	{
 		this.inventory.set(slot, stack);
-		
+
 		if(stack.getCount() > this.getMaxCountPerStack())
 			stack.setCount(this.getMaxCountPerStack());
 	}
@@ -195,7 +208,7 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	{
 		this.inventory.clear();
 	}
-	
+
 	@Override
 	public Text getContainerName()
 	{
@@ -207,19 +220,19 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	{
 		return new ExtractorScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
 	}
-	
+
 	@Override
 	public double getOutput()
 	{
 		return 0.0;
 	}
-	
+
 	@Override
 	public double getInput()
 	{
 		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
 	}
-	
+
 	@Override
 	public double getEnergyStored()
 	{
@@ -255,97 +268,95 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	public void clearOutputs()
 	{
 	}
-	
+
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("energy", this.energy);
 		nbt.putShort("time", (short) this.time);
 		nbt.putShort("totalTime", (short) this.totalTime);
-		Inventories.writeNbt(nbt, this.inventory);
+		Inventories.writeNbt(nbt, this.inventory, registryLookup);
 	}
-	
+
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
-		Inventories.readNbt(nbt, this.inventory);
+		Inventories.readNbt(nbt, this.inventory, registryLookup);
 		this.energy = nbt.getDouble("energy");
 		this.time = nbt.getShort("time");
 		this.totalTime = nbt.getShort("totalTime");
 	}
-	
+
 	public static void serverTick(World world, BlockPos pos, BlockState state, ExtractorBlockEntity blockEntity)
 	{
 		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
 		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
-		
+
 		if(blockEntity.hasValidItem())
 		{
 			if(blockEntity.totalTime == 0)
 			{
 				blockEntity.time = 0;
-				blockEntity.totalTime = iceMap.get(itemStack.getItem()) / 5;
+				blockEntity.totalTime = iceMap.get(itemStack.getItem()) / 10;
 			}
-			
+
 			if(blockEntity.energy > 0)
 			{
 				blockEntity.changeEnergy(-blockEntity.getInput());
 				blockEntity.time++;
-				
+
 				if(blockEntity.time == blockEntity.totalTime)
 				{
 					double massFlow = iceMap.get(itemStack.getItem());
 					int waterOutlets = 0;
-					
+
 					for(Direction direction : Direction.values())
 					{
 						if(direction == state.get(HorizontalFacingBlock.FACING))
 							continue;
-						
+
 						BlockPos offset = pos.offset(direction);
 						Block offsetBlock = world.getBlockState(offset).getBlock();
-						
+
 						if(offsetBlock instanceof FluidUtilityBlock && ((FluidUtilityBlock) offsetBlock).getFluidType().getID() == FluidResourceType.WATER.getID())
 						{
 							BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
-							
+
 							if(offsetBlockEntity instanceof FluidPipeBlockEntity)
 								waterOutlets++;
 						}
 					}
-					
+
 					for(Direction direction : Direction.values())
 					{
 						if(direction == state.get(HorizontalFacingBlock.FACING))
 							continue;
-						
+
 						BlockPos offset = pos.offset(direction);
 						BlockState offsetState = world.getBlockState(offset);
-						
+
 						if(offsetState.getBlock() == StarflightBlocks.WATER_PIPE)
 						{
 							ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 							ElectrolyzerBlockEntity.recursiveSpread(world, offset, checkList, massFlow / waterOutlets, FluidResourceType.WATER, 2048);
 						}
 					}
-					
+
 					itemStack.decrement(1);
 					blockEntity.time = 0;
 					blockEntity.totalTime = 0;
 				}
-			}
-			else if(blockEntity.time >= 0)
+			} else if(blockEntity.time >= 0)
 				blockEntity.time -= 2;
-		}
-		else
+		} else
 		{
 			blockEntity.time = 0;
 			blockEntity.totalTime = 0;
 		}
-		
+
 		if(world.getBlockState(pos).get(ExtractorBlock.LIT) != (blockEntity.chargeState > 0 && !itemStack.isEmpty()))
 		{
 			state = (BlockState) state.with(ExtractorBlock.LIT, blockEntity.chargeState > 0 && !itemStack.isEmpty());

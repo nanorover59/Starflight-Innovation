@@ -8,7 +8,7 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.DefaultParticleType;
+import net.minecraft.particle.SimpleParticleType;
 
 @Environment(value = EnvType.CLIENT)
 public class AirParticle extends SpriteBillboardParticle
@@ -45,7 +45,7 @@ public class AirParticle extends SpriteBillboardParticle
 	}
 
 	@Environment(value = EnvType.CLIENT)
-	public static class Factory implements ParticleFactory<DefaultParticleType>
+	public static class Factory implements ParticleFactory<SimpleParticleType>
 	{
 		private final SpriteProvider spriteProvider;
 
@@ -55,7 +55,7 @@ public class AirParticle extends SpriteBillboardParticle
 		}
 
 		@Override
-		public Particle createParticle(DefaultParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i)
+		public Particle createParticle(SimpleParticleType defaultParticleType, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i)
 		{
 			return new AirParticle(clientWorld, d, e, f, g, h, i, this.spriteProvider);
 		}

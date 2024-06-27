@@ -17,15 +17,15 @@ import space.entity.MovingCraftEntity;
 @Mixin(Camera.class)
 public abstract class CameraMixin
 {
-	@Shadow abstract double clipToSpace(double desiredCameraDistance);
-	@Shadow abstract void moveBy(double x, double y, double z);
+	@Shadow abstract float clipToSpace(float f);
+	@Shadow abstract void moveBy(float x, float y, float z);
 	
 	@Inject(method = "update(Lnet/minecraft/world/BlockView;Lnet/minecraft/entity/Entity;ZZF)V", at = @At("TAIL"), cancellable = true)
 	public void updateInject(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info)
 	{
 		if(thirdPerson && focusedEntity.getVehicle() instanceof MovingCraftEntity)
 		{
-			this.moveBy(-this.clipToSpace(32.0), 0.0, 0.0);
+			this.moveBy(-this.clipToSpace(32.0f), 0.0f, 0.0f);
 		}
 	}
 }

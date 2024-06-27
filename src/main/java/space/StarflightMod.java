@@ -4,17 +4,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.util.Identifier;
 import space.block.StarflightBlocks;
-import space.block.entity.RocketControllerBlockEntity;
 import space.command.StarflightCommands;
-import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.event.StarflightEvents;
 import space.item.StarflightItems;
+import space.network.c2s.StarflightNetworkingC2S;
 import space.particle.StarflightParticleTypes;
-import space.planet.PlanetList;
 import space.recipe.StarflightRecipes;
 import space.util.StarflightEffects;
 import space.world.StarflightWorldGeneration;
@@ -36,9 +32,6 @@ public class StarflightMod implements ModInitializer
 		StarflightEffects.initializeSounds();
 		StarflightCommands.initializeCommands();
 		StarflightRecipes.initializeRecipes();
-		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_button"), (server1, player, handler1, buf, sender) -> RocketControllerBlockEntity.receiveButtonPress(server1, player, handler1, buf, sender));
-		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_input"), (server1, player, handler1, buf, sender) -> RocketEntity.receiveInput(server1, player, handler1, buf, sender));
-		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_travel_button"), (server1, player, handler1, buf, sender) -> RocketEntity.receiveTravelInput(server1, player, handler1, buf, sender));
-		ServerPlayNetworking.registerGlobalReceiver(new Identifier(StarflightMod.MOD_ID, "planetarium_transfer"), (server1, player, handler1, buf, sender) -> PlanetList.receiveTransferCalculationRequest(server1, player, handler1, buf, sender));
+		StarflightNetworkingC2S.initializePackets();
 	}
 }

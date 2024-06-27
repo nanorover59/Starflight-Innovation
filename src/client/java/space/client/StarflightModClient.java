@@ -10,11 +10,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.impl.client.indigo.renderer.helper.ColorHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
@@ -25,10 +25,12 @@ import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -40,8 +42,8 @@ import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
 import space.client.gui.ElectricFurnaceScreen;
 import space.client.gui.ExtractorScreen;
+import space.client.gui.MetalFabricatorScreen;
 import space.client.gui.RocketControllerScreen;
-import space.client.gui.SpaceNavigationScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
 import space.client.render.StarflightClientEffects;
@@ -50,6 +52,7 @@ import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.client.render.entity.PlasmaBallEntityRenderer;
 import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
@@ -63,8 +66,18 @@ import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
+import space.network.s2c.FizzS2CPacket;
+import space.network.s2c.JetS2CPacket;
+import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
+import space.network.s2c.MovingCraftRenderDataS2CPacket;
+import space.network.s2c.OutgasS2CPacket;
+import space.network.s2c.PlanetDataS2CPacket;
+import space.network.s2c.RocketControllerDataS2CPacket;
+import space.network.s2c.RocketOpenTravelScreenS2CPacket;
+import space.network.s2c.UnlockPlanetS2CPacket;
 import space.particle.StarflightParticleTypes;
-import space.planet.ClientPlanetList;
+import space.planet.PlanetDimensionData;
+import space.planet.PlanetList;
 import space.screen.StarflightScreens;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftRenderList;
@@ -72,13 +85,14 @@ import space.vessel.MovingCraftRenderList;
 @Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
 {
-	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "dust"), "main");
-	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "cerulean"), "main");
-	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
-	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
-	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
-	public static final EntityModelLayer MODEL_SOLAR_SPECTRE_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "solar_spectre"), "main");
-	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(new Identifier(StarflightMod.MOD_ID, "stratofish"), "main");
+	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "dust"), "main");
+	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cerulean"), "main");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
+	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
+	public static final EntityModelLayer MODEL_SOLAR_SPECTRE_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), "main");
+	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
+	public static final EntityModelLayer MODEL_PLASMA_BALL_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
@@ -86,18 +100,16 @@ public class StarflightModClient implements ClientModInitializer
 	public void onInitializeClient()
 	{		
 		// Client side networking.
-		ClientPlayConnectionEvents.INIT.register((handler, client) -> {
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planet_data"), (client1, handler1, buf, sender1) -> ClientPlanetList.receivePlanetListUpdate(client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), (client1, handler1, buf, sender1) -> MovingCraftRenderList.receiveCraftListUpdate(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "moving_craft_entity_offsets"), (client1, handler1, buf, sender1) -> MovingCraftEntity.receiveEntityOffsets(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_open_travel_screen"), (client1, handler1, buf, sender1) -> RocketEntity.receiveOpenTravelScreen(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "rocket_controller_data"), (client1, handler1, buf, sender1) -> RocketControllerScreen.receiveDisplayDataUpdate(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "planetarium_transfer"), (client1, handler1, buf, sender1) -> SpaceNavigationScreen.receiveTransferCalculation(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "fizz"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveFizz(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "outgas"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveOutgas(handler1, sender1, client1, buf));
-			ClientPlayNetworking.registerReceiver(new Identifier(StarflightMod.MOD_ID, "jet"), (client1, handler1, buf, sender1) -> StarflightEffects.receiveJet(handler1, sender1, client1, buf));
-		});
-		
+		ClientPlayNetworking.registerGlobalReceiver(PlanetDataS2CPacket.PACKET_ID, (payload, context) -> PlanetList.receiveDynamicData((PlanetDataS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(MovingCraftRenderDataS2CPacket.PACKET_ID, (payload, context) -> MovingCraftRenderList.receiveCraftListUpdate((MovingCraftRenderDataS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveEntityOffsets((MovingCraftEntityOffsetsS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(RocketOpenTravelScreenS2CPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveOpenTravelScreen((RocketOpenTravelScreenS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(RocketControllerDataS2CPacket.PACKET_ID, (payload, context) -> RocketControllerScreen.receiveDisplayDataUpdate((RocketControllerDataS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(FizzS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveFizz((FizzS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(OutgasS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveOutgas((OutgasS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(JetS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveJet((JetS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(UnlockPlanetS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveUnlockPlanet((UnlockPlanetS2CPacket) payload, context));
+
 		// Client side block properties.
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.ALUMINUM_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WALKWAY, RenderLayer.getCutout());
@@ -106,6 +118,7 @@ public class StarflightModClient implements ClientModInitializer
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_GLASS, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.REDSTONE_GLASS, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WATER_TANK, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRWAY, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_DOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.AIRLOCK_TRAPDOOR, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.TITANIUM_DOOR, RenderLayer.getCutout());
@@ -117,7 +130,7 @@ public class StarflightModClient implements ClientModInitializer
 		
 		// Client side item properties.
 		ColorProviderRegistry.ITEM.register(
-			(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : 0xFFFFFFF,
+			(stack, tintIndex) -> tintIndex == 0 ? getColor(stack) : -1,
 			StarflightItems.SPACE_SUIT_HELMET,
 			StarflightItems.SPACE_SUIT_CHESTPLATE,
 			StarflightItems.SPACE_SUIT_LEGGINGS,
@@ -126,15 +139,13 @@ public class StarflightModClient implements ClientModInitializer
 		
 		ColorProviderRegistry.ITEM.register(
 			(stack, tintIndex) -> {
-				NbtCompound nbt = stack.getNbt();
-				
-				if(nbt == null)
+				if(!stack.contains(StarflightItems.PRIMARY_COLOR) || !stack.contains(StarflightItems.SECONDARY_COLOR))
 					return -1;
 				
 				if(tintIndex == 0)
-					return nbt.getInt("secondaryColor");
+					return stack.get(StarflightItems.PRIMARY_COLOR) | 0xFF000000;
 				else if(tintIndex == 1)
-					return nbt.getInt("primaryColor");
+					return stack.get(StarflightItems.SECONDARY_COLOR) | 0xFF000000;
 				else
 					return -1;
 			},
@@ -147,6 +158,7 @@ public class StarflightModClient implements ClientModInitializer
 		// GUIs
 		HandledScreens.register(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
 		HandledScreens.register(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
+		HandledScreens.register(StarflightScreens.METAL_FABRICATOR_SCREEN_HANDLER, MetalFabricatorScreen::new);
 		HandledScreens.register(StarflightScreens.EXTRACTOR_SCREEN_HANDLER, ExtractorScreen::new);
 		HandledScreens.register(StarflightScreens.BATTERY_SCREEN_HANDLER, BatteryScreen::new);
 		
@@ -154,6 +166,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ROCKET, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.LINEAR_PLATFORM, (context) -> new MovingCraftEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.PLASMA_BALL, (context) -> new PlasmaBallEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
@@ -168,18 +181,19 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_SOLAR_SPECTRE_LAYER, SolarSpectreEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_PLASMA_BALL_LAYER, PlasmaBallEntityRenderer::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();
 		
 		// Dimension Effects
-		registerDimensionEffect(new Identifier(StarflightMod.MOD_ID, "mars"), new Mars());
+		registerDimensionEffect(Identifier.of(StarflightMod.MOD_ID, "mars"), new Mars());
 		
 		// Start Client Tick Event
 		ClientTickEvents.START_CLIENT_TICK.register(client ->
 		{
-			// Update the planet render list.
-			ClientPlanetList.updatePlanets();
+			// Client planet list tick.
+			PlanetList.getClient().clientTick(client.getRenderTickCounter().getTickDelta(false));
 			
 			// Rocket user input.
 			StarflightControls.vehicleControls(client);
@@ -187,7 +201,9 @@ public class StarflightModClient implements ClientModInitializer
 			// Weather particle effects.
 			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)
 			{
-				if(!ClientPlanetList.isViewpointInOrbit() && ClientPlanetList.getViewpointPlanet() != null && ClientPlanetList.getViewpointPlanet().getName().equals("mars"))
+				PlanetDimensionData viewpointDimensionData = PlanetList.getClient().getViewpointDimensionData();
+				
+				if(viewpointDimensionData != null && !viewpointDimensionData.isOrbit() && viewpointDimensionData.getPlanet().getName().equals("mars"))
 				{
 					Random random = client.world.random;
 					int count = 64 + random.nextInt(64);
@@ -218,7 +234,8 @@ public class StarflightModClient implements ClientModInitializer
 						
 						if(distance < ((AlienMobEntity) entity).getRadiationRange())
 						{
-							float radiation = (1.0f - (distance / ((AlienMobEntity) entity).getRadiationRange())) * ((AlienMobEntity) entity).getRadiationStrength();
+							float df = distance / ((AlienMobEntity) entity).getRadiationRange();
+							float radiation = (1.0f - df) * ((AlienMobEntity) entity).getRadiationStrength();
 							
 							if(radiation > maxRadiation)
 								maxRadiation = radiation;
@@ -233,8 +250,8 @@ public class StarflightModClient implements ClientModInitializer
 	
 	int getColor(ItemStack stack)
 	{
-	      NbtCompound nbtCompound = stack.getSubNbt("display");
-	      return nbtCompound != null && nbtCompound.contains("color", 99) ? nbtCompound.getInt("color") : 0xFFFFFFF;
+	      DyedColorComponent color = stack.get(DataComponentTypes.DYED_COLOR);
+	      return color != null ? color.rgb() | 0xFF000000 : -1;
 	}
 	
 	private static TexturedModelData getInnerArmorModelData()

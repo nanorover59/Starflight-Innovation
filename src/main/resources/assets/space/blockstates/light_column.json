@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "axis=x,lit=false": {
+      "model": "space:block/light_column_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,lit=true": {
+      "model": "space:block/light_column_horizontal_on",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,lit=false": {
+      "model": "space:block/light_column"
+    },
+    "axis=y,lit=true": {
+      "model": "space:block/light_column_on"
+    },
+    "axis=z": {
+      "model": "space:block/light_column_horizontal",
+      "x": 90
+    },
+    "axis=z": {
+      "model": "space:block/light_column_horizontal_on",
+      "x": 90
+    }
+  }
+}

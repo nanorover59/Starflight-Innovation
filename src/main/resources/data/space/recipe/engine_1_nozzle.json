@@ -1,0 +1,13 @@
+{
+  "type": "space:metal_fabricator",
+  "category": "misc",
+  "group": "item.space.engine_1_nozzle",
+  "ingredient": {
+    "item": "space:titanium_block"
+  },
+  "result": {
+    "id": "space:engine_1_nozzle",
+    "count": 1
+  },
+  "machiningTime": 600
+}

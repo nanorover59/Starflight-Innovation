@@ -11,9 +11,7 @@ import org.joml.Vector3f;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
-import net.fabricmc.fabric.api.dimension.v1.FabricDimensions;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -22,7 +20,7 @@ import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
@@ -33,12 +31,11 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.listener.ClientPlayPacketListener;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -47,10 +44,10 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
-import space.StarflightMod;
 import space.block.StarflightBlocks;
-import space.inventory.ImplementedInventory;
 import space.mixin.common.EntityInvokerMixin;
+import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
+import space.network.s2c.MovingCraftRenderDataS2CPacket;
 import space.vessel.MovingCraftBlockData;
 
 public class MovingCraftEntity extends Entity
@@ -105,37 +102,37 @@ public class MovingCraftEntity extends Entity
 		this.setRotation(0.0f, 0.0f);
 		this.setQuaternion(new Quaternionf());
 		this.setInitialBlockPos(this.getBlockPos());
-		
+
 		if(blockDataList.isEmpty())
 			setRemoved(RemovalReason.DISCARDED);
-		
+
 		BlockPos min = new BlockPos(blockDataList.get(0).getPosition());
 		BlockPos max = new BlockPos(blockDataList.get(0).getPosition());
-    	
+
 		for(MovingCraftBlockData blockData : blockDataList)
 		{
 			BlockPos pos = blockData.getPosition();
-			
+
 			if(pos.getX() < min.getX())
 				min = new BlockPos(pos.getX(), min.getY(), min.getZ());
 			else if(pos.getX() > max.getX())
 				max = new BlockPos(pos.getX(), max.getY(), max.getZ());
-			
+
 			if(pos.getY() < min.getY())
 				min = new BlockPos(min.getX(), pos.getY(), min.getZ());
 			else if(pos.getY() > max.getY())
 				max = new BlockPos(max.getX(), pos.getY(), max.getZ());
-			
+
 			if(pos.getZ() < min.getZ())
 				min = new BlockPos(min.getX(), min.getY(), pos.getZ());
 			else if(pos.getZ() > max.getZ())
 				max = new BlockPos(max.getX(), max.getY(), pos.getZ());
 		}
-		
+
 		boxMin = new Vec3d(min.getX() - 0.5, min.getY() - 0.5, min.getZ() - 0.5);
 		boxMax = new Vec3d(max.getX() + 0.5, max.getY() + 0.5, max.getZ() + 0.5);
 		Box box = Box.enclosing(min, max.up()).offset(blockPos);
-		
+
 		for(Entity entity : world.getOtherEntities(this, box))
 		{
 			if(entity instanceof LivingEntity)
@@ -145,23 +142,22 @@ public class MovingCraftEntity extends Entity
 			}
 		}
 	}
-	
+
 	@Override
 	protected Box calculateBoundingBox()
 	{
 		World world = getWorld();
-		
+
 		if(world.isClient)
 		{
 			Vec3d min = new Vec3d(this.dataTracker.get(TRACKED_BOX_MIN));
 			Vec3d max = new Vec3d(this.dataTracker.get(TRACKED_BOX_MAX));
 			return new Box(getPos().add(min), getPos().add(max));
-		}
-		else if(boxMin != null && boxMax != null)
+		} else if(boxMin != null && boxMax != null)
 			return new Box(getPos().add(boxMin), getPos().add(boxMax));
-		
+
 		return Box.from(getPos());
-    }
+	}
 
 	@Override
 	public boolean isAttackable()
@@ -182,18 +178,18 @@ public class MovingCraftEntity extends Entity
 	}
 
 	@Override
-	protected void initDataTracker()
+	protected void initDataTracker(DataTracker.Builder builder)
 	{
-		this.dataTracker.startTracking(INITIAL_BLOCK_POS, BlockPos.ORIGIN);
-		this.dataTracker.startTracking(FORWARD, Integer.valueOf(0));
-		this.dataTracker.startTracking(CRAFT_QUATERNION, new Quaternionf());
-		this.dataTracker.startTracking(TRACKED_VELOCITY, new Vector3f());
-		this.dataTracker.startTracking(TRACKED_ANGULAR_VELOCITY, new Vector3f());
-		this.dataTracker.startTracking(TRACKED_ANGLES, new Vector3f());
-		this.dataTracker.startTracking(TRACKED_BOX_MIN, new Vector3f());
-		this.dataTracker.startTracking(TRACKED_BOX_MAX, new Vector3f());
+		builder.add(INITIAL_BLOCK_POS, BlockPos.ORIGIN);
+		builder.add(FORWARD, Integer.valueOf(0));
+		builder.add(CRAFT_QUATERNION, new Quaternionf());
+		builder.add(TRACKED_VELOCITY, new Vector3f());
+		builder.add(TRACKED_ANGULAR_VELOCITY, new Vector3f());
+		builder.add(TRACKED_ANGLES, new Vector3f());
+		builder.add(TRACKED_BOX_MIN, new Vector3f());
+		builder.add(TRACKED_BOX_MAX, new Vector3f());
 	}
-	
+
 	public void setInitialBlockPos(BlockPos pos)
 	{
 		this.dataTracker.set(INITIAL_BLOCK_POS, pos);
@@ -203,7 +199,7 @@ public class MovingCraftEntity extends Entity
 	{
 		this.dataTracker.set(FORWARD, d);
 	}
-	
+
 	public void setQuaternion(Quaternionf quaternion)
 	{
 		this.dataTracker.set(CRAFT_QUATERNION, quaternion);
@@ -213,38 +209,38 @@ public class MovingCraftEntity extends Entity
 	{
 		this.dataTracker.set(TRACKED_VELOCITY, velocity);
 	}
-	
+
 	public void setTrackedAngularVelocity(Vector3f angularVelocity)
 	{
 		this.dataTracker.set(TRACKED_ANGULAR_VELOCITY, angularVelocity);
 	}
-	
+
 	public void setTrackedAngles(Vector3f angles)
 	{
 		this.dataTracker.set(TRACKED_ANGLES, angles);
 	}
-	
+
 	public void updateTrackedBox()
 	{
 		this.dataTracker.set(TRACKED_BOX_MIN, boxMin.toVector3f());
 		this.dataTracker.set(TRACKED_BOX_MAX, boxMax.toVector3f());
 	}
-	
+
 	public double getLowerHeight()
 	{
 		return boxMin.getY();
 	}
-	
+
 	public double getUpperHeight()
 	{
 		return boxMax.getY();
 	}
-	
+
 	public double getXWidth()
 	{
 		return boxMax.getX() - boxMin.getX();
 	}
-	
+
 	public double getZWidth()
 	{
 		return boxMax.getZ() - boxMin.getZ();
@@ -269,85 +265,83 @@ public class MovingCraftEntity extends Entity
 	{
 		return this.dataTracker.get(TRACKED_VELOCITY);
 	}
-	
+
 	public Vector3f getTrackedAngularVelocity()
 	{
 		return this.dataTracker.get(TRACKED_ANGULAR_VELOCITY);
 	}
-	
+
 	public Vector3f getTrackedAngles()
 	{
 		return this.dataTracker.get(TRACKED_ANGLES);
 	}
-	
+
 	public void setMass(double craftMass)
 	{
 		this.craftMass = craftMass;
 	}
-	
+
 	public void setInitialMass(double craftMass)
 	{
 		this.craftMassInitial = craftMass;
 	}
-	
+
 	public void changeMass(double delta)
 	{
 		this.craftMass += delta;
 	}
-	
+
 	public double getMass()
 	{
 		return craftMass;
 	}
-	
+
 	public double getInitialMass()
 	{
 		return craftMassInitial;
 	}
-	
+
 	public double getDisplacementVolume()
 	{
 		return craftVolume;
 	}
-	
+
 	public float getIXX()
 	{
 		return momentOfInertia1.x();
 	}
-	
+
 	public float getIYY()
 	{
 		return momentOfInertia1.y();
 	}
-	
+
 	public float getIZZ()
 	{
 		return momentOfInertia1.z();
 	}
-	
+
 	public Matrix3f getMomentOfInertiaTensor()
 	{
-		Matrix3f tensor = new Matrix3f(momentOfInertia1.x(), momentOfInertia2.x(), momentOfInertia2.y(),
-									   momentOfInertia2.x(), momentOfInertia1.y(), momentOfInertia2.z(),
-									   momentOfInertia2.y(), momentOfInertia2.z(), momentOfInertia1.z());
-		//Matrix3f rotation = new Matrix3f().rotation(getQuaternion());
-		//tensor.mulLocal(rotation).mul(rotation.transpose());
+		Matrix3f tensor = new Matrix3f(momentOfInertia1.x(), momentOfInertia2.x(), momentOfInertia2.y(), momentOfInertia2.x(), momentOfInertia1.y(), momentOfInertia2.z(), momentOfInertia2.y(), momentOfInertia2.z(), momentOfInertia1.z());
+		// Matrix3f rotation = new Matrix3f().rotation(getQuaternion());
+		// tensor.mulLocal(rotation).mul(rotation.transpose());
 		return tensor;
 	}
-	
+
 	/**
 	 * Apply a force in Newtons at a position relative to the center of mass.
 	 */
 	public void forceAtPosition(Vector3f force, Vector3f position, Vector3f netForce, Vector3f netMoment)
 	{
 		netForce.add(force);
-		
+
 		if(position.length() == 0.0f)
 			return;
-		
+
 		netMoment.add(force.cross(position));
 	}
-	
+
 	/**
 	 * Apply a force to change the velocity.
 	 */
@@ -355,9 +349,10 @@ public class MovingCraftEntity extends Entity
 	{
 		addVelocity((force.x() / getMass()) * 0.0025f, (force.y() / getMass()) * 0.0025f, (force.z() / getMass()) * 0.0025f);
 	}
-	
+
 	/**
-	 * Apply a moment in Newton meters about the local X, Y, and Z axes of the craft.
+	 * Apply a moment in Newton meters about the local X, Y, and Z axes of the
+	 * craft.
 	 */
 	public void applyMomentXYZ(Vector3f moment)
 	{
@@ -366,10 +361,11 @@ public class MovingCraftEntity extends Entity
 		Vector3f av = new Vector3f(angularVelocity).mul(20.0f);
 		// Calculate the angular acceleration from Euler's rotation equation.
 		Vector3f acc = moment.sub(av.cross(av.mul(mit))).mul(mit.invert());
-		// Convert the angular acceleration to m/tick^2 and add it to the angular velocity.
+		// Convert the angular acceleration to m/tick^2 and add it to the angular
+		// velocity.
 		angularVelocity.add(acc.mul(0.0025f));
 	}
-	
+
 	public void integrateLocalAngles(float avx, float avy, float avz)
 	{
 		boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
@@ -377,25 +373,25 @@ public class MovingCraftEntity extends Entity
 		float ax = angles.x() + (b ? avx : avz);
 		float ay = angles.y() + avy;
 		float az = angles.z() + (b ? avz : avx);
-		
+
 		if(ax < -Math.PI)
 			ax += Math.PI * 2.0f;
 		else if(ax > Math.PI)
 			ax -= Math.PI * 2.0f;
-		
+
 		if(ay < -Math.PI)
 			ay += Math.PI * 2.0f;
 		else if(ay > Math.PI)
 			ay -= Math.PI * 2.0f;
-		
+
 		if(az < -Math.PI)
 			az += Math.PI * 2.0f;
 		else if(az > Math.PI)
 			az -= Math.PI * 2.0f;
-		
+
 		setTrackedAngles(new Vector3f(ax, ay, az));
 	}
-	
+
 	public Vector3f getAngularVelocity()
 	{
 		return angularVelocity;
@@ -447,7 +443,7 @@ public class MovingCraftEntity extends Entity
 	{
 		if(!this.hasPassenger(passenger) || !this.entityOffsets.containsKey(passenger.getUuid()))
 			return;
-		
+
 		if(entityOffsets.get(passenger.getUuid()) != null)
 		{
 			Vector3f offset = entityOffsets.get(passenger.getUuid()).toCenterPos().add(-0.5, -1.0, -0.5).toVector3f();
@@ -461,42 +457,37 @@ public class MovingCraftEntity extends Entity
 	public static ArrayList<MovingCraftBlockData> captureBlocks(World world, BlockPos centerPos, ArrayList<BlockPos> positionList)
 	{
 		ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
-		
+
 		// Fill the block data array list.
 		for(BlockPos pos : positionList)
 			blockDataList.add(MovingCraftBlockData.fromBlock(world, positionList, pos, centerPos, isBlockSolid(world, pos)));
 
 		return blockDataList;
 	}
-	
+
 	public static void removeBlocksFromWorld(World world, BlockPos centerPos, ArrayList<MovingCraftBlockData> blockDataList)
 	{
 		for(MovingCraftBlockData blockData : blockDataList)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 			Block block = world.getBlockState(pos).getBlock();
-			
+
 			if(block == StarflightBlocks.FLUID_TANK_INSIDE || block == StarflightBlocks.HABITABLE_AIR)
 			{
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.FORCE_STATE);
 				continue;
 			}
-			
+
 			BlockEntity blockEntity = world.getBlockEntity(pos);
 
 			if(blockEntity != null)
-			{
-				if(blockEntity instanceof ImplementedInventory)
-					((ImplementedInventory) blockEntity).clear();
-
-				blockEntity.readNbt(new NbtCompound());
-			}
+				blockEntity.read(new NbtCompound(), world.getRegistryManager());
 		}
-		
+
 		for(MovingCraftBlockData blockData : blockDataList)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
-			
+
 			if(!isBlockSolid(world, pos))
 			{
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
@@ -509,7 +500,7 @@ public class MovingCraftEntity extends Entity
 		for(MovingCraftBlockData blockData : blockDataList)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
-			
+
 			if(isBlockSolid(world, pos))
 				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 		}
@@ -520,7 +511,7 @@ public class MovingCraftEntity extends Entity
 		BlockState blockState = world.getBlockState(blockPos);
 		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
 	}
-	
+
 	public void pickUpEntity(Entity passenger, BlockPos offset)
 	{
 		if(this.getPassengerList().isEmpty())
@@ -559,8 +550,8 @@ public class MovingCraftEntity extends Entity
 		}
 
 		this.detach();
-		TeleportTarget movingCraftTarget = new TeleportTarget(arrivalLocation, this.getVelocity(), this.getYaw(), this.getPitch());
-		Entity movingCraft = FabricDimensions.teleport(this, destination, movingCraftTarget);
+		TeleportTarget movingCraftTarget = new TeleportTarget(destination, arrivalLocation, this.getVelocity(), this.getYaw(), this.getPitch(), TeleportTarget.NO_OP);
+		Entity movingCraft = this.teleportTo(movingCraftTarget);
 
 		if(movingCraft != null)
 		{
@@ -570,37 +561,37 @@ public class MovingCraftEntity extends Entity
 			for(int i = 0; i < passengerList.size(); i++)
 			{
 				Entity passenger = passengerList.get(i);
-				TeleportTarget passengerTarget = new TeleportTarget(passenger.getPos(), this.getVelocity(), passenger.getYaw(), passenger.getPitch());
-				Entity trasferred = FabricDimensions.teleport(passenger, destination, passengerTarget);
+				TeleportTarget passengerTarget = new TeleportTarget(destination, passenger.getPos(), this.getVelocity(), passenger.getYaw(), passenger.getPitch(), TeleportTarget.NO_OP);
+				Entity trasferred = passenger.teleportTo(passengerTarget);
 
 				if(trasferred != null)
 					((MovingCraftEntity) movingCraft).pickUpEntity(trasferred, offsetList.get(i));
 			}
 		}
 	}
-	
+
 	public void onDimensionChanged(ServerWorld destination, Vec3d arrivalLocation, float arrivalYaw)
 	{
 	}
-	
+
 	public void releaseBlocks()
 	{
 		// Snap the rotation of this entity into place and then dismount all passengers.
 		Quaternionf quaternion = getQuaternion();
 		Vector3f forward = getForwardDirection().getUnitVector().rotate(quaternion);
 		Direction facing = Direction.getFacing(forward.x(), forward.y(), forward.z());
-		
+
 		if(facing != Direction.UP && facing != Direction.DOWN)
 			quaternion.rotationY((getForwardDirection().asRotation() - facing.asRotation()) * (MathHelper.PI / 180.0f));
-		
+
 		ArrayList<MovingCraftBlockData> toPlaceFirst = new ArrayList<MovingCraftBlockData>();
 		ArrayList<MovingCraftBlockData> toPlaceLast = new ArrayList<MovingCraftBlockData>();
 		fallDistance = 0.0f;
-		
+
 		for(Entity passenger : this.getPassengerList())
 		{
 			UUID pUUID = passenger.getUuid();
-			
+
 			if(entityOffsets.containsKey(pUUID))
 			{
 				if(entityOffsets.get(passenger.getUuid()) != null)
@@ -610,12 +601,12 @@ public class MovingCraftEntity extends Entity
 					passenger.setPosition(this.getX() + offset.x(), this.getY() + offset.y(), this.getZ() + offset.z());
 				}
 			}
-			
+
 			passenger.setVelocity(Vec3d.ZERO);
 			passenger.velocityModified = true;
 			passenger.dismountVehicle();
 		}
-		
+
 		for(MovingCraftBlockData blockData : blockDataList)
 		{
 			if(blockData.placeFirst())
@@ -623,27 +614,27 @@ public class MovingCraftEntity extends Entity
 			else
 				toPlaceLast.add(blockData);
 		}
-		
+
 		for(MovingCraftBlockData blockData : toPlaceFirst)
 			blockData.toBlock(this.getWorld(), this.getBlockPos(), quaternion);
-		
+
 		for(MovingCraftBlockData blockData : toPlaceLast)
 			blockData.toBlock(this.getWorld(), this.getBlockPos(), quaternion);
-		
+
 		for(MovingCraftBlockData blockData : toPlaceFirst)
 		{
 			Vector3f offset = new Vector3f(blockData.getPosition().getX(), blockData.getPosition().getY(), blockData.getPosition().getZ()).rotate(quaternion);
 			BlockPos blockPos = this.getBlockPos().add(MathHelper.floor(offset.x()), MathHelper.floor(offset.y()), MathHelper.floor(offset.z()));
 			onBlockReleased(blockData, blockPos);
 		}
-		
+
 		blockDataList.clear();
 	}
-	
+
 	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
 	{
 	}
-	
+
 	@Override
 	protected void writeCustomDataToNbt(NbtCompound nbt)
 	{
@@ -712,7 +703,7 @@ public class MovingCraftEntity extends Entity
 	@Override
 	protected void readCustomDataFromNbt(NbtCompound nbt)
 	{
-		setInitialBlockPos(NbtHelper.toBlockPos(nbt.getCompound("initialBlockPos")));
+		setInitialBlockPos(NbtHelper.toBlockPos(nbt, "initialBlockPos").get());
 		setForwardDirection(nbt.getInt("forward"));
 		setQuaternion(new Quaternionf(nbt.getFloat("qx"), nbt.getFloat("qy"), nbt.getFloat("qz"), nbt.getFloat("qw")));
 		angularVelocity = new Vector3f(nbt.getFloat("avx"), nbt.getFloat("avy"), nbt.getFloat("avz"));
@@ -740,12 +731,6 @@ public class MovingCraftEntity extends Entity
 			entityOffsets.put(nbt.getUuid("pUUID" + i), new BlockPos(nbt.getInt("px" + i), nbt.getInt("py" + i), nbt.getInt("pz" + i)));
 	}
 
-	@Override
-	public Packet<ClientPlayPacketListener> createSpawnPacket()
-	{
-		return new EntitySpawnS2CPacket(this);
-	}
-
 	public void sendRenderData(boolean forceUnload)
 	{
 		MinecraftServer server = this.getServer();
@@ -756,31 +741,18 @@ public class MovingCraftEntity extends Entity
 
 			if(!forceUnload && !this.playersInRange.contains(player) && inRange)
 			{
-				PacketByteBuf buffer = PacketByteBufs.create();
 				this.playersInRange.add(player);
-				buffer.writeBoolean(true);
-				buffer.writeUuid(this.getUuid());
-				buffer.writeInt(this.blockDataList.size());
-
-				for(MovingCraftBlockData data : this.blockDataList)
-				{
-					buffer.writeNbt(NbtHelper.fromBlockState(data.getBlockState()));
-					buffer.writeBlockPos(data.getPosition());
-					buffer.writeBoolean(data.redstonePower());
-
-					for(int i = 0; i < 6; i++)
-						buffer.writeBoolean(data.getSidesShowing()[i]);
-				}
-
-				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
+				ArrayList<MovingCraftEntity.BlockRenderData> blockRenderDataList = new ArrayList<MovingCraftEntity.BlockRenderData>();
+				
+				for(MovingCraftBlockData blockData : blockDataList)
+					blockRenderDataList.add(new BlockRenderData(blockData));
+				
+				ServerPlayNetworking.send(player, new MovingCraftRenderDataS2CPacket(getId(), blockRenderDataList));
 			}
 			else if(forceUnload && this.playersInRange.contains(player) && !inRange)
 			{
-				PacketByteBuf buffer = PacketByteBufs.create();
 				this.playersInRange.remove(player);
-				buffer.writeBoolean(false);
-				buffer.writeUuid(this.getUuid());
-				ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_render_data"), buffer);
+				ServerPlayNetworking.send(player, new MovingCraftRenderDataS2CPacket(getId(), new ArrayList<MovingCraftEntity.BlockRenderData>()));
 			}
 			else if(!forceUnload && inRange)
 				sendEntityOffsets(player);
@@ -789,46 +761,113 @@ public class MovingCraftEntity extends Entity
 
 	public void sendEntityOffsets(ServerPlayerEntity player)
 	{
-		PacketByteBuf buffer = PacketByteBufs.create();
-		buffer.writeInt(getId());
-		int passengerCount = entityOffsets.keySet().size();
-		buffer.writeInt(passengerCount);
+		HashMap<Integer, BlockPos> passengerMap = new HashMap<Integer, BlockPos>();
 
-		for(UUID pUUID : entityOffsets.keySet())
+		for(UUID uuid : entityOffsets.keySet())
 		{
-			if(entityOffsets.get(pUUID) != null)
-			{
-				buffer.writeUuid(pUUID);
-				buffer.writeBlockPos(entityOffsets.get(pUUID));
-			}
+			if(entityOffsets.get(uuid) != null && player.getServerWorld().getEntity(uuid) != null)
+				passengerMap.put(player.getServerWorld().getEntity(uuid).getId(), entityOffsets.get(uuid));
 		}
 
-		ServerPlayNetworking.send(player, new Identifier(StarflightMod.MOD_ID, "moving_craft_entity_offsets"), buffer);
+		ServerPlayNetworking.send(player, new MovingCraftEntityOffsetsS2CPacket(getId(), passengerMap));
 	}
 
-	public static void receiveEntityOffsets(ClientPlayNetworkHandler handler, PacketSender sender, MinecraftClient client, PacketByteBuf buffer)
+	public static void receiveEntityOffsets(MovingCraftEntityOffsetsS2CPacket payload, ClientPlayNetworking.Context context)
 	{
-		int entityID = buffer.readInt();
-		int passengerCount = buffer.readInt();
-		HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
-		
-		for(int i = 0; i < passengerCount; i++)
-		{
-			UUID pUUID = buffer.readUuid();
-			BlockPos offset = buffer.readBlockPos();
-			entityOffsets.put(pUUID, offset);
-		}
+		int entityID = payload.entityID();
+		HashMap<Integer, BlockPos> passengerMap = payload.passengerMap();
+		MinecraftClient client = context.client();
+		ClientWorld clientWorld = client.world;
 		
 		client.execute(() -> {
-			if(client.world == null)
+			if(clientWorld == null)
 				return;
-	
-			Entity entity = client.world.getEntityById(entityID);
-	
+
+			Entity entity = clientWorld.getEntityById(entityID);
+
 			if(entity == null || !(entity instanceof MovingCraftEntity))
 				return;
-	
-			((MovingCraftEntity) entity).entityOffsets = entityOffsets;
+
+			((MovingCraftEntity) entity).entityOffsets.clear();
+			
+			for(int id : passengerMap.keySet())
+				((MovingCraftEntity) entity).entityOffsets.put(clientWorld.getEntityById(id).getUuid(), passengerMap.get(id));
 		});
+	}
+
+	public static void writeBlockRenderData(PacketByteBuf buffer, BlockRenderData blockRenderData)
+	{
+		writeBlockState(buffer, blockRenderData.blockState());
+		buffer.writeBlockPos(blockRenderData.position());
+		buffer.writeInt(blockRenderData.sidesShowing());
+		buffer.writeInt(blockRenderData.flags());
+	}
+
+	private static void writeBlockState(PacketByteBuf buffer, BlockState state)
+	{
+		buffer.writeIdentifier(Registries.BLOCK.getId(state.getBlock()));
+		buffer.writeInt(state.getProperties().size());
+
+		for(Property<?> property : state.getProperties())
+		{
+			buffer.writeString(property.getName());
+			buffer.writeString(getPropertyValueAsString(state, property));
+		}
+	}
+
+	public static BlockState readBlockState(PacketByteBuf buffer)
+	{
+		Identifier blockId = buffer.readIdentifier();
+		Block block = Registries.BLOCK.get(blockId);
+		BlockState state = block.getDefaultState();
+		int propertyCount = buffer.readInt();
+
+		for(int i = 0; i < propertyCount; i++)
+		{
+			String propertyName = buffer.readString();
+			String propertyValue = buffer.readString();
+			Property<?> property = block.getStateManager().getProperty(propertyName);
+
+			if(property != null)
+				state = setPropertyValue(state, property, propertyValue);
+		}
+
+		return state;
+	}
+
+	private static <T extends Comparable<T>> String getPropertyValueAsString(BlockState state, Property<T> property)
+	{
+		return property.name(state.get(property));
+	}
+
+	private static <T extends Comparable<T>> BlockState setPropertyValue(BlockState state, Property<T> property, String value)
+	{
+		return state.with(property, property.parse(value).orElse(state.get(property)));
+	}
+
+	public record BlockRenderData(BlockState blockState, BlockPos position, int sidesShowing, int flags)
+	{
+		public BlockRenderData(PacketByteBuf buffer)
+	    {
+	    	this(readBlockState(buffer), buffer.readBlockPos(), buffer.readInt(), buffer.readInt());
+	    }
+		
+		public BlockRenderData(MovingCraftBlockData blockData)
+	    {
+			this(blockData.getBlockState(), blockData.getPosition(), packBooleans(blockData.getSidesShowing()), packBooleans(blockData.redstonePower()));
+	    }
+		
+		private static int packBooleans(boolean ... booleans)
+		{
+			int packed = 0;
+			
+			for(int i = 0; i < booleans.length; i++)
+	        {
+	            if(booleans[i])
+	            	packed |= (1 << i);
+	        }
+			
+			return packed;
+		}
 	}
 }

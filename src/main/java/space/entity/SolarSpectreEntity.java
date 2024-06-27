@@ -1,14 +1,14 @@
 package space.entity;
 
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.RevengeGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
@@ -17,28 +17,34 @@ import net.minecraft.world.World;
 
 public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMobEntity
 {
-	private int targetCooldown;
-	
+	private int plasmaBalls;
+	private int plasmaBallCooldown;
+	private int plasmaBallFireCooldown;
+
 	public SolarSpectreEntity(EntityType<? extends SolarSpectreEntity> entityType, World world)
 	{
 		super(entityType, world);
-		targetCooldown = 0;
+		plasmaBalls = 0;
+		plasmaBallCooldown = 0;
+		plasmaBallFireCooldown = 0;
 	}
-	
+
 	public static DefaultAttributeContainer.Builder createSolarSpectreAttributes()
 	{
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 50.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0);
-    }
-	
+		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 128.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 50.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0);
+	}
+
 	@Override
-    protected void initGoals()
+	protected void initGoals()
 	{
-        this.goalSelector.add(1, new CancelVelocityGoal(25.0));
-        this.goalSelector.add(2, new EscapeFlightGoal(15.0));
-        this.goalSelector.add(3, new TrackTargetGoal(15.0, 200, true));
-        this.goalSelector.add(4, new RandomFlightGoal(15.0, 200, 16));
-    }
-	
+		this.goalSelector.add(3, new CancelVelocityGoal(25.0));
+		this.goalSelector.add(4, new EscapeFlightGoal(15.0));
+		this.goalSelector.add(5, new TrackTargetGoal(15.0, 400, true));
+		this.goalSelector.add(6, new RandomFlightGoal(15.0, 400, 32));
+		this.targetSelector.add(1, new RevengeGoal(this, new Class[0]));
+		this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
+	}
+
 	@Override
 	public boolean isPressureSafe(double pressure)
 	{
@@ -56,24 +62,25 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	{
 		return false;
 	}
-	
+
 	@Override
 	public int getRadiationRange()
 	{
-		return 128;
+		return 64;
 	}
-	
+
 	@Override
 	public float getRadiationStrength()
 	{
 		return 1.0f;
 	}
-	
-	@Override public boolean isDisallowedInPeaceful()
+
+	@Override
+	public boolean isDisallowedInPeaceful()
 	{
 		return true;
 	}
-	
+
 	@Override
 	protected SoundEvent getHurtSound(DamageSource source)
 	{
@@ -97,54 +104,44 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	{
 		super.tick();
 		World world = getWorld();
-		
+
 		if(world.isClient)
 			return;
-		
-		if(targetCooldown > 0)
-			targetCooldown--;
-		
-		if(targetCooldown == 0 && world.getDifficulty() != Difficulty.PEACEFUL)
-		{
-			PlayerEntity nearestPlayer = world.getClosestPlayer(this, 128.0);
 
-			if(nearestPlayer != null)
-				setTarget(nearestPlayer);
-			else
-				setTarget(null);
-			
-			if(getTarget() != null)
-			{
-				double distance = distanceTo(getTarget());
-				Vec3d direction = getTarget().getEyePos().subtract(getPos()).normalize();
-				
-				if(distance < 16.0)
-				{
-					tryAttack(getTarget());
-					
-					for(int i = 0; i < distance * 2; i++)
-					{
-						double px = getPos().getX() + direction.getX() * i;
-						double py = getPos().getY() + direction.getY() * i;
-						double pz = getPos().getZ() + direction.getZ() * i;
-						((ServerWorld) world).spawnParticles(ParticleTypes.GLOW, px, py, pz, 4, 0.1, 0.1, 0.1, 0.05);
-					}
-					
-					playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 10.0f, 1.0f);
-					targetCooldown = 50;
-				}
-			}
+		if(plasmaBallCooldown > 0)
+			plasmaBallCooldown--;
+
+		if(plasmaBallFireCooldown > 0)
+			plasmaBallFireCooldown--;
+		
+		if(plasmaBalls == 0)
+		{
+			plasmaBallCooldown = 40 + getRandom().nextInt(60);
+			plasmaBalls = 4 + getRandom().nextInt(8);
 		}
-		else
-			setTarget(null);
+
+		if(plasmaBalls > 0 && plasmaBallCooldown == 0 && plasmaBallFireCooldown == 0 && getTarget() != null && world.getDifficulty() != Difficulty.PEACEFUL)
+		{
+			playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
+			double distance = distanceTo(getTarget());
+			double dx = getTarget().getX() - getX();
+			double dy = getTarget().getBodyY(0.5) - getPos().getY();
+			double dz = getTarget().getZ() - getZ();
+			double ds = Math.sqrt(Math.sqrt(distance)) * 0.5;
+			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, 2.297 * ds), dy, getRandom().nextTriangular(dz, 2.297 * ds)));
+			plasmaBallEntity.setPosition(plasmaBallEntity.getX(), getPos().getY(), plasmaBallEntity.getZ());
+			world.spawnEntity(plasmaBallEntity);
+			plasmaBallFireCooldown = 2 + getRandom().nextInt(3);
+			plasmaBalls--;
+		}
 	}
-	
+
 	class EscapeFlightGoal extends Goal
 	{
 		Vec3d targetDirection;
 		double thrust;
 		int ticks;
-		
+
 		public EscapeFlightGoal(double thrust)
 		{
 			this.thrust = thrust;
@@ -152,7 +149,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 
 		public boolean canStart()
 		{
-			return goalSelector.getRunningGoals().count() == 0 && age > 6000;
+			return age > 6000;
 		}
 
 		public void start()

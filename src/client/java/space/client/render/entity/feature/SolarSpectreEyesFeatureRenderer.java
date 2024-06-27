@@ -13,7 +13,7 @@ import space.entity.SolarSpectreEntity;
 @Environment(value = EnvType.CLIENT)
 public class SolarSpectreEyesFeatureRenderer<T extends SolarSpectreEntity> extends EyesFeatureRenderer<T, SolarSpectreEntityModel<T>>
 {
-	private static final RenderLayer SKIN = RenderLayer.getEyes(new Identifier(StarflightMod.MOD_ID, "textures/entity/solar_spectre_eyes.png"));
+	private static final RenderLayer SKIN = RenderLayer.getEyes(Identifier.of(StarflightMod.MOD_ID, "textures/entity/solar_spectre_eyes.png"));
 
 	public SolarSpectreEyesFeatureRenderer(FeatureRendererContext<T, SolarSpectreEntityModel<T>> featureRendererContext)
 	{

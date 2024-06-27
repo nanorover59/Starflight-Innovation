@@ -12,7 +12,7 @@ import space.screen.BatteryScreenHandler;
 @Environment(EnvType.CLIENT)
 public class BatteryScreen extends HandledScreen<BatteryScreenHandler>
 {
-	private static final Identifier TEXTURE = new Identifier("textures/gui/container/hopper.png");
+	private static final Identifier TEXTURE = Identifier.of("textures/gui/container/hopper.png");
 
 	public BatteryScreen(BatteryScreenHandler handler, PlayerInventory inventory, Text title)
 	{

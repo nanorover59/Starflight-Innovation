@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "b b",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:aluminum_ingot"
+        },
+        "b": {
+            "item": "minecraft:blue_dye"
+        }
+    },
+    "result": {
+        "id": "space:oxygen_pipe",
+        "count": 16
+    }
+}

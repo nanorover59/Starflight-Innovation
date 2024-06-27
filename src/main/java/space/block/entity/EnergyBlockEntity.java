@@ -39,9 +39,27 @@ public interface EnergyBlockEntity
 		World world = blockEntity.getWorld();
 		ArrayList<BlockPos> outputs = ((EnergyBlockEntity) blockEntity).getOutputs();
 		total = Math.min(total, ((EnergyBlockEntity) blockEntity).getEnergyStored());
-		int count = outputs.size();
+		int count = 0;
 		double transferred = 0;
 		
+		// Confirm number of outputs to distribute energy.
+		for(BlockPos pos : outputs)
+		{
+			BlockEntity otherBlockEntity = world.getBlockEntity(pos);
+			
+			if(otherBlockEntity != null && otherBlockEntity instanceof EnergyBlockEntity)
+			{
+				EnergyBlockEntity energyBlockEntity = ((EnergyBlockEntity) otherBlockEntity);
+				
+				if(energyBlockEntity.getEnergyStored() < energyBlockEntity.getEnergyCapacity())
+					count++;
+			}
+		}
+		
+		if(count == 0)
+			return;
+		
+		// Attempt to distribute equal amounts of energy.
 		for(BlockPos pos : outputs)
 		{
 			BlockEntity otherBlockEntity = world.getBlockEntity(pos);

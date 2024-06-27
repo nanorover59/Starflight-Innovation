@@ -1,12 +1,20 @@
 package space.entity;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldView;
 import space.particle.StarflightParticleTypes;
 
 public class SolarEyesEntity extends MobEntity implements AlienMobEntity
@@ -58,8 +66,32 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	}
 	
 	@Override
+	public boolean canSpawn(WorldView world)
+	{
+        return !world.isSkyVisible(getBlockPos());
+    }
+	
+	@Override
 	protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition)
 	{
+	}
+	
+	@Override
+	public boolean tryAttack(Entity target)
+	{
+		if(super.tryAttack(target))
+		{
+			if(target instanceof LivingEntity)
+			{
+				World world = getWorld();
+				((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 120, 0), this);
+				((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(3), 0.5, 0.5, 0.5, 0.01);
+				remove(RemovalReason.DISCARDED);
+				return true;
+			}
+		}
+		
+		return false;
 	}
 
 	@Override
@@ -86,5 +118,11 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		
 		if(this.random.nextInt(200) == 0 || horizontalCollision || verticalCollision)
 			this.setVelocity(this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5);
+		
+		if(world.getLightLevel(LightType.SKY, getBlockPos()) > 4)
+		{
+			((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(3), 0.5, 0.5, 0.5, 0.01);
+			remove(RemovalReason.DISCARDED);
+		}
 	}
 }

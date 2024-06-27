@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a",
+        "b",
+        "c"
+    ],
+    "key": {
+        "a": {
+            "item": "minecraft:iron_trapdoor"
+        },
+        "b": {
+            "item": "space:structural_aluminum_slab"
+        },
+        "c": {
+            "item": "minecraft:redstone"
+        }
+    },
+    "result": {
+        "id": "space:airway",
+        "count": 1
+    }
+}

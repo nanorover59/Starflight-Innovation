@@ -3,50 +3,31 @@ package space.item;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.DyeableArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
-import net.minecraft.world.World;
 
-public class SpaceSuitItem extends DyeableArmorItem
+public class SpaceSuitItem extends ArmorItem
 {
-	public static final double MAX_OXYGEN = 4.0;
-	
-	public SpaceSuitItem(ArmorMaterial armorMaterial, ArmorItem.Type equipmentSlot, Item.Settings settings)
+	public SpaceSuitItem(RegistryEntry<ArmorMaterial> armorMaterial, ArmorItem.Type equipmentSlot, Item.Settings settings)
 	{
-		super(armorMaterial, equipmentSlot, settings);
+		super(armorMaterial, equipmentSlot, settings.maxCount(1).component(DataComponentTypes.DYED_COLOR, new DyedColorComponent(-1, false)));
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		if(this.getSlotType() == EquipmentSlot.CHEST)
+		if(this.getSlotType() == EquipmentSlot.CHEST && stack.contains(StarflightItems.OXYGEN))
 		{
-			if(stack.getNbt() != null && stack.getNbt().contains("oxygen"))
-			{
-				DecimalFormat df = new DecimalFormat("#.##");
-				tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.getNbt().getDouble("oxygen")) + "kg"));
-			}
-			else
-			{
-				NbtCompound nbt = stack.getOrCreateNbt();
-				nbt.putDouble("oxygen", 0);
-			}
+			DecimalFormat df = new DecimalFormat("#.##");
+			tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.get(StarflightItems.OXYGEN)) + "kg"));
 		}
-	}
-	
-	@Override
-	public int getColor(ItemStack stack)
-	{
-	      NbtCompound nbtCompound = stack.getSubNbt("display");
-	      return nbtCompound != null && nbtCompound.contains("color", 99) ? nbtCompound.getInt("color") : 0xFFFFFFF;
 	}
 }

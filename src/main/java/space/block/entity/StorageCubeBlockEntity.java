@@ -10,6 +10,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundCategory;
@@ -66,22 +67,22 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 	}
 
 	@Override
-	protected void writeNbt(NbtCompound nbt)
+	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.writeNbt(nbt);
+		super.writeNbt(nbt, registryLookup);
 		
 		if(!this.writeLootTable(nbt))
-			Inventories.writeNbt(nbt, this.inventory);
+			Inventories.writeNbt(nbt, this.inventory, registryLookup);
 	}
 
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		super.readNbt(nbt);
+		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		
 		if(!this.readLootTable(nbt))
-			Inventories.readNbt(nbt, this.inventory);
+			Inventories.readNbt(nbt, this.inventory, registryLookup);
 	}
 
 	@Override
@@ -91,15 +92,15 @@ public class StorageCubeBlockEntity extends LootableContainerBlockEntity
 	}
 
 	@Override
-	protected DefaultedList<ItemStack> method_11282()
+	protected DefaultedList<ItemStack> getHeldStacks()
 	{
 		return this.inventory;
 	}
 
 	@Override
-	protected void setInvStackList(DefaultedList<ItemStack> list)
+	protected void setHeldStacks(DefaultedList<ItemStack> inventory)
 	{
-		this.inventory = list;
+		this.inventory = inventory;
 	}
 
 	@Override

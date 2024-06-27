@@ -2,15 +2,12 @@ package space.item;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import net.minecraft.block.BlockState;
-import net.minecraft.client.item.TooltipContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
@@ -29,10 +26,10 @@ public class PlanetariumCardItem extends Item
 	}
 	
 	@Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context)
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		if(stack.hasNbt())
-			tooltip.add(Text.translatable("planet.space." + stack.getNbt().getString("name")).withColor(stack.getNbt().getInt("primaryColor")));
+		if(stack.contains(StarflightItems.PLANET_NAME))
+			tooltip.add(Text.translatable("planet.space." + stack.get(StarflightItems.PLANET_NAME)).withColor(stack.get(StarflightItems.PRIMARY_COLOR)));
 	}
 	
 	@Override
@@ -43,26 +40,30 @@ public class PlanetariumCardItem extends Item
         BlockPos position = context.getBlockPos();
         BlockState blockState = world.getBlockState(position);
         
-        if(stack.hasNbt() && stack.getNbt().contains("name") && blockState.isOf(StarflightBlocks.PLANETARIUM))
+        if(!world.isClient() && stack.contains(StarflightItems.PLANET_NAME) && blockState.isOf(StarflightBlocks.PLANETARIUM))
         {
-        	String planetName = stack.getNbt().getString("name");
-        	Planet planet = PlanetList.getByName(planetName);
+        	String planetName = stack.get(StarflightItems.PLANET_NAME);
+        	Planet planet = PlanetList.get().getByName(planetName);
         	
-        	if(!world.isClient() && planet != null)
+        	if(planet != null)
         	{
-        		StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), planetName);
+        		StarflightPlayerState playerState = StarflightPlayerState.get(world.getServer());
         		
-        		if(planet.getParent() != null)
-        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), planet.getParent().getName());
-        		
-        		for(Planet satellite : planet.getSatellites())
-        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), satellite.getName());
+        		if(!playerState.isPlanetUnlocked((ServerPlayerEntity) context.getPlayer(), planetName))
+        		{
+	        		playerState.unlockPlanet((ServerPlayerEntity) context.getPlayer(), planetName);
+	        		
+	        		if(planet.getParent() != null)
+	        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), planet.getParent().getName());
+	        		
+	        		for(Planet satellite : planet.getSatellites())
+	        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), satellite.getName());
+	        		
+	        		StarflightEffects.sendUnlockPlanet(world, planetName, stack.get(StarflightItems.PRIMARY_COLOR));
+        		}
         	}
-        	
-        	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
-        	return ActionResult.success(world.isClient);
         }
 		
-		return ActionResult.FAIL;
+		return ActionResult.success(world.isClient);
 	}
 }

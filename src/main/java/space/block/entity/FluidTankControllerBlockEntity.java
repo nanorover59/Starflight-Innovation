@@ -1,10 +1,13 @@
 package space.block.entity;
 
+import java.util.Optional;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
 import space.block.FluidTankControllerBlock;
 import space.block.StarflightBlocks;
@@ -23,7 +26,7 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 		this.fluid = ((FluidTankControllerBlock) state.getBlock()).getFluidType();
 		this.storageCapacity = 0;
 		this.storedFluid = 0;
-		this.centerOfMass = new BlockPos(0, 0, 0);
+		this.centerOfMass = null;
 	}
 	
 	public FluidTankControllerBlockEntity(BlockEntityType<?> type, FluidResourceType fluid, BlockPos pos, BlockState state)
@@ -32,7 +35,7 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 		this.fluid = fluid;
 		this.storageCapacity = 0;
 		this.storedFluid = 0;
-		this.centerOfMass = new BlockPos(0, 0, 0);
+		this.centerOfMass = null;
 	}
 	
 	public FluidResourceType getFluidType()
@@ -84,18 +87,23 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void readNbt(NbtCompound nbt)
+	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		this.storageCapacity = nbt.getDouble("storageCapacity");
 		this.storedFluid = nbt.getDouble("storedFluid");
-		this.centerOfMass = NbtHelper.toBlockPos(nbt.getCompound("centerOfMass"));
+		Optional<BlockPos> centerOfMassPos = NbtHelper.toBlockPos(nbt, "centerOfMass");
+		
+		if(centerOfMassPos.isPresent())
+			this.centerOfMass = centerOfMassPos.get();
 	}
 
 	@Override
-	public void writeNbt(NbtCompound nbt)
+	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		nbt.putDouble("storageCapacity", storageCapacity);
 		nbt.putDouble("storedFluid", storedFluid);
-		nbt.put("centerOfMass", NbtHelper.fromBlockPos(centerOfMass));
+		
+		if(centerOfMass != null)
+			nbt.put("centerOfMass", NbtHelper.fromBlockPos(centerOfMass));
 	}
 }
