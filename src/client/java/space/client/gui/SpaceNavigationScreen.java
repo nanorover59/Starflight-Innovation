@@ -72,7 +72,7 @@ public class SpaceNavigationScreen extends Screen
 	@Override
     protected void init()
 	{
-		transferDeltaV = 0.0;
+		//transferDeltaV = 0.0;
 		
         ScreenMouseEvents.afterMouseScroll(this).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
             if(verticalAmount < 0)
@@ -165,6 +165,9 @@ public class SpaceNavigationScreen extends Screen
 					mouseHold = true;
 					nothingSelected = false;
 					scaleFactor = getInitialScaleFactor(selectedPlanet);
+					
+					if(deltaV >= 0.0)
+						transferDeltaV = currentPlanet.dVToPlanet(selectedPlanet);
 				}
 			}
 		}

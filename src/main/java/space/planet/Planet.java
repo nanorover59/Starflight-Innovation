@@ -107,7 +107,7 @@ public class Planet implements Comparable<Planet>
 		if(PlanetList.getClient().getViewpointPlanet() == null)
 			return 0;
 		
-		double r1 = position.subtract(PlanetList.getClient().getViewpointPlanet().getPosition()).length();
+		double r1 = getPosition().subtract(PlanetList.getClient().getViewpointPlanet().getPosition()).length();
 		double r2 = other.getPosition().subtract(PlanetList.getClient().getViewpointPlanet().getPosition()).length();
         return (int) (r2 - r1);
     }
@@ -352,7 +352,7 @@ public class Planet implements Comparable<Planet>
 		
 		for(int i = satelliteLevel; i > 0; i--)
 		{
-			absolutePosition = absolutePosition.add(p.position);
+			absolutePosition = absolutePosition.add(p.getPosition());
 			p = p.parent;
 		}
 		
@@ -473,7 +473,7 @@ public class Planet implements Comparable<Planet>
 	}
 	
 	/**
-	 * Get the interpolated position of this object's surface viewpoint measured in meters.
+	 * Get the interpolated position of this object measured in meters.
 	 * Used for rendering on the client side.
 	 */
 	public Vec3d getInterpolatedPosition(float partialTicks)
@@ -481,8 +481,16 @@ public class Planet implements Comparable<Planet>
 		double x = MathHelper.lerp(partialTicks, positionPrevious.getX(), position.getX());
 		double y = MathHelper.lerp(partialTicks, positionPrevious.getY(), position.getY());
 		double z = MathHelper.lerp(partialTicks, positionPrevious.getZ(), position.getZ());
-		Vec3d interpolated = new Vec3d(x, y, z);
-		return interpolated;
+		Vec3d absolutePosition = new Vec3d(x, y, z);
+		Planet p = parent;
+		
+		for(int i = satelliteLevel; i > 0; i--)
+		{
+			absolutePosition = absolutePosition.add(p.getInterpolatedPosition(partialTicks));
+			p = p.parent;
+		}
+		
+		return absolutePosition;
 	}
 	
 	/**
@@ -494,8 +502,7 @@ public class Planet implements Comparable<Planet>
 		double x = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getX(), surfaceViewpoint.getX());
 		double y = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getY(), surfaceViewpoint.getY());
 		double z = MathHelper.lerp(partialTicks, surfaceViewpointPrevious.getZ(), surfaceViewpoint.getZ());
-		Vec3d interpolated = new Vec3d(x, y, z);
-		return interpolated;
+		return new Vec3d(x, y, z);
 	}
 	
 	/**
@@ -507,8 +514,7 @@ public class Planet implements Comparable<Planet>
 		double x = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getX(), parkingOrbitViewpoint.getX());
 		double y = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getY(), parkingOrbitViewpoint.getY());
 		double z = MathHelper.lerp(partialTicks, parkingOrbitViewpointPrevious.getZ(), parkingOrbitViewpoint.getZ());
-		Vec3d interpolated = new Vec3d(x, y, z);
-		return interpolated;
+		return new Vec3d(x, y, z);
 	}
 	
 	/**

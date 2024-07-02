@@ -1,7 +1,5 @@
 {
   "type": "space:metal_fabricator",
-  "category": "misc",
-  "group": "default",
   "ingredient": {
     "item": "minecraft:copper_ingot"
   },

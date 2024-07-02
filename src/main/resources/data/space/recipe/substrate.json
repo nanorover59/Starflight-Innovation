@@ -1,6 +1,5 @@
 {
   "type": "space:vacuum_furnace",
-  "category": "misc",
   "ingredient": {
     "item": "minecraft:quartz"
   },

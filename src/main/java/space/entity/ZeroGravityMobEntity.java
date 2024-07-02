@@ -228,16 +228,18 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	
 	class CancelVelocityGoal extends Goal
 	{
+		ZeroGravityMobEntity entity;
 		double thrust;
 		
-		public CancelVelocityGoal(double thrust)
+		public CancelVelocityGoal(ZeroGravityMobEntity entity, double thrust)
 		{
+			this.entity = entity;
 			this.thrust = thrust;
 		}
 
 		public boolean canStart()
 		{
-			return getVelocity().length() > 0.05;
+			return entity.goalSelector.getGoals().isEmpty() && getVelocity().length() > 0.05;
 		}
 
 		public void start()
@@ -266,6 +268,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	
 	class RandomFlightGoal extends Goal
 	{
+		ZeroGravityMobEntity entity;
 		Vec3d targetDirection;
 		double thrust;
 		double distance;
@@ -274,8 +277,9 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		int range;
 		int ticks;
 		
-		public RandomFlightGoal(double thrust, int maximumDuration, int range)
+		public RandomFlightGoal(ZeroGravityMobEntity entity, double thrust, int maximumDuration, int range)
 		{
+			this.entity = entity;
 			this.thrust = thrust;
 			this.maximumDuration = maximumDuration;
 			this.range = range;
@@ -283,7 +287,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 
 		public boolean canStart()
 		{
-			return getVelocity().length() < 0.1;
+			return entity.goalSelector.getGoals().isEmpty() && getVelocity().length() < 0.1;
 		}
 
 		public void start()
@@ -317,6 +321,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	
 	class TrackTargetGoal extends Goal
 	{
+		ZeroGravityMobEntity entity;
 		Vec3d targetDirection;
 		double thrust;
 		double distance;
@@ -327,8 +332,9 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		float rollSpeed;
 		int ticks;
 		
-		public TrackTargetGoal(double thrust, int maximumDuration, boolean rolling)
+		public TrackTargetGoal(ZeroGravityMobEntity entity, double thrust, int maximumDuration, boolean rolling)
 		{
+			this.entity = entity;
 			this.thrust = thrust;
 			this.maximumDuration = maximumDuration;
 			this.rolling = rolling;
@@ -340,7 +346,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 
 		public boolean canStart()
 		{
-			return getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			return entity.goalSelector.getGoals().isEmpty() && getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
 		}
 
 		public void start()

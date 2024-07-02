@@ -1,7 +1,5 @@
 {
   "type": "space:metal_fabricator",
-  "category": "misc",
-  "group": "item.space.impeller",
   "ingredient": {
     "item": "space:titanium_ingot"
   },

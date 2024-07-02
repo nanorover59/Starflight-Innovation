@@ -121,10 +121,7 @@ public class PlanetList
 	 */
 	public void loadPlanets(ArrayList<Planet> newPlanets)
 	{
-		planetListBuffer.clear();
-		
-		for(Planet planet : newPlanets)
-			planetListBuffer.add(planet);
+		planetListBuffer = newPlanets;
 	}
 	
 	public void serverTick(MinecraftServer server)

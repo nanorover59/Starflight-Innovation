@@ -37,10 +37,10 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	@Override
 	protected void initGoals()
 	{
-		this.goalSelector.add(3, new CancelVelocityGoal(25.0));
-		this.goalSelector.add(4, new EscapeFlightGoal(15.0));
-		this.goalSelector.add(5, new TrackTargetGoal(15.0, 400, true));
-		this.goalSelector.add(6, new RandomFlightGoal(15.0, 400, 32));
+		this.goalSelector.add(3, new CancelVelocityGoal(this, 25.0));
+		this.goalSelector.add(4, new EscapeFlightGoal(this, 15.0));
+		this.goalSelector.add(5, new TrackTargetGoal(this, 15.0, 400, true));
+		this.goalSelector.add(6, new RandomFlightGoal(this, 15.0, 400, 32));
 		this.targetSelector.add(1, new RevengeGoal(this, new Class[0]));
 		this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
 	}
@@ -138,12 +138,14 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 
 	class EscapeFlightGoal extends Goal
 	{
+		SolarSpectreEntity entity;
 		Vec3d targetDirection;
 		double thrust;
 		int ticks;
 
-		public EscapeFlightGoal(double thrust)
+		public EscapeFlightGoal(SolarSpectreEntity entity, double thrust)
 		{
+			this.entity = entity;
 			this.thrust = thrust;
 		}
 
