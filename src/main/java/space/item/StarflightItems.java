@@ -7,8 +7,6 @@ import java.util.function.Supplier;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.component.ComponentType;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.component.type.FoodComponents;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
@@ -53,8 +51,8 @@ public class StarflightItems
 	public static final ComponentType<Float> MAX_ENERGY = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
 	public static final ComponentType<Float> OXYGEN = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
 	public static final ComponentType<Float> MAX_OXYGEN = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
-	public static final ComponentType<String> PART_DRAWING_GROUPS = ComponentType.<String>builder().codec(Codecs.IDENTIFIER_PATH).packetCodec(PacketCodecs.STRING).build();
-	public static final ComponentType<String> PLANET_NAME = ComponentType.<String>builder().codec(Codecs.IDENTIFIER_PATH).packetCodec(PacketCodecs.STRING).build();
+	public static final ComponentType<String> PART_DRAWING_GROUPS = ComponentType.<String>builder().codec(Codecs.NON_EMPTY_STRING).packetCodec(PacketCodecs.STRING).build();
+	public static final ComponentType<String> PLANET_NAME = ComponentType.<String>builder().codec(Codecs.NON_EMPTY_STRING).packetCodec(PacketCodecs.STRING).build();
 	public static final ComponentType<Integer> PRIMARY_COLOR = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
 	public static final ComponentType<Integer> SECONDARY_COLOR = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
 	

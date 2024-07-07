@@ -1,5 +1,6 @@
 {
   "type": "space:metal_fabricator",
+  "group": "item.space.cooled_copper",
   "ingredient": {
     "item": "minecraft:copper_ingot"
   },

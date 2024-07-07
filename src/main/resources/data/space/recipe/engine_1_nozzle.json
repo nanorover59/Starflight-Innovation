@@ -1,5 +1,6 @@
 {
   "type": "space:metal_fabricator",
+  "group": "item.space.engine_1_nozzle",
   "ingredient": {
     "item": "space:titanium_block"
   },

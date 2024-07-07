@@ -16,11 +16,11 @@
     "axis=y,lit=true": {
       "model": "space:block/light_column_on"
     },
-    "axis=z": {
+    "axis=z,lit=false": {
       "model": "space:block/light_column_horizontal",
       "x": 90
     },
-    "axis=z": {
+    "axis=z,lit=true": {
       "model": "space:block/light_column_horizontal_on",
       "x": 90
     }

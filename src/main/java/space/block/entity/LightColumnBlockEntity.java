@@ -87,13 +87,13 @@ public class LightColumnBlockEntity extends BlockEntity implements EnergyBlockEn
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, LightColumnBlockEntity blockEntity)
 	{
+		blockEntity.changeEnergy(-blockEntity.getInput());
+		
 		if(state.get(LightColumnBlock.LIT) != blockEntity.energy > 0)
 		{
 			state = (BlockState) state.with(LightColumnBlock.LIT, blockEntity.energy > 0);
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);
 			markDirty(world, pos, state);
 		}
-		
-		blockEntity.changeEnergy(-blockEntity.getInput());
 	}
 }

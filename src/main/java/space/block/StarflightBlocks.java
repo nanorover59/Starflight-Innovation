@@ -88,10 +88,10 @@ public class StarflightBlocks
 	public static final Block BAUXITE_BLOCK = new Block(AbstractBlock.Settings.copy(Blocks.RAW_IRON_BLOCK));
 	public static final Block BAUXITE_ORE = new ExperienceDroppingBlock(ConstantIntProvider.create(0), AbstractBlock.Settings.copy(Blocks.IRON_ORE));
 	public static final Block DEEPSLATE_BAUXITE_ORE = new ExperienceDroppingBlock(ConstantIntProvider.create(0), AbstractBlock.Settings.copy(Blocks.DEEPSLATE_IRON_ORE));
-	public static final Block IRON_FRAME = new FrameBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(4.0f, 4.0f).nonOpaque());
-	public static final Block IRON_MACHINE_CASING = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK));
-	public static final Block REINFORCED_PANELS = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK));
-	public static final Block REINFORCED_ROUND_DECO = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK));
+	public static final Block IRON_FRAME = new FrameBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(4.0f, 4.0f).sounds(BlockSoundGroup.COPPER).nonOpaque());
+	public static final Block IRON_MACHINE_CASING = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.COPPER));
+	public static final Block REINFORCED_PANELS = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.COPPER));
+	public static final Block REINFORCED_ROUND_DECO = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.COPPER));
 	public static final Block REINFORCED_FABRIC = new Block(AbstractBlock.Settings.copy(Blocks.WHITE_WOOL).strength(2.0f, 3.0f));
 	public static final Block TITANIUM_BLOCK = new Block(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).strength(6.0f, 7.0f).sounds(BlockSoundGroup.COPPER));
 	public static final Block TITANIUM_FRAME = new FrameBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK).strength(4.0f, 4.0f).nonOpaque());
@@ -192,10 +192,10 @@ public class StarflightBlocks
 	public static final Block BUFFER = new SimpleFacingBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
-	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK), 1.0e6, 400, 350, 100.0, 0.0);
-	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0, 0.0);
-	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0, Math.PI / 16.0);
-	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.8e6, 450, 400, 100.0, 0.0);
+	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 1.6e6, 400, 350, 100.0, 0.0);
+	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.2e6, 450, 400, 100.0, 0.0);
+	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 450, 400, 100.0, Math.PI / 16.0);
+	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.4e6, 500, 250, 100.0, 0.0);
 	
 	// Block Entities
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = BlockEntityType.Builder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
@@ -349,11 +349,6 @@ public class StarflightBlocks
 		initializeBlock(ENGINE_1, "engine_1");
 		initializeBlock(ENGINE_1_GIMBAL, "engine_1_gimbal");
 		initializeBlock(ENGINE_1_VACUUM, "engine_1_vacuum");
-		
-		/*initializeBlock(THRUSTER_INITIAL, "thruster_initial");
-		initializeBlock(THRUSTER_SMALL, "thruster_small");
-		initializeBlock(THRUSTER_VACUUM, "thruster_vacuum");
-		initializeBlock(AEROSPIKE, "aerospike");*/
 		
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "stirling_engine"), STIRLING_ENGINE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "electric_furnace"), ELECTRIC_FURNACE_BLOCK_ENTITY);

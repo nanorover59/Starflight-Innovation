@@ -13,6 +13,8 @@
         "space:oxygen_pipe_al",
         "space:hydrogen_pipe_al",
         "space:titanium_panels",
+        "space:reinforced_panels",
+        "space:reinforced_round_deco",
         "minecraft:iron_block",
         "minecraft:gold_block",
         "minecraft:copper_block",

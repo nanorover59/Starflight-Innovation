@@ -112,17 +112,26 @@ public class MovingCraftBlockData
 		
         Vector3f offset = new Vector3f(position.getX(), position.getY(), position.getZ()).rotate(quaternion);
 		BlockPos blockPos = centerPos.add(MathHelper.floor(offset.x()), MathHelper.floor(offset.y()), MathHelper.floor(offset.z()));
+		BlockState conflictState = world.getBlockState(blockPos);
 		
 		// Do not overwrite existing solid world blocks.
-		if(world.getBlockState(blockPos).blocksMovement())
+		if(conflictState.blocksMovement())
 		{
-			BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
-			
-			if(blockEntity != null && blockEntityData != null)
-				blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup)world.getRegistryManager());
-			
-            Block.dropStacks(blockState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
-            return;
+			if(conflictState.getBlock().getHardness() > blockState.getBlock().getHardness())
+			{
+				BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
+				
+				if(blockEntity != null && blockEntityData != null)
+					blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup) world.getRegistryManager());
+				
+	            Block.dropStacks(blockState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
+	            return;
+			}
+			else
+			{
+				BlockEntity blockEntity = world.getBlockEntity(blockPos);
+	            Block.dropStacks(conflictState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
+			}
 		}
 		
 		if(blockState.getBlock() instanceof FluidTankInsideBlock)

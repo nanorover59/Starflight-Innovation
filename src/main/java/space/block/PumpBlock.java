@@ -96,6 +96,17 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	}
 	
 	@Override
+	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
+	{
+		if(world.isClient() || state.isOf(newState.getBlock()))
+			return;
+		
+		world.removeBlockEntity(pos);
+		BlockSearch.energyConnectionSearch(world, pos);
+		PumpBlockEntity.intakeFilterSearch(world, pos, true);
+	}
+	
+	@Override
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
 		return (BlockState) this.getDefaultState().with(FACING, context.getPlayerLookDirection());
@@ -117,17 +128,6 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	public BlockState mirror(BlockState state, BlockMirror mirror)
 	{
 		return state.rotate(mirror.getRotation(state.get(FACING)));
-	}
-	
-	@Override
-	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
-	{
-		if(world.isClient() || state.isOf(newState.getBlock()))
-			return;
-		
-		world.removeBlockEntity(pos);
-		BlockSearch.energyConnectionSearch(world, pos);
-		PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
 	
 	@Override

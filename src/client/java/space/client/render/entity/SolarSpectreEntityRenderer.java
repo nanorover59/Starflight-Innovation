@@ -40,11 +40,11 @@ public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEn
         
         if(entity.clientQuaternionPrevious != null && entity.clientQuaternion != null)
 		{
-			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious, entity.clientQuaternion, g).normalize();
+			Quaternionf quaternion = QuaternionUtil.interpolate(entity.clientQuaternionPrevious.normalize(), entity.clientQuaternion.normalize(), g);
 			matrixStack.multiply(quaternion);
 		}
 		else if(entity.clientQuaternion != null)
-			matrixStack.multiply(entity.clientQuaternion);
+			matrixStack.multiply(entity.clientQuaternion.normalize());
         
         matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((MathHelper.lerpAngleDegrees(g, entity.clientRollExtraPrevious, entity.clientRollExtra))));   
         float alpha = 0.8f;

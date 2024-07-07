@@ -254,6 +254,7 @@
 	"block.space.planetarium.unlocked": "Uploaded navigation data for ",
 	"block.space.solar_panel.description": "Output varies with sunlight exposure",
 	"block.space.battery.description": "Power values per battery item",
+	"block.space.light_column.description": "Stylish electric light source",
 	"block.space.breaker_switch.description": "Connects or disconnects power cables",
 	"block.space.pump.description_1": "Pulls from large bodies of water",
 	"block.space.pump.description_2": "Extend its reach with pipes",

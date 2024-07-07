@@ -59,7 +59,7 @@ public class PlasmaBallEntityRenderer extends EntityRenderer<PlasmaBallEntity>
 		matrixStack.push();
 		int k = OverlayTexture.DEFAULT_UV;
 		matrixStack.translate(0.0f, 0.1f, 0.0f);
-		matrixStack.scale(0.5f, 0.5f, 0.5f);
+		matrixStack.scale(0.25f, 0.25f, 0.25f);
 		matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
 		matrixStack.multiply(new Quaternionf().setAngleAxis(1.0471976f, SINE_45_DEGREES, 0.0f, SINE_45_DEGREES));
 		this.frame.render(matrixStack, vertexConsumer, i, k, argb);

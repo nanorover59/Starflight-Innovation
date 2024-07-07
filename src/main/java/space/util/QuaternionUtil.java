@@ -26,10 +26,6 @@ public class QuaternionUtil
 	{
 		float dot = q0.dot(q1);
 		
-		// Do not allow a dot product greater than 1.0 due to computational error.
-		if(dot > 1.0f)
-			dot = 1.0f;
-		
 		// Ensure that the interpolation is taking the shortest path.
 		if(dot < 0.0f)
 		{
@@ -37,7 +33,8 @@ public class QuaternionUtil
 			dot = -dot;
 		}
 		
-		double theta = Math.acos(dot);
+		// Do not allow a dot product greater than 1.0 due to computational error.
+		double theta = Math.acos(dot < 1.0 ? dot : 1.0);
 		double sinTheta = Math.sin(theta);
 		
 		if(sinTheta != 0.0)

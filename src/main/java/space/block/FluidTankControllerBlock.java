@@ -136,52 +136,67 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, double capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
 		BiPredicate<World, BlockPos> include;
+		BiPredicate<World, BlockPos> edgeCase;
 		boolean valid = false;
 		fluidTankController.setStorageCapacity(0);
 		fluidTankController.setStoredFluid(0);
 		
 		if(fluidTankController instanceof BalloonControllerBlockEntity)
+		{
 			include = (w, p) -> {
-				return !world.getBlockState(p).isIn(StarflightBlocks.BALLOON_BLOCK_TAG);
+				return !w.getBlockState(p).isIn(StarflightBlocks.BALLOON_BLOCK_TAG);
 			};
+			edgeCase = (w, p) -> false;
+		}
 		else
+		{
 			include = (w, p) -> {
-				return !world.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
+				return !w.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
 			};
+			edgeCase = (w, p) -> {
+				return w.getBlockState(p).isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG);
+			};
+		}
 
 		for(Direction direction : Direction.values())
 		{
+			if(!world.getBlockState(position.offset(direction)).isAir())
+				continue;
+			
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
 			ArrayList<BlockPos> actionList = new ArrayList<BlockPos>(); // List of all fluid tank controller and interface blocks found.
 			
-			BlockSearch.search(world, position.offset(direction), checkList, include, BlockSearch.MAX_VOLUME, true);
+			BlockSearch.search(world, position.offset(direction), checkList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
 			
 			if(checkList.size() > 0 && checkList.size() < BlockSearch.MAX_VOLUME)
 			{
 				double cx = 0;
 				double cy = 0;
 				double cz = 0;
+				double volume = 0;
 				int count = 0;
 
 				for(BlockPos p : checkList)
 				{
-					if(world.getBlockState(p).isAir())
+					BlockState blockState = world.getBlockState(p);
+					
+					if(blockState.isAir())
 					{
+						volume += 1.0;
 						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
-						cx += p.getX();
-						cy += p.getY();
-						cz += p.getZ();
-						count++;
-						
-						for(Direction direction1 : Direction.values())
-						{
-							BlockPos offset = p.offset(direction1);
-							BlockEntity blockEntity = world.getBlockEntity(offset);
-
-							if(blockEntity != null && (blockEntity instanceof FluidTankControllerBlockEntity || blockEntity instanceof ValveBlockEntity))
-								actionList.add(offset);
-						}
 					}
+					else if(edgeCase.test(world, p))
+					{
+						volume += 0.75;
+
+						if(blockState.getBlock() instanceof FluidTankControllerBlock || blockState.getBlock() instanceof ValveBlock)
+							actionList.add(p);
+					}
+					
+					cx += p.getX();
+					cy += p.getY();
+					cz += p.getZ();
+					count++;
 				}
 				
 				cx /= count;
@@ -221,7 +236,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					}
 				}
 				
-				fluidTankController.setStorageCapacity(capacity * count);
+				fluidTankController.setStorageCapacity(capacity * volume);
 				fluidTankController.setCenterOfMass(new BlockPos((int) cx, (int) cy, (int) cz));
 				valid = true;
 			}

@@ -39,8 +39,8 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	{
 		this.goalSelector.add(3, new CancelVelocityGoal(this, 25.0));
 		this.goalSelector.add(4, new EscapeFlightGoal(this, 15.0));
-		this.goalSelector.add(5, new TrackTargetGoal(this, 15.0, 400, true));
-		this.goalSelector.add(6, new RandomFlightGoal(this, 15.0, 400, 32));
+		this.goalSelector.add(5, new TrackTargetGoal(this, 15.0, 8000, true));
+		this.goalSelector.add(6, new RandomFlightGoal(this, 15.0, 8000, 64));
 		this.targetSelector.add(1, new RevengeGoal(this, new Class[0]));
 		this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
 	}
@@ -107,7 +107,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 
 		if(world.isClient)
 			return;
-
+		
 		if(plasmaBallCooldown > 0)
 			plasmaBallCooldown--;
 
@@ -124,9 +124,9 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 		{
 			playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
 			double distance = distanceTo(getTarget());
-			double dx = getTarget().getX() - getX();
-			double dy = getTarget().getBodyY(0.5) - getPos().getY();
-			double dz = getTarget().getZ() - getZ();
+			double dx = (getTarget().getX() + getTarget().getVelocity().getX() * 4.0) - getX();
+			double dy = (getTarget().getBodyY(0.5) + getTarget().getVelocity().getY() * 4.0) - getBodyY(0.5);
+			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ() * 4.0) - getZ();
 			double ds = Math.sqrt(Math.sqrt(distance)) * 0.5;
 			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, 2.297 * ds), dy, getRandom().nextTriangular(dz, 2.297 * ds)));
 			plasmaBallEntity.setPosition(plasmaBallEntity.getX(), getPos().getY(), plasmaBallEntity.getZ());
@@ -149,11 +149,13 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 			this.thrust = thrust;
 		}
 
+		@Override
 		public boolean canStart()
 		{
-			return age > 6000;
+			return !entity.hasRunningGoals() && age > 6000;
 		}
 
+		@Override
 		public void start()
 		{
 			World world = getWorld();
@@ -165,20 +167,29 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 			ticks = 0;
 		}
 
+		@Override
 		public void stop()
 		{
 			setRemoved(RemovalReason.DISCARDED);
 		}
 
+		@Override
 		public void tick()
 		{
-			updateMotion(targetDirection, thrust, false);
+			updateMotion(targetDirection, thrust);
 			ticks++;
 		}
-
+		
+		@Override
 		public boolean shouldContinue()
 		{
 			return true;
+		}
+
+		@Override
+		public boolean canStop()
+		{
+			return false;
 		}
 	}
 }

@@ -110,10 +110,14 @@ public class RocketControllerBlockEntity extends BlockEntity
 				if(blockEntity instanceof FluidTankControllerBlockEntity)
 				{
 					FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
-					double fluidTankMass = fluidTank.getStoredFluid();
-					mass += fluidTankMass;
-					centerPos = fluidTank.getCenterOfMass().toCenterPos();
-					centerOfMass = centerOfMass.add(centerPos.getX() * fluidTankMass, centerPos.getY() * fluidTankMass, centerPos.getZ() * fluidTankMass);
+					
+					if(fluidTank.getCenterOfMass() != null)
+					{
+						double fluidTankMass = fluidTank.getStoredFluid();
+						mass += fluidTankMass;
+						centerPos = fluidTank.getCenterOfMass().toCenterPos();
+						centerOfMass = centerOfMass.add(centerPos.getX() * fluidTankMass, centerPos.getY() * fluidTankMass, centerPos.getZ() * fluidTankMass);
+					}
 				}
         	}
         }

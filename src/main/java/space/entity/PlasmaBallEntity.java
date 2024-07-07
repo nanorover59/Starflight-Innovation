@@ -43,11 +43,11 @@ public class PlasmaBallEntity extends AbstractFireballEntity
 		Entity target = entityHitResult.getEntity();
 		Entity owner = this.getOwner();
 
-		if(!owner.equals(target) && owner instanceof LivingEntity)
-		{
-			target.damage(getDamageSources().mobProjectile(this, (LivingEntity) owner), 5.0f);
-			discard();
-		}
+		if(getOwner() != null && owner.equals(target))
+			return;
+		
+		target.damage(getDamageSources().mobProjectile(this, (LivingEntity) owner), 5.0f);
+		discard();
 	}
 	
 	@Override

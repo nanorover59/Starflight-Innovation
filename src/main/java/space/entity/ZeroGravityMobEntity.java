@@ -7,6 +7,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -174,7 +175,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		return this.dataTracker.get(ROLL_EXTRA).floatValue();
 	}
 	
-	public void updateMotion(Vec3d direction, double thrust, boolean ignoreDifference)
+	public void updateMotion(Vec3d direction, double thrust)
 	{
 		Vector3f directionF = direction.toVector3f().normalize();
 		Quaternionf current = getQuaternion().normalize();
@@ -182,12 +183,9 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		axis.cross(directionF);
 		float angle = (float) Math.acos(-directionF.z());
 		Quaternionf target = new Quaternionf().rotateAxis(angle, axis);
-		float difference = QuaternionUtil.difference(current, target);
 		Quaternionf step = QuaternionUtil.interpolate(current, target, getTurningFactor());
-		setQuaternion(step.normalize());
-		
-		if(ignoreDifference || difference < 0.2f)
-			applyThrust(thrust);
+		setQuaternion(step);
+		applyThrust(thrust);
 	}
 
 	private void applyThrust(double thrust)
@@ -201,6 +199,17 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	public float getTurningFactor()
 	{
 		return 0.25f;
+	}
+	
+	public boolean hasRunningGoals()
+	{
+		for(PrioritizedGoal goal : goalSelector.getGoals())
+		{
+			if(goal.isRunning())
+				return true;
+		}
+		
+		return false;
 	}
 	
 	@Override
@@ -221,7 +230,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	public void readCustomDataFromNbt(NbtCompound nbt)
 	{
 		super.readCustomDataFromNbt(nbt);
-		setQuaternion(new Quaternionf(nbt.getFloat("qx"), nbt.getFloat("qy"), nbt.getFloat("qz"), nbt.getFloat("qw")));
+		setQuaternion(new Quaternionf(nbt.getFloat("qx"), nbt.getFloat("qy"), nbt.getFloat("qz"), nbt.getFloat("qw")).normalize());
 		pointOfInterest = new Vec3d(nbt.getDouble("px"), nbt.getDouble("py"), nbt.getDouble("pz"));
 		setRollExtra(nbt.getFloat("re"));
 	}
@@ -236,28 +245,29 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 			this.entity = entity;
 			this.thrust = thrust;
 		}
-
+		
+		@Override
 		public boolean canStart()
 		{
-			return entity.goalSelector.getGoals().isEmpty() && getVelocity().length() > 0.05;
+			return !entity.hasRunningGoals() && getVelocity().length() > 0.1;
 		}
 
-		public void start()
-		{
-		}
-
-		public void stop()
-		{
-		}
-
+		@Override
 		public void tick()
 		{
-			updateMotion(getVelocityToCancel(), getVelocity().length() > 0.1 ? thrust : thrust * 0.25, false);
+			updateMotion(getVelocityToCancel(), getVelocity().length() > 0.1 ? thrust : thrust * 0.25);
 		}
 
+		@Override
 		public boolean shouldContinue()
 		{
-			return getVelocity().length() > 0.05;
+			return !canStop();
+		}
+		
+		@Override
+		public boolean canStop()
+		{
+			return getVelocity().length() < 0.05;
 		}
 		
 		private Vec3d getVelocityToCancel()
@@ -285,37 +295,55 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 			this.range = range;
 		}
 
+		@Override
 		public boolean canStart()
 		{
-			return entity.goalSelector.getGoals().isEmpty() && getVelocity().length() < 0.1;
+			return !entity.hasRunningGoals();
 		}
 
+		@Override
 		public void start()
+		{
+			setPointOfInterest();
+			targetDirection = pointOfInterest.subtract(getPos());
+			distance = targetDirection.length();
+			previousDistance = distance;
+			ticks = 0;
+		}
+
+		@Override
+		public void tick()
+		{
+			targetDirection = pointOfInterest.subtract(getPos());
+			previousDistance = distance;
+			distance = targetDirection.length();
+			updateMotion(targetDirection, thrust);
+			
+			if(distance < 2.0)
+				setPointOfInterest();
+			
+			ticks++;
+		}
+		
+		@Override
+		public boolean shouldContinue()
+		{
+			return !canStop();
+		}
+
+		@Override
+		public boolean canStop()
+		{
+			return getTarget() != null || ticks >= maximumDuration || horizontalCollision || verticalCollision;
+		}
+		
+		private void setPointOfInterest()
 		{
 			boolean upBias = getY() < getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
 			int dx = random.nextInt(range) - random.nextInt(range);
 			int dy = random.nextInt(range) - (upBias ? 0 : random.nextInt(range));
 			int dz = random.nextInt(range) - random.nextInt(range);
 			pointOfInterest = getPos().add(dx, dy, dz);
-			targetDirection = pointOfInterest.subtract(getPos());
-			ticks = 0;
-		}
-
-		public void stop()
-		{
-		}
-
-		public void tick()
-		{
-			updateMotion(targetDirection, thrust, false);
-			previousDistance = distance;
-			distance = pointOfInterest.subtract(getPos()).length();
-			ticks++;
-		}
-
-		public boolean shouldContinue()
-		{
-			return ticks < 40 || (ticks < maximumDuration && distance < previousDistance);
 		}
 	}
 	
@@ -344,21 +372,20 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 				this.initialDistance = getTarget().getEyePos().subtract(getPos()).length();
 		}
 
+		@Override
 		public boolean canStart()
 		{
-			return entity.goalSelector.getGoals().isEmpty() && getTarget() != null && getVelocity().length() < 0.1 && getY() > getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			return !entity.hasRunningGoals() && getTarget() != null;
 		}
 
+		@Override
 		public void start()
 		{
 			trackTargetEntity();
 			ticks = 0;
 		}
-
-		public void stop()
-		{
-		}
-
+		
+		@Override
 		public void tick()
 		{
 			if(getTarget() != null)
@@ -366,9 +393,9 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 				trackTargetEntity();
 				
 				if(distance < 16.0)
-					updateMotion(targetDirection, thrust * -0.5f, true);
+					updateMotion(targetDirection, thrust * -0.5f);
 				else
-					updateMotion(targetDirection, thrust, true);
+					updateMotion(targetDirection, thrust);
 			}
 			
 			setRollExtra(getRollExtra() + rollSpeed);
@@ -376,10 +403,17 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 			distance = pointOfInterest.subtract(getPos()).length();
 			ticks++;
 		}
-
+		
+		@Override
 		public boolean shouldContinue()
 		{
-			return getTarget() != null && ticks < maximumDuration;
+			return !canStop();
+		}
+
+		@Override
+		public boolean canStop()
+		{
+			return getTarget() == null || ticks > maximumDuration || horizontalCollision || verticalCollision;
 		}
 		
 		private void trackTargetEntity()

@@ -256,7 +256,7 @@ public class RocketEntity extends MovingCraftEntity
 		tickPhysics();
 		checkDimensionChange();
 		
-		PlanetDimensionData data = PlanetList.get().getDimensionDataForWorld(getWorld());
+		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
 		Vector3f trackedVelocity = getTrackedVelocity();
 		float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
 		
