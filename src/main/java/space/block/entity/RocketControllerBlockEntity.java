@@ -378,11 +378,6 @@ public class RocketControllerBlockEntity extends BlockEntity
 			requiredDeltaV2
 		};
 		
-		ArrayList<MovingCraftEntity.BlockRenderData> bufferedBlockList = new ArrayList<MovingCraftEntity.BlockRenderData>();
-		
-		for(MovingCraftBlockData blockData : this.blockDataList)
-			bufferedBlockList.add(new MovingCraftEntity.BlockRenderData(blockData));
-		
-		ServerPlayNetworking.send(player, new RocketControllerDataS2CPacket(stats, bufferedBlockList));
+		ServerPlayNetworking.send(player, new RocketControllerDataS2CPacket(stats, this.blockDataList));
 	}
 }

@@ -6,8 +6,8 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.entity.RocketEntity;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
+import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
-import space.network.s2c.MovingCraftRenderDataS2CPacket;
 import space.network.s2c.OutgasS2CPacket;
 import space.network.s2c.PlanetDataS2CPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
@@ -19,7 +19,7 @@ public class StarflightNetworkingC2S
 	public static void initializePackets()
 	{
 		PayloadTypeRegistry.playS2C().register(PlanetDataS2CPacket.PACKET_ID, PlanetDataS2CPacket.PACKET_CODEC);
-		PayloadTypeRegistry.playS2C().register(MovingCraftRenderDataS2CPacket.PACKET_ID, MovingCraftRenderDataS2CPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(MovingCraftBlocksS2CPacket.PACKET_ID, MovingCraftBlocksS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, MovingCraftEntityOffsetsS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(RocketOpenTravelScreenS2CPacket.PACKET_ID, RocketOpenTravelScreenS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(RocketControllerDataS2CPacket.PACKET_ID, RocketControllerDataS2CPacket.PACKET_CODEC);

@@ -30,13 +30,9 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -46,8 +42,8 @@ import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
 import space.mixin.common.EntityInvokerMixin;
+import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
-import space.network.s2c.MovingCraftRenderDataS2CPacket;
 import space.vessel.MovingCraftBlockData;
 
 public class MovingCraftEntity extends Entity
@@ -60,7 +56,7 @@ public class MovingCraftEntity extends Entity
 	private static final TrackedData<Vector3f> TRACKED_ANGLES = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_BOX_MIN = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_BOX_MAX = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
-	protected ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
+	protected ArrayList<MovingCraftBlockData> blocks = new ArrayList<MovingCraftBlockData>();
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	private Vector3f momentOfInertia1;
@@ -88,10 +84,10 @@ public class MovingCraftEntity extends Entity
 		super(entityType, world);
 	}
 
-	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
+	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blocks, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
 	{
 		this(type, world);
-		this.blockDataList = blockDataList;
+		this.blocks = blocks;
 		this.craftMass = mass;
 		this.craftMassInitial = mass;
 		this.craftVolume = volume;
@@ -103,13 +99,13 @@ public class MovingCraftEntity extends Entity
 		this.setQuaternion(new Quaternionf());
 		this.setInitialBlockPos(this.getBlockPos());
 
-		if(blockDataList.isEmpty())
+		if(blocks.isEmpty())
 			setRemoved(RemovalReason.DISCARDED);
 
-		BlockPos min = new BlockPos(blockDataList.get(0).getPosition());
-		BlockPos max = new BlockPos(blockDataList.get(0).getPosition());
+		BlockPos min = new BlockPos(blocks.get(0).getPosition());
+		BlockPos max = new BlockPos(blocks.get(0).getPosition());
 
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockPos pos = blockData.getPosition();
 
@@ -138,7 +134,7 @@ public class MovingCraftEntity extends Entity
 			if(entity instanceof LivingEntity)
 			{
 				BlockPos offset = entity.getBlockPos().subtract(blockPos);
-				pickUpEntity(entity, offset);
+				//pickUpEntity(entity, offset);
 			}
 		}
 	}
@@ -224,6 +220,11 @@ public class MovingCraftEntity extends Entity
 	{
 		this.dataTracker.set(TRACKED_BOX_MIN, boxMin.toVector3f());
 		this.dataTracker.set(TRACKED_BOX_MAX, boxMax.toVector3f());
+	}
+	
+	public ArrayList<MovingCraftBlockData> getBlocks()
+	{
+		return blocks;
 	}
 
 	public double getLowerHeight()
@@ -399,9 +400,7 @@ public class MovingCraftEntity extends Entity
 
 	public boolean clientMotion()
 	{
-		World world = getWorld();
-
-		if(world.isClient)
+		if(getWorld().isClient())
 		{
 			if(this.clientInterpolationSteps > 0)
 			{
@@ -456,18 +455,18 @@ public class MovingCraftEntity extends Entity
 
 	public static ArrayList<MovingCraftBlockData> captureBlocks(World world, BlockPos centerPos, ArrayList<BlockPos> positionList)
 	{
-		ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
+		ArrayList<MovingCraftBlockData> blocks = new ArrayList<MovingCraftBlockData>();
 
 		// Fill the block data array list.
 		for(BlockPos pos : positionList)
-			blockDataList.add(MovingCraftBlockData.fromBlock(world, positionList, pos, centerPos, isBlockSolid(world, pos)));
+			blocks.add(MovingCraftBlockData.fromBlock(world, positionList, pos, centerPos, isBlockSolid(world, pos)));
 
-		return blockDataList;
+		return blocks;
 	}
 
-	public static void removeBlocksFromWorld(World world, BlockPos centerPos, ArrayList<MovingCraftBlockData> blockDataList)
+	public static void removeBlocksFromWorld(World world, BlockPos centerPos, ArrayList<MovingCraftBlockData> blocks)
 	{
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 			Block block = world.getBlockState(pos).getBlock();
@@ -484,7 +483,7 @@ public class MovingCraftEntity extends Entity
 				blockEntity.read(new NbtCompound(), world.getRegistryManager());
 		}
 
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
@@ -497,7 +496,7 @@ public class MovingCraftEntity extends Entity
 			}
 		}
 
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
@@ -607,7 +606,7 @@ public class MovingCraftEntity extends Entity
 			passenger.dismountVehicle();
 		}
 
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			if(blockData.placeFirst())
 				toPlaceFirst.add(blockData);
@@ -628,7 +627,7 @@ public class MovingCraftEntity extends Entity
 			onBlockReleased(blockData, blockPos);
 		}
 
-		blockDataList.clear();
+		blocks.clear();
 	}
 
 	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
@@ -662,7 +661,7 @@ public class MovingCraftEntity extends Entity
 		nbt.putDouble("maxX", boxMax.getX());
 		nbt.putDouble("maxY", boxMax.getY());
 		nbt.putDouble("maxZ", boxMax.getZ());
-		int blockCount = blockDataList.size();
+		int blockCount = blocks.size();
 		nbt.putInt("blockCount", blockCount);
 		int[] x = new int[blockCount];
 		int[] y = new int[blockCount];
@@ -670,7 +669,7 @@ public class MovingCraftEntity extends Entity
 
 		for(int i = 0; i < blockCount; i++)
 		{
-			MovingCraftBlockData blockData = blockDataList.get(i);
+			MovingCraftBlockData blockData = blocks.get(i);
 			x[i] = blockData.getPosition().getX();
 			y[i] = blockData.getPosition().getY();
 			z[i] = blockData.getPosition().getZ();
@@ -722,7 +721,7 @@ public class MovingCraftEntity extends Entity
 		for(int i = 0; i < blockCount; i++)
 		{
 			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
-			blockDataList.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));
+			blocks.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));
 		}
 
 		int passengerCount = nbt.getInt("passengerCount");
@@ -742,21 +741,35 @@ public class MovingCraftEntity extends Entity
 			if(!forceUnload && !this.playersInRange.contains(player) && inRange)
 			{
 				this.playersInRange.add(player);
-				ArrayList<MovingCraftEntity.BlockRenderData> blockRenderDataList = new ArrayList<MovingCraftEntity.BlockRenderData>();
-				
-				for(MovingCraftBlockData blockData : blockDataList)
-					blockRenderDataList.add(new BlockRenderData(blockData));
-				
-				ServerPlayNetworking.send(player, new MovingCraftRenderDataS2CPacket(getId(), blockRenderDataList));
+				ServerPlayNetworking.send(player, new MovingCraftBlocksS2CPacket(getId(), blocks));
 			}
 			else if(forceUnload && this.playersInRange.contains(player) && !inRange)
-			{
 				this.playersInRange.remove(player);
-				ServerPlayNetworking.send(player, new MovingCraftRenderDataS2CPacket(getId(), new ArrayList<MovingCraftEntity.BlockRenderData>()));
-			}
 			else if(!forceUnload && inRange)
 				sendEntityOffsets(player);
 		}
+	}
+	
+	public static void receiveBlockData(MovingCraftBlocksS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		int entityID = payload.entityID();
+		ArrayList<MovingCraftBlockData> blockList = payload.blockDataList();
+		MinecraftClient client = context.client();
+		ClientWorld clientWorld = client.world;
+		
+		client.execute(() -> {
+			if(clientWorld == null)
+				return;
+
+			Entity entity = clientWorld.getEntityById(entityID);
+
+			if(entity == null || !(entity instanceof MovingCraftEntity))
+				return;
+
+			((MovingCraftEntity) entity).blocks.clear();
+			((MovingCraftEntity) entity).blocks.addAll(blockList);
+			
+		});
 	}
 
 	public void sendEntityOffsets(ServerPlayerEntity player)
@@ -793,81 +806,5 @@ public class MovingCraftEntity extends Entity
 			for(int id : passengerMap.keySet())
 				((MovingCraftEntity) entity).entityOffsets.put(clientWorld.getEntityById(id).getUuid(), passengerMap.get(id));
 		});
-	}
-
-	public static void writeBlockRenderData(PacketByteBuf buffer, BlockRenderData blockRenderData)
-	{
-		writeBlockState(buffer, blockRenderData.blockState());
-		buffer.writeBlockPos(blockRenderData.position());
-		buffer.writeInt(blockRenderData.sidesShowing());
-		buffer.writeInt(blockRenderData.flags());
-	}
-
-	private static void writeBlockState(PacketByteBuf buffer, BlockState state)
-	{
-		buffer.writeIdentifier(Registries.BLOCK.getId(state.getBlock()));
-		buffer.writeInt(state.getProperties().size());
-
-		for(Property<?> property : state.getProperties())
-		{
-			buffer.writeString(property.getName());
-			buffer.writeString(getPropertyValueAsString(state, property));
-		}
-	}
-
-	public static BlockState readBlockState(PacketByteBuf buffer)
-	{
-		Identifier blockId = buffer.readIdentifier();
-		Block block = Registries.BLOCK.get(blockId);
-		BlockState state = block.getDefaultState();
-		int propertyCount = buffer.readInt();
-
-		for(int i = 0; i < propertyCount; i++)
-		{
-			String propertyName = buffer.readString();
-			String propertyValue = buffer.readString();
-			Property<?> property = block.getStateManager().getProperty(propertyName);
-
-			if(property != null)
-				state = setPropertyValue(state, property, propertyValue);
-		}
-
-		return state;
-	}
-
-	private static <T extends Comparable<T>> String getPropertyValueAsString(BlockState state, Property<T> property)
-	{
-		return property.name(state.get(property));
-	}
-
-	private static <T extends Comparable<T>> BlockState setPropertyValue(BlockState state, Property<T> property, String value)
-	{
-		return state.with(property, property.parse(value).orElse(state.get(property)));
-	}
-
-	public record BlockRenderData(BlockState blockState, BlockPos position, int sidesShowing, int flags)
-	{
-		public BlockRenderData(PacketByteBuf buffer)
-	    {
-	    	this(readBlockState(buffer), buffer.readBlockPos(), buffer.readInt(), buffer.readInt());
-	    }
-		
-		public BlockRenderData(MovingCraftBlockData blockData)
-	    {
-			this(blockData.getBlockState(), blockData.getPosition(), packBooleans(blockData.getSidesShowing()), packBooleans(blockData.redstonePower()));
-	    }
-		
-		private static int packBooleans(boolean ... booleans)
-		{
-			int packed = 0;
-			
-			for(int i = 0; i < booleans.length; i++)
-	        {
-	            if(booleans[i])
-	            	packed |= (1 << i);
-	        }
-			
-			return packed;
-		}
 	}
 }

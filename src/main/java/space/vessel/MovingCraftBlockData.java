@@ -17,9 +17,12 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.state.property.Properties;
+import net.minecraft.state.property.Property;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
@@ -40,7 +43,7 @@ public class MovingCraftBlockData
 	private boolean redstone;
 	private double storedFluid;
 	
-	private MovingCraftBlockData(BlockState blockState, BlockPos position, NbtCompound blockEntityData, boolean[] sidesShowing, boolean placeFirst, boolean redstone, double storedFluid)
+	public MovingCraftBlockData(BlockState blockState, BlockPos position, NbtCompound blockEntityData, boolean[] sidesShowing, boolean placeFirst, boolean redstone, double storedFluid)
 	{
 		this.blockState = blockState;
 		this.position = position;
@@ -53,6 +56,11 @@ public class MovingCraftBlockData
 		this.redstone = redstone;
 		this.storedFluid = storedFluid;
 	}
+	
+	public MovingCraftBlockData(PacketByteBuf buffer)
+    {
+    	this(readBlockState(buffer), buffer.readBlockPos(), buffer.readNbt(), unpackBooleans(buffer.readInt()), buffer.readBoolean(), buffer.readBoolean(), buffer.readDouble());
+    }
 	
 	public static MovingCraftBlockData fromBlock(World world, ArrayList<BlockPos> positionList, BlockPos blockPos, BlockPos centerPos, boolean placeFirst)
 	{
@@ -223,5 +231,81 @@ public class MovingCraftBlockData
 		boolean redstone = data.getBoolean("redstone");
 		double storedFluid = data.contains("storedFluid") ? data.getDouble("storedFluid") : 0.0;
 		return new MovingCraftBlockData(blockState, position, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid);
+	}
+	
+	public static void writeBlockData(PacketByteBuf buffer, MovingCraftBlockData blockData)
+	{
+		writeBlockState(buffer, blockData.getBlockState());
+		buffer.writeBlockPos(blockData.getPosition());
+		buffer.writeNbt(blockData.getBlockEntityData());
+		buffer.writeInt(packBooleans(blockData.getSidesShowing()));
+		buffer.writeBoolean(blockData.placeFirst());
+		buffer.writeBoolean(blockData.redstonePower());
+		buffer.writeDouble(blockData.getStoredFluid());
+	}
+	
+	private static void writeBlockState(PacketByteBuf buffer, BlockState state)
+	{
+		buffer.writeIdentifier(Registries.BLOCK.getId(state.getBlock()));
+		buffer.writeInt(state.getProperties().size());
+
+		for(Property<?> property : state.getProperties())
+		{
+			buffer.writeString(property.getName());
+			buffer.writeString(getPropertyValueAsString(state, property));
+		}
+	}
+
+	public static BlockState readBlockState(PacketByteBuf buffer)
+	{
+		Identifier blockId = buffer.readIdentifier();
+		Block block = Registries.BLOCK.get(blockId);
+		BlockState state = block.getDefaultState();
+		int propertyCount = buffer.readInt();
+
+		for(int i = 0; i < propertyCount; i++)
+		{
+			String propertyName = buffer.readString();
+			String propertyValue = buffer.readString();
+			Property<?> property = block.getStateManager().getProperty(propertyName);
+
+			if(property != null)
+				state = setPropertyValue(state, property, propertyValue);
+		}
+
+		return state;
+	}
+	
+	private static <T extends Comparable<T>> String getPropertyValueAsString(BlockState state, Property<T> property)
+	{
+		return property.name(state.get(property));
+	}
+
+	private static <T extends Comparable<T>> BlockState setPropertyValue(BlockState state, Property<T> property, String value)
+	{
+		return state.with(property, property.parse(value).orElse(state.get(property)));
+	}
+	
+	private static int packBooleans(boolean ... booleans)
+	{
+		int packed = 0;
+		
+		for(int i = 0; i < booleans.length; i++)
+        {
+            if(booleans[i])
+            	packed |= (1 << i);
+        }
+		
+		return packed;
+	}
+	
+	private static boolean[] unpackBooleans(int packed)
+	{
+		boolean[] sidesShowing = new boolean[6];
+		
+		for (int i = 0; i < 6; i++)
+			sidesShowing[i] = (packed & (1 << i)) != 0;
+		
+		return sidesShowing;
 	}
 }

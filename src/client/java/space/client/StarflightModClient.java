@@ -14,7 +14,6 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.fabricmc.fabric.impl.client.indigo.renderer.helper.ColorHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
@@ -30,7 +29,6 @@ import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -68,8 +66,8 @@ import space.entity.StarflightEntities;
 import space.item.StarflightItems;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
+import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
-import space.network.s2c.MovingCraftRenderDataS2CPacket;
 import space.network.s2c.OutgasS2CPacket;
 import space.network.s2c.PlanetDataS2CPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
@@ -80,7 +78,6 @@ import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.StarflightScreens;
 import space.util.StarflightEffects;
-import space.vessel.MovingCraftRenderList;
 
 @Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
@@ -101,7 +98,7 @@ public class StarflightModClient implements ClientModInitializer
 	{		
 		// Client side networking.
 		ClientPlayNetworking.registerGlobalReceiver(PlanetDataS2CPacket.PACKET_ID, (payload, context) -> PlanetList.receiveDynamicData((PlanetDataS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(MovingCraftRenderDataS2CPacket.PACKET_ID, (payload, context) -> MovingCraftRenderList.receiveCraftListUpdate((MovingCraftRenderDataS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(MovingCraftBlocksS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveBlockData((MovingCraftBlocksS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveEntityOffsets((MovingCraftEntityOffsetsS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(RocketOpenTravelScreenS2CPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveOpenTravelScreen((RocketOpenTravelScreenS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(RocketControllerDataS2CPacket.PACKET_ID, (payload, context) -> RocketControllerScreen.receiveDisplayDataUpdate((RocketControllerDataS2CPacket) payload, context));

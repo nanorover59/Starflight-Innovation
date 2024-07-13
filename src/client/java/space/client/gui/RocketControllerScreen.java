@@ -16,6 +16,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.NarratorManager;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -24,12 +25,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import space.StarflightMod;
 import space.client.render.StarflightClientEffects;
-import space.entity.MovingCraftEntity;
+import space.client.render.entity.MovingCraftEntityRenderer;
 import space.network.c2s.RocketControllerButtonC2SPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetList;
-import space.vessel.MovingCraftBlockRenderData;
+import space.vessel.MovingCraftBlockData;
 
 @Environment(EnvType.CLIENT)
 public class RocketControllerScreen extends Screen
@@ -38,7 +39,7 @@ public class RocketControllerScreen extends Screen
 	private static final int MARGIN = 12;
     private static final int GREEN = 0xFF6ABE30;
 	private static final int RED = 0xFFDC3222;
-	private static ArrayList<MovingCraftBlockRenderData> blockList;
+	private static ArrayList<MovingCraftBlockData> blocks;
 	public static String worldKey;
 	public static BlockPos position;
 	public static double mass;
@@ -59,7 +60,7 @@ public class RocketControllerScreen extends Screen
 	public RocketControllerScreen(String worldKeyName, BlockPos blockPos)
 	{
 		super(NarratorManager.EMPTY);
-		blockList = new ArrayList<MovingCraftBlockRenderData>();
+		blocks = new ArrayList<MovingCraftBlockData>();
 		worldKey = worldKeyName;
 		position = blockPos;
 	}
@@ -101,8 +102,8 @@ public class RocketControllerScreen extends Screen
 		context.getMatrices().multiplyPositionMatrix(new Matrix4f().scaling(scaleFactor, -scaleFactor, scaleFactor));
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
 		
-		for(MovingCraftBlockRenderData blockData : blockList)
-			blockData.renderBlock(client.world, context.getMatrices(), context.getVertexConsumers(), client.world.random, new BlockPos(0, 0, 0), new BlockPos(0, 0, 0), 0xF000F0, 0);
+		for(MovingCraftBlockData blockData : blocks)
+			MovingCraftEntityRenderer.renderBlock(client.world, context.getMatrices(), context.getVertexConsumers(), client.world.random, blockData, new BlockPos(0, 0, 0), new BlockPos(0, 0, 0), 0xF000F0, 0);
 		
 		context.getMatrices().pop();
 		
@@ -185,19 +186,19 @@ public class RocketControllerScreen extends Screen
 		
 		int minY = 0;
 		int maxY = 0;
-		ArrayList<MovingCraftBlockRenderData> bufferedBlockList = new ArrayList<MovingCraftBlockRenderData>();
+		ArrayList<MovingCraftBlockData> bufferedBlocks = new ArrayList<MovingCraftBlockData>();
 		
-		for(MovingCraftEntity.BlockRenderData blockRenderData : payload.blockDataList())
+		for(MovingCraftBlockData blockData : payload.blockDataList())
 		{
-			BlockState blockState = blockRenderData.blockState();
-			BlockPos blockPos = blockRenderData.position();
-			boolean redstone = (blockRenderData.flags() & (1 << 0)) != 0;
-			boolean[] sidesShowing = new boolean[6];
+			BlockState blockState = blockData.getBlockState();
+			BlockPos blockPos = blockData.getPosition();
+			NbtCompound blockEntityData = blockData.getBlockEntityData();
 			
-			for (int i = 0; i < 6; i++)
-				sidesShowing[i] = (blockRenderData.sidesShowing() & (1 << i)) != 0;
-			
-			bufferedBlockList.add(new MovingCraftBlockRenderData(blockState, blockPos, redstone, sidesShowing));
+			boolean[] sidesShowing = blockData.getSidesShowing();
+			boolean placeFirst = blockData.placeFirst();
+			boolean redstone = blockData.redstonePower();
+			double storedFluid = blockData.getStoredFluid();
+			bufferedBlocks.add(new MovingCraftBlockData(blockState, blockPos, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid));
 			
 			if(blockPos.getY() < minY)
 				minY = blockPos.getY();
@@ -209,8 +210,8 @@ public class RocketControllerScreen extends Screen
 		float scale = 100.0f / (maxY - minY);
 		
 		context.client().execute(() -> {
-			blockList.clear();
-			blockList.addAll(bufferedBlockList);
+			blocks.clear();
+			blocks.addAll(bufferedBlocks);
 			scaleFactor = scale;
 		});
 	}

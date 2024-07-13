@@ -48,8 +48,6 @@ import space.util.QuaternionUtil;
 import space.util.StarflightEffects;
 import space.util.VectorUtil;
 import space.vessel.MovingCraftBlockData;
-import space.vessel.MovingCraftBlockRenderData;
-import space.vessel.MovingCraftRenderList;
 
 public class RocketEntity extends MovingCraftEntity
 {
@@ -232,7 +230,7 @@ public class RocketEntity extends MovingCraftEntity
 			return;
 		}
 		
-		if(blockDataList.isEmpty())
+		if(blocks.isEmpty())
 		{
 			setRemoved(RemovalReason.DISCARDED);
 			return;
@@ -337,7 +335,7 @@ public class RocketEntity extends MovingCraftEntity
 		pitchTorque = 30e3f;
 		yawTorque = 30e3f;
 		
-		for(MovingCraftBlockData blockData : blockDataList)
+		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockState blockState = blockData.getBlockState();
 			Block block = blockState.getBlock();
@@ -725,15 +723,11 @@ public class RocketEntity extends MovingCraftEntity
 	
 	private void spawnThrusterParticles()
 	{
-		ArrayList<MovingCraftBlockRenderData> blocks = MovingCraftRenderList.getBlocksForEntity(getId());
 		Quaternionf quaternion = getQuaternion();
 		Vector3f craftVelocity = getTrackedVelocity();
 		Vector3f craftAngularVelocity = getTrackedAngularVelocity();
 		
-		if(blocks == null)
-			return;
-		
-		for(MovingCraftBlockRenderData block : blocks)
+		for(MovingCraftBlockData block : blocks)
 		{
 			if(getThrottle() > 0.0f && block.getBlockState().getBlock() instanceof RocketThrusterBlock && !block.redstonePower() && block.getPosition().getY() < 0)
 			{
