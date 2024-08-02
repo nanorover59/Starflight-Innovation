@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/reinforced_panel_slab"
+    },
+    "type=double": {
+      "model": "space:block/reinforced_panels"
+    },
+    "type=top": {
+      "model": "space:block/reinforced_panel_slab_top"
+    }
+  }
+}

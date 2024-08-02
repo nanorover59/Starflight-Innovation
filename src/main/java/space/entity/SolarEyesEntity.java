@@ -4,29 +4,40 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import space.particle.StarflightParticleTypes;
+import space.util.AirUtil;
+import space.util.IWorldMixin;
 
 public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 {
+	private LivingEntity entityCollided = null;
+	
 	public SolarEyesEntity(EntityType<? extends MobEntity> entityType, World world)
 	{
         super(entityType, world);
     }
 	
+	@Override
+    protected void initGoals()
+	{
+        this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
+    }
+	
 	public static DefaultAttributeContainer.Builder createSolarEyesAttributes()
 	{
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0);
+        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0);
     }
 	
 	@Override
@@ -68,7 +79,8 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	@Override
 	public boolean canSpawn(WorldView world)
 	{
-        return !world.isSkyVisible(getBlockPos());
+		double p = AirUtil.getAirResistanceMultiplier(getWorld(), ((IWorldMixin) getWorld()).getPlanetDimensionData(), getBlockPos());
+        return !world.isSkyVisible(getBlockPos()) && isPressureSafe(p);
     }
 	
 	@Override
@@ -77,22 +89,18 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	}
 	
 	@Override
-	public boolean tryAttack(Entity target)
+    public boolean collidesWith(Entity other)
 	{
-		if(super.tryAttack(target))
+		World world = getWorld();
+		
+		if(!world.isClient() && other instanceof LivingEntity && !(other instanceof AlienMobEntity && ((AlienMobEntity) other).getRadiationRange() > 0))
 		{
-			if(target instanceof LivingEntity)
-			{
-				World world = getWorld();
-				((LivingEntity) target).addStatusEffect(new StatusEffectInstance(StatusEffects.BLINDNESS, 120, 0), this);
-				((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(3), 0.5, 0.5, 0.5, 0.01);
-				remove(RemovalReason.DISCARDED);
-				return true;
-			}
+			entityCollided = (LivingEntity) other;
+			return false;
 		}
 		
-		return false;
-	}
+        return super.collidesWith(other);
+    }
 
 	@Override
 	public void tick()
@@ -102,11 +110,12 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		
 		if(world.isClient)
 		{
-			if(this.random.nextInt(10) == 0)
+			if(this.random.nextInt(8) == 0)
 			{
-				double x = getX() + random.nextDouble() - random.nextDouble();
-				double y = getY() + random.nextDouble() - random.nextDouble();
-				double z = getZ() + random.nextDouble() - random.nextDouble();
+				double spread = 4.0;
+				double x = getX() + (random.nextDouble() - random.nextDouble()) * spread;
+				double y = getY() + (random.nextDouble() - random.nextDouble()) * spread;
+				double z = getZ() + (random.nextDouble() - random.nextDouble()) * spread;
 				world.addParticle(StarflightParticleTypes.EYE, true, x, y, z, 0.0, 0.0, 0.0);
 			}
 			
@@ -116,11 +125,23 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		this.setNoGravity(true);
 		this.setVelocity(this.getVelocity().multiply(0.98));
 		
-		if(this.random.nextInt(200) == 0 || horizontalCollision || verticalCollision)
-			this.setVelocity(this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5);
-		
-		if(world.getLightLevel(LightType.SKY, getBlockPos()) > 4)
+		if(getTarget() == null)
 		{
+			if(this.random.nextInt(400) == 0 || horizontalCollision || verticalCollision)
+				this.setVelocity(this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5);
+		}
+		else
+		{
+			Vec3d difference = getTarget().getPos().subtract(getPos());
+			double distance = difference.length();
+			addVelocity(difference.normalize().multiply(1.0 / (distance * distance)));
+		}
+		
+		if(entityCollided != null || world.getLightLevel(LightType.SKY, getBlockPos()) > 4)
+		{
+			if(entityCollided != null)
+				entityCollided.damage(getDamageSources().mobAttack(this), 2.0f);
+			
 			((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(3), 0.5, 0.5, 0.5, 0.01);
 			remove(RemovalReason.DISCARDED);
 		}

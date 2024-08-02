@@ -68,7 +68,7 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		textList.add(Text.translatable("block.space.light_column.description_1"));
+		textList.add(Text.translatable("block.space.light_column.description"));
 		StarflightModClient.hiddenItemTooltip(tooltip, textList);
 	}
 	

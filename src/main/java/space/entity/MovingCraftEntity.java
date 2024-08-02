@@ -2,6 +2,7 @@ package space.entity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import org.joml.Matrix3f;
@@ -28,6 +29,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.server.MinecraftServer;
@@ -40,7 +42,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
+import space.block.FluidTankControllerBlock;
 import space.block.StarflightBlocks;
+import space.block.entity.FluidTankControllerBlockEntity;
 import space.mixin.common.EntityInvokerMixin;
 import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
@@ -61,7 +65,7 @@ public class MovingCraftEntity extends Entity
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	private Vector3f momentOfInertia1;
 	private Vector3f momentOfInertia2;
-	private Vector3f angularVelocity;
+	public Vector3f angularVelocity;
 	public Quaternionf clientQuaternion;
 	public Quaternionf clientQuaternionPrevious;
 	public Vector3f clientAngles;
@@ -127,16 +131,6 @@ public class MovingCraftEntity extends Entity
 
 		boxMin = new Vec3d(min.getX() - 0.5, min.getY() - 0.5, min.getZ() - 0.5);
 		boxMax = new Vec3d(max.getX() + 0.5, max.getY() + 0.5, max.getZ() + 0.5);
-		Box box = Box.enclosing(min, max.up()).offset(blockPos);
-
-		for(Entity entity : world.getOtherEntities(this, box))
-		{
-			if(entity instanceof LivingEntity)
-			{
-				BlockPos offset = entity.getBlockPos().subtract(blockPos);
-				//pickUpEntity(entity, offset);
-			}
-		}
 	}
 
 	@Override
@@ -362,8 +356,7 @@ public class MovingCraftEntity extends Entity
 		Vector3f av = new Vector3f(angularVelocity).mul(20.0f);
 		// Calculate the angular acceleration from Euler's rotation equation.
 		Vector3f acc = moment.sub(av.cross(av.mul(mit))).mul(mit.invert());
-		// Convert the angular acceleration to m/tick^2 and add it to the angular
-		// velocity.
+		// Convert the angular acceleration to m/tick^2 and add it to the angular velocity.
 		angularVelocity.add(acc.mul(0.0025f));
 	}
 
@@ -396,6 +389,92 @@ public class MovingCraftEntity extends Entity
 	public Vector3f getAngularVelocity()
 	{
 		return angularVelocity;
+	}
+	
+	/**
+	 * Push away external entities taking into account the contained blocks and rotation.
+	 */
+	public void externalEntityCollisions()
+	{
+		List<Entity> entities = getWorld().getOtherEntities(this, getBoundingBox().expand(10.0));
+		Quaternionf qinv = new Quaternionf(getQuaternion()).invert();
+
+		for(Entity entity : entities)
+		{
+			if(getWorld().isClient() && !(entity instanceof PlayerEntity))
+				continue;
+			
+			if(hasPassengerDeep(entity))
+				continue;
+			
+			Vec3d offset = new Vec3d(0.0, 0.0, 0.0);
+			Vector3f otherPos = entity.getPos().subtract(getPos()).toVector3f().rotate(qinv);
+			Box otherBox = entity.getBoundingBox().offset(otherPos.sub(entity.getPos().toVector3f()));
+			boolean velocity = false;
+			
+			for(MovingCraftBlockData blockData : blocks)
+			{
+				Box box = new Box(blockData.getPosition()).offset(-0.5, -0.5, -0.5);
+				
+				if(!velocity && box.intersects(otherBox.expand(0.001)))
+					velocity = true;
+				
+				if(!box.intersects(otherBox))
+					continue;
+				
+				Box intersection = box.intersection(otherBox);
+				double ix = intersection.getLengthX();
+				double iy = intersection.getLengthY();
+				double iz = intersection.getLengthZ();
+				Vec3d boxCenter = box.getCenter();
+				Vec3d otherBoxCenter = otherBox.getCenter();
+				
+				//System.out.println(intersection.getAverageSideLength());
+				
+				if(ix < iy && ix < iz && offset.getX() == 0.0)
+				{
+					if(boxCenter.getX() < otherBoxCenter.getX())
+						offset = offset.add(ix, 0.0, 0.0);
+					else
+						offset = offset.add(-ix, 0.0, 0.0);
+				}
+				else if(iy < ix && iy < iz && offset.getY() == 0.0)
+				{
+					if(boxCenter.getY() < otherBoxCenter.getY())
+						offset = offset.add(0.0, iy, 0.0);
+					else
+						offset = offset.add(0.0, -iy, 0.0);
+				}
+				else if(iz < ix && iz < iy && offset.getZ() == 0.0)
+				{
+					if(boxCenter.getZ() < otherBoxCenter.getZ())
+						offset = offset.add(0.0, 0.0, iz);
+					else
+						offset = offset.add(0.0, 0.0, -iz);
+				}
+			}
+			
+			if(!offset.equals(Vec3d.ZERO))
+			{
+				//System.out.println(entity.getType() + "  " + offset);
+				Vector3f globalOffset = offset.toVector3f().rotate(getQuaternion());
+				Vec3d moved = entity.getPos().add(globalOffset.x(), globalOffset.y(), globalOffset.z());
+				entity.setPosition(moved.getX(), moved.getY(), moved.getZ());
+				
+				// "Ground" Collision
+				if(globalOffset.y() > 0.0 && entity.getVelocity().getY() < 0.0)
+				{
+					entity.setVelocity(entity.getVelocity().getX(), 0.0, entity.getVelocity().getZ());
+					entity.setOnGround(true);
+					entity.verticalCollision = true;
+					entity.groundCollision = true;
+					entity.fallDistance = 0.0f;
+				}
+			}
+			
+			if(velocity)
+				entity.setPosition(entity.getPos().add(getVelocity()));
+		}
 	}
 
 	public boolean clientMotion()
@@ -509,6 +588,20 @@ public class MovingCraftEntity extends Entity
 	{
 		BlockState blockState = world.getBlockState(blockPos);
 		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
+	}
+	
+	public void pickUpEntities()
+	{
+		Box box = calculateBoundingBox().expand(1.0);
+		
+		for(Entity entity : getWorld().getOtherEntities(this, box))
+		{
+			if(entity instanceof LivingEntity)
+			{
+				BlockPos offset = entity.getBlockPos().subtract(getBlockPos());
+				pickUpEntity(entity, offset);
+			}
+		}
 	}
 
 	public void pickUpEntity(Entity passenger, BlockPos offset)
@@ -632,6 +725,14 @@ public class MovingCraftEntity extends Entity
 
 	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
 	{
+		BlockEntity blockEntity = getWorld().getBlockEntity(worldPos);
+
+		if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
+		{
+			FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
+			((FluidTankControllerBlock) blockData.getBlockState().getBlock()).initializeFluidTank(getWorld(), worldPos, fluidTank);
+			fluidTank.setStoredFluid(blockData.getStoredFluid());
+		}
 	}
 
 	@Override

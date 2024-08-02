@@ -29,10 +29,10 @@
       "space:ore_ilmenite"
     ],
     [
-      "space:spring_lava"
-    ],
-    [
-      "space:surface_rock"
+      "space:surface_rock",
+      "space:cave_ice",
+      "space:cave_ice_pile",
+      "space:powder_snow_lake"
     ]
   ],
   "has_precipitation": false,

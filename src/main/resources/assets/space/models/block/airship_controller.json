@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/airship_controller_top",
+    "bottom": "space:block/reinforced_panels",
+    "front": "space:block/airship_controller_front",
+    "side": "space:block/reinforced_panels"
+  }
+}

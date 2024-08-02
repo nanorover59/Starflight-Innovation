@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/cube",
+  "textures": {
+    "down": "space:block/aluminum_machine",
+    "east": "space:block/metal_crafting_table_side",
+    "north": "space:block/metal_crafting_table_side",
+    "particle": "space:block/metal_crafting_table_side",
+    "south": "space:block/metal_crafting_table_side",
+    "up": "space:block/metal_crafting_table_top",
+    "west": "space:block/metal_crafting_table_side"
+  }
+}

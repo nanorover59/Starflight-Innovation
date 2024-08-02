@@ -9,11 +9,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
+import space.block.StarflightBlocks;
 
 public class BlockMass
 {
 	public static double volumeForBlock(BlockState blockState, World world, BlockPos pos)
 	{
+		if(blockState.isAir() || blockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
+			return 0.0;
+		
 		double volume = 0;
 		
 		for(Box box : blockState.getOutlineShape(world, pos).getBoundingBoxes())
@@ -25,9 +29,6 @@ public class BlockMass
 	public static double getMass(World world, BlockPos pos)
 	{
 		BlockState blockState = world.getBlockState(pos);
-		
-		if(blockState.isAir())
-			return 0.0;
 		
 		double density = 50; // Assume a density of 50kg per cubic meter by default.
 		

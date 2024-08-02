@@ -34,10 +34,12 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
 			blockPos = blockPos.down();
 		
+		blockPos = blockPos.down();
+		
 		if(blockPos.getY() <= structureWorldAccess.getBottomY() + 3)
 			return false;
 		
-		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 8.0f);
+		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 6.0f);
 		int u = Math.min(rockSize, 4);
 		
 		for(int i = 0; i < rockSize; i++)

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:reinforced_panel_stairs"
+    ]
+  },
+  "criteria": {
+    "has_reinforced_panels": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:reinforced_panels"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:reinforced_panel_stairs"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_reinforced_panels",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "space:block/airship_motor_end",
+    "side": "space:block/airship_motor_side",
+    "top": "space:block/airship_motor_end"
+  }
+}

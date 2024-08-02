@@ -23,17 +23,17 @@
       "minecraft:ore_diamond",
       "minecraft:ore_diamond_large",
       "minecraft:ore_diamond_buried",
+      "space:ore_diamond_extra",
       "space:ore_copper",
       "space:ore_bauxite",
       "space:ore_sulfur",
-      "space:ore_ilmenite",
-      "minecraft:spring_lava"
-    ],
-    [
-      "space:spring_lava"
+      "space:ore_ilmenite"
     ],
     [ 
-      "space:surface_rock"
+      "space:surface_rock",
+      "space:cave_ice",
+      "space:cave_ice_pile",
+      "space:powder_snow_lake"
     ]
   ],
   "has_precipitation": false,

@@ -31,6 +31,9 @@ public class StarflightWorldGeneration
 	// Surface Rock Feature
 	public static final Feature<DefaultFeatureConfig> SURFACE_ROCK = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "surface_rock"), new SurfaceRockFeature(DefaultFeatureConfig.CODEC));
 	
+	// Cave Ice Feature
+	public static final Feature<CaveIceFeatureConfig> CAVE_ICE = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "cave_ice"), new CaveIceFeature(CaveIceFeatureConfig.CODEC));
+	
 	// Freeze Water Feature
 	public static final Feature<DefaultFeatureConfig> FREEZE_WATER = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "freeze_water"), new FreezeWaterFeature(DefaultFeatureConfig.CODEC));
 	

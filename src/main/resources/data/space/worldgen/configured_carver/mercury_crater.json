@@ -1,7 +1,7 @@
 {
   "type": "space:crater",
   "config": {
-    "probability": 0.3,
+    "probability": 0.5,
     "y": {
       "absolute": 0
     },

@@ -1,0 +1,6 @@
+{
+  "parent": "space:block/icicle",
+  "textures": {
+    "cross": "space:block/icicle_down_tip_merge"
+  }
+}

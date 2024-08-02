@@ -170,10 +170,10 @@ public class BioDomeGenerator
 		@Override
 		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot)
 		{
+			ServerWorld serverWorld = world.toServerWorld();
 			BlockPos center = new BlockPos(centerX, centerY, centerZ);
 			BlockPos startPos = chunkPos.getBlockPos(0, centerY, 0);
 			BlockPos chunkCenterPos = new BlockPos(8, centerY, 8);
-			BlockState bricks = getBrickType(world.toServerWorld());
 			HashMap<BlockPos, Integer> details = new HashMap<BlockPos, Integer>();
 			
 			for(int x = 0; x < 16; x++)
@@ -191,12 +191,12 @@ public class BioDomeGenerator
 						
 						if((int) distance == SHELL_RADIUS)
 						{
-							state = Blocks.GLASS.getDefaultState();
+							state = StarflightBlocks.TITANIUM_GLASS.getDefaultState();
 							
 							if(pos.getY() == centerY)
-								state = StarflightBlocks.RIVETED_ALUMINUM.getDefaultState();
+								state = StarflightBlocks.REINFORCED_ROUND_DECO.getDefaultState();
 							else if(pos.getY() < centerY)
-								state = bricks;
+								state = StarflightBlocks.REINFORCED_PANELS.getDefaultState();
 							
 							world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
 							
@@ -208,7 +208,7 @@ public class BioDomeGenerator
 							state = Blocks.AIR.getDefaultState();
 							
 							if(y < 0 && (y == -1 || y % LEVEL_HEIGHT == 0))
-								state = bricks;
+								state = getBrickType(serverWorld);
 							else if(y == 0)							
 								state = Blocks.DIRT.getDefaultState();
 							
@@ -226,14 +226,14 @@ public class BioDomeGenerator
 											state = Blocks.GLASS.getDefaultState();
 									}
 									else
-										state = bricks;
+										state = StarflightBlocks.REINFORCED_PANELS.getDefaultState();
 								}
 								else if((int) dxz < CENTER_RADIUS)
 								{
 									if(y == CENTER_HEIGHT)
 										state = Blocks.GLASS.getDefaultState();
 									else if(y % LEVEL_HEIGHT == 0)
-										state = y > 0 ? StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState() : bricks;
+										state = y > 0 ? StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState() : StarflightBlocks.REINFORCED_PANELS.getDefaultState();
 									else
 										state = Blocks.AIR.getDefaultState();
 								}
@@ -355,16 +355,15 @@ public class BioDomeGenerator
 				else if(type == 3)
 				{
 					// Gardens
-					ServerWorld serverWorld = world.toServerWorld();
 					int y = chunkCenterPos.getY() + 1;
 					fillWithOutline(world, chunkBox, -5, y, -5, 5, y, -5, getBrickStairsType(serverWorld, Direction.NORTH), AIR, false);
 					fillWithOutline(world, chunkBox, -5, y, 5, 5, y, 5, getBrickStairsType(serverWorld, Direction.SOUTH), AIR, false);
 					fillWithOutline(world, chunkBox, 5, y, -5, 5, y, 5, getBrickStairsType(serverWorld, Direction.WEST), AIR, false);
 					fillWithOutline(world, chunkBox, -5, y, -5, -5, y, 5, getBrickStairsType(serverWorld, Direction.EAST), AIR, false);
-					fillWithOutline(world, chunkBox, -5, y, -5, -5, y + 1, -5, bricks, AIR, false);
-					fillWithOutline(world, chunkBox, 5, y, -5, 5, y + 1, -5, bricks, AIR, false);
-					fillWithOutline(world, chunkBox, 5, y, 5, 5, y + 1, 5, bricks, AIR, false);
-					fillWithOutline(world, chunkBox, -5, y, 5, -5, y + 1, 5, bricks, AIR, false);
+					fillWithOutline(world, chunkBox, -5, y, -5, -5, y + 1, -5, getBrickType(serverWorld), AIR, false);
+					fillWithOutline(world, chunkBox, 5, y, -5, 5, y + 1, -5, getBrickType(serverWorld), AIR, false);
+					fillWithOutline(world, chunkBox, 5, y, 5, 5, y + 1, 5, getBrickType(serverWorld), AIR, false);
+					fillWithOutline(world, chunkBox, -5, y, 5, -5, y + 1, 5, getBrickType(serverWorld), AIR, false);
 					fillWithOutline(world, chunkBox, -4, y, -4, 4, y, 4, Blocks.DIRT.getDefaultState(), AIR, false);
 					
 					int gardenType = random.nextInt(2);
@@ -391,7 +390,7 @@ public class BioDomeGenerator
 				{
 					// Underground Rooms
 					int y = pos.getY();
-					fillWithOutline(world, chunkBox, -4, y, -4, 4, y + 5, 4, bricks, AIR, false);
+					fillWithOutline(world, chunkBox, -4, y, -4, 4, y + 5, 4, StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState(), AIR, false);
 					fillWithOutline(world, chunkBox, -4, y + 1, -4, -4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
 					fillWithOutline(world, chunkBox, -4, y + 1, 4, -4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
 					fillWithOutline(world, chunkBox, 4, y + 1, -4, 4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);

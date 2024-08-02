@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:titanium_panel_wall"
+    ]
+  },
+  "criteria": {
+    "has_titanium_panels": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:titanium_panels"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:titanium_panel_wall"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_titanium_panels",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -32,7 +32,7 @@ public class RocketControllerBlock extends BlockWithEntity
 	public static final MapCodec<RocketControllerBlock> CODEC = RocketControllerBlock.createCodec(RocketControllerBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 
-	protected RocketControllerBlock(Settings settings)
+	public RocketControllerBlock(Settings settings)
 	{
 		super(settings);
 		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.NORTH)));
@@ -84,9 +84,9 @@ public class RocketControllerBlock extends BlockWithEntity
 		return ActionResult.SUCCESS;
 	}
 
-	public BlockState getPlacementState(ItemPlacementContext ctx)
+	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return (BlockState) this.getDefaultState().with(FACING, ctx.getHorizontalPlayerFacing().getOpposite());
+		return (BlockState) this.getDefaultState().with(FACING, context.getHorizontalPlayerFacing().getOpposite());
 	}
 
 	@Override

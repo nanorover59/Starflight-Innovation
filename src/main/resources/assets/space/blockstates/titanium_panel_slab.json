@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/titanium_panel_slab"
+    },
+    "type=double": {
+      "model": "space:block/titanium_panels"
+    },
+    "type=top": {
+      "model": "space:block/titanium_panel_slab_top"
+    }
+  }
+}

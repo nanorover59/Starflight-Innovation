@@ -3,6 +3,7 @@ package space.network.c2s;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import space.block.entity.RocketControllerBlockEntity;
+import space.entity.AirshipEntity;
 import space.entity.RocketEntity;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
@@ -31,9 +32,11 @@ public class StarflightNetworkingC2S
 		PayloadTypeRegistry.playC2S().register(RocketControllerButtonC2SPacket.PACKET_ID, RocketControllerButtonC2SPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(RocketInputC2SPacket.PACKET_ID, RocketInputC2SPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playC2S().register(RocketTravelButtonC2SPacket.PACKET_ID, RocketTravelButtonC2SPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playC2S().register(AirshipInputC2SPacket.PACKET_ID, AirshipInputC2SPacket.PACKET_CODEC);
 		
 		ServerPlayNetworking.registerGlobalReceiver(RocketControllerButtonC2SPacket.PACKET_ID, (payload, context) -> RocketControllerBlockEntity.receiveButtonPress((RocketControllerButtonC2SPacket) payload, context));
 		ServerPlayNetworking.registerGlobalReceiver(RocketInputC2SPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveInput((RocketInputC2SPacket) payload, context));
 		ServerPlayNetworking.registerGlobalReceiver(RocketTravelButtonC2SPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveTravelInput((RocketTravelButtonC2SPacket) payload, context));
+		ServerPlayNetworking.registerGlobalReceiver(AirshipInputC2SPacket.PACKET_ID, (payload, context) -> AirshipEntity.receiveInput((AirshipInputC2SPacket) payload, context));
 	}
 }

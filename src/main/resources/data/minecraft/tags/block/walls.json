@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "space:aluminum_wall",
+    "space:reinforced_wall",
+    "space:titanium_wall"
+  ]
+}

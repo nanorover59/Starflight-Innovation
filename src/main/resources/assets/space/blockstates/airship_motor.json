@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "space:block/airship_motor",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "space:block/airship_motor",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "space:block/airship_motor",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "space:block/airship_motor",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "space:block/airship_motor"
+    },
+    "facing=west": {
+      "model": "space:block/airship_motor",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

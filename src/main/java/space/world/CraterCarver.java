@@ -5,6 +5,8 @@ import java.util.function.Function;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.SnowBlock;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -44,11 +46,13 @@ public class CraterCarver extends Carver<CraterCarverConfig>
         {
 			int craterX = chunkPos.getOffsetX(craterRandom.nextInt(16));
 			int craterZ = chunkPos.getOffsetZ(craterRandom.nextInt(16));
-			int radius = (int) powerLaw(craterRandom, 2.5f, 4.0f, 32.0f);
+			int radius = (int) powerLaw(craterRandom, 2.5f, 4.0f, 64.0f);
 			double depthFactor = 0.5 + craterRandom.nextDouble() * 0.25;
 			double rimWidth = 0.5 + craterRandom.nextDouble() * 0.15;
 			double rimSteepness = 0.25 + craterRandom.nextDouble() * 0.25;
 			BlockPos.Mutable mutable = new BlockPos.Mutable();
+			RegistryEntry<Biome> biome = posToBiome.apply(new BlockPos(craterX, 64, craterZ));
+			boolean ice = biome == null ? false : biome.isIn(StarflightWorldGeneration.ICE_CRATERS);
 			
 			for(int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++)
 			{
@@ -67,8 +71,18 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 						{
 							for(int y = surfaceY + 4; y >= surfaceY + depth; y--)
 							{
+								BlockState blockState = AIR;
 								mutable.set(x, y, z);
-								chunk.setBlockState(mutable, AIR, false);
+								
+								if(ice)
+								{
+									if(y < surfaceY - 9)
+										blockState = craterRandom.nextInt(16) == 0 ? Blocks.BLUE_ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState();
+									else if(y < surfaceY - 8)
+										blockState = Blocks.POWDER_SNOW.getDefaultState();
+								}
+								
+								chunk.setBlockState(mutable, blockState, false);
 								chunk.markBlockForPostProcessing(mutable);
 								
 								if(y == surfaceY + depth)
