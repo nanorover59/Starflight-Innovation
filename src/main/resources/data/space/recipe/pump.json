@@ -2,8 +2,7 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
         " c ",
-        "bab",
-        "   "
+        "bab"
     ],
     "key": {
         "a": {

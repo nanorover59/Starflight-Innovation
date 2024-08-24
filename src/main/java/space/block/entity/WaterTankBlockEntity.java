@@ -96,28 +96,25 @@ public class WaterTankBlockEntity extends BlockEntity
 	public static void serverTick(World world, BlockPos pos, BlockState state, WaterTankBlockEntity blockEntity)
 	{
 		double storedFluid = blockEntity.getStoredFluid();
-		boolean renderTop = blockEntity.renderTop;
-		boolean renderBottom = blockEntity.renderBottom;
 		
 		for(Direction direction : Direction.values())
 		{
 			if(direction == Direction.UP || (direction != Direction.DOWN && blockEntity.getStoredFluid() < blockEntity.getStorageCapacity() / 2.0))
 				continue;
 			
-			if(world.getBlockState(pos.offset(direction)).getBlock() instanceof FluidPipeBlock)
+			Block offsetBlock = world.getBlockState(pos.offset(direction)).getBlock();
+			
+			if(offsetBlock instanceof FluidPipeBlock)
 			{
 				FluidPipeBlockEntity adjacentBlockEntity = ((FluidPipeBlockEntity) world.getBlockEntity(pos.offset(direction)));
 				double deltaFluid = Math.min(blockEntity.getStoredFluid(), adjacentBlockEntity.getStorageCapacity() - adjacentBlockEntity.getStoredFluid());
 				blockEntity.changeStoredFluid(-deltaFluid);
 				adjacentBlockEntity.changeStoredFluid(deltaFluid);
-				blockEntity.markDirty();
-				adjacentBlockEntity.markDirty();
 			}
 		}
 		
 		if(world.getBlockState(pos.down()).isOf(state.getBlock()))
 		{
-			blockEntity.renderBottom = false;
 			WaterTankBlockEntity blockEntityDown = (WaterTankBlockEntity) world.getBlockEntity(pos.down());
 			double deltaFluid = Math.min(blockEntity.getStoredFluid(), blockEntityDown.getStorageCapacity() - blockEntityDown.getStoredFluid());
 			
@@ -125,29 +122,21 @@ public class WaterTankBlockEntity extends BlockEntity
 			{
 				blockEntity.changeStoredFluid(-deltaFluid);
 				blockEntityDown.changeStoredFluid(deltaFluid);
-				blockEntity.markDirty();
-				blockEntityDown.markDirty();
-				world.updateListeners(pos, blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_LISTENERS);
-				world.updateListeners(pos.down(), blockEntityDown.getCachedState(), blockEntityDown.getCachedState(), Block.NOTIFY_LISTENERS);
 			}
 		}
-		else
-			blockEntity.renderBottom = true;
 		
-		if(blockEntity.getStoredFluid() == blockEntity.getStorageCapacity() && world.getBlockState(pos.up()).isOf(state.getBlock()))
+		blockEntity.renderTop = blockEntity.getStoredFluid() > 0;
+		blockEntity.renderBottom = blockEntity.getStoredFluid() > 0 && !world.getBlockState(pos.down()).isOf(state.getBlock());
+		
+		if(world.getBlockState(pos.up()).isOf(state.getBlock()))
 		{
 			WaterTankBlockEntity blockEntityUp = (WaterTankBlockEntity) world.getBlockEntity(pos.up());
-			blockEntity.renderTop = blockEntityUp.getStoredFluid() == 0;
+			
+			if(blockEntityUp.renderTop || blockEntityUp.getStoredFluid() == blockEntityUp.getStorageCapacity())
+				blockEntity.renderTop = false;
 		}
-		else if(world.getBlockState(pos.down()).isOf(state.getBlock()))
-		{
-			WaterTankBlockEntity blockEntityDown = (WaterTankBlockEntity) world.getBlockEntity(pos.down());
-			blockEntity.renderTop = blockEntityDown.getStoredFluid() == blockEntityDown.getStorageCapacity();
-		}
-		else
-			blockEntity.renderTop = true;
 		
-		if(storedFluid != blockEntity.getStoredFluid() || renderTop != blockEntity.renderTop || renderBottom != blockEntity.renderBottom)
+		if(storedFluid != blockEntity.getStoredFluid())
 		{
 			blockEntity.markDirty();
 			world.updateListeners(pos, state, state, Block.NOTIFY_LISTENERS);

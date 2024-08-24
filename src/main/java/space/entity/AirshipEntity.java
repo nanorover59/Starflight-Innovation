@@ -254,7 +254,7 @@ public class AirshipEntity extends MovingCraftEntity
 		
 		Vector3f angles = new Vector3f();
 		getQuaternion().getEulerAnglesYXZ(angles);
-		boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
+		//boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
 		netMoment.add(angles.x() * 1000000.0f, 0.0f, angles.z() * 1000000.0f);
 		
 		// Apply the net force and moment then move.
@@ -283,25 +283,29 @@ public class AirshipEntity extends MovingCraftEntity
 	
 	private void checkDimensionChange()
 	{
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
-		ServerWorld nextWorld = null;
 		int topThreshold = getWorld().getTopY() - 4;
 		int bottomThreshold = getWorld().getBottomY() + 4;
 		int arrivalY = 0;
-
-		if(data.isSky() && data.getPlanet().getSurface() != null && getBlockY() < bottomThreshold)
+		
+		if(getBlockY() < bottomThreshold || getBlockY() > topThreshold)
 		{
-			nextWorld = getServer().getWorld(data.getPlanet().getSurface().getWorldKey());
-			arrivalY = topThreshold - 1;
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
+			ServerWorld nextWorld = null;
+	
+			if(data.isSky() && data.getPlanet().getSurface() != null && getBlockY() < bottomThreshold)
+			{
+				nextWorld = getServer().getWorld(data.getPlanet().getSurface().getWorldKey());
+				arrivalY = topThreshold - 1;
+			}
+			else if(!data.isOrbit() && !data.isSky() && data.getPlanet().getSky() != null && getBlockY() > topThreshold)
+			{
+				nextWorld = getServer().getWorld(data.getPlanet().getSky().getWorldKey());
+				arrivalY = bottomThreshold + 1;
+			}
+	
+			if(nextWorld != null)
+				this.changeDimension(nextWorld, new Vec3d(getPos().getX(), arrivalY, getPos().getZ()), getYaw());
 		}
-		else if(!data.isOrbit() && !data.isSky() && data.getPlanet().getSky() != null && getBlockY() > topThreshold)
-		{
-			nextWorld = getServer().getWorld(data.getPlanet().getSky().getWorldKey());
-			arrivalY = topThreshold + 1;
-		}
-
-		if(nextWorld != null)
-			this.changeDimension(nextWorld, new Vec3d(getPos().getX(), arrivalY, getPos().getZ()), getYaw());
 	}
 	
 	private void spawnThrusterParticles()

@@ -1,19 +1,16 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "bab",
-        "aca",
-        "bab"
+        " a ",
+        "aba",
+        " a "
     ],
     "key": {
         "a": {
             "item": "space:coil"
         },
         "b": {
-            "item": "minecraft:iron_nugget"
-        },
-        "c": {
-            "item": "space:aluminum_shaft"
+            "item": "minecraft:iron_ingot"
         }
     },
     "result": {

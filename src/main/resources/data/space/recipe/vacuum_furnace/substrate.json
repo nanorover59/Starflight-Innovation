@@ -4,8 +4,7 @@
     "item": "minecraft:quartz"
   },
   "result": {
-    "id": "space:substrate",
-    "count": 1
+    "id": "space:substrate"
   },
   "experience": 0.2,
   "cookingtime": 200

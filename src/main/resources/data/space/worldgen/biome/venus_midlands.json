@@ -36,9 +36,14 @@
       "space:ore_sulfur",
       "space:ore_ilmenite",
       "minecraft:ore_magma",
-      "minecraft:spring_lava",
       "space:ore_magma",
       "space:venus_blackstone"
+    ],
+    [
+      "minecraft:spring_lava"
+    ],
+    [
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

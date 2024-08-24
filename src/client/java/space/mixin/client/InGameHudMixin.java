@@ -18,6 +18,7 @@ import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
+import space.client.gui.SpaceNavigationScreen;
 import space.client.render.StarflightHUD;
 import space.entity.RocketEntity;
 
@@ -35,7 +36,7 @@ public abstract class InGameHudMixin
             RenderSystem.setShader(GameRenderer::getPositionTexProgram);
             RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png"));
 			
-			if(client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity)
+			if(client.player.hasVehicle() && client.player.getVehicle() instanceof RocketEntity && !(client.currentScreen instanceof SpaceNavigationScreen))
 			{
 				StarflightHUD.renderSpacecraftHUD(client, context, tickCounter.getTickDelta(false));
 	            info.cancel();

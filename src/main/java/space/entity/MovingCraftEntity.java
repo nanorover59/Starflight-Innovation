@@ -15,6 +15,7 @@ import com.google.common.collect.Lists;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SlabBlock;
@@ -43,7 +44,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.block.FluidTankControllerBlock;
-import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.mixin.common.EntityInvokerMixin;
 import space.network.s2c.MovingCraftBlocksS2CPacket;
@@ -61,6 +61,7 @@ public class MovingCraftEntity extends Entity
 	private static final TrackedData<Vector3f> TRACKED_BOX_MIN = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_BOX_MAX = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	protected ArrayList<MovingCraftBlockData> blocks = new ArrayList<MovingCraftBlockData>();
+	protected ArrayList<MovingCraftBlockData> exposedBlocks = new ArrayList<MovingCraftBlockData>();
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	private Vector3f momentOfInertia1;
@@ -102,9 +103,13 @@ public class MovingCraftEntity extends Entity
 		this.setRotation(0.0f, 0.0f);
 		this.setQuaternion(new Quaternionf());
 		this.setInitialBlockPos(this.getBlockPos());
+		this.refreshExposedBlocks();
 
 		if(blocks.isEmpty())
+		{
 			setRemoved(RemovalReason.DISCARDED);
+			return;
+		}
 
 		BlockPos min = new BlockPos(blocks.get(0).getPosition());
 		BlockPos max = new BlockPos(blocks.get(0).getPosition());
@@ -219,6 +224,11 @@ public class MovingCraftEntity extends Entity
 	public ArrayList<MovingCraftBlockData> getBlocks()
 	{
 		return blocks;
+	}
+	
+	public ArrayList<MovingCraftBlockData> getExposedBlocks()
+	{
+		return exposedBlocks;
 	}
 
 	public double getLowerHeight()
@@ -412,8 +422,19 @@ public class MovingCraftEntity extends Entity
 			Box otherBox = entity.getBoundingBox().offset(otherPos.sub(entity.getPos().toVector3f()));
 			boolean velocity = false;
 			
-			for(MovingCraftBlockData blockData : blocks)
+			for(MovingCraftBlockData blockData : exposedBlocks)
 			{
+				boolean hidden = true;
+				
+				for(boolean side : blockData.getSidesShowing())
+				{
+					if(side)
+						hidden = false;
+				}
+				
+				if(hidden)
+					continue;
+				
 				Box box = new Box(blockData.getPosition()).offset(-0.5, -0.5, -0.5);
 				
 				if(!velocity && box.intersects(otherBox.expand(0.001)))
@@ -548,18 +569,14 @@ public class MovingCraftEntity extends Entity
 		for(MovingCraftBlockData blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
-			Block block = world.getBlockState(pos).getBlock();
-
-			if(block == StarflightBlocks.FLUID_TANK_INSIDE || block == StarflightBlocks.HABITABLE_AIR)
+			
+			if(world.getBlockState(pos).getBlock() instanceof BlockEntityProvider)
 			{
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.FORCE_STATE);
-				continue;
+				BlockEntity blockEntity = world.getBlockEntity(pos);
+	
+				if(blockEntity != null)
+					blockEntity.read(new NbtCompound(), world.getRegistryManager());
 			}
-
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-
-			if(blockEntity != null)
-				blockEntity.read(new NbtCompound(), world.getRegistryManager());
 		}
 
 		for(MovingCraftBlockData blockData : blocks)
@@ -588,6 +605,25 @@ public class MovingCraftEntity extends Entity
 	{
 		BlockState blockState = world.getBlockState(blockPos);
 		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
+	}
+	
+	private void refreshExposedBlocks()
+	{
+		exposedBlocks.clear();
+		
+		for(MovingCraftBlockData blockData : blocks)
+		{
+			boolean exposed = false;
+			
+			for(boolean side : blockData.getSidesShowing())
+			{
+				if(side)
+					exposed = true;
+			}
+			
+			if(exposed)
+				exposedBlocks.add(blockData);
+		}
 	}
 	
 	public void pickUpEntities()
@@ -721,6 +757,7 @@ public class MovingCraftEntity extends Entity
 		}
 
 		blocks.clear();
+		exposedBlocks.clear();
 	}
 
 	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
@@ -763,7 +800,6 @@ public class MovingCraftEntity extends Entity
 		nbt.putDouble("maxY", boxMax.getY());
 		nbt.putDouble("maxZ", boxMax.getZ());
 		int blockCount = blocks.size();
-		nbt.putInt("blockCount", blockCount);
 		int[] x = new int[blockCount];
 		int[] y = new int[blockCount];
 		int[] z = new int[blockCount];
@@ -776,7 +812,8 @@ public class MovingCraftEntity extends Entity
 			z[i] = blockData.getPosition().getZ();
 			blockData.saveData(nbt);
 		}
-
+		
+		nbt.putInt("blockCount", blockCount);
 		nbt.putIntArray("x", x);
 		nbt.putIntArray("y", y);
 		nbt.putIntArray("z", z);
@@ -824,11 +861,15 @@ public class MovingCraftEntity extends Entity
 			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
 			blocks.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));
 		}
+		
+		refreshExposedBlocks();
 
 		int passengerCount = nbt.getInt("passengerCount");
 
 		for(int i = 0; i < passengerCount; i++)
 			entityOffsets.put(nbt.getUuid("pUUID" + i), new BlockPos(nbt.getInt("px" + i), nbt.getInt("py" + i), nbt.getInt("pz" + i)));
+		
+		sendRenderData(false);
 	}
 
 	public void sendRenderData(boolean forceUnload)
@@ -869,7 +910,7 @@ public class MovingCraftEntity extends Entity
 
 			((MovingCraftEntity) entity).blocks.clear();
 			((MovingCraftEntity) entity).blocks.addAll(blockList);
-			
+			((MovingCraftEntity) entity).refreshExposedBlocks();
 		});
 	}
 

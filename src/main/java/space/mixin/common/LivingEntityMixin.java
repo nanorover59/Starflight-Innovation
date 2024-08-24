@@ -4,11 +4,8 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -18,7 +15,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -26,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.World;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
@@ -40,7 +35,6 @@ public abstract class LivingEntityMixin extends Entity
 {
 	private double gravity = 1.0;
 	private float airMultiplier = 1.0f;
-	private int jumpTime = 0;
 	
 	@Shadow @Nullable abstract StatusEffectInstance getStatusEffect(RegistryEntry<StatusEffect> jumpBoost);
 	
@@ -172,45 +166,23 @@ public abstract class LivingEntityMixin extends Entity
 					thisEntity.setAir(thisEntity.getMaxAir());
 					chestplate.set(StarflightItems.OXYGEN, oxygen - oxygenUsed < 0.0f ? 0.0f : oxygen - oxygenUsed);
 				}
-				
-				// Mobs auto jump further away in low gravity.
-				if(gravity < 0.5 && thisEntity instanceof MobEntity && !thisEntity.hasNoGravity() && thisEntity.isOnGround())
-				{
-					if(jumpTime > 0)
-						jumpTime--;
-					else
-					{
-						if(thisEntity.horizontalSpeed > 0.25)
-						{
-							Vec3d vxz = new Vec3d(thisEntity.getVelocity().getX(), 0.0, thisEntity.getVelocity().getZ()).normalize().multiply(2.0);
-							BlockPos pos = thisEntity.getBlockPos().add((int) vxz.getX(), 0, (int) vxz.getZ());
-							VoxelShape shape = this.getWorld().getBlockState(pos).getCollisionShape(this.getWorld(), pos);
-							
-							if(!shape.isEmpty() && shape.getBoundingBox().getLengthY() > thisEntity.getStepHeight() && !this.getWorld().getBlockState(pos.up((int) (1.0 / gravity))).blocksMovement())
-							{
-								thisEntity.addVelocity(0.0, 0.4, 0.0);
-								jumpTime = 40;
-							}
-						}
-					}
-				}
 			}
 		}
 	}
-	/*
+	
 	/**
 	 * Modify the variable for living entity gravity.
 	 */
-	@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("STORE"), ordinal = 0)
+	/*@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("STORE"), ordinal = 0)
 	public double gravityInject(double d)
 	{
 		return d * gravity;
-	}
+	}*/
 	
 	/**
 	 * Modify the constants for living entity air resistance.
 	 */
-	@ModifyConstant(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", constant = @Constant(floatValue = 0.99f))
+	/*@ModifyConstant(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", constant = @Constant(floatValue = 0.99f))
 	public float frictionInject1(float f)
 	{
 		return 1.0f - (0.01f * airMultiplier);
@@ -226,7 +198,7 @@ public abstract class LivingEntityMixin extends Entity
 	public float frictionInject3(float f)
 	{
 		return 1.0f - (0.09f * airMultiplier);
-	}
+	}*/
 	
 	/**
 	 * Modify the lift for living entity fall flight.
@@ -246,24 +218,24 @@ public abstract class LivingEntityMixin extends Entity
 	/**
 	 * Modify movement input according to air resistance.
 	 */
-	@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"))
+	/*@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"))
 	public Vec3d movementInputInject(Vec3d movementInput)
 	{
 		if(this.verticalCollision || this.horizontalCollision || horizontalSpeed < 0.1)
 			return movementInput;
 		else
 			return movementInput.multiply(airMultiplier);
-	}
+	}*/
 	
 	/**
-	 * Properly recognize a zero gravity environment.
+	 * Properly recognize a zero drag environment.
 	 */
-	@Inject(method = "hasNoDrag()Z", at = @At("HEAD"), cancellable = true)
+	/*@Inject(method = "hasNoDrag()Z", at = @At("HEAD"), cancellable = true)
 	public void hasNoGravityInject(CallbackInfoReturnable<Boolean> info)
 	{
-		if(gravity == 0.0 && airMultiplier == 0.0f)
+		if(!this.verticalCollision && !this.horizontalCollision && airMultiplier == 0.0f)
 			info.setReturnValue(true);
-	}
+	}*/
 	
 	/**
 	 * Reduce fall damage by the appropriate amount.

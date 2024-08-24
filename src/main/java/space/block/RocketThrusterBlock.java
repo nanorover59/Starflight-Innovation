@@ -42,7 +42,7 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	public static final MapCodec<RocketThrusterBlock> CODEC = RocketThrusterBlock.createCodec(RocketThrusterBlock::new);
 	
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	private static final double ISP_MULTIPLIER = 1.5;
+	private static final double ISP_MULTIPLIER = 1.0;
 	private final double standardGravity = 9.80665;
 	private final double massFlow;
 	private final double vacuumThrust;

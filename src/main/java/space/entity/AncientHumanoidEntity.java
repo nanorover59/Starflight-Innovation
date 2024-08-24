@@ -31,7 +31,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	
 	public static DefaultAttributeContainer.Builder createAncientHumanoidAttributes()
 	{
-        return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 60.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
+        return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 60.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
     }
 
 	public static boolean canSpawn(EntityType<HuskEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
@@ -49,12 +49,6 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	protected boolean burnsInDaylight()
 	{
 		return false;
-	}
-	
-	@Override
-	public float getMovementSpeed()
-	{
-		return super.getMovementSpeed() * (getTarget() == null ? 1.0f : 2.0f);
 	}
 
 	@Override

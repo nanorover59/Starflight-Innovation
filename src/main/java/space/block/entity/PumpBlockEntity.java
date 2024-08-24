@@ -1,10 +1,6 @@
 package space.block.entity;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,19 +13,21 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.FluidPipeBlock;
+import space.block.FluidUtilityBlock;
 import space.block.PumpBlock;
 import space.block.StarflightBlocks;
+import space.block.ValveBlock;
+import space.block.WaterTankBlock;
 import space.util.FluidResourceType;
 
 public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
 	private double energy;
-	private boolean hasWater;
+	private int onTimer = 0;
 	
 	public PumpBlockEntity(BlockPos pos, BlockState state)
 	{
 		super(StarflightBlocks.PUMP_BLOCK_ENTITY, pos, state);
-		hasWater = false;
 	}
 	
 	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, FluidResourceType fluidType, int limit)
@@ -37,7 +35,9 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 		if(checkList.contains(position) || checkList.size() >= limit)
 			return toSpread;
 		
-		if(world.getBlockEntity(position) instanceof FluidPipeBlockEntity)
+		BlockState blockState = world.getBlockState(position);
+		
+		if(blockState.getBlock() instanceof FluidPipeBlock)
 		{
 			FluidPipeBlockEntity blockEntity = ((FluidPipeBlockEntity) world.getBlockEntity(position));
 			double capacity = blockEntity.getStorageCapacity();
@@ -58,11 +58,14 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 					toSpread -= difference;
 					
 					for(Direction direction : Direction.values())
-						toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, fluidType, limit);
+					{
+						if(((FluidPipeBlock) blockState.getBlock()).isConnected(world, position, blockState, direction))
+							toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, fluidType, limit);
+					}
 				}
 			}
 		}
-		else if(world.getBlockEntity(position) instanceof ValveBlockEntity)
+		else if(blockState.getBlock() instanceof ValveBlock)
 		{
 			FluidTankControllerBlockEntity blockEntity = ((ValveBlockEntity) world.getBlockEntity(position)).getFluidTankController();
 			
@@ -88,7 +91,7 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 				}
 			}
 		}
-		else if(fluidType.getID() == FluidResourceType.WATER.getID() && world.getBlockEntity(position) instanceof WaterTankBlockEntity)
+		else if(fluidType.getID() == FluidResourceType.WATER.getID() && blockState.getBlock() instanceof WaterTankBlock)
 		{
 			WaterTankBlockEntity blockEntity = ((WaterTankBlockEntity) world.getBlockEntity(position));
 			double capacity = blockEntity.getStorageCapacity();
@@ -105,86 +108,23 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 				double difference = capacity - fluid;
 				blockEntity.changeStoredFluid(difference);
 				toSpread -= difference;
-				toSpread = recursiveSpread(world, position.down(), checkList, toSpread, fluidType, limit);
-				toSpread = recursiveSpread(world, position.up(), checkList, toSpread, fluidType, limit);
-			}
-			
-			blockEntity.markDirty();
-			world.updateListeners(position, blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_LISTENERS);
-		}
-		
-		return toSpread;
-	}
-	
-	public static void intakeFilterSearch(World world, BlockPos startPos, boolean searchAround)
-	{
-		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
-		Block startBlock = world.getBlockState(startPos).getBlock();
-		
-		if(startBlock instanceof FluidPipeBlock && ((FluidPipeBlock) startBlock).getFluidType().getID() == FluidResourceType.WATER.getID())
-			stack.push(startPos);
-		else if(searchAround)
-		{
-			for(Direction direction : Direction.values())
-				intakeFilterSearch(world, startPos.offset(direction), false);
-			
-			return;
-		}
-		
-		Set<BlockPos> set = new HashSet<BlockPos>();
-		Set<BlockPos> intakeSet = new HashSet<BlockPos>();
-		BlockPos pumpPos = null;
-		
-		for(Direction direction: Direction.values())
-			stack.push(startPos.offset(direction));
-		
-		while(stack.size() > 0 && set.size() < 2048)
-		{
-			BlockPos blockPos = stack.pop();
-			
-			if(set.contains(blockPos))
-				continue;
-			
-			Block block = world.getBlockState(blockPos).getBlock();
-			
-			if(block instanceof FluidPipeBlock && ((FluidPipeBlock) block).getFluidType().getID() == FluidResourceType.WATER.getID())
-			{
-				set.add(blockPos);
 				
 				for(Direction direction : Direction.values())
 				{
-					BlockPos offset = blockPos.offset(direction);
-					stack.push(offset);
+					BlockPos offsetPos = position.offset(direction);
+					BlockState offsetState = world.getBlockState(offsetPos);
+					
+					if((offsetState.getBlock() instanceof WaterTankBlock && (direction == Direction.UP || direction == Direction.DOWN))
+					|| (offsetState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) offsetState.getBlock()).isConnected(world, offsetPos, offsetState, direction.getOpposite())))
+						toSpread = recursiveSpread(world, offsetPos, checkList, toSpread, fluidType, limit);
 				}
 			}
-			else if(block == StarflightBlocks.PUMP)
-				pumpPos = blockPos;
-			else if(block == StarflightBlocks.VENT)
-				intakeSet.add(blockPos);
+			
+			blockEntity.markDirty();
+			world.updateListeners(position, blockState, blockState, Block.NOTIFY_LISTENERS);
 		}
 		
-		for(BlockPos intakePos : intakeSet)
-		{
-			BlockEntity blockEntity = world.getBlockEntity(intakePos);
-			
-			if(blockEntity instanceof VentBlockEntity)
-			{
-				if(pumpPos == null)
-					((VentBlockEntity) blockEntity).setPumpPosition(intakePos);
-				else
-					((VentBlockEntity) blockEntity).setPumpPosition(pumpPos);
-			}
-		}
-	}
-	
-	public void setWater(boolean b)
-	{
-		hasWater = b;
-	}
-
-	public boolean getWater()
-	{
-		return hasWater;
+		return toSpread;
 	}
 	
 	@Override
@@ -240,7 +180,6 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 	{
 		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("energy", this.energy);
-		nbt.putBoolean("hasWater", this.hasWater);
 	}
 	
 	@Override
@@ -248,18 +187,17 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 	{
 		super.readNbt(nbt, registryLookup);
 		this.energy = nbt.getDouble("energy");
-		this.hasWater = nbt.getBoolean("hasWater");
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, PumpBlockEntity blockEntity)
 	{
 		Direction direction = state.get(PumpBlock.FACING);
 		BlockPos inletPos = pos.offset(direction.getOpposite());
-		BlockEntity inletBlockEntity = world.getBlockEntity(inletPos);
+		Block inletBlock = world.getBlockState(inletPos).getBlock();
 		FluidResourceType fluid = null;
 		double toTransfer = 0;
 		
-		if(inletBlockEntity == null || blockEntity.energy < blockEntity.getInput())
+		if(blockEntity.energy < blockEntity.getInput())
 		{
 			if(state.get(PumpBlock.LIT))
 			{
@@ -271,23 +209,33 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 			return;
 		}
 		
-		if(inletBlockEntity instanceof FluidPipeBlockEntity)
+		if(inletBlock instanceof FluidUtilityBlock)
 		{
-			FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) inletBlockEntity);
-			fluid = pipeBlockEntity.getFluidType();
-			toTransfer = Math.min(fluid.getStorageDensity() / 25.0, pipeBlockEntity.getStoredFluid());
+			BlockEntity inletBlockEntity = world.getBlockEntity(inletPos);
+			
+			if(inletBlockEntity instanceof FluidPipeBlockEntity)
+			{
+				FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) inletBlockEntity);
+				fluid = pipeBlockEntity.getFluidType();
+				toTransfer = Math.min(fluid.getStorageDensity() / 18.0, pipeBlockEntity.getStoredFluid());
+			}
+			else if(inletBlockEntity instanceof ValveBlockEntity)
+			{
+				FluidTankControllerBlockEntity tankBlockEntity = ((ValveBlockEntity) inletBlockEntity).getFluidTankController();
+				fluid = tankBlockEntity.getFluidType();
+				toTransfer = Math.min(fluid.getStorageDensity() / 18.0, tankBlockEntity.getStoredFluid());
+			}
+			else if(world.getBlockEntity(inletPos) instanceof WaterTankBlockEntity)
+			{
+				WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) world.getBlockEntity(inletPos));
+				fluid = FluidResourceType.WATER;	
+				toTransfer = Math.min(fluid.getStorageDensity() / 18.0, tankBlockEntity.getStoredFluid());
+			}
 		}
-		else if(inletBlockEntity instanceof ValveBlockEntity)
+		else if(state.get(PumpBlock.WATER))
 		{
-			FluidTankControllerBlockEntity tankBlockEntity = ((ValveBlockEntity) inletBlockEntity).getFluidTankController();
-			fluid = tankBlockEntity.getFluidType();
-			toTransfer = Math.min(fluid.getStorageDensity() / 25.0, tankBlockEntity.getStoredFluid());
-		}
-		else if(world.getBlockEntity(inletPos) instanceof WaterTankBlockEntity)
-		{
-			WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) world.getBlockEntity(inletPos));
-			fluid = FluidResourceType.WATER;	
-			toTransfer = Math.min(fluid.getStorageDensity() / 25.0, tankBlockEntity.getStoredFluid());
+			fluid = FluidResourceType.WATER;
+			toTransfer = fluid.getStorageDensity() / 18.0;
 		}
 		
 		if(fluid == null || toTransfer < 1e-4)
@@ -307,14 +255,9 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 		
 		if(remaining < toTransfer)
 		{
+			BlockEntity inletBlockEntity = world.getBlockEntity(inletPos);
 			blockEntity.changeEnergy(-blockEntity.getInput());
-			
-			if(!state.get(PumpBlock.LIT))
-			{
-				state = (BlockState) state.with(PumpBlock.LIT, true);
-				world.setBlockState(pos, state, Block.NOTIFY_ALL);
-				markDirty(world, pos, state);
-			}
+			blockEntity.onTimer = 5;
 			
 			if(inletBlockEntity instanceof FluidPipeBlockEntity)
 			{
@@ -326,17 +269,24 @@ public class PumpBlockEntity extends BlockEntity implements EnergyBlockEntity
 				FluidTankControllerBlockEntity tankBlockEntity = ((ValveBlockEntity) inletBlockEntity).getFluidTankController();
 				tankBlockEntity.changeStoredFluid(remaining - toTransfer);
 			}
-			else if(world.getBlockEntity(inletPos) instanceof WaterTankBlockEntity)
+			else if(inletBlockEntity instanceof WaterTankBlockEntity)
 			{
-				WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) world.getBlockEntity(inletPos));
+				WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) inletBlockEntity);
 				tankBlockEntity.changeStoredFluid(remaining - toTransfer);
+				BlockState inletState = world.getBlockState(inletPos);
+				blockEntity.markDirty();
+				world.updateListeners(inletPos, inletState, inletState, Block.NOTIFY_LISTENERS);
 			}
 		}
-		else if(state.get(PumpBlock.LIT))
+		
+		if(state.get(PumpBlock.LIT) != blockEntity.onTimer > 0)
 		{
-			state = (BlockState) state.with(PumpBlock.LIT, false);
+			state = (BlockState) state.with(PumpBlock.LIT, blockEntity.onTimer > 0);
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);
 			markDirty(world, pos, state);
 		}
+		
+		if(blockEntity.onTimer > 0)
+			blockEntity.onTimer--;
     }
 }

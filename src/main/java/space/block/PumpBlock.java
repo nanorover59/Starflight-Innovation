@@ -1,8 +1,12 @@
 package space.block;
 
 import java.text.DecimalFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -16,10 +20,12 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -30,6 +36,8 @@ import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.PumpBlockEntity;
@@ -42,11 +50,12 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	public static final MapCodec<PumpBlock> CODEC = PumpBlock.createCodec(PumpBlock::new);
 	public static final DirectionProperty FACING = Properties.FACING;
 	public static final BooleanProperty LIT = Properties.LIT;
+	public static final BooleanProperty WATER = BooleanProperty.of("water");
 	
 	public PumpBlock(Settings settings)
 	{
 		super(settings);
-		this.setDefaultState(this.getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(LIT, false));
+		this.setDefaultState(this.getStateManager().getDefaultState().with(FACING, Direction.NORTH).with(LIT, false).with(WATER, false));
 	}
 	
 	@Override
@@ -60,6 +69,7 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	{
 		stateManager.add(FACING);
 		stateManager.add(LIT);
+		stateManager.add(WATER);
 	}
 	
 	@Override
@@ -86,13 +96,32 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	}
 	
 	@Override
+    public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
+	{
+        if(state.get(WATER) && state.get(LIT))
+        {
+        	int count = 2 + random.nextInt(4);
+        	Vec3d offset = pos.offset(state.get(FACING).getOpposite()).toCenterPos();
+        	Vec3d velocity = pos.toCenterPos().subtract(offset).normalize().multiply(0.1);
+        	
+        	for(int i = 0; i < count; i++)
+        	{
+        		double x = offset.getX() + (random.nextDouble() - random.nextDouble()) * 0.5;
+        		double y = offset.getY() + (random.nextDouble() - random.nextDouble()) * 0.5;
+        		double z = offset.getZ() + (random.nextDouble() - random.nextDouble()) * 0.5;
+        		world.addParticle(ParticleTypes.BUBBLE, x, y, z, velocity.getX(), velocity.getY(), velocity.getZ());
+        	}
+        }
+    }
+	
+	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
 		if(world.isClient)
 			return;
 	
 		BlockSearch.energyConnectionSearch(world, pos);
-		PumpBlockEntity.intakeFilterSearch(world, pos, true);
+		updateWaterState(world, state, pos);
 	}
 	
 	@Override
@@ -103,8 +132,14 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 		
 		world.removeBlockEntity(pos);
 		BlockSearch.energyConnectionSearch(world, pos);
-		PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
+	
+	@Override
+    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify)
+    {
+		if(!world.isClient)
+			updateWaterState(world, state, pos);
+    }
 	
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext context)
@@ -164,5 +199,39 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
 		return world.isClient ? null : validateTicker(type, StarflightBlocks.PUMP_BLOCK_ENTITY, PumpBlockEntity::serverTick);
+	}
+	
+	public void updateWaterState(World world, BlockState state, BlockPos pos)
+	{
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		stack.push(pos.offset(state.get(FACING)));
+		
+		while(stack.size() > 0)
+		{
+			if(set.size() >= 1024)
+			{
+				world.setBlockState(pos, state.with(WATER, true));
+				return;
+			}
+			
+			BlockPos blockPos = stack.pop();
+			
+			if(set.contains(blockPos))
+				continue;
+			
+			if(world.getFluidState(blockPos).isOf(Fluids.WATER))
+			{
+				set.add(blockPos);
+				
+				for(Direction direction : Direction.values())
+				{
+					BlockPos offset = blockPos.offset(direction);
+					stack.push(offset);
+				}
+			}
+		}
+		
+		world.setBlockState(pos, state.with(WATER, false));
 	}
 }

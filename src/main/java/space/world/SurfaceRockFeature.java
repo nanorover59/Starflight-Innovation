@@ -34,8 +34,6 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
 			blockPos = blockPos.down();
 		
-		blockPos = blockPos.down();
-		
 		if(blockPos.getY() <= structureWorldAccess.getBottomY() + 3)
 			return false;
 		

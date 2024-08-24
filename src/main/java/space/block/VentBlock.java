@@ -13,7 +13,6 @@ import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -29,7 +28,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.block.entity.PumpBlockEntity;
 import space.block.entity.VentBlockEntity;
 import space.client.StarflightModClient;
 import space.util.FluidResourceType;
@@ -55,7 +53,7 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	@Override
 	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"), Text.translatable("block.space.vent.description_3"));
+		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"));
 	}
 
 	@Override
@@ -70,28 +68,6 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	{
 		return BlockRenderType.MODEL;
 	}
-	
-	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack itemStack)
-	{
-		if(world.isClient)
-			return;
-		
-		VentBlockEntity blockEntity = (VentBlockEntity) world.getBlockEntity(pos);
-		blockEntity.updateWaterState(world, pos);
-		PumpBlockEntity.intakeFilterSearch(world, pos, true);
-	}
-	
-	@Override
-    public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify)
-    {
-		if(world.isClient)
-			return;
-		
-		VentBlockEntity blockEntity = (VentBlockEntity) world.getBlockEntity(pos);
-		blockEntity.updateWaterState(world, pos);
-		PumpBlockEntity.intakeFilterSearch(world, pos, true);
-    }
 	
 	@Override
 	public BlockState rotate(BlockState state, BlockRotation rotation)

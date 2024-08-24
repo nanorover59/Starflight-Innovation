@@ -1,9 +1,6 @@
 {
   "structures" : [
-    {
-      "structure" : "space:airship",
-      "weight" : 1
-    }
+    
   ],
   "placement" : {
     "salt" : 92837434,

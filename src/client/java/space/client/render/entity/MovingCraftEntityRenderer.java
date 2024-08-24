@@ -25,8 +25,8 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.client.texture.SpriteAtlasTexture;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -60,15 +60,14 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
-		for(MovingCraftBlockData block : entity.getBlocks())
+		for(MovingCraftBlockData block : entity.getExposedBlocks())
 			renderBlock(world, matrixStack, vertexConsumerProvider, random, block, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getYaw());
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	@Override
 	public Identifier getTexture(MovingCraftEntity var1)
 	{
-		return SpriteAtlasTexture.BLOCK_ATLAS_TEXTURE;
+		return PlayerScreenHandler.BLOCK_ATLAS_TEXTURE;
 	}
 	
 	public static void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, MovingCraftBlockData block, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
@@ -92,7 +91,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		}
 		
 		// Block model render.
-		if(blockState.getRenderType() != BlockRenderType.MODEL || blockState.getRenderType() == BlockRenderType.INVISIBLE)
+		if(blockState.getRenderType() != BlockRenderType.MODEL)
 			return;
 		
 		BlockRenderManager blockRenderManager = MinecraftClient.getInstance().getBlockRenderManager();
@@ -103,10 +102,10 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
         matrixStack.push();
         matrixStack.translate(position.getX() - 0.5, position.getY() - 0.5, position.getZ() - 0.5);
         long seed = blockState.getRenderingSeed(position.add(centerBlockPosInitial));
+        random.setSeed(seed);
         
         for(Direction direction : Direction.values())
         {
-            random.setSeed(seed);
             List<BakedQuad> list = model.getQuads(blockState, direction, random);
             
             if(list.isEmpty() || !canRenderSide(block, direction))
@@ -115,7 +114,6 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
             ((BlockModelRendererInvokerMixin) blockModelRenderer).callRenderQuadsFlat(world, blockState, position, lightLevel, OverlayTexture.DEFAULT_UV, false, matrixStack, vertexConsumer, list, bitSet);
         }
         
-        random.setSeed(seed);
         List<BakedQuad> list = model.getQuads(blockState, null, random);
         
         if(!list.isEmpty())

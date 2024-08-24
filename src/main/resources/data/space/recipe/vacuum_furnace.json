@@ -1,18 +1,21 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
+        "dcd",
         "bab",
-        " c "
+        "dcd"
     ],
     "key": {
         "a": {
-            "item": "space:electric_furnace"
+            "item": "space:titanium_machine_casing"
         },
         "b": {
             "item": "space:pump"
         },
         "c": {
+            "item": "space:coil"
+        },
+        "d": {
             "item": "space:copper_cable"
         }
     },

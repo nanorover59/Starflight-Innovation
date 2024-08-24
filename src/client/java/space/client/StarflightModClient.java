@@ -48,6 +48,7 @@ import space.client.render.StarflightClientEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
+import space.client.render.entity.CloudSharkEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
 import space.client.render.entity.PlasmaBallEntityRenderer;
@@ -56,6 +57,7 @@ import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
+import space.client.render.entity.model.CloudSharkEntityModel;
 import space.client.render.entity.model.DustEntityModel;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.client.render.entity.model.StratofishEntityModel;
@@ -88,14 +90,15 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
 	public static final EntityModelLayer MODEL_SOLAR_SPECTRE_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), "main");
-	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
 	public static final EntityModelLayer MODEL_PLASMA_BALL_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), "main");
+	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
+	public static final EntityModelLayer MODEL_CLOUD_SHARK_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
 	@Override
 	public void onInitializeClient()
-	{		
+	{
 		// Client side networking.
 		ClientPlayNetworking.registerGlobalReceiver(PlanetDataS2CPacket.PACKET_ID, (payload, context) -> PlanetList.receiveDynamicData((PlanetDataS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(MovingCraftBlocksS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveBlockData((MovingCraftBlocksS2CPacket) payload, context));
@@ -172,6 +175,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_SPECTRE, (context) -> new SolarSpectreEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_EYES, (context) -> new SolarEyesEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.CLOUD_SHARK, (context) -> new CloudSharkEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
@@ -179,8 +183,9 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, StarflightModClient::getInnerArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_SOLAR_SPECTRE_LAYER, SolarSpectreEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_PLASMA_BALL_LAYER, PlasmaBallEntityRenderer::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_CLOUD_SHARK_LAYER, CloudSharkEntityModel::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();

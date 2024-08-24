@@ -7,7 +7,7 @@
     ],
     "key": {
         "a": {
-            "item": "minecraft:iron_ingot"
+            "item": "space:aluminum_ingot"
         },
         "b": {
             "item": "minecraft:iron_bars"

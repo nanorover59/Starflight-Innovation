@@ -39,7 +39,7 @@ public class CallTrackBlock extends Block
 		if(world.isClient)
 			return;
 		
-		if(world.getBlockState(sourcePos).emitsRedstonePower() && !state.get(TRIGGERED))
+		if(world.isReceivingRedstonePower(pos) && !state.get(TRIGGERED))
 		{
 			Set<BlockPos> set = new HashSet<BlockPos>();
 			BlockPos actuatorPos = null;
@@ -75,7 +75,7 @@ public class CallTrackBlock extends Block
 			}
 			
 			if(actuatorPos != null && actuatorPos.getSquaredDistance(targetPos) > 0)
-				LinearActuatorBlock.spawnEntity(world, actuatorPos, targetPos, set);
+				LinearActuatorBlock.spawnEntity(world, actuatorPos, targetPos, pos);
 			
 			world.setBlockState(pos, state.with(TRIGGERED, true), Block.NOTIFY_LISTENERS);
 		}

@@ -25,6 +25,7 @@ public class StarflightEntities
 	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), EntityType.Builder.<SolarSpectreEntity>create(SolarSpectreEntity::new, SpawnGroup.MONSTER).dimensions(2.5f, 2.5f));
 	public static final EntityType<SolarEyesEntity> SOLAR_EYES = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_eyes"), EntityType.Builder.<SolarEyesEntity>create(SolarEyesEntity::new, SpawnGroup.AMBIENT).dimensions(0.5f, 0.5f));
 	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.5f));
+	public static final EntityType<CloudSharkEntity> CLOUD_SHARK = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), EntityType.Builder.<CloudSharkEntity>create(CloudSharkEntity::new, SpawnGroup.CREATURE).dimensions(2.5f, 1.0f));
 
 	// Entity Tags
 	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "no_oxygen"));
@@ -37,6 +38,7 @@ public class StarflightEntities
 		FabricDefaultAttributeRegistry.register(SOLAR_SPECTRE, SolarSpectreEntity.createSolarSpectreAttributes());
 		FabricDefaultAttributeRegistry.register(SOLAR_EYES, SolarEyesEntity.createSolarEyesAttributes());
 		FabricDefaultAttributeRegistry.register(STRATOFISH, StratofishEntity.createStratofishAttributes());
+		FabricDefaultAttributeRegistry.register(CLOUD_SHARK, CloudSharkEntity.createCloudSharkAttributes());
 	}
 	
 	private static <T extends Entity> EntityType<T> registerEntity(Identifier id, Builder<T> type)

@@ -19,110 +19,15 @@ import space.util.FluidResourceType;
 
 public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
-	private static double WATER_FLOW = 10.0; // Mass of water to electrolyze per tick.
+	private static double WATER_FLOW = 20.0; // Mass of water to electrolyze per tick.
 	private static double OXYGEN_FLOW = WATER_FLOW * (8.0 / 9.0);
 	private static double HYDROGEN_FLOW = WATER_FLOW * (1.0 / 9.0);
 	private double energy;
-	private boolean hasWater;
+	private int onTimer = 0;
 	
 	public ElectrolyzerBlockEntity(BlockPos pos, BlockState state)
 	{
 		super(StarflightBlocks.ELECTROLYZER_BLOCK_ENTITY, pos, state);
-		hasWater = false;
-	}
-	
-	public static double recursiveSpread(World world, BlockPos position, ArrayList<BlockPos> checkList, double toSpread, FluidResourceType fluidType, int limit)
-	{
-		if(checkList.contains(position) || checkList.size() >= limit)
-			return toSpread;
-		
-		if(world.getBlockEntity(position) instanceof FluidPipeBlockEntity)
-		{
-			FluidPipeBlockEntity blockEntity = ((FluidPipeBlockEntity) world.getBlockEntity(position));
-			double capacity = blockEntity.getStorageCapacity();
-			double fluid = blockEntity.getStoredFluid();
-			checkList.add(position);
-			
-			if(blockEntity.getFluidType().getID() == fluidType.getID())
-			{
-				if(fluid + toSpread < capacity)
-				{
-					blockEntity.changeStoredFluid(toSpread);
-					toSpread = 0;
-				}
-				else
-				{
-					double difference = capacity - fluid;
-					blockEntity.changeStoredFluid(difference);
-					toSpread -= difference;
-					
-					for(Direction direction : Direction.values())
-						toSpread = recursiveSpread(world, position.offset(direction), checkList, toSpread, fluidType, limit);
-				}
-			}
-		}
-		else if(world.getBlockEntity(position) instanceof ValveBlockEntity)
-		{
-			FluidTankControllerBlockEntity blockEntity = ((ValveBlockEntity) world.getBlockEntity(position)).getFluidTankController();
-			
-			if(blockEntity == null)
-				return toSpread;
-			
-			double capacity = blockEntity.getStorageCapacity();
-			double fluid = blockEntity.getStoredFluid();
-			checkList.add(position);
-			
-			if(blockEntity.getFluidType().getID() == fluidType.getID())
-			{
-				if(fluid + toSpread < capacity)
-				{
-					blockEntity.changeStoredFluid(toSpread);
-					toSpread = 0;
-				}
-				else
-				{
-					double difference = capacity - fluid;
-					blockEntity.changeStoredFluid(difference);
-					toSpread -= difference;
-				}
-			}
-		}
-		else if(world.getBlockEntity(position) instanceof WaterTankBlockEntity)
-		{
-			WaterTankBlockEntity blockEntity = ((WaterTankBlockEntity) world.getBlockEntity(position));
-			double capacity = blockEntity.getStorageCapacity();
-			double fluid = blockEntity.getStoredFluid();
-			checkList.add(position);
-
-			if(fluid + toSpread < capacity)
-			{
-				blockEntity.changeStoredFluid(toSpread);
-				toSpread = 0;
-			}
-			else
-			{
-				double difference = capacity - fluid;
-				blockEntity.changeStoredFluid(difference);
-				toSpread -= difference;
-				toSpread = recursiveSpread(world, position.down(), checkList, toSpread, fluidType, limit);
-				toSpread = recursiveSpread(world, position.up(), checkList, toSpread, fluidType, limit);
-			}
-			
-			blockEntity.markDirty();
-			world.updateListeners(position, blockEntity.getCachedState(), blockEntity.getCachedState(), Block.NOTIFY_LISTENERS);
-		}
-		
-		return toSpread;
-	}
-	
-	public void setWater(boolean b)
-	{
-		hasWater = b;
-	}
-
-	public boolean getWater()
-	{
-		return hasWater;
 	}
 	
 	@Override
@@ -178,7 +83,6 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockE
 	{
 		super.writeNbt(nbt, registryLookup);
 		nbt.putDouble("energy", this.energy);
-		nbt.putBoolean("hasWater", this.hasWater);
 	}
 	
 	@Override
@@ -186,72 +90,99 @@ public class ElectrolyzerBlockEntity extends BlockEntity implements EnergyBlockE
 	{
 		super.readNbt(nbt, registryLookup);
 		this.energy = nbt.getDouble("energy");
-		this.hasWater = nbt.getBoolean("hasWater");
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, ElectrolyzerBlockEntity blockEntity)
 	{
-		int waterInlets = 0;
-		int oxygenOutlets = 0;
-		int hydrogenOutlets = 0;
-		
-		for(Direction direction : Direction.values())
+		if(blockEntity.energy > 0)
 		{
-			BlockPos offset = pos.offset(direction);
-			Block offsetBlock = world.getBlockState(offset).getBlock();
+			BlockPos waterInletPos = null;
+			BlockPos oxygenOutletPos = null;
+			BlockPos hydrogenOutletPos = null;
 			
-			if(offsetBlock instanceof FluidUtilityBlock)
+			for(Direction direction : Direction.values())
 			{
-				BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
+				BlockPos offset = pos.offset(direction);
+				Block offsetBlock = world.getBlockState(offset).getBlock();
 				
-				if(offsetBlockEntity instanceof FluidPipeBlockEntity)
+				if(offsetBlock instanceof FluidUtilityBlock)
 				{
-					if(offsetBlock == StarflightBlocks.WATER_PIPE && ((FluidPipeBlockEntity) offsetBlockEntity).getStoredFluid() > WATER_FLOW)
-						waterInlets++;
-					else if(offsetBlock == StarflightBlocks.OXYGEN_PIPE)
-						oxygenOutlets++;
-					else if(offsetBlock == StarflightBlocks.HYDROGEN_PIPE)
-						hydrogenOutlets++;
-				}
-			}
-		}
-		
-		if(waterInlets > 0 && (oxygenOutlets > 0 || hydrogenOutlets > 0))
-		{
-			blockEntity.changeEnergy(-blockEntity.getInput());
-			
-			if(blockEntity.energy > 0)
-			{
-				if(!world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
-				{
-					state = (BlockState) state.with(ElectrolyzerBlock.LIT, true);
-					world.setBlockState(pos, state, Block.NOTIFY_ALL);
-					markDirty(world, pos, state);
-				}
-				
-				for(Direction direction : Direction.values())
-				{
-					BlockPos offset = pos.offset(direction);
-					Block offsetBlock = world.getBlockState(offset).getBlock();
 					BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
 					
-					if(offsetBlock == StarflightBlocks.WATER_PIPE)
-						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(-WATER_FLOW / waterInlets);
-					else if(offsetBlock == StarflightBlocks.OXYGEN_PIPE)
-						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(OXYGEN_FLOW / oxygenOutlets);
-					else if(offsetBlock == StarflightBlocks.HYDROGEN_PIPE)
-						((FluidPipeBlockEntity) offsetBlockEntity).changeStoredFluid(HYDROGEN_FLOW / hydrogenOutlets);
+					if(offsetBlockEntity instanceof FluidPipeBlockEntity)
+					{
+						FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) offsetBlockEntity);
+						
+						if(pipeBlockEntity.getFluidType() == FluidResourceType.WATER && pipeBlockEntity.getStoredFluid() > WATER_FLOW)
+							waterInletPos = offset;
+						else if(pipeBlockEntity.getFluidType() == FluidResourceType.OXYGEN)
+							oxygenOutletPos = offset;
+						else if(pipeBlockEntity.getFluidType() == FluidResourceType.HYDROGEN)
+							hydrogenOutletPos = offset;
+					}
+					else if(offsetBlockEntity instanceof ValveBlockEntity)
+					{
+						ValveBlockEntity valveBlockEntity = (ValveBlockEntity) offsetBlockEntity;
+						FluidTankControllerBlockEntity tankBlockEntity = ((ValveBlockEntity) offsetBlockEntity).getFluidTankController();
+						
+						if(valveBlockEntity.getMode() == 0 && tankBlockEntity.getStoredFluid() < tankBlockEntity.getStorageCapacity())
+						{
+							if(tankBlockEntity.getFluidType() == FluidResourceType.OXYGEN)
+								oxygenOutletPos = offset;
+							else if(tankBlockEntity.getFluidType() == FluidResourceType.HYDROGEN)
+								hydrogenOutletPos = offset;
+						}
+					}
+					else if(offsetBlockEntity instanceof WaterTankBlockEntity)
+					{
+						WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) offsetBlockEntity);
+						
+						if(tankBlockEntity.getStoredFluid() > WATER_FLOW)
+							waterInletPos = offset;
+					}
 				}
 				
-				return;
+				if(waterInletPos != null && oxygenOutletPos != null && hydrogenOutletPos != null)
+					break;
+			}
+			
+			if(waterInletPos != null && oxygenOutletPos != null && hydrogenOutletPos != null)
+			{
+				ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+				double oxygenRemaining = PumpBlockEntity.recursiveSpread(world, oxygenOutletPos, checkList, OXYGEN_FLOW, FluidResourceType.OXYGEN, 2048);
+				checkList.clear();
+				double hydrogenRemaining = PumpBlockEntity.recursiveSpread(world, hydrogenOutletPos, checkList, HYDROGEN_FLOW, FluidResourceType.HYDROGEN, 2048);
+				
+				if(oxygenRemaining < OXYGEN_FLOW || hydrogenRemaining < HYDROGEN_FLOW)
+				{
+					BlockEntity waterBlockEntity = world.getBlockEntity(waterInletPos);
+					blockEntity.changeEnergy(-blockEntity.getInput());
+					blockEntity.onTimer = 5;
+					
+					if(waterBlockEntity instanceof FluidPipeBlockEntity)
+					{
+						FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) waterBlockEntity);
+						
+						if(pipeBlockEntity.getFluidType() == FluidResourceType.WATER)
+							pipeBlockEntity.changeStoredFluid(-WATER_FLOW);
+					}
+					else if(waterBlockEntity instanceof WaterTankBlockEntity)
+					{
+						WaterTankBlockEntity tankBlockEntity = ((WaterTankBlockEntity) waterBlockEntity);
+						tankBlockEntity.changeStoredFluid(-WATER_FLOW);
+					}
+				}
 			}
 		}
 		
-		if(world.getBlockState(pos).get(ElectrolyzerBlock.LIT))
+		if(world.getBlockState(pos).get(ElectrolyzerBlock.LIT) != blockEntity.onTimer > 0)
 		{
-			state = (BlockState) state.with(ElectrolyzerBlock.LIT, false);
+			state = (BlockState) state.with(ElectrolyzerBlock.LIT, blockEntity.onTimer > 0);
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);
 			markDirty(world, pos, state);
 		}
+		
+		if(blockEntity.onTimer > 0)
+			blockEntity.onTimer--;
     }
 }

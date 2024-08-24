@@ -7,6 +7,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.data.DataTracker;
+import net.minecraft.entity.data.TrackedData;
+import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particle.ParticleTypes;
@@ -22,6 +25,7 @@ import space.util.IWorldMixin;
 
 public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 {
+	private static final TrackedData<Integer> ANGER_TIME = DataTracker.registerData(SolarEyesEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	private LivingEntity entityCollided = null;
 	
 	public SolarEyesEntity(EntityType<? extends MobEntity> entityType, World world)
@@ -37,8 +41,36 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	
 	public static DefaultAttributeContainer.Builder createSolarEyesAttributes()
 	{
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0);
+        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0);
     }
+	
+	@Override
+	protected void initDataTracker(DataTracker.Builder builder)
+	{
+		super.initDataTracker(builder);
+		builder.add(ANGER_TIME, 0);
+	}
+	
+	public int getAngerTime()
+	{
+		return this.dataTracker.get(ANGER_TIME);
+	}
+
+	public void increaseAngerTime()
+	{
+		int angerTime = getAngerTime();
+		
+		if(angerTime < 63)
+			this.dataTracker.set(ANGER_TIME, angerTime + 1);
+	}
+	
+	public void decreaseAngerTime()
+	{
+		int angerTime = getAngerTime();
+		
+		if(angerTime > 0)
+			this.dataTracker.set(ANGER_TIME, angerTime - 1);
+	}
 	
 	@Override
 	public boolean isPressureSafe(double pressure)
@@ -61,13 +93,13 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	@Override
 	public int getRadiationRange()
 	{
-		return 16;
+		return 32;
 	}
 	
 	@Override
 	public float getRadiationStrength()
 	{
-		return 0.5f;
+		return getAngerTime() * 0.04f;
 	}
 	
 	@Override
@@ -110,13 +142,18 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		
 		if(world.isClient)
 		{
-			if(this.random.nextInt(8) == 0)
+			if(this.random.nextInt(12) == 0)
 			{
-				double spread = 4.0;
-				double x = getX() + (random.nextDouble() - random.nextDouble()) * spread;
-				double y = getY() + (random.nextDouble() - random.nextDouble()) * spread;
-				double z = getZ() + (random.nextDouble() - random.nextDouble()) * spread;
-				world.addParticle(StarflightParticleTypes.EYE, true, x, y, z, 0.0, 0.0, 0.0);
+				int count = 1 + random.nextInt(3);
+				
+				for(int i = 0; i < count; i++)
+				{
+					double spread = 2.0;
+					double x = getX() + (random.nextDouble() - random.nextDouble()) * spread;
+					double y = getY() + (random.nextDouble() - random.nextDouble()) * spread;
+					double z = getZ() + (random.nextDouble() - random.nextDouble()) * spread;
+					world.addParticle(StarflightParticleTypes.EYE, true, x, y, z, 0.0, 0.0, 0.0);
+				}
 			}
 			
 			return;
@@ -125,22 +162,23 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		this.setNoGravity(true);
 		this.setVelocity(this.getVelocity().multiply(0.98));
 		
-		if(getTarget() == null)
+		if(this.random.nextInt(400) == 0 || horizontalCollision || verticalCollision)
+			this.setVelocity((this.random.nextDouble() - 0.5) * 0.25, (this.random.nextDouble() - 0.5) * 0.25, (this.random.nextDouble() - 0.5) * 0.25);
+		
+		if(getTarget() != null)
 		{
-			if(this.random.nextInt(400) == 0 || horizontalCollision || verticalCollision)
-				this.setVelocity(this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5, this.random.nextDouble() - 0.5);
+			Vec3d difference = getTarget().getEyePos().subtract(getPos());
+			double distance = difference.length();
+			addVelocity(difference.normalize().multiply(getAngerTime() > 48 ? Math.max(0.02, 0.25 / (distance * distance)) : 0.001));
+			increaseAngerTime();
 		}
 		else
-		{
-			Vec3d difference = getTarget().getPos().subtract(getPos());
-			double distance = difference.length();
-			addVelocity(difference.normalize().multiply(1.0 / (distance * distance)));
-		}
+			decreaseAngerTime();
 		
 		if(entityCollided != null || world.getLightLevel(LightType.SKY, getBlockPos()) > 4)
 		{
 			if(entityCollided != null)
-				entityCollided.damage(getDamageSources().mobAttack(this), 2.0f);
+				tryAttack(entityCollided);
 			
 			((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(3), 0.5, 0.5, 0.5, 0.01);
 			remove(RemovalReason.DISCARDED);

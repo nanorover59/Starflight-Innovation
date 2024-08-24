@@ -67,6 +67,7 @@ public class StarflightWorldGeneration
 		
 		// Overworld Ores
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_bauxite")));
+		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_ilmenite")));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_sulfur")));
 
 		// Trees

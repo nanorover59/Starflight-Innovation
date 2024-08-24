@@ -11,7 +11,6 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.util.QuaternionUtil;
 import space.util.StarflightEffects;
 import space.vessel.MovingCraftBlockData;
 

@@ -16,7 +16,7 @@
       "options": {
         "type": "minecraft:white_ash"
       },
-      "probability": 0.0005
+      "probability": 0.005
     }
   },
   "features": [
@@ -37,7 +37,6 @@
       "space:ore_ilmenite",
       "minecraft:ore_magma",
       "minecraft:delta",
-      "minecraft:small_basalt_columns",
       "minecraft:spring_lava",
       "space:ore_magma",
       "space:venus_blackstone"

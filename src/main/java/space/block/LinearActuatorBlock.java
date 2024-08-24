@@ -3,6 +3,7 @@ package space.block;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import org.joml.Vector3f;
 
@@ -42,8 +43,6 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 			
 			if(offsetState.getBlock() == StarflightBlocks.LINEAR_TRACK && !offsetState.get(PillarBlock.AXIS).test(redstoneDirection))
 				return;
-			
-			Set<BlockPos> set = new HashSet<BlockPos>();
 			Mutable mutable = offsetPos.mutableCopy();
 			int distance = 0;
 			boolean junctionFlag = false;
@@ -56,31 +55,42 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 				if(!junctionFlag)
 					distance++;
 				
-				set.add(mutable.toImmutable());
 				mutable.move(redstoneDirection);
 			}
 			
 			mutable = offsetPos.mutableCopy();
 			
 			while((world.getBlockState(mutable).getBlock() == StarflightBlocks.LINEAR_TRACK && world.getBlockState(mutable).get(PillarBlock.AXIS).test(redstoneDirection)) || world.getBlockState(mutable).getBlock() == StarflightBlocks.CALL_TRACK)
-			{
-				set.add(mutable.toImmutable());
 				mutable.move(redstoneDirection.getOpposite());
-			}
 			
 			if(!junctionFlag)
 				distance--;
 			
 			if(distance > 0)
-				spawnEntity(world, pos, pos.offset(redstoneDirection, distance), set);
+				spawnEntity(world, pos, pos.offset(redstoneDirection, distance), offsetPos);
 		}
     }
 	
-	public static void spawnEntity(World world, BlockPos pos, BlockPos targetPos, Set<BlockPos> set)
+	public static void spawnEntity(World world, BlockPos pos, BlockPos targetPos, BlockPos trackPos)
 	{
-		// Detect blocks to be included in the craft construction.
+		// Exclude blocks that are part of the track.
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			BlockState blockState = w.getBlockState(p);
+			return blockState.getBlock() == StarflightBlocks.LINEAR_TRACK || blockState.getBlock() == StarflightBlocks.CALL_TRACK;
+		};
+		
 		ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
+		BlockSearch.search(world, trackPos, positionList, include, BlockSearch.MAX_VOLUME, false);
+		Set<BlockPos> set = new HashSet<BlockPos>();
+		set.addAll(positionList);
+		
+		// Detect blocks to be included in the craft construction.
+		positionList = new ArrayList<BlockPos>();
 		BlockSearch.movingCraftSearch(world, pos, positionList, set, BlockSearch.MAX_VOLUME, BlockSearch.MAX_DISTANCE);
+		
+		if(positionList.isEmpty())
+			return;
+		
 		ArrayList<MovingCraftBlockData> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(pos.getX()), MathHelper.floor(pos.getY()), MathHelper.floor(pos.getZ())), positionList);
 		LinearPlatformEntity entity = new LinearPlatformEntity(world, pos, blockDataList, 0.0, 0.0, new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f), targetPos);
 		MovingCraftEntity.removeBlocksFromWorld(world, pos, blockDataList);

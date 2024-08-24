@@ -95,7 +95,7 @@ public class RocketEntity extends MovingCraftEntity
 	public float throttlePrevious;
 	private int autoState;
 	private int soundEffectTimer;
-	private boolean pausePhysics;
+	public boolean pausePhysics;
 
 	public RocketEntity(EntityType<? extends RocketEntity> entityType, World world)
 	{
@@ -575,7 +575,7 @@ public class RocketEntity extends MovingCraftEntity
 					Vector3f position = thruster.getPosition();
 					Vector3f force = thruster.gimbal > 0 ? thruster.getForceWithGimbal(quaternion, throttle, rollControl, pitchControl, yawControl, b) : thruster.getForce(quaternion, throttle);
 					forceAtPosition(force, position, netForce, netMoment);
-					totalMassFlow += thruster.getMassFlow(throttle);
+					totalMassFlow += thruster.getMassFlow(throttle) * 0.05;
 				}
 			}
 
@@ -590,7 +590,7 @@ public class RocketEntity extends MovingCraftEntity
 					Vector3f position = thruster.getPosition();
 					Vector3f force = thruster.getForce(quaternion, 1.0);
 					forceAtPosition(force, position, netForce, netMoment);
-					totalMassFlow += thruster.getMassFlow(1.0);
+					totalMassFlow += thruster.getMassFlow(1.0) * 0.05;
 				}
 			}
 		}
@@ -894,7 +894,7 @@ public class RocketEntity extends MovingCraftEntity
 				Direction forward = rocketEntity.getForwardDirection();
 				rocketEntity.rollControl = (forward == Direction.NORTH || forward == Direction.WEST) ? rollState : -rollState;
 				rocketEntity.pitchControl = (forward == Direction.SOUTH || forward == Direction.WEST) ? pitchState : -pitchState;
-				rocketEntity.yawControl = yawState;
+				rocketEntity.yawControl = -yawState;
 				rocketEntity.xControl = xState;
 				rocketEntity.yControl = yState;
 				rocketEntity.zControl = zState;
@@ -1048,7 +1048,7 @@ public class RocketEntity extends MovingCraftEntity
 
 		public double getMassFlow(double throttle)
 		{
-			return ((thrust * throttle) / (SG * isp)) * 0.05;
+			return ((thrust * throttle) / (SG * isp));
 		}
 
 		public void writeCustomDataToNbt(NbtCompound nbt)

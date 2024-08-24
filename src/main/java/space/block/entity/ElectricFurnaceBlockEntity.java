@@ -49,6 +49,7 @@ import net.minecraft.world.World;
 import space.block.ElectricFurnaceBlock;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
+import space.recipe.StarflightRecipes;
 import space.screen.ElectricFurnaceScreenHandler;
 
 public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, EnergyBlockEntity
@@ -106,6 +107,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 		this.recipesUsed = new Object2IntOpenHashMap<Identifier>();
 		this.recipeTypes = new HashSet<RecipeType<?>>();
+		this.recipeTypes.add(StarflightRecipes.ELECTRIC_FURNACE);
 		this.recipeTypes.add(RecipeType.SMELTING);
 		this.recipeTypes.add(RecipeType.BLASTING);
 		this.recipeTypes.add(RecipeType.SMOKING);

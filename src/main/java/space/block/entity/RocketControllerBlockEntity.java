@@ -306,12 +306,11 @@ public class RocketControllerBlockEntity extends BlockEntity
 		nbt.putDouble("requiredDeltaV1", requiredDeltaV1);
 		nbt.putDouble("requiredDeltaV2", requiredDeltaV2);
 		int blockCount = blockDataList.size();
-		nbt.putInt("blockCount", blockCount);
 		int[] x = new int[blockCount];
 		int[] y = new int[blockCount];
 		int[] z = new int[blockCount];
 
-		for(int i = 0; i < blockCount; i++)
+		for(int i = 0; i < blockCount - 1; i++)
 		{
 			MovingCraftBlockData blockData = blockDataList.get(i);
 			x[i] = blockData.getPosition().getX();
@@ -354,7 +353,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 		if(blockCount == 0)
 			return;
 
-		for(int i = 0; i < blockCount; i++)
+		for(int i = 0; i < blockCount - 1; i++)
 		{
 			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
 			blockDataList.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));

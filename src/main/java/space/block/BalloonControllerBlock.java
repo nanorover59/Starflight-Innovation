@@ -36,7 +36,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	
 	public BalloonControllerBlock(Settings settings)
 	{
-		super(settings, FluidResourceType.HYDROGEN, 0.25);
+		super(settings, FluidResourceType.HYDROGEN, 0.1);
 	}
 	
 	@Override

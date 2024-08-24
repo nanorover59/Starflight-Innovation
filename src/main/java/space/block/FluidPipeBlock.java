@@ -30,7 +30,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.FluidPipeBlockEntity;
-import space.block.entity.PumpBlockEntity;
 import space.util.FluidResourceType;
 
 public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock, Waterloggable
@@ -136,9 +135,6 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
 		
 		world.setBlockState(pos, state);
-		
-		if(!world.isClient())
-			PumpBlockEntity.intakeFilterSearch(world, pos, false);
 	}
 	
 	@Override
@@ -146,9 +142,6 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 	{
 		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
 			world.removeBlockEntity(pos);
-		
-		if(!world.isClient() && !state.isOf(newState.getBlock()))
-			PumpBlockEntity.intakeFilterSearch(world, pos, true);
 	}
 	
 	@Override
@@ -161,9 +154,6 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 			state = updateStateForConnection(world, pos, world.getBlockState(pos.offset(d)), state, d);
 		
 		world.setBlockState(pos, state);
-		
-		if(!world.isClient())
-			PumpBlockEntity.intakeFilterSearch(world, pos, false);
     }
 	
 	public BlockState updateStateForConnection(World world, BlockPos neighborPos, BlockState neighborState, BlockState initialState, Direction direction)

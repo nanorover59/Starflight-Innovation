@@ -13,6 +13,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CarpetBlock;
 import net.minecraft.block.ColoredFallingBlock;
+import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.block.ExperienceDroppingBlock;
 import net.minecraft.block.LadderBlock;
 import net.minecraft.block.LeavesBlock;
@@ -151,12 +152,13 @@ public class StarflightBlocks
 	public static final Block VOLCANIC_SLATE = new Block(AbstractBlock.Settings.copy(Blocks.DEEPSLATE));
 	public static final Block SOLARIZED_REGOLITH = new HotRegolith(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
 	public static final Block SEARING_REGOLITH = new HotRegolith(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.ORANGE).strength(0.5F));
-	public static final Block DIAMOND_REGOLITH = new HotRegolith(new ColorCode(MapColor.DIAMOND_BLUE.color), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.DIAMOND_BLUE).strength(0.5F));
+	public static final Block DIAMOND_REGOLITH = new HotRegolith(new ColorCode(MapColor.DIAMOND_BLUE.color), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.DIAMOND_BLUE).strength(3.0F, 3.0F));
 	public static final Block FRIGID_STONE = new Block(AbstractBlock.Settings.copy(Blocks.STONE));
 	public static final Block TREE_TAP = new TreeTapBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(1.0f, 1.0f).ticksRandomly());
 	public static final Block IRON_LADDER = new LadderBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME).nonOpaque());
 	public static final Block PLANETARIUM = new PlanetariumBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block ALUMINUM_SHELF = new Block(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
+	public static final Block METAL_CRAFTING_TABLE = new CraftingTableBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block STORAGE_CUBE = new StorageCubeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block LEVER_BLOCK = new SolidLeverBlock(AbstractBlock.Settings.copy(STRUCTURAL_ALUMINUM));
 	public static final Block AIRLOCK_DOOR = new SealedDoorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).nonOpaque());
@@ -186,13 +188,13 @@ public class StarflightBlocks
 	public static final Block HYDROGEN_TANK = new FluidTankControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), FluidResourceType.HYDROGEN, FluidResourceType.HYDROGEN.getStorageDensity());
 	public static final Block BALLOON_CONTROLLER = new BalloonControllerBlock(AbstractBlock.Settings.copy(REINFORCED_FABRIC));
 	public static final Block VALVE = new ValveBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
-	public static final Block VENT = new VentBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block COPPER_CABLE_AL = new EncasedEnergyCableBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block WATER_PIPE_AL = new EncasedFluidPipeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), FluidResourceType.WATER);
 	public static final Block OXYGEN_PIPE_AL = new EncasedFluidPipeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), FluidResourceType.OXYGEN);
 	public static final Block HYDROGEN_PIPE_AL = new EncasedFluidPipeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), FluidResourceType.HYDROGEN);
-	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(AbstractBlock.Settings.create().replaceable().dropsNothing());
+	public static final Block FLUID_TANK_INSIDE = new FluidTankInsideBlock(AbstractBlock.Settings.create().dropsNothing());
 	public static final Block OXYGEN_DISPENSER = new OxygenDispenserBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
+	public static final Block VENT = new VentBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block OXYGEN_SENSOR = new OxygenSensorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block HABITABLE_AIR = new HabitableAirBlock(AbstractBlock.Settings.create().replaceable().noCollision().dropsNothing().air());
@@ -204,10 +206,10 @@ public class StarflightBlocks
 	public static final Block BUFFER = new SimpleFacingBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).nonOpaque());
 	public static final Block LANDING_LEG = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
-	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 1.6e6, 400, 350, 100.0, 0.0);
-	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.2e6, 450, 400, 100.0, 0.0);
-	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 450, 400, 100.0, Math.PI / 16.0);
-	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.4e6, 500, 250, 100.0, 0.0);
+	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 3.0e6, 380, 340, 100.0, 0.0);
+	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 2.0e6, 400, 380, 100.0, 0.0);
+	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.5e6, 415, 380, 100.0, Math.PI / 16.0);
+	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 455, 250, 100.0, 0.0);
 	
 	// Block Entities
 	public static final BlockEntityType<StirlingEngineBlockEntity> STIRLING_ENGINE_BLOCK_ENTITY = BlockEntityType.Builder.create(StirlingEngineBlockEntity::new, STIRLING_ENGINE).build(null);
@@ -278,7 +280,7 @@ public class StarflightBlocks
 		initializeBlock(DEEPSLATE_SULFUR_ORE, "deepslate_sulfur_ore");
 		initializeBlock(RUBBER_LOG, "rubber_log");
 		initializeBlock(SAPPY_RUBBER_LOG, "sappy_rubber_log", false, List.of(), List.of());
-		initializeBlock(STRIPPED_RUBBER_LOG, "stripped_rubber_log");
+		initializeBlock(STRIPPED_RUBBER_LOG, "stripped_rubber_log", false, List.of(), List.of());
 		initializeBlock(RUBBER_LEAVES, "rubber_leaves");
 		initializeBlock(RUBBER_SAPLING, "rubber_sapling");
 		initializeBlock(ICICLE, "icicle");
@@ -320,6 +322,7 @@ public class StarflightBlocks
 		initializeBlock(IRON_LADDER, "iron_ladder");
 		initializeBlock(PLANETARIUM, "planetarium");
 		initializeBlock(ALUMINUM_SHELF, "aluminum_shelf");
+		initializeBlock(METAL_CRAFTING_TABLE, "metal_crafting_table");
 		initializeBlock(STORAGE_CUBE, "storage_cube");
 		initializeBlock(LEVER_BLOCK, "lever_block");
 		initializeBlock(AIRLOCK_DOOR, "airlock_door");
@@ -349,13 +352,13 @@ public class StarflightBlocks
 		initializeBlock(HYDROGEN_TANK, "hydrogen_tank");
 		initializeBlock(BALLOON_CONTROLLER, "balloon_controller");
 		initializeBlock(VALVE, "valve");
-		initializeBlock(VENT, "vent");
 		initializeBlock(COPPER_CABLE_AL, "copper_cable_al");
 		initializeBlock(WATER_PIPE_AL, "water_pipe_al");
 		initializeBlock(OXYGEN_PIPE_AL, "oxygen_pipe_al");
 		initializeBlock(HYDROGEN_PIPE_AL, "hydrogen_pipe_al");
 		initializeBlock(FLUID_TANK_INSIDE, "fluid_tank_inside", false, List.of(), List.of());
 		initializeBlock(OXYGEN_DISPENSER, "oxygen_dispenser");
+		initializeBlock(VENT, "vent");
 		initializeBlock(ATMOSPHERE_GENERATOR, "atmosphere_generator", true, List.of(), List.of(Text.translatable("block.space.atmosphere_generator.description_1"), Text.translatable("block.space.atmosphere_generator.description_2")));
 		initializeBlock(OXYGEN_SENSOR, "oxygen_sensor", true, List.of(), List.of(Text.translatable("block.space.oxygen_sensor.description_1"), Text.translatable("block.space.oxygen_sensor.description_2")));
 		initializeBlock(HABITABLE_AIR, "habitable_air", false, List.of(), List.of());

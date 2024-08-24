@@ -33,7 +33,7 @@ public class FluidPipeBlockEntity extends BlockEntity
 
 	public double getStorageCapacity()
 	{
-		return fluid.getStorageDensity() / 25.0;
+		return fluid.getStorageDensity() / 18.0;
 	}
 	
 	public double getStoredFluid()

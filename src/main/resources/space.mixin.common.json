@@ -6,26 +6,18 @@
   "mixins": [
     "WorldMixin",
     "ServerWorldMixin",
+    "EntityMixin",
     "LivingEntityMixin",
+    "ServerPlayerEntityMixin",
     "ProjectileEntityInvokerMixin",
-    "ThrownEntityMixin",
-    "PersistentProjectileEntityMixin",
-    "ItemEntityMixin",
-    "ExperienceOrbEntityMixin",
-    "FallingBlockEntityMixin",
-    "TntEntityMixin",
-    "BoatEntityMixin",
-    "AbstractMinecartEntityMixin",
-    "AxeItemMixin",
     "FireBlockMixin",
     "FireBlockInvokerMixin",
-    "EntityMixin",
     "EntityInvokerMixin",
     "FluidStateMixin",
     "FallingBlockMixin",
     "AbstractFurnaceBlockEntityMixin",
     "AbstractFurnaceBlockEntityAccessorMixin",
-    "ServerPlayerEntityMixin"
+    "CraftingScreenHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 0

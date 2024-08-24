@@ -46,7 +46,7 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 	@Override
 	public boolean isPressureSafe(double pressure)
 	{
-		return pressure > 0.9;
+		return pressure > 0.5;
 	}
 
 	@Override
@@ -110,12 +110,6 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 		@Override
 		public void tick()
 		{
-			if(StratofishEntity.this.horizontalCollision)
-			{
-				StratofishEntity.this.setYaw(StratofishEntity.this.getYaw() + 180.0f);
-				this.targetSpeed = 0.1f;
-			}
-			
 			double d = StratofishEntity.this.targetPosition.x - StratofishEntity.this.getX();
 			double e = StratofishEntity.this.targetPosition.y - StratofishEntity.this.getY();
 			double f = StratofishEntity.this.targetPosition.z - StratofishEntity.this.getZ();
@@ -142,6 +136,9 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 				Vec3d vec3d = StratofishEntity.this.getVelocity();
 				StratofishEntity.this.setVelocity(vec3d.add(new Vec3d(p, r, q).subtract(vec3d).multiply(0.2)));
 			}
+			
+			if(hasPassengers())
+				getFirstPassenger().fallDistance = 0.0f;
 		}
 	}
 	
@@ -154,7 +151,7 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 
 		protected boolean isNearTarget()
 		{
-			return StratofishEntity.this.targetPosition.squaredDistanceTo(StratofishEntity.this.getX(), StratofishEntity.this.getY(), StratofishEntity.this.getZ()) < 4.0;
+			return StratofishEntity.this.targetPosition.squaredDistanceTo(StratofishEntity.this.getX(), StratofishEntity.this.getY(), StratofishEntity.this.getZ()) < 2.0;
 		}
 	}
 	
@@ -178,8 +175,8 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 		@Override
 		public void start()
 		{
-			this.radius = 10.0f + StratofishEntity.this.random.nextFloat() * 10.0f;
-			this.yOffset = -4.0f + StratofishEntity.this.random.nextFloat() * 9.0f;
+			this.radius = (15.0f + StratofishEntity.this.random.nextFloat() * 10.0f) * StratofishEntity.this.getWidth();
+			this.yOffset = -8.0f + StratofishEntity.this.random.nextFloat() * 16.0f;
 			this.circlingDirection = StratofishEntity.this.random.nextBoolean() ? 1.0f : -1.0f;
 			this.adjustDirection();
 		}
@@ -188,15 +185,18 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 		public void tick()
 		{
 			if(StratofishEntity.this.random.nextInt(this.getTickCount(350)) == 0)
-				this.yOffset = -4.0f + StratofishEntity.this.random.nextFloat() * 9.0f;
+				this.yOffset = -8.0f + StratofishEntity.this.random.nextFloat() * 16.0f;
 			
-			if(StratofishEntity.this.random.nextInt(this.getTickCount(250)) == 0)
+			if(StratofishEntity.this.verticalCollision)
+				this.yOffset += 1;
+			
+			if(StratofishEntity.this.random.nextInt(this.getTickCount(250)) == 0 || StratofishEntity.this.horizontalCollision)
 			{
 				this.radius += 1.0f;
 				
-				if(this.radius > 15.0f)
+				if(this.radius > 15.0f * StratofishEntity.this.getWidth())
 				{
-					this.radius = 5.0f;
+					this.radius = 5.0f * StratofishEntity.this.getWidth();
 					this.circlingDirection = -this.circlingDirection;
 				}
 			}
@@ -207,11 +207,11 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 				this.adjustDirection();
 			}
 			
-			if(StratofishEntity.this.random.nextInt(this.getTickCount(450)) == 0)
+			/*if(StratofishEntity.this.random.nextInt(this.getTickCount(450)) == 0)
 			{
 				this.angle = StratofishEntity.this.random.nextFloat() * 2.0f * (float) Math.PI;
 				this.adjustDirection();
-			}
+			}*/
 			
 			if(StratofishEntity.this.targetPosition.y < StratofishEntity.this.getY() && !StratofishEntity.this.getWorld().isAir(StratofishEntity.this.getBlockPos().down(1)))
 			{
@@ -232,7 +232,7 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 				StratofishEntity.this.circlingCenter = StratofishEntity.this.getBlockPos();
 			
 			this.angle += this.circlingDirection * 15.0f * ((float) Math.PI / 180.0f);
-			StratofishEntity.this.targetPosition = Vec3d.of(StratofishEntity.this.circlingCenter).add(this.radius * MathHelper.cos(this.angle), -4.0f + this.yOffset, this.radius * MathHelper.sin(this.angle));
+			StratofishEntity.this.targetPosition = Vec3d.of(StratofishEntity.this.circlingCenter).add(this.radius * MathHelper.cos(this.angle), this.yOffset, this.radius * MathHelper.sin(this.angle));
 		}
 	}
 }

@@ -145,12 +145,17 @@ public class AirshipControllerBlock extends Block
 				for(Direction direction : Direction.values())
 				{
 					ArrayList<BlockPos> checkList = new ArrayList<BlockPos>(); // Check list to avoid ensure each block is only checked once.
-
+					ArrayList<BlockPos> foundList = new ArrayList<BlockPos>(); // Balloon walls are counted as balloon volume and not other volume.
+					
 					BiPredicate<World, BlockPos> include = (w, p) -> {
 						return world.getBlockState(p).getBlock() == StarflightBlocks.FLUID_TANK_INSIDE;
 					};
+					
+					BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
+						return world.getBlockState(p).getBlock() == StarflightBlocks.REINFORCED_FABRIC;
+					};
 
-					BlockSearch.search(world, pos.offset(direction), checkList, include, BlockSearch.MAX_VOLUME, true);
+					BlockSearch.search(world, pos.offset(direction), checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
 
 					if(checkList.size() > 0 && checkList.size() < BlockSearch.MAX_VOLUME)
 					{
@@ -169,15 +174,16 @@ public class AirshipControllerBlock extends Block
 						}
 						
 						if(fluidTank instanceof BalloonControllerBlockEntity && ((BalloonControllerBlockEntity) fluidTank).getStoredFluid() > ((BalloonControllerBlockEntity) fluidTank).getStorageCapacity() * 0.9)
-							balloonVolume += checkList.size();
+						{
+							balloonVolume += checkList.size() + foundList.size();
+							volume -= foundList.size();
+						}
 					}
 				}
 			}
         }
         
         PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
-        
-        System.out.println(balloonVolume + "   " + volume);
         
         if(data.getPressure() < 0.75)
         {
@@ -195,8 +201,8 @@ public class AirshipControllerBlock extends Block
         BlockPos centerPos = BlockPos.ofFloored(centerOfMass);
         ArrayList<MovingCraftBlockData> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(centerOfMass.getX()), MathHelper.floor(centerOfMass.getY()), MathHelper.floor(centerOfMass.getZ())), positionList);
         AirshipEntity entity = new AirshipEntity(world, centerPos, blockDataList, world.getBlockState(position).get(FACING), mass, volume, momentOfInertia1.toVector3f(), momentOfInertia2.toVector3f());
-		MovingCraftEntity.removeBlocksFromWorld(world, centerPos, blockDataList);
-		world.spawnEntity(entity);		
+        MovingCraftEntity.removeBlocksFromWorld(world, centerPos, blockDataList);
+        world.spawnEntity(entity);
 		return ActionResult.SUCCESS;
 	}
 }

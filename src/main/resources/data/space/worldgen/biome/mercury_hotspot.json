@@ -27,7 +27,8 @@
       "space:ore_copper",
       "space:ore_bauxite",
       "space:ore_sulfur",
-      "space:ore_ilmenite"
+      "space:ore_ilmenite",
+      "space:ore_diamond_regolith"
     ],
     [
       "minecraft:spring_lava"

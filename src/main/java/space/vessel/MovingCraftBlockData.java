@@ -27,7 +27,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import space.block.FluidTankControllerBlock;
 import space.block.FluidTankInsideBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
@@ -66,23 +65,17 @@ public class MovingCraftBlockData
 	public static MovingCraftBlockData fromBlock(World world, ArrayList<BlockPos> positionList, BlockPos blockPos, BlockPos centerPos, boolean placeFirst)
 	{
 		BlockState blockState = world.getBlockState(blockPos);
-		BlockEntity blockEntity = world.getBlockEntity(blockPos);
-		NbtCompound blockEntityData = null;
-		
-		if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
-			blockEntityData = blockEntity.createNbt((RegistryWrapper.WrapperLookup) world.getRegistryManager());
-		
 		boolean[] sidesShowing = new boolean[6];
 		Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN};
 		BlockPos[] offsets = {blockPos.north(), blockPos.east(), blockPos.south(), blockPos.west(), blockPos.up(), blockPos.down()};
+		NbtCompound blockEntityData = null;
+		double storedFluid = 0.0;
 		
 		for(int i  = 0; i < 6; i++)
 		{
 			BlockState otherBlockState = world.getBlockState(offsets[i]);
 			
-			if(!positionList.contains(offsets[i]))
-				sidesShowing[i] = true;
-			else if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
+			if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
 				sidesShowing[i] = false;
 			else if(!otherBlockState.isOpaqueFullCube(world, offsets[i]))
 				sidesShowing[i] = true;
@@ -92,10 +85,17 @@ public class MovingCraftBlockData
 				sidesShowing[i] = true;
 		}
 		
-		double storedFluid = 0.0;
-		
-		if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-			storedFluid = ((FluidTankControllerBlockEntity) blockEntity).getStoredFluid();
+		if(blockState.getBlock() instanceof BlockEntityProvider)
+		{
+			BlockEntity blockEntity = world.getBlockEntity(blockPos);
+			
+			if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
+				storedFluid = ((FluidTankControllerBlockEntity) blockEntity).getStoredFluid();
+			
+			if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
+				blockEntityData = blockEntity.createNbt((RegistryWrapper.WrapperLookup) world.getRegistryManager());
+			
+		}
 		
 		return new MovingCraftBlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, world.isReceivingRedstonePower(blockPos), storedFluid);
 	}

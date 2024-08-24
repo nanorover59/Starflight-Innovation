@@ -4,7 +4,6 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityStatuses;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
@@ -44,7 +43,6 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TimeHelper;
 import net.minecraft.util.math.intprovider.UniformIntProvider;
-import net.minecraft.world.EntityView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldView;
 import space.item.StarflightItems;
@@ -146,7 +144,7 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
 	@Override
 	public boolean canSpawn(WorldView world)
 	{
-        return this.getRandom().nextInt(16) == 0 && this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos()) && world.getBlockState(this.getBlockPos().down()).getBlock() == Blocks.STONE;
+        return this.getRandom().nextInt(16) == 0 && this.getBlockY() < 0 && !world.isSkyVisible(getBlockPos());
     }
 	
 	@Override
@@ -274,11 +272,5 @@ public class CeruleanEntity extends TameableEntity implements Angerable, AlienMo
 		}
 		
 		return ActionResult.SUCCESS;
-	}
-
-	@Override
-	public EntityView method_48926()
-	{
-		return super.getWorld();
 	}
 }

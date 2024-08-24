@@ -2,17 +2,17 @@
   "parent": "minecraft:recipes/root",
   "rewards": {
     "recipes": [
-      "space:aluminum_ingot_from_blasting_ferric_bauxite_ore"
+      "space:titanium_ingot_from_smelting_ilmenite"
     ]
   },
   "criteria": {
-    "has_ferric_bauxite_ore": {
+    "has_ilmenite": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:ferric_bauxite_ore"
+              "space:ilmenite"
             ]
           }
         ]
@@ -21,13 +21,13 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "space:aluminum_ingot_from_blasting_ferric_bauxite_ore"
+        "recipe": "space:titanium_ingot_from_smelting_ilmenite"
       }
     }
   },
   "requirements": [
     [
-      "has_ferric_bauxite_ore",
+      "has_ilmenite",
       "has_the_recipe"
     ]
   ]

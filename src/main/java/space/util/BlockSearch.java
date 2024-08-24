@@ -244,9 +244,12 @@ public class BlockSearch
 			BlockState blockState = world.getBlockState(blockPos);
 
 			if(!pos.isWithinDistance(blockPos, distance))
+			{
+				positionList.clear();
 				return;
+			}
 
-			if(!set.contains(blockPos) && !blockState.isAir())
+			if(!set.contains(blockPos) && !blockState.isAir() && !blockState.isLiquid())
 			{
 				set.add(blockPos);
 				positionList.add(blockPos);

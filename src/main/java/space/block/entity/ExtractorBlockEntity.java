@@ -311,7 +311,6 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 				if(blockEntity.time == blockEntity.totalTime)
 				{
 					double massFlow = iceMap.get(itemStack.getItem());
-					int waterOutlets = 0;
 
 					for(Direction direction : Direction.values())
 					{
@@ -320,28 +319,26 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 
 						BlockPos offset = pos.offset(direction);
 						Block offsetBlock = world.getBlockState(offset).getBlock();
-
-						if(offsetBlock instanceof FluidUtilityBlock && ((FluidUtilityBlock) offsetBlock).getFluidType().getID() == FluidResourceType.WATER.getID())
+						
+						if(offsetBlock instanceof FluidUtilityBlock)
 						{
 							BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
-
+							
 							if(offsetBlockEntity instanceof FluidPipeBlockEntity)
-								waterOutlets++;
-						}
-					}
-
-					for(Direction direction : Direction.values())
-					{
-						if(direction == state.get(HorizontalFacingBlock.FACING))
-							continue;
-
-						BlockPos offset = pos.offset(direction);
-						BlockState offsetState = world.getBlockState(offset);
-
-						if(offsetState.getBlock() == StarflightBlocks.WATER_PIPE)
-						{
-							ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-							ElectrolyzerBlockEntity.recursiveSpread(world, offset, checkList, massFlow / waterOutlets, FluidResourceType.WATER, 2048);
+							{
+								FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) offsetBlockEntity);
+								
+								if(pipeBlockEntity.getFluidType() == FluidResourceType.WATER)
+								{
+									ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+									massFlow = PumpBlockEntity.recursiveSpread(world, offset, checkList, massFlow, FluidResourceType.WATER, 2048);
+								}
+							}
+							else if(offsetBlockEntity instanceof WaterTankBlockEntity)
+							{
+								ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+								massFlow = PumpBlockEntity.recursiveSpread(world, offset, checkList, massFlow, FluidResourceType.WATER, 2048);
+							}
 						}
 					}
 
@@ -349,9 +346,11 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 					blockEntity.time = 0;
 					blockEntity.totalTime = 0;
 				}
-			} else if(blockEntity.time >= 0)
+			}
+			else if(blockEntity.time >= 0)
 				blockEntity.time -= 2;
-		} else
+		}
+		else
 		{
 			blockEntity.time = 0;
 			blockEntity.totalTime = 0;
