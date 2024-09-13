@@ -6,8 +6,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.BlockPos.Mutable;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.feature.Feature;
@@ -23,21 +24,26 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 	@Override
 	public boolean generate(FeatureContext<DefaultFeatureConfig> context)
 	{
-		BlockPos blockPos = context.getOrigin();
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		BlockState blockState = structureWorldAccess.getBlockState(blockPos.down(8 + random.nextInt(8)));
+		BlockPos blockPos = structureWorldAccess.getTopPosition(Heightmap.Type.OCEAN_FLOOR_WG, context.getOrigin());
+		Mutable mutable = blockPos.down(2 + random.nextInt(16)).mutableCopy();
+		BlockState rockState = null;
 		
-		if(!blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+		while(rockState == null && mutable.getY() > structureWorldAccess.getBottomY())
+		{
+			BlockState blockState = structureWorldAccess.getBlockState(mutable);
+			
+			if(blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+				rockState = blockState;
+			
+			mutable.setY(mutable.getY() - 1);
+		}
+		
+		if(rockState == null || structureWorldAccess.getBlockState(blockPos.up()).isOpaque())
 			return true;
 		
-		while(blockPos.getY() > structureWorldAccess.getBottomY() + 3 && !(structureWorldAccess.getBlockState(blockPos.down()).isSideSolidFullSquare(structureWorldAccess, blockPos, Direction.UP)))
-			blockPos = blockPos.down();
-		
-		if(blockPos.getY() <= structureWorldAccess.getBottomY() + 3)
-			return false;
-		
-		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 6.0f);
+		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 5.0f);
 		int u = Math.min(rockSize, 4);
 		
 		for(int i = 0; i < rockSize; i++)
@@ -52,7 +58,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 				if(blockPos2.getSquaredDistance(blockPos) > (double) (f * f))
 					continue;
 				
-				structureWorldAccess.setBlockState(blockPos2, blockState, Block.NOTIFY_ALL);
+				structureWorldAccess.setBlockState(blockPos2, rockState, Block.NOTIFY_ALL);
 			}
 			
 			blockPos = blockPos.add(-u + random.nextInt(u) + 1, -u + random.nextInt(u) + 1, -u + random.nextInt(u) + 1);

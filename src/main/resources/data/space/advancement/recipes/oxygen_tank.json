@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_aluminum_ingot": {
+    "has_structural_aluminum": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:aluminum_ingot"
+              "space:structural_aluminum"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_aluminum_ingot",
+      "has_structural_aluminum",
       "has_the_recipe"
     ]
   ]

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -233,7 +235,7 @@ public class BlockSearch
 		}
 	}
 	
-	public static void movingCraftSearch(World world, BlockPos pos, ArrayList<BlockPos> positionList, Set<BlockPos> set, int limit, int distance)
+	public static void movingCraftSearch(World world, BlockPos pos, ArrayList<BlockPos> positionList, Set<BlockPos> set, @Nullable Direction movementDirection, int limit, int distance)
 	{
 		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
 		stack.push(pos);
@@ -253,18 +255,18 @@ public class BlockSearch
 			{
 				set.add(blockPos);
 				positionList.add(blockPos);
-
-				if(!blockState.isIn(StarflightBlocks.EDGE_CASE_TAG))
+				
+				for(Direction checkDirection : DIRECTIONS)
 				{
-					for(Direction checkDirection : DIRECTIONS)
+					BlockPos offset = blockPos.offset(checkDirection);
+					BlockState offsetState = world.getBlockState(offset);
+
+					if(movementDirection != null && movementDirection.equals(checkDirection))
+						stack.push(offset);
+					else if(!blockState.isIn(StarflightBlocks.EDGE_CASE_TAG))
 					{
-						if(blockState.getBlock() == StarflightBlocks.BUFFER && blockState.get(SimpleFacingBlock.FACING) == checkDirection)
-							continue;
-
-						BlockPos offset = blockPos.offset(checkDirection);
-						BlockState offsetState = world.getBlockState(offset);
-
-						if(!(offsetState.getBlock() == StarflightBlocks.BUFFER && offsetState.get(SimpleFacingBlock.FACING) == checkDirection.getOpposite()))
+						if(!((blockState.getBlock() == StarflightBlocks.BUFFER && blockState.get(SimpleFacingBlock.FACING) == checkDirection)
+						|| (offsetState.getBlock() == StarflightBlocks.BUFFER && offsetState.get(SimpleFacingBlock.FACING) == checkDirection.getOpposite())))
 							stack.push(offset);
 					}
 				}

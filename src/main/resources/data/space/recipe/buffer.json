@@ -1,19 +1,15 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
-        "aba",
-        "aaa"
+        "bb",
+        "aa"
     ],
     "key": {
         "a": {
-            "item": "space:iron_plate"
+            "item": "space:structural_iron"
         },
         "b": {
-            "item": "space:iron_frame"
-        },
-        "c": {
-            "item": "minecraft:heavy_weighted_pressure_plate"
+            "item": "space:iron_plate"
         }
     },
     "result": {

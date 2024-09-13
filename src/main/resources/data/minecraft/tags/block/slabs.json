@@ -2,8 +2,8 @@
   "replace": false,
   "values": [
     "space:structural_aluminum_slab",
-    "space:reinforced_panel_slab",
-    "space:titanium_panel_slab",
+    "space:structural_iron_slab",
+    "space:structural_titanium_slab",
     "space:redslate_brick_slab"
   ]
 }

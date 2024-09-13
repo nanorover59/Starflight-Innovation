@@ -44,10 +44,10 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.ExtractorBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, FluidUtilityBlock
 {
@@ -81,13 +81,13 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.extractor.description"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
 	public double getInput()
 	{
-		return 16.0;
+		return 32.0;
 	}
 	
 	@Override
@@ -128,7 +128,7 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 			double f = (double) pos.getZ() + 0.5;
 			
 			if(random.nextDouble() < 0.1)
-				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
+				world.playSound(d, e, f, StarflightSoundEvents.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
 		}
 	}
 

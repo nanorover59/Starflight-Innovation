@@ -37,11 +37,11 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.AirUtil;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
-import space.util.StarflightEffects;
 
 public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUtilityBlock, EnergyBlock
 {
@@ -74,9 +74,9 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		textList.add(Text.translatable("block.space.multimeter.description_1"));
-		textList.add(Text.translatable("block.space.multimeter.description_2"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		textList.add(Text.translatable("block.space.atmosphere_generator.description_1"));
+		textList.add(Text.translatable("block.space.atmosphere_generator.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -115,6 +115,8 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	{
 		if(!world.isClient && !state.isOf(newState.getBlock()))
 			BlockSearch.energyConnectionSearch(world, pos);
+		
+		super.onStateReplaced(state, world, pos, newState, moved);
 	}
 	
 	@Override
@@ -197,7 +199,7 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 				//time = System.currentTimeMillis();
 				
 				world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
-				StarflightEffects.sendOutgas(world, pos, frontPos, true);
+				OutgasS2CPacket.sendOutgas(world, pos, frontPos, true);
 			}
 		}
 		else if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)

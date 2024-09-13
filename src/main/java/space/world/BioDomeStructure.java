@@ -33,7 +33,7 @@ public class BioDomeStructure extends Structure
 
 	private static void addPieces(StructurePiecesCollector collector, Structure.Context context)
 	{
-		BlockPos blockPos = new BlockPos(context.chunkPos().getStartX(), 0, context.chunkPos().getStartZ());
+		BlockPos blockPos = new BlockPos(context.chunkPos().getStartX() + 8, 0, context.chunkPos().getStartZ() + 8);
 		BioDomeGenerator.addPieces(context, blockPos, collector);
 	}
 }

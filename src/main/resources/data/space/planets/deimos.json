@@ -3,7 +3,7 @@
     "parentName": "mars",
     "mass": 1.4762e15,
     "radius": 6.38e3,
-    "parkingOrbitRadius": 0,
+    "lowOrbitAltitude": 0,
     "periapsis": 2.34555e7,
     "apoapsis": 2.34709e7,
     "argumentOfPeriapsis": 0,

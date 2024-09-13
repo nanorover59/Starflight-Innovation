@@ -12,6 +12,8 @@ import org.lwjgl.opengl.GL11;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gl.Framebuffer;
@@ -29,10 +31,12 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import space.StarflightMod;
-import space.client.gui.SpaceNavigationScreen;
+import space.entity.AirshipEntity;
+import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.item.StarflightItems;
 
+@Environment(EnvType.CLIENT)
 public class StarflightHUD
 {
 	private static final Identifier ROCKET_HUD = Identifier.of(StarflightMod.MOD_ID, "textures/gui/starflight_hud.png");
@@ -81,10 +85,32 @@ public class StarflightHUD
         int centerY = scaledHeight / 2;
 		context.getMatrices().push();
 		context.getMatrices().scale(hudScale, hudScale, hudScale);
-		drawReadouts(context, textRenderer, rocketEntity, tickDelta, 40, 40, hudColor);
-		drawThrottle(context, textRenderer, rocketEntity, tickDelta, 40, scaledHeight - 200, throttleColor);
-		drawFuelLevels(context, textRenderer, rocketEntity, tickDelta, scaledWidth - 80, scaledHeight - 200, hydrogenColor, oxygenColor);
-		drawNavBall(context, tickDelta, rocketEntity.getForwardDirection(), quaternion, new Vector3f(rocketEntity.getTrackedVelocity()), 200, 200);
+		drawReadouts(context, textRenderer, rocketEntity, tickDelta, 60, 320, hudColor);
+		drawThrottle(context, textRenderer, rocketEntity, tickDelta, 20, scaledHeight - 200, throttleColor);
+		drawFuelLevels(context, textRenderer, rocketEntity, tickDelta, scaledWidth - 70, scaledHeight - 200, hydrogenColor, oxygenColor);
+		drawNavBall(context, tickDelta, rocketEntity.getForwardDirection(), true, quaternion, new Vector3f(rocketEntity.getTrackedVelocity()), 90, 395);
+		context.getMatrices().pop();
+	}
+	
+	public static void renderAirshipHUD(MinecraftClient client, DrawContext context, float tickDelta)
+	{
+		TextRenderer textRenderer = client.textRenderer;
+		int scaledWidth = client.getWindow().getScaledWidth();
+        int scaledHeight = client.getWindow().getScaledHeight();
+		AirshipEntity airshipEntity = (AirshipEntity) client.player.getVehicle();
+        int hudColor = 0xC800FF00;
+        float hudScale = 0.5f;
+        
+        if(airshipEntity.clientQuaternion == null || airshipEntity.clientQuaternionPrevious == null)
+        	return;
+        
+        Quaternionf quaternion = new Quaternionf(airshipEntity.clientQuaternionPrevious).slerp(airshipEntity.clientQuaternion, tickDelta);
+        scaledWidth /= hudScale;
+		scaledHeight /= hudScale;
+		context.getMatrices().push();
+		context.getMatrices().scale(hudScale, hudScale, hudScale);
+		drawReadouts(context, textRenderer, airshipEntity, tickDelta, 50, 320, hudColor);
+		drawNavBall(context, tickDelta, airshipEntity.getForwardDirection(), false, quaternion, new Vector3f(airshipEntity.getTrackedVelocity()), 80, 395);
 		context.getMatrices().pop();
 	}
 	
@@ -114,12 +140,12 @@ public class StarflightHUD
 		}
 	}
 	
-	public static void drawReadouts(DrawContext context, TextRenderer textRenderer, RocketEntity rocketEntity, float tickDelta, int x, int y, int hudColor)
+	public static void drawReadouts(DrawContext context, TextRenderer textRenderer, MovingCraftEntity entity, float tickDelta, int x, int y, int hudColor)
 	{
-		float altitude = rocketEntity.getAltitude();
-		float velocity = rocketEntity.getTrackedVelocity().length() * 20.0f;
+		float altitude = entity.getTrackedAltitude();
+		float velocity = entity.getTrackedVelocity().length() * 20.0f;
 		
-		if(rocketEntity.getTrackedVelocity().y() < 0.0f)
+		if(entity.getTrackedVelocity().y() < 0.0f)
 		{
 			if(velocity > 10.0f)
 				hudColor = Color.RED.getRGB();
@@ -164,7 +190,7 @@ public class StarflightHUD
 		context.drawCenteredTextWithShadow(textRenderer, df.format(oxygenLevel * 100.0f) + "%", x + (int) (barWidth * 2.5), y + barHeight + 20, oxygenColor);
 	}
 	
-	public static void drawNavBall(DrawContext context, float tickDelta, Direction direction, Quaternionf rotation, Vector3f velocity, int x, int y)
+	public static void drawNavBall(DrawContext context, float tickDelta, Direction direction, boolean facingUp, Quaternionf rotation, Vector3f velocity, int x, int y)
 	{
 		// Draw to a frame buffer and then scale it to create a pixel art appearance.
 		int frameWidth = MinecraftClient.getInstance().getWindow().getFramebufferWidth();
@@ -177,9 +203,11 @@ public class StarflightHUD
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 		context.getMatrices().push();
 		context.getMatrices().translate(x, y, 0.0f);
-		context.getMatrices().multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0f));
+		context.getMatrices().multiply(RotationAxis.POSITIVE_X.rotationDegrees(facingUp ? 90.0f : 180.0f));
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotationDegrees(direction.asRotation()));
 		context.getMatrices().multiply(rotation.invert());
+		Matrix3f matrix3f = new Matrix3f();
+		context.getMatrices().peek().getPositionMatrix().get3x3(matrix3f);
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0f));
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0f));
 		Matrix4f matrix4f = context.getMatrices().peek().getPositionMatrix();
@@ -187,7 +215,7 @@ public class StarflightHUD
 		int colorBottom = 0xffff8800;
 		int stacks = 32;
 		int slices = 32;
-		float radius = 48.0f;
+		float radius = 40.0f;
 		
 		// Central Sphere
 		for(int i = 0; i < stacks; i++)
@@ -276,9 +304,7 @@ public class StarflightHUD
 		}
 		
 		radius += 0.05f;
-		Matrix3f matrix3f = new Matrix3f();
-		matrix4f.get3x3(matrix3f);
-		velocity.mul(matrix3f).normalize().mul(-radius);
+		velocity.mul(matrix3f).normalize().mul(radius);
 		context.getMatrices().pop();
 		context.getMatrices().push();
 		context.getMatrices().translate(x, y, 0.0f);
@@ -319,6 +345,7 @@ public class StarflightHUD
 			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
 		}
 		
+		// Cross Hairs
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/gui/navball.png"));
         BufferBuilder bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);

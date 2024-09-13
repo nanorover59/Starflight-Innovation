@@ -12,7 +12,7 @@ import space.item.StarflightItems;
 import space.network.c2s.StarflightNetworkingC2S;
 import space.particle.StarflightParticleTypes;
 import space.recipe.StarflightRecipes;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 import space.world.StarflightWorldGeneration;
 
 public class StarflightMod implements ModInitializer
@@ -29,7 +29,7 @@ public class StarflightMod implements ModInitializer
 		StarflightParticleTypes.initializeParticles();
 		StarflightWorldGeneration.initializeWorldGeneration();
 		StarflightEvents.registerEvents();
-		StarflightEffects.initializeSounds();
+		StarflightSoundEvents.initializeSounds();
 		StarflightCommands.initializeCommands();
 		StarflightRecipes.initializeRecipes();
 		StarflightNetworkingC2S.initializePackets();

@@ -2,15 +2,14 @@
     "type": "minecraft:crafting_shaped",
     "pattern": [
         "ebe",
-        "cad",
-        "efe"
+        "cad"
     ],
     "key": {
         "a": {
             "item": "space:iron_machine_casing"
         },
         "b": {
-            "item": "space:water_pipe"
+            "item": "space:pump"
         },
         "c": {
             "item": "space:oxygen_pipe"
@@ -19,10 +18,7 @@
             "item": "space:hydrogen_pipe"
         },
         "e": {
-            "item": "space:copper_cable"
-        },
-        "f": {
-            "item": "space:water_tank"
+            "item": "minecraft:gold_ingot"
         }
     },
     "result": {

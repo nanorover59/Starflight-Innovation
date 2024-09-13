@@ -7,22 +7,22 @@ import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
-import space.vessel.MovingCraftBlockData;
+import space.entity.MovingCraftEntity;
 
-public record RocketControllerDataS2CPacket(double[] stats, ArrayList<MovingCraftBlockData> blockDataList) implements CustomPayload
+public record RocketControllerDataS2CPacket(double[] stats, ArrayList<MovingCraftEntity.BlockData> blockDataList) implements CustomPayload
 {
 	public static final CustomPayload.Id<RocketControllerDataS2CPacket> PACKET_ID = new CustomPayload.Id<>(Identifier.of(StarflightMod.MOD_ID, "rocket_controller_data"));
     public static final PacketCodec<PacketByteBuf, RocketControllerDataS2CPacket> PACKET_CODEC = CustomPayload.codecOf(RocketControllerDataS2CPacket::write, RocketControllerDataS2CPacket::new);
     
     private RocketControllerDataS2CPacket(PacketByteBuf buffer)
     {
-    	this(readDoubles(buffer), buffer.readCollection(ArrayList::new, MovingCraftBlockData::new));
+    	this(readDoubles(buffer), buffer.readCollection(ArrayList::new, MovingCraftEntity.BlockData::new));
     }
     
     private void write(PacketByteBuf buffer)
     {
     	writeDoubles(buffer, stats);
-    	buffer.writeCollection(blockDataList, MovingCraftBlockData::writeBlockData);
+    	buffer.writeCollection(blockDataList, MovingCraftEntity.BlockData::writeBlockData);
     }
     
     @Override

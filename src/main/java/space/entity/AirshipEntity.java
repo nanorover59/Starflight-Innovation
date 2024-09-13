@@ -31,7 +31,6 @@ import space.network.c2s.AirshipInputC2SPacket;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.QuaternionUtil;
-import space.vessel.MovingCraftBlockData;
 
 public class AirshipEntity extends MovingCraftEntity
 {
@@ -53,7 +52,7 @@ public class AirshipEntity extends MovingCraftEntity
 		super(entityType, world);
 	}
 
-	public AirshipEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
+	public AirshipEntity(World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
 	{
 		super(StarflightEntities.AIRSHIP, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		setForwardDirection(forward.getHorizontal());
@@ -152,7 +151,7 @@ public class AirshipEntity extends MovingCraftEntity
 			sendRenderData(true);
 			releaseBlocks();
 		}
-		else
+		else if(getPortalCooldown() == 0)
 			sendRenderData(false);
 		
 		tickPhysics();
@@ -164,13 +163,15 @@ public class AirshipEntity extends MovingCraftEntity
 		setTrackedVelocity(getVelocity().toVector3f());
 		setTrackedAngularVelocity(getAngularVelocity());
 		updateTrackedBox();
+		updateTrackedAltitude();
+		tickPortalCooldown();
 	}
 	
 	public void initializePropulsion()
 	{
 		thrusters.clear();
 		
-		for(MovingCraftBlockData blockData : blocks)
+		for(MovingCraftEntity.BlockData blockData : blocks)
 		{
 			BlockState blockState = blockData.getBlockState();
 			Block block = blockState.getBlock();
@@ -256,21 +257,19 @@ public class AirshipEntity extends MovingCraftEntity
 		getQuaternion().getEulerAnglesYXZ(angles);
 		//boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
 		netMoment.add(angles.x() * 1000000.0f, 0.0f, angles.z() * 1000000.0f);
-		
-		// Apply the net force and moment then move.
-		//setVelocity(getVelocity().multiply(0.98));
-		angularVelocity.mul(0.95f);
 		netForce.rotate(quaternion);
 		
 		if(data.getPressure() > 0)
 		{
-			float t = 90.0f + data.getTemperatureCategory() * 100.0f;
+			float t = 90.0f + data.getTemperatureCategory(getWorld().getSkyAngle(1.0f)) * 100.0f;
 			float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
-			float drag = 0.5f * airDensity * (float) (Math.min(getXWidth() * getHeight(), getZWidth() * getHeight()) * Math.pow(getVelocity().length() * 10.0, 2.0));
+			float height = (float) (getUpperHeight() - getLowerHeight());
+			float drag = 0.5f * airDensity * (float) (Math.min(getXWidth() * height, getZWidth() * height) * Math.pow(getVelocity().length() * 20.0, 2.0));
 			netForce.add(getVelocity().normalize().toVector3f().mul(-drag));
-			//netForce.add(0.0f, (float) (airDensity * gravity * getDisplacementVolume()), 0.0f);
+			angularVelocity.mul(0.95f);
 		}
 		
+		// Apply the net force and moment then move.
 		applyForce(netForce);
 		applyMomentXYZ(netMoment);
 		move(MovementType.SELF, getVelocity());
@@ -283,8 +282,8 @@ public class AirshipEntity extends MovingCraftEntity
 	
 	private void checkDimensionChange()
 	{
-		int topThreshold = getWorld().getTopY() - 4;
-		int bottomThreshold = getWorld().getBottomY() + 4;
+		int topThreshold = getWorld().getTopY();
+		int bottomThreshold = getWorld().getBottomY();
 		int arrivalY = 0;
 		
 		if(getBlockY() < bottomThreshold || getBlockY() > topThreshold)
@@ -314,7 +313,7 @@ public class AirshipEntity extends MovingCraftEntity
 		Vector3f craftVelocity = getTrackedVelocity();
 		Vector3f craftAngularVelocity = getTrackedAngularVelocity();
 
-		for(MovingCraftBlockData block : blocks)
+		for(MovingCraftEntity.BlockData block : blocks)
 		{
 			if(block.getBlockState().getBlock() == StarflightBlocks.AIRSHIP_MOTOR)
 			{

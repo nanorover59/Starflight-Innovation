@@ -44,7 +44,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.entity.StirlingEngineBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
 
 public class StirlingEngineBlock extends BlockWithEntity implements EnergyBlock
@@ -76,7 +76,7 @@ public class StirlingEngineBlock extends BlockWithEntity implements EnergyBlock
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
 	}
 	
 	@Override
@@ -94,8 +94,6 @@ public class StirlingEngineBlock extends BlockWithEntity implements EnergyBlock
 	@Override
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
-		System.out.println(world.isClient);
-		
 		if(!world.isClient)
 		{
 			NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);

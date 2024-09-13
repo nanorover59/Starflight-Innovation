@@ -3,7 +3,7 @@
     "parentName": "sol",
     "mass": 0.33010e24,
     "radius": 2.4405e6,
-    "parkingOrbitRadius": 500e3,
+    "lowOrbitAltitude": 500e3,
     "periapsis": 0.46000e11,
     "apoapsis": 0.69818e11,
     "argumentOfPeriapsis": 0.508323304919,

@@ -1,5 +1,6 @@
 package space.planet;
 
+import net.minecraft.network.PacketByteBuf;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.Identifier;
@@ -35,6 +36,38 @@ public class PlanetDimensionData
 		this.temperatureCategory = temperatureCategory;
 		this.gravity = gravity;
 		this.pressure = pressure;
+	}
+	
+	public PlanetDimensionData(PacketByteBuf buffer)
+	{
+		this.worldKey = buffer.readRegistryKey(RegistryKeys.WORLD);
+		this.isOrbit = buffer.readBoolean();
+		this.isSky = buffer.readBoolean();
+		this.overridePhysics = buffer.readBoolean();
+		this.overrideSky = buffer.readBoolean();
+		this.isCloudy = buffer.readBoolean();
+		this.hasLowClouds = buffer.readBoolean();
+		this.hasWeather = buffer.readBoolean();
+		this.hasOxygen = buffer.readBoolean();
+		this.temperatureCategory = buffer.readInt();
+		this.gravity = buffer.readDouble();
+		this.pressure = buffer.readDouble();
+	}
+	
+	public static void write(PacketByteBuf buffer, PlanetDimensionData data)
+	{
+		buffer.writeRegistryKey(data.worldKey);
+		buffer.writeBoolean(data.isOrbit);
+		buffer.writeBoolean(data.isSky);
+		buffer.writeBoolean(data.overridePhysics);
+		buffer.writeBoolean(data.overrideSky);
+		buffer.writeBoolean(data.isCloudy);
+		buffer.writeBoolean(data.hasLowClouds);
+		buffer.writeBoolean(data.hasWeather);
+		buffer.writeBoolean(data.hasOxygen);
+		buffer.writeInt(data.temperatureCategory);
+		buffer.writeDouble(data.gravity);
+		buffer.writeDouble(data.pressure);
 	}
 	
 	public PlanetDimensionData forPlanet(Planet planet)
@@ -93,8 +126,11 @@ public class PlanetDimensionData
 		return hasOxygen;
 	}
 
-	public int getTemperatureCategory()
+	public int getTemperatureCategory(float skyAngle)
 	{
+		if(temperatureCategory >= Planet.TEMPERATE && (isOrbit || pressure < 0.01))
+			return skyAngle < 0.25f || skyAngle > 0.75f ? Planet.HOT : Planet.COLD;
+			
 		return temperatureCategory;
 	}
 

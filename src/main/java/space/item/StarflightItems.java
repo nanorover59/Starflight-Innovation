@@ -32,6 +32,7 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.Util;
@@ -88,6 +89,8 @@ public class StarflightItems
 	public static final Item SUBSTRATE = new Item(new Settings());
 	public static final Item CONTROL_UNIT = new Item(new Settings());
 	public static final Item SOLAR_CELL = new Item(new Settings());
+	public static final Item HEAVY_CYLINDER = new Item(new Settings());
+	public static final Item MINI_THRUSTER = new Item(new Settings());
 	public static final Item COOLED_COPPER = new Item(new Settings());
 	public static final Item COPPER_INJECTOR = new Item(new Settings());
 	public static final Item IMPELLER = new Item(new Settings());
@@ -114,10 +117,10 @@ public class StarflightItems
 	public static final Item WAND = new MovingCraftWandItem(new Settings());
 	
 	// Armor Items
-    public static final Item SPACE_SUIT_HELMET = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings());
-    public static final Item SPACE_SUIT_CHESTPLATE = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings().component(OXYGEN, 0.0f).component(MAX_OXYGEN, 4.0f));
-    public static final Item SPACE_SUIT_LEGGINGS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings());
-    public static final Item SPACE_SUIT_BOOTS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings());
+    public static final Item SPACE_SUIT_HELMET = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.HELMET, new Item.Settings().maxDamage(ArmorItem.Type.HELMET.getMaxDamage(15)));
+    public static final Item SPACE_SUIT_CHESTPLATE = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings().maxDamage(ArmorItem.Type.CHESTPLATE.getMaxDamage(15)).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 4.0f));
+    public static final Item SPACE_SUIT_LEGGINGS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings().maxDamage(ArmorItem.Type.LEGGINGS.getMaxDamage(15)));
+    public static final Item SPACE_SUIT_BOOTS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings().maxDamage(ArmorItem.Type.BOOTS.getMaxDamage(15)));
     
     // Structure Placer Items
     public static final Item ROCKET_1 = new StructurePlacerItem(new Settings().maxCount(1), 7, 20, 7, "rocket_1");
@@ -128,12 +131,15 @@ public class StarflightItems
 	public static final Item ANCIENT_HUMANOID_SPAWN_EGG = new SpawnEggItem(StarflightEntities.ANCIENT_HUMANOID, 0xF8F9F9, 0x154360, new Item.Settings());
 	public static final Item SOLAR_SPECTRE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SOLAR_SPECTRE, 0xE9F3FD, 0xC8E2F9, new Item.Settings());
 	public static final Item STRATOFISH_SPAWN_EGG = new SpawnEggItem(StarflightEntities.STRATOFISH, 0xFFE8FA, 0x7B6D9E, new Item.Settings());
-	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xECF8FD, 0xBFE7F7, new Item.Settings());
+	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
 	
 	// Item Tags
 	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "no_oxygen_fuel"));
 	public static final TagKey<Item> COMBUSTION_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "combustion"));
     
+	// Track the state of the hidden tooltip key.
+	public static boolean tooltipKey = false;
+	
 	public static void initializeItems()
 	{
 		// Item Group
@@ -169,6 +175,8 @@ public class StarflightItems
 		registerItem(SUBSTRATE, "substrate");
 		registerItem(CONTROL_UNIT, "control_unit");
 		registerItem(SOLAR_CELL, "solar_cell");
+		registerItem(HEAVY_CYLINDER, "heavy_cylinder");
+		registerItem(MINI_THRUSTER, "mini_thruster");
 		registerItem(COOLED_COPPER, "cooled_copper");
 		registerItem(COPPER_INJECTOR, "copper_injector");
 		registerItem(IMPELLER, "impeller");
@@ -201,9 +209,9 @@ public class StarflightItems
 		
 		// Planetarium Cards
 		registerItemHidden(PLANETARIUM_CARD, "planetarium_card");
-		enterPlanetariumCardItem("mercury", 0x6F6076, 0x605C75);
-		enterPlanetariumCardItem("venus", 0xFFF980, 0xFFAA00);
-		enterPlanetariumCardItem("mars", 0xBF6A41, 0xDC4D18);
+		//enterPlanetariumCardItem("mercury", 0x6F6076, 0x605C75);
+		//enterPlanetariumCardItem("venus", 0xFFF980, 0xFFAA00);
+		//enterPlanetariumCardItem("mars", 0xBF6A41, 0xDC4D18);
 		
 		// Creative Items
 		registerItem(OXYGEN_LOADER, "oxygen_loader");
@@ -255,5 +263,27 @@ public class StarflightItems
 			enumMap.put(type, defense.get(type));
 		
 		return Registry.registerReference(Registries.ARMOR_MATERIAL, Identifier.of(StarflightMod.MOD_ID, id), new ArmorMaterial(enumMap, enchantability, equipSound, repairIngredient, layers, toughness, knockbackResistance));
+	}
+	
+	public static void hiddenItemTooltip(List<Text> tooltip, Text ... texts)
+	{
+		if(tooltipKey)
+		{
+			for(Text text : texts)
+				tooltip.add(text);
+		}
+		else
+			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
+	}
+	
+	public static void hiddenItemTooltip(List<Text> tooltip, List<Text> texts)
+	{
+		if(tooltipKey)
+		{
+			for(Text text : texts)
+				tooltip.add(text);
+		}
+		else
+			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
 	}
 }

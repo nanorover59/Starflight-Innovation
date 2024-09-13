@@ -1,16 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "aa ",
-        "aba",
-        " aa"
+        "cbc",
+        "bab",
+        "cbc"
     ],
     "key": {
         "a": {
-            "item": "space:iron_plate"
+            "item": "space:structural_iron"
         },
         "b": {
-            "item": "space:iron_frame"
+            "item": "space:iron_plate"
+        },
+        "c": {
+            "item": "minecraft:redstone"
         }
     },
     "result": {

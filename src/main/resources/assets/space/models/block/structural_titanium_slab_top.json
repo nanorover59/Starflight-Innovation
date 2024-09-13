@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "space:block/structural_titanium",
+    "side": "space:block/structural_titanium",
+    "top": "space:block/structural_titanium"
+  }
+}

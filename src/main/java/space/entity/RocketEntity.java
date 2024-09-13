@@ -7,7 +7,6 @@ import org.joml.Matrix3f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -36,18 +35,16 @@ import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
-import space.client.gui.SpaceNavigationScreen;
 import space.network.c2s.RocketInputC2SPacket;
 import space.network.c2s.RocketTravelButtonC2SPacket;
-import space.network.s2c.RocketOpenTravelScreenS2CPacket;
+import space.network.s2c.OpenNavigationScreenS2CPacket;
 import space.particle.StarflightParticleTypes;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.QuaternionUtil;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 import space.util.VectorUtil;
-import space.vessel.MovingCraftBlockData;
 
 public class RocketEntity extends MovingCraftEntity
 {
@@ -59,7 +56,6 @@ public class RocketEntity extends MovingCraftEntity
 	private static final TrackedData<Boolean> USER_INPUT = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.BOOLEAN);
 	private static final TrackedData<Integer> HOLD_STOP = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.INTEGER);
 	private static final TrackedData<Float> THROTTLE = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
-	private static final TrackedData<Float> ALTITUDE = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> OXYGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Float> HYDROGEN_LEVEL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.FLOAT);
 	private static final TrackedData<Vector3f> ATTITUDE_CONTROL = DataTracker.registerData(RocketEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
@@ -102,7 +98,7 @@ public class RocketEntity extends MovingCraftEntity
 		super(entityType, world);
 	}
 
-	public RocketEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double hydrogenSupply, double hydrogenCapacity, double oxygenSupply, double oxygenCapacity)
+	public RocketEntity(World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double hydrogenSupply, double hydrogenCapacity, double oxygenSupply, double oxygenCapacity)
 	{
 		super(StarflightEntities.ROCKET, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		this.pausePhysics = false;
@@ -125,7 +121,6 @@ public class RocketEntity extends MovingCraftEntity
 		builder.add(USER_INPUT, Boolean.valueOf(false));
 		builder.add(HOLD_STOP, Integer.valueOf(0));
 		builder.add(THROTTLE, Float.valueOf(0.0f));
-		builder.add(ALTITUDE, Float.valueOf(0.0f));
 		builder.add(OXYGEN_LEVEL, Float.valueOf(0.0f));
 		builder.add(HYDROGEN_LEVEL, Float.valueOf(0.0f));
 		builder.add(ATTITUDE_CONTROL, new Vector3f());
@@ -145,11 +140,6 @@ public class RocketEntity extends MovingCraftEntity
 	public void setThrottle(float throttle)
 	{
 		this.dataTracker.set(THROTTLE, Float.valueOf(throttle));
-	}
-
-	public void setAltitude(float altitude)
-	{
-		this.dataTracker.set(ALTITUDE, Float.valueOf(altitude));
 	}
 
 	public void setOxygenLevel(float oxygenLevel)
@@ -185,11 +175,6 @@ public class RocketEntity extends MovingCraftEntity
 	public float getThrottle()
 	{
 		return this.dataTracker.get(THROTTLE);
-	}
-
-	public float getAltitude()
-	{
-		return this.dataTracker.get(ALTITUDE);
 	}
 
 	public float getOxygenLevel()
@@ -245,7 +230,7 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			if(soundEffectTimer <= 0)
 			{
-				playSound(StarflightEffects.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
+				playSound(StarflightSoundEvents.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
 				soundEffectTimer = 5;
 			} else
 				soundEffectTimer--;
@@ -301,13 +286,12 @@ public class RocketEntity extends MovingCraftEntity
 			sendRenderData(true);
 			this.releaseBlocks();
 		}
-		else
+		else if(getPortalCooldown() == 0)
 			sendRenderData(false);
 
 		// Update thruster state tracked data.
 		setThrottle((float) throttle);
 		setUserInput(autoState == 0);
-		setAltitude((float) (getY() - getLowerHeight() - arrivalPos.getY()));
 		setTrackedVelocity(getVelocity().toVector3f());
 		setTrackedAngularVelocity(getAngularVelocity());
 		setOxygenLevel((float) (oxygenSupply / oxygenCapacity));
@@ -315,6 +299,8 @@ public class RocketEntity extends MovingCraftEntity
 		setAttitudeControl(rollControl, pitchControl, yawControl);
 		setTranslationControl(xControl, yControl, zControl);
 		updateTrackedBox();
+		updateTrackedAltitude();
+		tickPortalCooldown();
 	}
 
 	/**
@@ -334,7 +320,7 @@ public class RocketEntity extends MovingCraftEntity
 		pitchTorque = 30e3f;
 		yawTorque = 30e3f;
 
-		for(MovingCraftBlockData blockData : blocks)
+		for(MovingCraftEntity.BlockData blockData : blocks)
 		{
 			BlockState blockState = blockData.getBlockState();
 			Block block = blockState.getBlock();
@@ -362,7 +348,7 @@ public class RocketEntity extends MovingCraftEntity
 				{
 					Vector3f position = new Vector3f(thruster.getLeft()).rotate(blockFacingQuaternion).add(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 					Vector3f direction = new Vector3f(thruster.getRight()).rotate(blockFacingQuaternion);
-					rcsThrusters.add(new Thruster(position, direction, 2.0e4, 400.0, 0.0));
+					rcsThrusters.add(new Thruster(position, direction, 4.0e4, 400.0, 0.0));
 				}
 			}
 			else if(block instanceof ReactionWheelBlock)
@@ -538,23 +524,16 @@ public class RocketEntity extends MovingCraftEntity
 				arrivalPos = new BlockPos(arrivalPos.getX(), PARKING_HEIGHT_ORBIT, arrivalPos.getZ());
 		}
 
+		// Automatic launch and landing states.
 		if(autoState == 1)
-		{
-			if(nominalThrust / getMass() > maxG)
-				throttle = (getMass() * maxG) / nominalThrust;
-			else
-				throttle = 1.0;
-		} else if(autoState == 2)
+			throttle = 1.0;
+		else if(autoState == 2)
 		{
 			double currentHeight = getY() - getLowerHeight() - arrivalPos.getY();
 			double vy = getVelocity().getY() * 20.0; // Vertical velocity in m/s.
 			double f = (getMass() * (0.5 * vy * vy + gravity * currentHeight)) / currentHeight; // Force to cancel vertical velocity.
 			double t = Math.min(f / nominalThrust, 1.0); // Throttle to cancel vertical velocity.
-
-			if(f > Math.max(gravity * 2.0, SG) * getMass())
-				throttle = t;
-			else
-				throttle = 0.0;
+			throttle = t;
 		}
 
 		// Stability Assist System
@@ -601,11 +580,10 @@ public class RocketEntity extends MovingCraftEntity
 
 		if(data.getPressure() > 0)
 		{
-			float t = 90.0f + data.getTemperatureCategory() * 100.0f;
+			float t = 90.0f + data.getTemperatureCategory(getWorld().getSkyAngle(1.0f)) * 100.0f;
 			float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
 			float drag = 0.5f * airDensity * (float) (getXWidth() * getZWidth() * Math.pow(getVelocity().length() * 10.0, 2.0));
 			netForce.add(getVelocity().normalize().toVector3f().mul(-drag));
-			netForce.add(0.0f, (float) (airDensity * gravity * getDisplacementVolume()), 0.0f);
 		}
 
 		applyForce(netForce);
@@ -621,6 +599,12 @@ public class RocketEntity extends MovingCraftEntity
 		changeMass(-totalMassFlow);
 		hydrogenSupply -= totalMassFlow * (1.0 / 7.0);
 		oxygenSupply -= totalMassFlow * (6.0 / 7.0);
+		
+		if(hydrogenSupply < 0.0)
+			hydrogenSupply = 0.0;
+		
+		if(oxygenSupply < 0.0)
+			oxygenSupply = 0.0;
 	}
 
 	private void checkDimensionChange()
@@ -635,12 +619,28 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			if(getBlockPos().getY() > travelCeiling || getBlockPos().getY() < getWorld().getBottomY())
 			{
-				openTravelScreen();
-				return;
+				if(getDeltaV() == 0.0)
+				{
+					// Crash landing if there is no fuel.
+					if(data.getPlanet().getSky() != null)
+						nextWorld = getServer().getWorld(data.getPlanet().getSky().getWorldKey());
+					else
+						nextWorld = getServer().getWorld(data.getPlanet().getSurface().getWorldKey());
+					
+					setVelocity(0.0, -4.0, 0.0);
+					arrivalY = TRAVEL_CEILING;
+				}
+				else
+				{
+					// Pause and open the travel screen.
+					openNavigationScreen();
+					return;
+				}
 			}
 		}
 		else if(getBlockPos().getY() > travelCeiling)
 		{
+			// Surface to Orbit
 			nextWorld = getServer().getWorld(data.getPlanet().getOrbit().getWorldKey());
 			requiredDeltaV = data.isSky() ? data.getPlanet().dVSkyToOrbit() : data.getPlanet().dVSurfaceToOrbit();
 			setVelocity(0.0, -2.0, 0.0);
@@ -649,24 +649,33 @@ public class RocketEntity extends MovingCraftEntity
 		}
 		else
 		{
-			int topThreshold = getWorld().getTopY() - 8;
-			int bottomThreshold = getWorld().getBottomY() + 8;
+			int topThreshold = getWorld().getTopY();
+			int bottomThreshold = getWorld().getBottomY();
 
 			if(data.isSky() && data.getPlanet().getSurface() != null && getBlockY() < bottomThreshold)
 			{
+				// Sky to Surface
 				nextWorld = getServer().getWorld(data.getPlanet().getSurface().getWorldKey());
 				arrivalY = topThreshold - 1;
 			}
 			else if(!data.isOrbit() && !data.isSky() && data.getPlanet().getSky() != null && getBlockY() > topThreshold)
 			{
+				// Surface to Sky
 				nextWorld = getServer().getWorld(data.getPlanet().getSky().getWorldKey());
 				arrivalY = topThreshold + 1;
 			}
 		}
 
-		if(nextWorld != null && requiredDeltaV < getDeltaV())
+		if(nextWorld != null)
 		{
-			useDeltaV(requiredDeltaV);
+			if(requiredDeltaV > 0.0)
+			{
+				if(requiredDeltaV > getDeltaV())
+					return;
+				
+				useDeltaV(requiredDeltaV);
+			}
+			
 			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
 			this.changeDimension(nextWorld, new Vec3d(arrivalPos.getX() + 0.5, arrivalY, arrivalPos.getZ() + 0.5), arrivalYaw);
 		}
@@ -680,7 +689,7 @@ public class RocketEntity extends MovingCraftEntity
 	}
 
 	@Override
-	public void onBlockReleased(MovingCraftBlockData blockData, BlockPos worldPos)
+	public void onBlockReleased(MovingCraftEntity.BlockData blockData, BlockPos worldPos)
 	{
 		if(blockData.getStoredFluid() > 0)
 		{
@@ -706,13 +715,13 @@ public class RocketEntity extends MovingCraftEntity
 		}
 	}
 
-	private void openTravelScreen()
+	private void openNavigationScreen()
 	{
 		for(Entity entity : getPassengerList())
 		{
 			if(entity instanceof ServerPlayerEntity)
 			{
-				ServerPlayNetworking.send((ServerPlayerEntity) entity, new RocketOpenTravelScreenS2CPacket(getDeltaV()));
+				ServerPlayNetworking.send((ServerPlayerEntity) entity, new OpenNavigationScreenS2CPacket(getDeltaV()));
 				pausePhysics = true;
 				return;
 			}
@@ -725,7 +734,7 @@ public class RocketEntity extends MovingCraftEntity
 		Vector3f craftVelocity = getTrackedVelocity();
 		Vector3f craftAngularVelocity = getTrackedAngularVelocity();
 
-		for(MovingCraftBlockData block : blocks)
+		for(MovingCraftEntity.BlockData block : blocks)
 		{
 			if(getThrottle() > 0.0f && block.getBlockState().getBlock() instanceof RocketThrusterBlock && !block.redstonePower() && block.getPosition().getY() < 0)
 			{
@@ -978,12 +987,6 @@ public class RocketEntity extends MovingCraftEntity
 				}
 			}
 		});
-	}
-
-	public static void receiveOpenTravelScreen(RocketOpenTravelScreenS2CPacket payload, ClientPlayNetworking.Context context)
-	{
-		double deltaV = payload.deltaV();
-		context.client().execute(() -> context.client().setScreen(new SpaceNavigationScreen(deltaV)));
 	}
 
 	private static Vector3f getDirectionWithGimbal(Vector3f position, Vector3f direction, float gimbal, float rollControl, float pitchControl, float yawControl, boolean rollOnZAxis)

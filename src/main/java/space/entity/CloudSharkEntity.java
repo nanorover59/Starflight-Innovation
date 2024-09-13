@@ -2,13 +2,17 @@ package space.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class CloudSharkEntity extends StratofishEntity
 {
@@ -63,6 +67,11 @@ public class CloudSharkEntity extends StratofishEntity
 		
 		return false;
 	}
+	
+	public static boolean canCloudSharkSpawn(EntityType<CloudSharkEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
+	{
+        return random.nextInt(2) == 0;
+    }
 	
 	class AttackGoal extends Goal
 	{

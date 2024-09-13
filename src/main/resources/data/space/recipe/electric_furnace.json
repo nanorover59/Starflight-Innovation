@@ -13,7 +13,7 @@
             "item": "space:coil"
         },
         "c": {
-            "item": "space:copper_cable"
+            "item": "minecraft:redstone"
         }
     },
     "result": {

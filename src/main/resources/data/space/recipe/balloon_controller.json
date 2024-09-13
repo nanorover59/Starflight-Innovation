@@ -1,18 +1,15 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " a ",
-        "cbc",
-        " c "
+        " b ",
+        "bab",
+        " b "
     ],
     "key": {
         "a": {
-            "item": "space:valve"
-        },
-        "b": {
             "item": "space:hydrogen_tank"
         },
-        "c": {
+        "b": {
             "item": "space:reinforced_fabric"
         }
     },

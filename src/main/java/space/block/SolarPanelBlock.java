@@ -17,7 +17,6 @@ import net.minecraft.block.Waterloggable;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -36,7 +35,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import space.block.entity.SolarPanelBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -69,18 +68,11 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		MinecraftClient client = MinecraftClient.getInstance();
-		
-		if(client.world == null)
-			return;
-		
 		Planet viewpointPlanet = PlanetList.getClient().getViewpointPlanet();
 		PlanetDimensionData dimensionData = PlanetList.getClient().getViewpointDimensionData();
 		double solarMultiplier = 1.0;
 		
-		if(!client.world.getDimension().hasSkyLight())
-			solarMultiplier = 0.0;
-		else if(viewpointPlanet != null && dimensionData != null)
+		if(viewpointPlanet != null && dimensionData != null)
 		{
 			double d = viewpointPlanet.getPosition().lengthSquared();
 			
@@ -96,7 +88,7 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 		textList.add(Text.translatable("block.space.energy_producer_nominal").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
 		textList.add(Text.translatable("block.space.energy_producer_local").append(String.valueOf(df.format(getOutput() * solarMultiplier))).append("kJ/s").formatted(Formatting.GOLD));
 		textList.add(Text.translatable("block.space.solar_panel.description"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -108,7 +100,7 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 	@Override
 	public double getEnergyCapacity()
 	{
-		return 8.0;
+		return 16.0;
 	}
 
 	@Override

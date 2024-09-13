@@ -1,0 +1,14 @@
+{
+  "structures" : [
+    {
+      "structure" : "space:volcano",
+      "weight" : 1
+    }
+  ],
+  "placement" : {
+    "salt" : 56904314,
+    "spacing" : 16,
+    "separation" : 12,
+    "type" : "minecraft:random_spread"
+  }
+}

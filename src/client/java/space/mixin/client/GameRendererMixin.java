@@ -11,7 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Uniform;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.RenderTickCounter;
-import space.client.render.StarflightClientEffects;
+import space.client.render.StarflightRenderEffects;
 
 @Mixin(GameRenderer.class)
 public class GameRendererMixin
@@ -21,15 +21,15 @@ public class GameRendererMixin
 	@Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;drawEntityOutlinesFramebuffer()V", shift = At.Shift.AFTER))
     private void injectAfterDrawEntityOutlinesFramebuffer(RenderTickCounter tickCounter, boolean tick, CallbackInfo info)
 	{
-		if(StarflightClientEffects.radiationShader != null && StarflightClientEffects.radiation > 0)
+		if(StarflightRenderEffects.radiationShader != null && StarflightRenderEffects.radiation > 0)
 		{
-			Uniform aberrationStrength = ((PostEffectProcessorAccessorMixin) StarflightClientEffects.radiationShader).getPasses().get(0).getProgram().getUniformByNameOrDummy("Strength");
-			Uniform noiseSeed = ((PostEffectProcessorAccessorMixin) StarflightClientEffects.radiationShader).getPasses().get(1).getProgram().getUniformByNameOrDummy("Seed");
-			Uniform noiseThreshold = ((PostEffectProcessorAccessorMixin) StarflightClientEffects.radiationShader).getPasses().get(1).getProgram().getUniformByNameOrDummy("Threshold");
-			aberrationStrength.set(StarflightClientEffects.radiation);
+			Uniform aberrationStrength = ((PostEffectProcessorAccessorMixin) StarflightRenderEffects.radiationShader).getPasses().get(0).getProgram().getUniformByNameOrDummy("Strength");
+			Uniform noiseSeed = ((PostEffectProcessorAccessorMixin) StarflightRenderEffects.radiationShader).getPasses().get(1).getProgram().getUniformByNameOrDummy("Seed");
+			Uniform noiseThreshold = ((PostEffectProcessorAccessorMixin) StarflightRenderEffects.radiationShader).getPasses().get(1).getProgram().getUniformByNameOrDummy("Threshold");
+			aberrationStrength.set(StarflightRenderEffects.radiation);
 			noiseSeed.set(client.world.random.nextFloat());
-			noiseThreshold.set(1.0f - StarflightClientEffects.radiation * 0.001f);
-			StarflightClientEffects.radiationShader.render(tickCounter.getTickDelta(false));
+			noiseThreshold.set(1.0f - StarflightRenderEffects.radiation * 0.001f);
+			StarflightRenderEffects.radiationShader.render(tickCounter.getTickDelta(false));
 			client.getFramebuffer().beginWrite(false);
 		}
     }

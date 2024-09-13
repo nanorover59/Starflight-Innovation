@@ -20,9 +20,9 @@
     "creature": [
       {
         "type": "space:stratofish",
-        "maxCount": 1,
+        "maxCount": 2,
         "minCount": 1,
-        "weight": 10
+        "weight": 3
       },
       {
         "type": "space:cloud_shark",

@@ -13,9 +13,9 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
+import space.network.s2c.UnlockPlanetS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetList;
-import space.util.StarflightEffects;
 import space.world.persistent.StarflightPlayerState;
 
 public class PlanetariumCardItem extends Item
@@ -59,7 +59,7 @@ public class PlanetariumCardItem extends Item
 	        		for(Planet satellite : planet.getSatellites())
 	        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), satellite.getName());
 	        		
-	        		StarflightEffects.sendUnlockPlanet(world, planetName, stack.get(StarflightItems.PRIMARY_COLOR));
+	        		UnlockPlanetS2CPacket.sendUnlockPlanet(world, planetName, stack.get(StarflightItems.PRIMARY_COLOR));
         		}
         	}
         }

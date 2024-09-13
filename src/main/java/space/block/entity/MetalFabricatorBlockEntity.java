@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
@@ -18,11 +17,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryWrapper;
@@ -49,6 +47,7 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 {
 	private List<RecipeEntry<MetalFabricatorRecipe>> availableRecipes = Lists.newArrayList();
 	private DefaultedList<ItemStack> inventory;
+	private ItemStack lastInputStack = ItemStack.EMPTY;
 	private ItemStack lastDrawingStack = ItemStack.EMPTY;
 	private double energy;
 	private int chargeState;
@@ -107,11 +106,6 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 				return 4;
 			}
 		};
-	}
-
-	public static void addIce(Map<Item, Integer> iceMap, ItemConvertible item, int iceMass)
-	{
-		iceMap.put(item.asItem(), iceMass);
 	}
 	
 	private static boolean canAcceptRecipeOutput(DynamicRegistryManager registryManager, MetalFabricatorRecipe recipe, DefaultedList<ItemStack> slots)
@@ -268,7 +262,12 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 		return false;
 	}
 	
-	public static List<RecipeEntry<MetalFabricatorRecipe>> listAvailableRecipes(World world, ItemStack drawingStack)
+	public static List<RecipeEntry<MetalFabricatorRecipe>> listAllRecipes(World world)
+	{
+		return world.getRecipeManager().listAllOfType(StarflightRecipes.METAL_FABRICATOR).stream().sorted(new RecipeComparator()).collect(Collectors.toList());
+	}
+	
+	public static List<RecipeEntry<MetalFabricatorRecipe>> listAvailableRecipes(World world, ItemStack inputStack, ItemStack drawingStack)
 	{
 		List<RecipeEntry<MetalFabricatorRecipe>> allRecipes = world.getRecipeManager().listAllOfType(StarflightRecipes.METAL_FABRICATOR).stream().sorted(new RecipeComparator()).collect(Collectors.toList());
 		List<RecipeEntry<MetalFabricatorRecipe>> availableRecipes = Lists.newArrayList();
@@ -279,7 +278,9 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 		
 		for(RecipeEntry<MetalFabricatorRecipe> recipeEntry : allRecipes)
 		{
-			if(recipeEntry.value().getGroup().equals("default") || drawingGroups.contains(recipeEntry.value().getGroup()))
+			Ingredient ingredient = recipeEntry.value().getIngredients().getFirst();
+			
+			if(ingredient.test(inputStack) && (recipeEntry.value().getGroup().equals("default") || drawingGroups.contains(recipeEntry.value().getGroup())))
 				availableRecipes.add(recipeEntry);
 		}
 		
@@ -389,9 +390,10 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
 		MetalFabricatorRecipe recipe = null;
 		
-		if(blockEntity.availableRecipes.isEmpty() || !ItemStack.areEqual(drawingStack, blockEntity.lastDrawingStack))
+		if(blockEntity.availableRecipes.isEmpty() || !ItemStack.areEqual(inputStack, blockEntity.lastInputStack) || !ItemStack.areEqual(drawingStack, blockEntity.lastDrawingStack))
 		{
-			blockEntity.availableRecipes = listAvailableRecipes(world, drawingStack);
+			blockEntity.availableRecipes = listAllRecipes(world);
+			blockEntity.lastInputStack = inputStack.copy();
 			blockEntity.lastDrawingStack = drawingStack.copy();
 		}
 			

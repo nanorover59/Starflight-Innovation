@@ -31,8 +31,8 @@ import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import space.StarflightMod;
 import space.client.render.PlanetRenderer;
-import space.client.render.StarflightClientEffects;
 import space.network.c2s.RocketTravelButtonC2SPacket;
+import space.network.s2c.OpenNavigationScreenS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetList;
 
@@ -44,7 +44,7 @@ public class SpaceNavigationScreen extends Screen
     private static final int GREEN = 0xFF6ABE30;
 	private static final int RED = 0xFFDC3222;
 	private boolean mouseHold = false;
-	private double scaleFactor = 3.0e-10;
+	private double scaleFactor = 4.0e-10;
 	private static double transferDeltaV;
     private double deltaV;
 	private Planet selectedPlanet = null;
@@ -98,7 +98,6 @@ public class SpaceNavigationScreen extends Screen
 		boolean mouseDown = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		MinecraftClient client = MinecraftClient.getInstance();
 		Planet currentPlanet = planetList.getViewpointPlanet();
-		//ClientPlanet selectedPlanet = ClientPlanetList.getPlanets(false).get(ClientPlanetList.getPlanets(false).indexOf(selectedPlanet));
 		double selectedPlanetX = selectedPlanet.getPosition().getX() * scaleFactor;
 		double selectedPlanetY = selectedPlanet.getPosition().getZ() * scaleFactor;
 		double focusX = selectedPlanetX;
@@ -110,7 +109,6 @@ public class SpaceNavigationScreen extends Screen
 		
 		// Render the displayed planets.
 		context.fill(0, 0, width, height, -100, 0xFF000000);
-		StarflightClientEffects.renderScreenGUIOverlay(client, context, width, height, delta);
 		
 		for(int i = 0; i < planetList.getPlanets().size(); i++)
 		{
@@ -121,14 +119,14 @@ public class SpaceNavigationScreen extends Screen
 				continue;
 
 			int renderType = planet.getName().equals("sol") ? 1 : 0;
-			float renderWidth = Math.max(4.0f, (float) (planet.getRadius() * scaleFactor));
+			float renderWidth = Math.max(planet == selectedPlanet ? 8.0f : 4.0f, (float) (planet.getRadius() * scaleFactor));
 			float px = (float) ((planet.getPosition().getX() * scaleFactor) + x - focusX);
 			float py = (float) ((planet.getPosition().getZ() * scaleFactor) + y - focusY);
 			Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
 
 			// drawGlow(matrix, px, py, 8.0f, 1.0f, 1.0f, 1.0f);
 			// !planet.unlocked || 
-			if(planet != selectedPlanet && Math.sqrt(Math.pow(px - x, 2.0) + Math.pow(py - y, 2.0)) < 4.0)
+			if(planet != selectedPlanet && Math.sqrt(Math.pow(px - x, 2.0) + Math.pow(py - y, 2.0)) < 8.0)
 				continue;
 
 			// Draw the planet's orbit in the GUI.
@@ -143,7 +141,7 @@ public class SpaceNavigationScreen extends Screen
 
 			if(renderType == 1)
 			{
-				drawGlow(matrix, px, py, 8.0f, 1.0f, 1.0f, 1.0f);
+				drawGlow(matrix, px, py, 16.0f, 1.0f, 1.0f, 1.0f);
 				drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 			}
 			else if(planet.hasSimpleTexture())
@@ -336,7 +334,7 @@ public class SpaceNavigationScreen extends Screen
 	private double getInitialScaleFactor(Planet planet)
 	{
 		if(selectedPlanet.getParent() == null)
-			return 3.0e-10;
+			return 4.0e-10;
 		else
 		{
 			double maxDistance = selectedPlanet.getRadius();
@@ -347,7 +345,7 @@ public class SpaceNavigationScreen extends Screen
 					maxDistance = satellite.getApoapsis();
 			}
 			
-			return (1.0 / maxDistance) * 32.0;
+			return (1.0 / maxDistance) * 80.0;
 		}
 	}
 	
@@ -390,5 +388,11 @@ public class SpaceNavigationScreen extends Screen
     		mouseHold = true;
     		close();
         }
+	}
+	
+	public static void receiveOpenNavigationScreen(OpenNavigationScreenS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		double deltaV = payload.deltaV();
+		context.client().execute(() -> context.client().setScreen(new SpaceNavigationScreen(deltaV)));
 	}
 }

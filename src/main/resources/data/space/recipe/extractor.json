@@ -1,22 +1,22 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
-        "bab",
-        "dcd"
+        "cbc",
+        "cac",
+        "ddd"
     ],
     "key": {
         "a": {
-            "item": "space:titanium_machine_casing"
+            "item": "space:iron_machine_casing"
         },
         "b": {
-            "item": "space:coil"
+            "item": "space:pump"
         },
         "c": {
-            "item": "space:copper_cable"
+            "item": "space:water_pipe"
         },
         "d": {
-            "item": "space:water_pipe"
+            "item": "space:coil"
         }
     },
     "result": {

@@ -7,7 +7,6 @@ import java.util.HashMap;
 
 import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.MinecraftServer;
@@ -15,7 +14,8 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.WorldSavePath;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.network.s2c.PlanetDataS2CPacket;
+import space.network.s2c.PlanetDynamicDataS2CPacket;
+import space.network.s2c.PlanetStaticDataS2CPacket;
 import space.util.IWorldMixin;
 
 public class PlanetList
@@ -25,7 +25,7 @@ public class PlanetList
 	
 	private ArrayList<Planet> planetList = new ArrayList<Planet>();
 	private ArrayList<Planet> planetListBuffer = new ArrayList<Planet>();
-	private PlanetDataS2CPacket dynamicDataBuffer = null;
+	private PlanetDynamicDataS2CPacket dynamicDataBuffer = null;
 	private Planet viewpointPlanet = null;
 	private PlanetDimensionData viewpointDimensionData = null;
 	private int timeSteps = 1;
@@ -44,6 +44,17 @@ public class PlanetList
 			clientInstance = new PlanetList();
 		
 		return clientInstance;
+	}
+	
+	public static void reset()
+	{
+		instance = null;
+		clientInstance = null;
+	}
+	
+	public void setDynamicDataBuffer(PlanetDynamicDataS2CPacket packet)
+	{
+		dynamicDataBuffer = packet;
 	}
 	
 	/**
@@ -216,7 +227,7 @@ public class PlanetList
     	planetListBuffer = new ArrayList<Planet>();
     	
     	// Update Clients
-    	sendDynamicDataToClients(server);
+    	sendStaticDataToClients(server);
 	}
 	
 	/**
@@ -301,11 +312,27 @@ public class PlanetList
 			dynamicDataMap.put(planet.getName(), planet.getDynamicData());
 		
 		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
-			ServerPlayNetworking.send(player, new PlanetDataS2CPacket(dynamicDataMap, player.getWorld().getRegistryKey(), timeSteps));
+			ServerPlayNetworking.send(player, new PlanetDynamicDataS2CPacket(dynamicDataMap, player.getWorld().getRegistryKey(), timeSteps));
 	}
 	
-	public static void receiveDynamicData(PlanetDataS2CPacket payload, ClientPlayNetworking.Context context)
+	public void sendStaticDataToClients(MinecraftServer server)
 	{
-		PlanetList.getClient().dynamicDataBuffer = payload;
+		HashMap<String, Planet.StaticData> staticDataMap = new HashMap<String, Planet.StaticData>();
+		
+		for(Planet planet : planetList)
+			staticDataMap.put(planet.getName(), planet.getStaticData());
+		
+		for(ServerPlayerEntity player : server.getPlayerManager().getPlayerList())
+			ServerPlayNetworking.send(player, new PlanetStaticDataS2CPacket(staticDataMap));
+	}
+	
+	public void sendStaticDataToClient(ServerPlayerEntity player)
+	{
+		HashMap<String, Planet.StaticData> staticDataMap = new HashMap<String, Planet.StaticData>();
+		
+		for(Planet planet : planetList)
+			staticDataMap.put(planet.getName(), planet.getStaticData());
+		
+		ServerPlayNetworking.send(player, new PlanetStaticDataS2CPacket(staticDataMap));
 	}
 }

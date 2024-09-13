@@ -3,20 +3,17 @@
     "pattern": [
         " c ",
         "bab",
-        " d "
+        " c "
     ],
     "key": {
         "a": {
-            "item": "space:titanium_frame"
+            "item": "space:iron_machine_casing"
         },
         "b": {
-            "item": "space:titanium_plate"
+            "item": "space:electric_motor"
         },
         "c": {
-            "item": "space:control_unit"
-        },
-        "d": {
-            "item": "space:electric_motor"
+            "item": "minecraft:redstone"
         }
     },
     "result": {

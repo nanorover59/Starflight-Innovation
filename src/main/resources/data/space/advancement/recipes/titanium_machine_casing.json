@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_titanium_frame": {
+    "has_titanium_ingot": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:titanium_frame"
+              "space:titanium_ingot"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_titanium_frame",
+      "has_titanium_ingot",
       "has_the_recipe"
     ]
   ]

@@ -7,12 +7,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
+import space.util.AirUtil;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin
@@ -42,7 +44,7 @@ public abstract class EntityMixin
 	/**
 	 * Modified vanilla entity physics to account for different air resistance values.
 	 */
-	/*@Inject(method = "tick()V", at = @At("TAIL"), cancellable = true)
+	@Inject(method = "tick()V", at = @At("TAIL"), cancellable = true)
 	public void tickInject(CallbackInfo info)
 	{
 		Entity entity = (Entity) (Object) this;
@@ -59,13 +61,10 @@ public abstract class EntityMixin
 				{
 					double airMultiplier = AirUtil.getAirResistanceMultiplier(world, data, entity.getBlockPos()); // Atmospheric pressure multiplier for air resistance.
 					entity.setVelocity(entity.getVelocity().multiply((1.0 / 0.98) * (1.0 / (1.0 + (0.02 * airMultiplier)))));
-					
-					//if(entity instanceof PlayerEntity)
-					//	System.out.println(entity.getVelocity());
 				} 
 			}
 		}
-	}*/
+	}
 	
 	/**
 	 * Inject into the tickPortal() function for entities to travel between "surface" and "sky" dimensions.
@@ -87,18 +86,19 @@ public abstract class EntityMixin
 				{
 					ServerWorld next = null;
 					Vec3d arrivalPos = null;
-					int topThreshold = world.getTopY() - 4;
-					int bottomThreshold = world.getBottomY() + 4;
+					int topThreshold = world.getTopY();
+					int bottomThreshold = world.getBottomY();
+					Vec3d velocity = entity.getVelocity();
 					
-					if(data.isSky() && data.getPlanet().getSurface() != null && entity.getBlockY() < bottomThreshold)
+					if(data.isSky() && data.getPlanet().getSurface() != null && entity.getBlockY() < bottomThreshold && velocity.getY() < 0.0)
 					{
 						next = entity.getServer().getWorld(data.getPlanet().getSurface().getWorldKey());
-						arrivalPos = new Vec3d(entity.getX(), topThreshold - 4.0, entity.getZ());
+						arrivalPos = new Vec3d(entity.getX(), topThreshold, entity.getZ());
 					}
-					else if(!data.isOrbit() && !data.isSky() && data.getPlanet().getSky() != null && entity.getBlockY() > topThreshold)
+					else if(!data.isOrbit() && !data.isSky() && data.getPlanet().getSky() != null && entity.getBlockY() > topThreshold && velocity.getY() > 0.0)
 					{
 						next = entity.getServer().getWorld(data.getPlanet().getSky().getWorldKey());
-						arrivalPos = new Vec3d(entity.getX(), bottomThreshold + 4.0, entity.getZ());
+						arrivalPos = new Vec3d(entity.getX(), bottomThreshold, entity.getZ());
 					}
 					
 					if(next != null)
@@ -109,6 +109,8 @@ public abstract class EntityMixin
 						if(transferred != null)
 						{
 							transferred.setPortalCooldown(60);
+							transferred.setVelocity(velocity);
+							transferred.velocityDirty = true;
 							info.cancel();
 						}
 					}

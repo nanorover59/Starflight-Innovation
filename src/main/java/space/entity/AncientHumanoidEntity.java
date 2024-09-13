@@ -18,7 +18,7 @@ import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import space.item.StarflightItems;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntity
 {
@@ -31,7 +31,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	
 	public static DefaultAttributeContainer.Builder createAncientHumanoidAttributes()
 	{
-        return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 60.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
+        return ZombieEntity.createZombieAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 20.0);
     }
 
 	public static boolean canSpawn(EntityType<HuskEntity> type, ServerWorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
@@ -54,7 +54,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	@Override
 	protected SoundEvent getAmbientSound()
 	{
-		return StarflightEffects.NOISE_SOUND_EVENT;
+		return StarflightSoundEvents.NOISE_SOUND_EVENT;
 	}
 
 	@Override
@@ -73,6 +73,11 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	protected SoundEvent getStepSound()
 	{
 		return SoundEvents.BLOCK_STONE_STEP;
+	}
+	
+	public float getSoundVolume()
+	{
+		return 0.5f;
 	}
 	
 	@Override
@@ -102,7 +107,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	@Override
 	public float getRadiationStrength()
 	{
-		return 0.5f;
+		return getTarget() != null ? 0.5f : 0.0f;
 	}
 	
 	@Override

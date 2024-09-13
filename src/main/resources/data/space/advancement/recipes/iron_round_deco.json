@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:iron_round_deco"
+    ]
+  },
+  "criteria": {
+    "has_structural_iron": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:structural_iron"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:iron_round_deco"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_structural_iron",
+      "has_the_recipe"
+    ]
+  ]
+}

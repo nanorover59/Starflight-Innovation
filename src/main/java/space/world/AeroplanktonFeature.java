@@ -30,8 +30,11 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
 		
-		int divisions = random.nextBetween(6, 12);
-		int reach = Math.round(powerLaw(random, 2.5f, 4.0f, 16.0f));
+		if(!structureWorldAccess.getBlockState(origin).isAir())
+			return false;
+		
+		int divisions = Math.round(powerLaw(random, 2.5f, 6.0f, 12.0f));
+		int reach = Math.round(powerLaw(random, 2.5f, 8.0f, 16.0f));
 		Vector3f vector = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
 		Vector3f axis = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
 		vector.rotateAxis((float) (Math.PI * 2.0) * random.nextFloat(), axis.x(), axis.y(), axis.z());

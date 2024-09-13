@@ -30,9 +30,6 @@
     [
       "space:spring_lava",
       "minecraft:underwater_magma"
-    ],
-    [
-      "space:freeze_water"
     ]
   ],
   "has_precipitation": false,

@@ -34,15 +34,15 @@ public class StarflightWorldGeneration
 	// Cave Ice Feature
 	public static final Feature<CaveIceFeatureConfig> CAVE_ICE = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "cave_ice"), new CaveIceFeature(CaveIceFeatureConfig.CODEC));
 	
-	// Freeze Water Feature
-	public static final Feature<DefaultFeatureConfig> FREEZE_WATER = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "freeze_water"), new FreezeWaterFeature(DefaultFeatureConfig.CODEC));
-	
 	// Aeroplankton Feature
 	public static final Feature<DefaultFeatureConfig> AEROPLANKTON = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "aeroplankton"), new AeroplanktonFeature(DefaultFeatureConfig.CODEC));
 	
-	// Impact Crater Structure
-	public static final StructurePieceType CRATER_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "crater_piece"), CraterGenerator.Piece::new);
-	public static final StructureType<CraterStructure> CRATER_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "crater"), () -> CraterStructure.CODEC);
+	// Impact Crater Carver
+	public static final Carver<CraterCarverConfig> CRATER = Registry.register(Registries.CARVER, Identifier.of(StarflightMod.MOD_ID, "crater"), new CraterCarver(CraterCarverConfig.CRATER_CODEC));
+	
+	// Volcano Structure
+	public static final StructurePieceType VOLCANO_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "volcano_piece"), VolcanoGenerator.Piece::new);
+	public static final StructureType<VolcanoStructure> VOLCANO_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "volcano"), () -> VolcanoStructure.CODEC);
 	
 	// Bio Dome Structure
 	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "biodome_piece"), BioDomeGenerator.Piece::new);
@@ -57,21 +57,17 @@ public class StarflightWorldGeneration
 	public static final StructurePieceType AIRSHIP_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "airship_piece"), AirshipGenerator.Piece::new);
 	public static final StructureType<AirshipStructure> AIRSHIP_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "airship"), () -> AirshipStructure.CODEC);
 	
-	// Impact Crater Carver
-	public static final Carver<CraterCarverConfig> CRATER = Registry.register(Registries.CARVER, Identifier.of(StarflightMod.MOD_ID, "crater"), new CraterCarver(CraterCarverConfig.CRATER_CODEC));
-	
 	public static void initializeWorldGeneration()
 	{
-		// Chunk Generators
-		Registry.register(Registries.CHUNK_GENERATOR, Identifier.of(StarflightMod.MOD_ID, "space"), SpaceChunkGenerator.CODEC);
-		
 		// Overworld Ores
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_bauxite")));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_ilmenite")));
 		BiomeModifications.addFeature(BiomeSelectors.foundInOverworld(), GenerationStep.Feature.UNDERGROUND_ORES, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "ore_sulfur")));
 
 		// Trees
-		//BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "rubber_tree")));
 		BiomeModifications.addFeature(BiomeSelectors.includeByKey(BiomeKeys.FOREST, BiomeKeys.SWAMP, BiomeKeys.SPARSE_JUNGLE), GenerationStep.Feature.VEGETAL_DECORATION, RegistryKey.of(RegistryKeys.PLACED_FEATURE, Identifier.of(StarflightMod.MOD_ID, "rubber_tree")));
+	
+		// Volcano Settings
+		VolcanoGenerator.initializeVolcanoSettings();
 	}
 }

@@ -10,7 +10,6 @@ import net.minecraft.block.HorizontalFacingBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.screen.ScreenHandler;
@@ -25,12 +24,12 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.entity.RocketControllerBlockEntity;
-import space.client.gui.RocketControllerScreen;
 
 public class RocketControllerBlock extends BlockWithEntity
 {
 	public static final MapCodec<RocketControllerBlock> CODEC = RocketControllerBlock.createCodec(RocketControllerBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
+	public static BlockPos openScreen = null;
 
 	public RocketControllerBlock(Settings settings)
 	{
@@ -66,10 +65,7 @@ public class RocketControllerBlock extends BlockWithEntity
 	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
 	{
 		if(world.isClient)
-		{
-			MinecraftClient minecraft = MinecraftClient.getInstance();
-        	minecraft.setScreen(new RocketControllerScreen(world.getRegistryKey().getValue().toString(), pos));
-		}
+			openScreen = pos;
 		else
 		{
 			BlockEntity blockEntity = world.getBlockEntity(pos);

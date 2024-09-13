@@ -1,20 +1,18 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        " a ",
-        "aba",
-        " a "
-    ],
-    "key": {
-        "a": {
-            "item": "space:aluminum_ingot"
-        },
-        "b": {
-            "item": "minecraft:iron_bars"
-        }
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:valve"
     },
-    "result": {
-        "id": "space:vent",
-        "count": 1
+    {
+      "item": "minecraft:iron_ingot"
+    },
+    {
+      "item": "minecraft:redstone"
     }
+  ],
+  "result": {
+    "id": "space:vent",
+    "count": 1
+  }
 }

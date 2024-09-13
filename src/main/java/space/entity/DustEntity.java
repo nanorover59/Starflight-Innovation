@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.AttackGoal;
@@ -25,8 +26,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.BlockStateParticleEffect;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import space.block.StarflightBlocks;
 
 public class DustEntity extends HostileEntity implements AlienMobEntity
@@ -162,6 +166,18 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
 		super.readCustomDataFromNbt(nbt);
 		dataTracker.set(STAMINA, nbt.getInt("stamina"));
 	}
+	
+	@Override
+	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
+	{
+		return true;
+	}
+	
+	public static boolean canDustSpawn(EntityType<DustEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
+	{
+		int chance = world.getServer().getOverworld().isRaining() ? 64 : 256;
+        return random.nextInt(chance) == 0 && world.isSkyVisible(pos) && world.getBlockState(pos.down()).getBlock() == StarflightBlocks.FERRIC_SAND;
+    }
 	
 	static public class DustWanderAroundGoal extends WanderAroundGoal
 	{

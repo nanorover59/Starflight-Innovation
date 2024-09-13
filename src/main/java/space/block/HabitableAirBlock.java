@@ -21,9 +21,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.AirUtil;
 import space.util.BlockSearch;
-import space.util.StarflightEffects;
 
 public class HabitableAirBlock extends AirBlock
 {
@@ -159,7 +159,7 @@ public class HabitableAirBlock extends AirBlock
 			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
 			BlockSearch.search(world, pos, checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
 			AirUtil.removeOrLeak(world, pos, fromPos, checkList.size() / 5, BlockSearch.MAX_VOLUME);
-			StarflightEffects.sendOutgas(world, pos, fromPos, true);
+			OutgasS2CPacket.sendOutgas(world, pos, fromPos, true);
 		}
     }
 	

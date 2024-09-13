@@ -1,0 +1,12 @@
+{
+  "type": "space:extractor",
+  "ingredient": {
+    "item": "minecraft:packed_ice"
+  },
+  "result": {
+    "id": "minecraft:packed_ice"
+  },
+  "water": 1000.0,
+  "experience": 0.0,
+  "cookingtime": 200
+}

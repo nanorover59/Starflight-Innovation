@@ -1,7 +1,6 @@
 package space.client;
 
 import java.util.HashMap;
-import java.util.List;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -10,11 +9,10 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
@@ -28,14 +26,11 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
+import space.block.RocketControllerBlock;
 import space.block.StarflightBlocks;
 import space.client.gui.BatteryScreen;
 import space.client.gui.ElectricFurnaceScreen;
@@ -44,7 +39,8 @@ import space.client.gui.MetalFabricatorScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
-import space.client.render.StarflightClientEffects;
+import space.client.render.MarsDimensionEffect;
+import space.client.render.StarflightRenderEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
@@ -62,24 +58,12 @@ import space.client.render.entity.model.DustEntityModel;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.client.render.entity.model.StratofishEntityModel;
 import space.entity.AlienMobEntity;
-import space.entity.MovingCraftEntity;
-import space.entity.RocketEntity;
 import space.entity.StarflightEntities;
 import space.item.StarflightItems;
-import space.network.s2c.FizzS2CPacket;
-import space.network.s2c.JetS2CPacket;
-import space.network.s2c.MovingCraftBlocksS2CPacket;
-import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
-import space.network.s2c.OutgasS2CPacket;
-import space.network.s2c.PlanetDataS2CPacket;
-import space.network.s2c.RocketControllerDataS2CPacket;
-import space.network.s2c.RocketOpenTravelScreenS2CPacket;
-import space.network.s2c.UnlockPlanetS2CPacket;
 import space.particle.StarflightParticleTypes;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.screen.StarflightScreens;
-import space.util.StarflightEffects;
 
 @Environment(EnvType.CLIENT)
 public class StarflightModClient implements ClientModInitializer
@@ -100,16 +84,8 @@ public class StarflightModClient implements ClientModInitializer
 	public void onInitializeClient()
 	{
 		// Client side networking.
-		ClientPlayNetworking.registerGlobalReceiver(PlanetDataS2CPacket.PACKET_ID, (payload, context) -> PlanetList.receiveDynamicData((PlanetDataS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(MovingCraftBlocksS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveBlockData((MovingCraftBlocksS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveEntityOffsets((MovingCraftEntityOffsetsS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(RocketOpenTravelScreenS2CPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveOpenTravelScreen((RocketOpenTravelScreenS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(RocketControllerDataS2CPacket.PACKET_ID, (payload, context) -> RocketControllerScreen.receiveDisplayDataUpdate((RocketControllerDataS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(FizzS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveFizz((FizzS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(OutgasS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveOutgas((OutgasS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(JetS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveJet((JetS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(UnlockPlanetS2CPacket.PACKET_ID, (payload, context) -> StarflightEffects.receiveUnlockPlanet((UnlockPlanetS2CPacket) payload, context));
-
+		StarflightNetworkingS2C.initializePackets();
+		
 		// Client side block properties.
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.ALUMINUM_FRAME, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.WALKWAY, RenderLayer.getCutout());
@@ -126,6 +102,7 @@ public class StarflightModClient implements ClientModInitializer
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.RUBBER_SAPLING, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_TOP, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_STEM, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.REDSTONE_BLOSSOM, RenderLayer.getCutout());
 		ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> 0x437346, StarflightBlocks.RUBBER_LEAVES);
 		ColorProviderRegistry.ITEM.register((itemstack, i) -> 0x437346, StarflightBlocks.RUBBER_LEAVES.asItem());
 		
@@ -191,7 +168,7 @@ public class StarflightModClient implements ClientModInitializer
 		StarflightParticleManager.initializeParticles();
 		
 		// Dimension Effects
-		registerDimensionEffect(Identifier.of(StarflightMod.MOD_ID, "mars"), new Mars());
+		registerDimensionEffect(Identifier.of(StarflightMod.MOD_ID, "mars"), new MarsDimensionEffect());
 		
 		// Start Client Tick Event
 		ClientTickEvents.START_CLIENT_TICK.register(client ->
@@ -199,8 +176,19 @@ public class StarflightModClient implements ClientModInitializer
 			// Client planet list tick.
 			PlanetList.getClient().clientTick(client.getRenderTickCounter().getTickDelta(false));
 			
+			// Item Tooltip Key
+			long windowHandle = client.getWindow().getHandle();
+			StarflightItems.tooltipKey = InputUtil.isKeyPressed(windowHandle, GLFW.GLFW_KEY_LEFT_CONTROL) || InputUtil.isKeyPressed(windowHandle, GLFW.GLFW_KEY_RIGHT_CONTROL);
+			
 			// Rocket user input.
 			StarflightControls.vehicleControls(client);
+			
+			// Open screens that do not have a handler.
+			if(RocketControllerBlock.openScreen != null)
+			{
+				client.setScreen(new RocketControllerScreen(client.world.getRegistryKey().getValue().toString(), RocketControllerBlock.openScreen));
+				RocketControllerBlock.openScreen = null;
+			}
 			
 			// Weather particle effects.
 			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)
@@ -247,8 +235,14 @@ public class StarflightModClient implements ClientModInitializer
 					}
 				}
 				
-				StarflightClientEffects.radiation = maxRadiation;
+				StarflightRenderEffects.radiation = maxRadiation;
 			}
+		});
+		
+		// Client Disconnect Event
+		ClientLoginConnectionEvents.DISCONNECT.register((handler, client) ->
+		{
+			PlanetList.reset();
 		});
 	}
 	
@@ -268,28 +262,6 @@ public class StarflightModClient implements ClientModInitializer
 		return TexturedModelData.of(BipedEntityModel.getModelData(new Dilation(1.0f), 0.0f), 64, 32);
 	}
 	
-	public static void hiddenItemTooltip(List<Text> tooltip, Text ... texts)
-	{
-		if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL) || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_CONTROL))
-		{
-			for(Text text : texts)
-				tooltip.add(text);
-		}
-		else
-			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
-	}
-	
-	public static void hiddenItemTooltip(List<Text> tooltip, List<Text> texts)
-	{
-		if(InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_LEFT_CONTROL) || InputUtil.isKeyPressed(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_KEY_RIGHT_CONTROL))
-		{
-			for(Text text : texts)
-				tooltip.add(text);
-		}
-		else
-			tooltip.add(Text.translatable("item.space.press_for_more").formatted(Formatting.ITALIC, Formatting.DARK_GRAY));
-	}
-	
 	public static void registerDimensionEffect(Identifier dimensionType, DimensionEffects dimensionEffect)
 	{
 		dimensionEffects.put(dimensionType, dimensionEffect);
@@ -298,46 +270,5 @@ public class StarflightModClient implements ClientModInitializer
 	public static DimensionEffects getDimensionEffect(Identifier dimensionType)
 	{
 		return dimensionEffects.get(dimensionType);
-	}
-	
-	@Environment(value = EnvType.CLIENT)
-	public static class Mars extends DimensionEffects
-	{
-		public Mars()
-		{
-			super(192.0f, true, SkyType.NORMAL, false, false);
-		}
-
-		@Override
-		public float[] getFogColorOverride(float skyAngle, float tickDelta)
-		{
-			float g = MathHelper.cos(skyAngle * (float) (Math.PI * 2.0));
-			
-			if(g >= -0.4f && g <= 0.4f)
-			{
-				float i = (g - -0.0f) / 0.4f * 0.5f + 0.5f;
-				float j = 1.0f - (1.0f - MathHelper.sin(i * (float) Math.PI)) * 0.99f;
-				float[] rgba = new float[4];
-				rgba[0] = 0.3f;
-				rgba[1] = i * i * 0.7f + 0.3f;
-				rgba[2] = i * 0.3f + 0.7f;
-				rgba[3] = j * j;
-				return rgba;
-			}
-			
-			return null;
-		}
-		
-		@Override
-		public Vec3d adjustFogColor(Vec3d color, float sunHeight)
-		{
-			return color.multiply(sunHeight * 0.94f + 0.06f, sunHeight * 0.94f + 0.06f, sunHeight * 0.91f + 0.09f);
-		}
-
-		@Override
-		public boolean useThickFog(int camX, int camY)
-		{
-			return false;
-		}
 	}
 }

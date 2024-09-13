@@ -24,12 +24,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.client.StarflightModClient;
 import space.item.OxygenTankItem;
 import space.item.StarflightItems;
+import space.network.s2c.FizzS2CPacket;
 import space.util.AirUtil;
 import space.util.FluidResourceType;
-import space.util.StarflightEffects;
 
 public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 {
@@ -44,7 +43,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.oxygen_dispenser.description_1"), Text.translatable("block.space.oxygen_dispenser.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.oxygen_dispenser.description_1"), Text.translatable("block.space.oxygen_dispenser.description_2"));
 	}
 	
 	@Override
@@ -97,7 +96,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 			// Do effects and transfer oxygen.
 			if(availableOxygen >= requiredOxygen)
 			{
-				StarflightEffects.sendFizz(world, pos);
+				FizzS2CPacket.sendFizz(world, pos);
 				MutableText text = Text.translatable("block.space.oxygen_dispenser.message");
 				player.sendMessage(text, true);
 				stackToFill.set(StarflightItems.OXYGEN, maxOxygen);

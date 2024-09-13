@@ -11,6 +11,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
+import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
@@ -39,7 +40,22 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 	@Override
 	public double getOutput()
 	{
-		return (((EnergyBlock) getCachedState().getBlock()).getOutput() / world.getTickManager().getTickRate());
+		PlanetDimensionData dimensionData = PlanetList.getDimensionDataForWorld(getWorld());
+		double solarMultiplier = 1.0;
+		
+		if(dimensionData != null)
+		{
+			Planet planet = dimensionData.getPlanet();
+			double d = planet.getPosition().lengthSquared();
+			
+			if(d > 0.0)
+			{
+				d /= 2.238016e22; // Convert the distance from meters to astronomical units.
+				solarMultiplier = (1.0 / d) * (dimensionData.isCloudy() ? 0.1 : 1.0);
+			}
+		}
+		
+		return ((((EnergyBlock) getCachedState().getBlock()).getOutput() * solarMultiplier) / world.getTickManager().getTickRate());
 	}
 	
 	@Override

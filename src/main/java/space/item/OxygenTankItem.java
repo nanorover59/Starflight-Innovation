@@ -13,7 +13,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import space.util.StarflightEffects;
+import space.network.s2c.FizzS2CPacket;
 
 public class OxygenTankItem extends Item
 {
@@ -47,14 +47,14 @@ public class OxygenTankItem extends Item
 			if(armorStack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE && armorStack.contains(StarflightItems.OXYGEN) && armorStack.contains(StarflightItems.MAX_OXYGEN))
 			{
 				float previousOxygen = armorStack.get(StarflightItems.OXYGEN);
-				float requiredOxygen = armorStack.get(StarflightItems.MAX_OXYGEN) - previousOxygen;
+				float requiredOxygen = Math.max(armorStack.get(StarflightItems.MAX_OXYGEN) - previousOxygen, 0.0f);
 				
 				if(requiredOxygen > 0.0f)
 				{
-					StarflightEffects.sendFizz(world, player.getBlockPos());
+					FizzS2CPacket.sendFizz(world, player.getBlockPos());
 					float oxygenToTransfer = Math.min(requiredOxygen, availableOxygen);
 					stack.set(StarflightItems.OXYGEN, availableOxygen - oxygenToTransfer);
-					armorStack.set(StarflightItems.OXYGEN, availableOxygen + oxygenToTransfer);
+					armorStack.set(StarflightItems.OXYGEN, previousOxygen + oxygenToTransfer);
 					MutableText text = Text.translatable("item.space.space_suit.oxygen_supply");
 					int percent = (int) Math.ceil((armorStack.get(StarflightItems.OXYGEN) / armorStack.get(StarflightItems.MAX_OXYGEN)) * 100.0f);
 					text.append(percent + "%").formatted(Formatting.BOLD, Formatting.GREEN);

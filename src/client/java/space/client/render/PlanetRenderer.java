@@ -6,6 +6,8 @@ import org.joml.Matrix4f;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
@@ -21,6 +23,7 @@ import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
+@Environment(EnvType.CLIENT)
 public class PlanetRenderer
 {
 	private static final Identifier PLANET_SHADING = Identifier.of(StarflightMod.MOD_ID, "textures/environment/planet_shading.png");

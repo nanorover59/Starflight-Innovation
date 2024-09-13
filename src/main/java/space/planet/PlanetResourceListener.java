@@ -11,11 +11,10 @@ import com.google.gson.stream.JsonReader;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.profiler.Profiler;
 import space.StarflightMod;
 
-public class PlanetResourceListener implements SimpleResourceReloadListener<Pair<ArrayList<Planet>, ArrayList<Planet>>>
+public class PlanetResourceListener implements SimpleResourceReloadListener<ArrayList<Planet>>
 {
 	@Override
 	public Identifier getFabricId()
@@ -24,19 +23,18 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Pair
 	}
 
 	@Override
-	public CompletableFuture<Pair<ArrayList<Planet>, ArrayList<Planet>>> load(ResourceManager manager, Profiler profiler, Executor executor)
+	public CompletableFuture<ArrayList<Planet>> load(ResourceManager manager, Profiler profiler, Executor executor)
 	{
 		return CompletableFuture.supplyAsync(() -> {
-			return new Pair<ArrayList<Planet>, ArrayList<Planet>>(loadPlanetList(manager), loadPlanetList(manager));
+			return loadPlanetList(manager);
         }, executor);
 	}
 
 	@Override
-	public CompletableFuture<Void> apply(Pair<ArrayList<Planet>, ArrayList<Planet>> data, ResourceManager manager, Profiler profiler, Executor executor)
+	public CompletableFuture<Void> apply(ArrayList<Planet> data, ResourceManager manager, Profiler profiler, Executor executor)
 	{
 		return CompletableFuture.runAsync(() -> {
-			PlanetList.get().loadPlanets(data.getLeft());
-			PlanetList.getClient().loadPlanets(data.getRight());
+			PlanetList.get().loadPlanets(data);
 		}, executor);
 	}
 	
@@ -54,7 +52,7 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Pair
 				String parentName = "null";
 				double mass = 0.0;
 				double radius = 0.0;
-				double parkingOrbitRadius = 0.0;
+				double lowOrbitAltitude = 0.0;
 				double periapsis = 0.0;
 				double apoapsis = 0.0;
 				double argumentOfPeriapsis = 0.0;
@@ -84,8 +82,8 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Pair
 						mass = reader.nextDouble();
 					else if(tagName.equals("radius"))
 						radius = reader.nextDouble();
-					else if(tagName.equals("parkingOrbitRadius"))
-						parkingOrbitRadius = reader.nextDouble();
+					else if(tagName.equals("lowOrbitAltitude"))
+						lowOrbitAltitude = reader.nextDouble();
 					else if(tagName.equals("periapsis"))
 						periapsis = reader.nextDouble();
 					else if(tagName.equals("apoapsis"))
@@ -182,7 +180,7 @@ public class PlanetResourceListener implements SimpleResourceReloadListener<Pair
 
 				if(!name.equals("null"))
 				{
-					Planet planet = new Planet(name, parentName, mass, radius, parkingOrbitRadius);
+					Planet planet = new Planet(name, parentName, mass, radius, lowOrbitAltitude);
 					planet.setOrbitParameters(periapsis, apoapsis, argumentOfPeriapsis, trueAnomaly, ascendingNode, inclination);
 					planet.setRotationParameters(isTidallyLocked, obliquity, rotationRate, 0.0);
 					planet.setDecorativeParameters(simpleTexture, drawClouds, cloudRotationRate);

@@ -43,7 +43,7 @@
         "type": "space:solar_eyes",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 50
+        "weight": 10
       }
     ],
     "axolotls": [],
@@ -51,10 +51,16 @@
     "misc": [],
     "monster": [
       {
-        "type": "space:cerulean",
+          "type": "space:cerulean",
+          "maxCount": 1,
+          "minCount": 1,
+          "weight": 10
+      },
+      {
+        "type": "space:solar_spectre",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 50
+        "weight": 10
       }
     ],
     "underground_water_creature": [],

@@ -32,11 +32,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.Heightmap.Type;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.gen.chunk.VerticalBlockSample;
 import net.minecraft.world.gen.structure.Structure;
 import space.StarflightMod;
 import space.block.AirwayBlock;
@@ -75,8 +77,21 @@ public class BioDomeGenerator
 	{
 		ChunkRandom random = context.random();
 		int radius = 64;
-		pos = pos.add(8, 0, 8);
+		//pos = pos.add(8, 0, 8);
 		int surfaceY = context.chunkGenerator().getHeightOnGround(pos.getX(), pos.getZ(), Type.WORLD_SURFACE_WG, context.world(), context.noiseConfig());
+		
+		for(int i = 0; i < 8; i++)
+		{
+			double theta = (i * Math.PI * 2.0) / 8.0;
+			int x = (int) (pos.getX() + (radius + 8) * Math.cos(theta));
+			int z = (int) (pos.getZ() + (radius + 8) * Math.sin(theta));
+			int sy = context.chunkGenerator().getHeightOnGround(x, z, Heightmap.Type.OCEAN_FLOOR_WG, context.world(), context.noiseConfig());
+			VerticalBlockSample sample = context.chunkGenerator().getColumnSample(pos.getX(), pos.getZ(), context.world(), context.noiseConfig());
+			
+			if(sy < surfaceY - 16 || sy > surfaceY + 16 || !sample.getState(surfaceY + 4).isAir())
+				return;
+		}
+		
 		BlockPos center = pos.up(surfaceY);
 		int chunkRadius = (((int) radius) >> 4);
 		Direction direction = Direction.fromHorizontal(random.nextInt(4));
@@ -194,9 +209,9 @@ public class BioDomeGenerator
 							state = StarflightBlocks.TITANIUM_GLASS.getDefaultState();
 							
 							if(pos.getY() == centerY)
-								state = StarflightBlocks.REINFORCED_ROUND_DECO.getDefaultState();
+								state = StarflightBlocks.IRON_ROUND_DECO.getDefaultState();
 							else if(pos.getY() < centerY)
-								state = StarflightBlocks.REINFORCED_PANELS.getDefaultState();
+								state = StarflightBlocks.STRUCTURAL_IRON.getDefaultState();
 							
 							world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
 							
@@ -226,14 +241,14 @@ public class BioDomeGenerator
 											state = Blocks.GLASS.getDefaultState();
 									}
 									else
-										state = StarflightBlocks.REINFORCED_PANELS.getDefaultState();
+										state = StarflightBlocks.STRUCTURAL_IRON.getDefaultState();
 								}
 								else if((int) dxz < CENTER_RADIUS)
 								{
 									if(y == CENTER_HEIGHT)
 										state = Blocks.GLASS.getDefaultState();
 									else if(y % LEVEL_HEIGHT == 0)
-										state = y > 0 ? StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState() : StarflightBlocks.REINFORCED_PANELS.getDefaultState();
+										state = y > 0 ? StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState() : StarflightBlocks.STRUCTURAL_IRON.getDefaultState();
 									else
 										state = Blocks.AIR.getDefaultState();
 								}
@@ -262,6 +277,8 @@ public class BioDomeGenerator
 									details.put(pos, 4);
 							}
 						}
+						else if(y > 0 && distance - SHELL_RADIUS - 8 < y)
+							state = Blocks.AIR.getDefaultState();
 						
 						if(state != null)
 							world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);
@@ -282,10 +299,10 @@ public class BioDomeGenerator
 					fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 1, -3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, -3);
 					fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 1, 3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
 					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, 2, chunkCenterPos.getY() - 1, 2, Blocks.GLASS.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, -2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.TITANIUM_PANELS.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, 2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.TITANIUM_PANELS.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, 2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.TITANIUM_PANELS.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, -2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.TITANIUM_PANELS.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, -2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, 2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, 2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, -2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
 					fillWithOutline(world, chunkBox, -1, chunkCenterPos.getY() - SHELL_RADIUS + 1, -1, 1, chunkCenterPos.getY() - 1, 1, Blocks.WATER.getDefaultState(), AIR, false);
 					
 					for(int y = -SHELL_RADIUS; y < 0; y++)
@@ -333,7 +350,7 @@ public class BioDomeGenerator
 				{
 					// Airlock
 					BlockRotation rotation = getRotationFromDirection(Direction.fromVector(pos.getX() - center.getX(), 0, pos.getZ() - center.getZ()));
-					pos = pos.subtract(new BlockPos(5, 5, 9).rotate(rotation));
+					pos = pos.subtract(new BlockPos(5, 5, 3).rotate(rotation));
 					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(AIRLOCK).get();
 					StructurePlacementData placementdata = new StructurePlacementData().setRotation(rotation);
 					template.place(world, pos, pos, placementdata, random, Block.NOTIFY_LISTENERS);

@@ -43,9 +43,9 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.entity.MetalFabricatorBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class MetalFabricatorBlock extends BlockWithEntity implements EnergyBlock
 {
@@ -80,7 +80,7 @@ public class MetalFabricatorBlock extends BlockWithEntity implements EnergyBlock
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.metal_fabricator.description_1"));
 		textList.add(Text.translatable("block.space.metal_fabricator.description_2"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
@@ -127,7 +127,7 @@ public class MetalFabricatorBlock extends BlockWithEntity implements EnergyBlock
 			double f = (double) pos.getZ() + 0.5;
 			
 			if(random.nextDouble() < 0.1)
-				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
+				world.playSound(d, e, f, StarflightSoundEvents.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.25f, 0.5f - 0.1f * random.nextFloat(), true);
 		}
 	}
 

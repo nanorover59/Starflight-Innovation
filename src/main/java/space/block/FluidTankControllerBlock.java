@@ -25,10 +25,10 @@ import net.minecraft.world.World;
 import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.ValveBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
-import space.util.StarflightEffects;
 
 public class FluidTankControllerBlock extends BlockWithEntity
 {
@@ -57,7 +57,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 	@Override
 	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.fluid_tank.description_1"), Text.translatable("block.space.fluid_tank.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.fluid_tank.description_1"), Text.translatable("block.space.fluid_tank.description_2"));
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 			for(Direction direction : Direction.values())
 			{
 				if(world.getBlockState(pos.offset(direction.getOpposite())).getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
-					StarflightEffects.sendOutgas(world, pos, pos.offset(direction), true);
+					OutgasS2CPacket.sendOutgas(world, pos, pos.offset(direction), true);
 			}
 		}
 		

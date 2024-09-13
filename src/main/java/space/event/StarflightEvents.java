@@ -9,13 +9,13 @@ import net.darkhax.ess.DataCompound;
 import net.darkhax.ess.ESSHelper;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.WorldSavePath;
 import space.planet.PlanetList;
 import space.planet.PlanetResourceListener;
-import space.util.MobSpawningUtil;
 
 public class StarflightEvents
 {
@@ -35,19 +35,26 @@ public class StarflightEvents
 		// Server Stopping Event
 		ServerLifecycleEvents.SERVER_STOPPING.register((server) ->
 	    {
-	    	// Save planet and vessel data when the server is stopping.
+	    	// Save planet data when the server is stopping.
 	    	saveData(server);
+	    	PlanetList.reset();
+	    });
+		
+		// Server Player Join Event
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
+	    {
+	    	PlanetList.get().sendStaticDataToClient(handler.getPlayer());
 	    });
 		
 		// Server Tick Event
 		ServerTickEvents.END_SERVER_TICK.register((server) ->
 	    {
 			PlanetList.get().serverTick(server);
-			MobSpawningUtil.doCustomMobSpawning(server);
+			//MobSpawningUtil.doCustomMobSpawning(server);
 			
 			saveTimer++;
 			
-			// Save planet and vessel data every 5 minutes.
+			// Save planet data every 5 minutes.
 			if(saveTimer >= 6000)
 			{
 				saveTimer = 0;

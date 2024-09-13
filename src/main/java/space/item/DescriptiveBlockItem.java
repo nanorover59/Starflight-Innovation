@@ -7,7 +7,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
-import space.client.StarflightModClient;
 
 public class DescriptiveBlockItem extends BlockItem
 {
@@ -28,6 +27,6 @@ public class DescriptiveBlockItem extends BlockItem
 			tooltip.addAll(description);
 		
 		if(!hiddenDescription.isEmpty())
-			StarflightModClient.hiddenItemTooltip(tooltip, hiddenDescription);
+			StarflightItems.hiddenItemTooltip(tooltip, hiddenDescription);
 	}
 }

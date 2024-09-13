@@ -17,9 +17,12 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 
 public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 {
@@ -44,6 +47,22 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
     }
 	
 	@Override
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData)
+	{
+		if(spawnReason == SpawnReason.NATURAL || spawnReason == SpawnReason.CHUNK_GENERATION)
+		{
+            int topY = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, getBlockPos()).getY();
+            
+            if(topY > world.getBottomY())
+            	this.setPosition(getPos().getX(), topY + random.nextBetween(8, 16), getPos().getZ());
+            else
+            	this.setPosition(getPos().getX(), random.nextBetween(64, 128), getPos().getZ());
+		}
+		
+        return super.initialize(world, difficulty, spawnReason, entityData);
+	}
+	
+	@Override
 	public boolean isPressureSafe(double pressure)
 	{
 		return pressure > 0.5;
@@ -60,12 +79,6 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 	{
 		return false;
 	}
-	
-	@Override
-    public boolean shouldRender(double distance)
-	{
-        return true;
-    }
 
 	public int getWingFlapTickOffset()
 	{
@@ -73,11 +86,15 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
     }
 	
 	@Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData)
+	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
-        this.circlingCenter = this.getBlockPos().up(5);
-        return super.initialize(world, difficulty, spawnReason, entityData);
+		return true;
 	}
+	
+	public static boolean canStratofishSpawn(EntityType<StratofishEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
+	{
+        return random.nextInt(2) == 0;
+    }
 	
 	@Override
     public void readCustomDataFromNbt(NbtCompound nbt)
@@ -206,12 +223,6 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 				this.angle += (float) Math.PI;
 				this.adjustDirection();
 			}
-			
-			/*if(StratofishEntity.this.random.nextInt(this.getTickCount(450)) == 0)
-			{
-				this.angle = StratofishEntity.this.random.nextFloat() * 2.0f * (float) Math.PI;
-				this.adjustDirection();
-			}*/
 			
 			if(StratofishEntity.this.targetPosition.y < StratofishEntity.this.getY() && !StratofishEntity.this.getWorld().isAir(StratofishEntity.this.getBlockPos().down(1)))
 			{

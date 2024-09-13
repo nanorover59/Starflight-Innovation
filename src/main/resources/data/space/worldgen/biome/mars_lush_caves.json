@@ -29,8 +29,9 @@
       "minecraft:underwater_magma"
     ],
     [
-      "space:mars_delta",
-      "space:mars_cave_vegetation"
+      "space:mars_cave_vegetation",
+      "space:mars_cave_vegetation_ceiling",
+      "space:redstone_blossom"
     ],
     [
       "space:surface_rock"

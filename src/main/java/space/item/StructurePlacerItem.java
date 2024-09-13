@@ -22,7 +22,6 @@ import net.minecraft.util.math.BlockPos;
 import space.StarflightMod;
 import space.block.FluidTankControllerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.client.StarflightModClient;
 
 public class StructurePlacerItem extends Item
 {
@@ -42,7 +41,7 @@ public class StructurePlacerItem extends Item
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.structure_placer.description"), Text.translatable("item.space.structure_placer.size").append("X: " + size.getX() + "  Y: " + size.getY() + "  Z: " + size.getZ()));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space.structure_placer.description"), Text.translatable("item.space.structure_placer.size").append("X: " + size.getX() + "  Y: " + size.getY() + "  Z: " + size.getZ()));
 	}
 	
 	@Override

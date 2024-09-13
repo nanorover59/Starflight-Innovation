@@ -1,12 +1,13 @@
 package space.block;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.util.ActionResult;
@@ -16,8 +17,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
-import space.client.gui.SpaceNavigationScreen;
 import space.item.StarflightItems;
+import space.network.s2c.OpenNavigationScreenS2CPacket;
 
 public class PlanetariumBlock extends Block
 {
@@ -47,11 +48,8 @@ public class PlanetariumBlock extends Block
 		if(player.getMainHandStack().isOf(StarflightItems.PLANETARIUM_CARD))
 			return ActionResult.PASS;
 		
-		if(world.isClient)
-		{
-			MinecraftClient minecraft = MinecraftClient.getInstance();
-        	minecraft.setScreen(new SpaceNavigationScreen(-1.0));
-		}
+		if(!world.isClient)
+			ServerPlayNetworking.send((ServerPlayerEntity) player, new OpenNavigationScreenS2CPacket(-1.0));
 		
 		return ActionResult.SUCCESS;
 	}

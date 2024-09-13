@@ -33,12 +33,10 @@ import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
-import space.vessel.BlockMass;
-import space.vessel.MovingCraftBlockData;
 
 public class RocketControllerBlockEntity extends BlockEntity
 {
-	protected ArrayList<MovingCraftBlockData> blockDataList = new ArrayList<MovingCraftBlockData>();
+	protected ArrayList<MovingCraftEntity.BlockData> blockDataList = new ArrayList<MovingCraftEntity.BlockData>();
 	private Vec3d centerOfMass = Vec3d.ZERO;
 	private Vec3d momentOfInertia1 = Vec3d.ZERO;
 	private Vec3d momentOfInertia2 = Vec3d.ZERO;
@@ -92,13 +90,13 @@ public class RocketControllerBlockEntity extends BlockEntity
 		// Detect blocks to be included in the craft construction.
         ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
         Set<BlockPos> set = new HashSet<BlockPos>();
-        BlockSearch.movingCraftSearch(world, pos, positionList, set, BlockSearch.MAX_VOLUME, BlockSearch.MAX_DISTANCE);
+        BlockSearch.movingCraftSearch(world, pos, positionList, set, null, BlockSearch.MAX_VOLUME, BlockSearch.MAX_DISTANCE);
         
         // Find the center of mass in world coordinates.
         for(BlockPos pos : positionList)
         {
-        	double blockMass = BlockMass.getMass(world, pos);
-        	double blockVolume = BlockMass.volumeForBlock(world.getBlockState(pos), world, pos);
+        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
+        	double blockVolume = MovingCraftEntity.volumeForBlock(world.getBlockState(pos), world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	mass += blockMass;
         	volume += blockVolume;
@@ -130,7 +128,7 @@ public class RocketControllerBlockEntity extends BlockEntity
         for(BlockPos pos : positionList)
         {
         	boolean redstone = world.isReceivingRedstonePower(pos);
-        	double blockMass = BlockMass.getMass(world, pos);
+        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	Vec3d centerPos = pos.toCenterPos().subtract(centerOfMass);
         	// Square distance to the center of mass coordinates.
@@ -209,7 +207,7 @@ public class RocketControllerBlockEntity extends BlockEntity
         
         if(data.getPressure() > 0)
 		{
-			double t = 90.0 + data.getTemperatureCategory() * 100.0;
+			double t = 90.0 + data.getTemperatureCategory(world.getSkyAngle(1.0f)) * 100.0;
 			double airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05);
 			buoyancy = airDensity * volume * data.getGravity() * 9.80665;
 		}
@@ -312,7 +310,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 
 		for(int i = 0; i < blockCount - 1; i++)
 		{
-			MovingCraftBlockData blockData = blockDataList.get(i);
+			MovingCraftEntity.BlockData blockData = blockDataList.get(i);
 			x[i] = blockData.getPosition().getX();
 			y[i] = blockData.getPosition().getY();
 			z[i] = blockData.getPosition().getZ();
@@ -356,7 +354,7 @@ public class RocketControllerBlockEntity extends BlockEntity
 		for(int i = 0; i < blockCount - 1; i++)
 		{
 			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
-			blockDataList.add(MovingCraftBlockData.loadData(nbt.getCompound(dataPos.toShortString())));
+			blockDataList.add(MovingCraftEntity.BlockData.loadData(nbt.getCompound(dataPos.toShortString())));
 		}
 	}
 	

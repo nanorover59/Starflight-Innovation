@@ -2,8 +2,8 @@
   "replace": false,
   "values": [
     "space:structural_aluminum_stairs",
-    "space:reinforced_panel_stairs",
-    "space:titanium_panel_stairs",
+    "space:structural_iron_stairs",
+    "space:structural_titanium_stairs",
     "space:redslate_brick_stairs"
   ]
 }

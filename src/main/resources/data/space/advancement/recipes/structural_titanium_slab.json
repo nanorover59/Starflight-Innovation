@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:structural_titanium_slab"
+    ]
+  },
+  "criteria": {
+    "has_structural_titanium": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:structural_titanium"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:structural_titanium_slab"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_structural_titanium",
+      "has_the_recipe"
+    ]
+  ]
+}

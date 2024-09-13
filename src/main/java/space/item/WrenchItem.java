@@ -16,8 +16,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.AirwayBlock;
 import space.block.ValveBlock;
-import space.client.StarflightModClient;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class WrenchItem extends Item
 {
@@ -29,7 +28,7 @@ public class WrenchItem extends Item
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.wrench.description"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space.wrench.description"));
 	}
 
 	@Override
@@ -43,19 +42,19 @@ public class WrenchItem extends Item
         {
         	Direction previousDirection = blockState.get(HorizontalFacingBlock.FACING);
         	world.setBlockState(position, blockState.with(HorizontalFacingBlock.FACING, previousDirection.rotateYClockwise()));
-        	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
+        	world.playSoundAtBlockCenter(position, StarflightSoundEvents.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
         	return ActionResult.success(world.isClient);
         }
         else if(blockState.getProperties().contains(ValveBlock.MODE))
         {
         	world.setBlockState(position, blockState.cycle(ValveBlock.MODE));
-        	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
+        	world.playSoundAtBlockCenter(position, StarflightSoundEvents.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
         	return ActionResult.success(world.isClient);
         }
         else if(blockState.getProperties().contains(AirwayBlock.CLOSED))
         {
         	world.setBlockState(position, blockState.cycle(AirwayBlock.CLOSED));
-        	world.playSoundAtBlockCenter(position, StarflightEffects.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
+        	world.playSoundAtBlockCenter(position, StarflightSoundEvents.WRENCH_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, true);
         	return ActionResult.success(world.isClient);
         }
 		

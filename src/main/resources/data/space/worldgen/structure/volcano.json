@@ -1,0 +1,7 @@
+{
+  "type" : "space:volcano",
+  "biomes": "#space:volcano",
+  "step" : "raw_generation",
+  "spawn_overrides" : {},
+  "terrain_adaptation" : "none"
+}

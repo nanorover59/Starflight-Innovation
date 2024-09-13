@@ -43,9 +43,9 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.entity.ElectricFurnaceBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 {
@@ -76,13 +76,13 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 	}
 	
 	@Override
 	public double getInput()
 	{
-		return 32.0;
+		return 16.0;
 	}
 	
 	@Override
@@ -129,7 +129,7 @@ public class ElectricFurnaceBlock extends BlockWithEntity implements EnergyBlock
 			double f = (double) pos.getZ() + 0.5;
 			
 			if(random.nextFloat() < 0.1f)
-				world.playSound(d, e, f, StarflightEffects.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.1f, 0.5f - 0.1f * random.nextFloat(), true);
+				world.playSound(d, e, f, StarflightSoundEvents.CURRENT_SOUND_EVENT, SoundCategory.BLOCKS, 0.1f, 0.5f - 0.1f * random.nextFloat(), true);
 		}
 	}
 

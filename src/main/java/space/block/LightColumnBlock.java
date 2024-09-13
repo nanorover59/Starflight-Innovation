@@ -34,7 +34,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
 import space.block.entity.LightColumnBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
 
 public class LightColumnBlock extends BlockWithEntity implements BlockEntityProvider, EnergyBlock
@@ -69,7 +69,7 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.light_column.description"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override

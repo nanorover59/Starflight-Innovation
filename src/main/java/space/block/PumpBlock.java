@@ -41,7 +41,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.PumpBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
@@ -80,7 +80,8 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.pump.description_1"));
 		textList.add(Text.translatable("block.space.pump.description_2"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		textList.add(Text.translatable("block.space.pump.description_3"));
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override

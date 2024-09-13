@@ -44,13 +44,20 @@
         "type": "space:solar_eyes",
         "maxCount": 1,
         "minCount": 1,
-        "weight": 50
+        "weight": 10
       }
     ],
     "axolotls": [],
     "creature": [],
     "misc": [],
-    "monster": [],
+    "monster": [
+      {
+        "type": "space:solar_spectre",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 10
+      }
+    ],
     "underground_water_creature": [],
     "water_ambient": [],
     "water_creature": []

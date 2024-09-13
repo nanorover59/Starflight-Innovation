@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a",
+        "b",
+        "c"
+    ],
+    "key": {
+        "a": {
+            "item": "space:heavy_cylinder"
+        },
+        "b": {
+            "item": "space:electric_motor"
+        },
+        "c": {
+            "item": "space:titanium_machine_casing"
+        }
+    },
+    "result": {
+        "id": "space:reaction_wheel",
+        "count": 1
+    }
+}

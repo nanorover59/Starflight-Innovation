@@ -24,13 +24,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
 import space.StarflightMod;
-import space.client.render.StarflightClientEffects;
 import space.client.render.entity.MovingCraftEntityRenderer;
+import space.entity.MovingCraftEntity;
 import space.network.c2s.RocketControllerButtonC2SPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetList;
-import space.vessel.MovingCraftBlockData;
 
 @Environment(EnvType.CLIENT)
 public class RocketControllerScreen extends Screen
@@ -39,7 +38,7 @@ public class RocketControllerScreen extends Screen
 	private static final int MARGIN = 12;
     private static final int GREEN = 0xFF6ABE30;
 	private static final int RED = 0xFFDC3222;
-	private static ArrayList<MovingCraftBlockData> blocks;
+	private static ArrayList<MovingCraftEntity.BlockData> blocks = new ArrayList<MovingCraftEntity.BlockData>();
 	public static String worldKey;
 	public static BlockPos position;
 	public static double mass;
@@ -60,7 +59,6 @@ public class RocketControllerScreen extends Screen
 	public RocketControllerScreen(String worldKeyName, BlockPos blockPos)
 	{
 		super(NarratorManager.EMPTY);
-		blocks = new ArrayList<MovingCraftBlockData>();
 		worldKey = worldKeyName;
 		position = blockPos;
 	}
@@ -95,14 +93,13 @@ public class RocketControllerScreen extends Screen
 		boolean inOrbit = PlanetList.getClient().getViewpointDimensionData().isOrbit();
 		Planet currentPlanet = PlanetList.getClient().getViewpointPlanet();
 		context.fill(0, 0, width, height, -100, 0xFF000000);
-		StarflightClientEffects.renderScreenGUIOverlay(client, context, width, height, delta);
 		float rotation = (client.world.getTime()) * 0.05f; // Adjust rotation speed as needed.
 		context.getMatrices().push();
 		context.getMatrices().translate(width / 2, height / 2, -10.0f);
 		context.getMatrices().multiplyPositionMatrix(new Matrix4f().scaling(scaleFactor, -scaleFactor, scaleFactor));
 		context.getMatrices().multiply(RotationAxis.POSITIVE_Y.rotation(rotation));
 		
-		for(MovingCraftBlockData blockData : blocks)
+		for(MovingCraftEntity.BlockData blockData : blocks)
 			MovingCraftEntityRenderer.renderBlock(client.world, context.getMatrices(), context.getVertexConsumers(), client.world.random, blockData, new BlockPos(0, 0, 0), new BlockPos(0, 0, 0), 0xF000F0, 0);
 		
 		context.getMatrices().pop();
@@ -137,11 +134,6 @@ public class RocketControllerScreen extends Screen
 			context.drawText(textRenderer, Text.translatable("block.space.oxygen_container.level").append(df.format((oxygen / oxygenCapacity) * 100)).append("%"), x, y1 += 14, GREEN, true);
 			context.drawText(textRenderer, Text.translatable("block.space.weight").append(df.format(weight / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
 			context.drawText(textRenderer, Text.translatable("block.space.thrust").append(df.format(thrust / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
-			
-			if(buoyancy > weight * 0.1)
-				context.drawText(textRenderer, Text.translatable("block.space.buoyancy").append(df.format(buoyancy / 1000.0)).append("kN"), x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
-			
-			context.drawText(textRenderer, ttwText, x, y1 += 14, ttw > 1.0 ? GREEN : RED, true);
 			context.drawText(textRenderer, Text.translatable("block.space.deltav").append(df.format(deltaV)).append("m/s"), x, y1 += 14, GREEN, true);
 			context.drawText(textRenderer, Text.translatable("block.space.deltav_capacity").append(df.format(deltaVCapacity)).append("m/s"), x, y1 += 14, GREEN, true);
 			context.drawText(textRenderer, Text.translatable("block.space.deltav_to_orbit").append(df.format(requiredDeltaV1)).append("m/s"), x, y1 += 14, requiredDeltaV1 < deltaV ? GREEN : RED, true);
@@ -186,9 +178,9 @@ public class RocketControllerScreen extends Screen
 		
 		int minY = 0;
 		int maxY = 0;
-		ArrayList<MovingCraftBlockData> bufferedBlocks = new ArrayList<MovingCraftBlockData>();
+		ArrayList<MovingCraftEntity.BlockData> bufferedBlocks = new ArrayList<MovingCraftEntity.BlockData>();
 		
-		for(MovingCraftBlockData blockData : payload.blockDataList())
+		for(MovingCraftEntity.BlockData blockData : payload.blockDataList())
 		{
 			BlockState blockState = blockData.getBlockState();
 			BlockPos blockPos = blockData.getPosition();
@@ -198,7 +190,7 @@ public class RocketControllerScreen extends Screen
 			boolean placeFirst = blockData.placeFirst();
 			boolean redstone = blockData.redstonePower();
 			double storedFluid = blockData.getStoredFluid();
-			bufferedBlocks.add(new MovingCraftBlockData(blockState, blockPos, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid));
+			bufferedBlocks.add(new MovingCraftEntity.BlockData(blockState, blockPos, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid));
 			
 			if(blockPos.getY() < minY)
 				minY = blockPos.getY();

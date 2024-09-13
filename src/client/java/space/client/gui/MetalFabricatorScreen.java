@@ -4,8 +4,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.List;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
@@ -14,7 +12,6 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.sound.SoundEvents;
@@ -135,7 +132,6 @@ public class MetalFabricatorScreen extends HandledScreen<ScreenHandler>
 	private void renderRecipeIcons(DrawContext context, int x, int y, int scrollOffset)
 	{
 		List<RecipeEntry<MetalFabricatorRecipe>> list = ((MetalFabricatorScreenHandler) this.handler).getAvailableRecipes();
-		int selectedRecipe = ((MetalFabricatorScreenHandler) this.handler).getSelectedRecipe();
 		
 		for(int i = this.scrollOffset; i < scrollOffset + 12 && i < ((MetalFabricatorScreenHandler) this.handler).getAvailableRecipeCount(); i++)
 		{
@@ -144,18 +140,6 @@ public class MetalFabricatorScreen extends HandledScreen<ScreenHandler>
 			int l = j / 4;
 			int m = y + l * 18 + 2;
 			context.drawItem(((RecipeEntry<?>) list.get(i)).value().getResult(this.client.world.getRegistryManager()), k, m);
-		}
-		
-		if(selectedRecipe > -1 && selectedRecipe < list.size() && ((MetalFabricatorScreenHandler) this.handler).getSlot(2).getStack().isEmpty())
-		{
-			ItemStack ingredient = ((RecipeEntry<?>) list.get(selectedRecipe)).value().getIngredients().get(0).getMatchingStacks()[0];
-			
-			if(ingredient != null)
-			{
-				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 0.15f);
-				context.drawItem(ingredient, x - 33, y + 21);
-				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-			}
 		}
 	}
 

@@ -4,6 +4,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -16,12 +17,11 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.world.WorldAccess;
 import space.particle.StarflightParticleTypes;
-import space.util.AirUtil;
-import space.util.IWorldMixin;
 
 public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 {
@@ -93,7 +93,7 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	@Override
 	public int getRadiationRange()
 	{
-		return 32;
+		return 16;
 	}
 	
 	@Override
@@ -107,13 +107,6 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	{
 		return true;
 	}
-	
-	@Override
-	public boolean canSpawn(WorldView world)
-	{
-		double p = AirUtil.getAirResistanceMultiplier(getWorld(), ((IWorldMixin) getWorld()).getPlanetDimensionData(), getBlockPos());
-        return !world.isSkyVisible(getBlockPos()) && isPressureSafe(p);
-    }
 	
 	@Override
 	protected void fall(double heightDifference, boolean onGround, BlockState landedState, BlockPos landedPosition)
@@ -142,13 +135,13 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		
 		if(world.isClient)
 		{
-			if(this.random.nextInt(12) == 0)
+			if(this.random.nextInt(8) == 0)
 			{
-				int count = 1 + random.nextInt(3);
+				int count = 1 + random.nextInt(1);
 				
 				for(int i = 0; i < count; i++)
 				{
-					double spread = 2.0;
+					double spread = 1.0;
 					double x = getX() + (random.nextDouble() - random.nextDouble()) * spread;
 					double y = getY() + (random.nextDouble() - random.nextDouble()) * spread;
 					double z = getZ() + (random.nextDouble() - random.nextDouble()) * spread;
@@ -184,4 +177,9 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 			remove(RemovalReason.DISCARDED);
 		}
 	}
+	
+	public static boolean canSolarEyesSpawn(EntityType<SolarEyesEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
+	{
+        return random.nextInt(10) == 0 && !world.isSkyVisible(pos) && world.isAir(pos);
+    }
 }

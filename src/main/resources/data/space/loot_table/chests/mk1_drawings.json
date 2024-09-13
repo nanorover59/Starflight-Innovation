@@ -7,12 +7,71 @@
       "entries": [
         {
           "type": "item",
-          "weight": 1,
+          "weight": 10,
           "name": "space:part_drawings",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.cooled_copper\"}"
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.cooled_copper"
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.copper_injector"
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.impeller"
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.engine_1_nozzle"
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
+          "weight": 10,
+          "name": "space:part_drawings",
+          "functions": [
+            {
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.engine_1_extension"
+              }
             }
           ]
         },
@@ -22,8 +81,11 @@
           "name": "space:part_drawings",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.copper_injector\"}"
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.cooled_copper,item.space.copper_injector"
+              }
             }
           ]
         },
@@ -33,52 +95,11 @@
           "name": "space:part_drawings",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.impeller\"}"
-            }
-          ]
-        },
-        {
-          "type": "item",
-          "weight": 1,
-          "name": "space:part_drawings",
-          "functions": [
-            {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.engine_1_nozzle\"}"
-            }
-          ]
-        },
-        {
-          "type": "item",
-          "weight": 1,
-          "name": "space:part_drawings",
-          "functions": [
-            {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.engine_1_extension\"}"
-            }
-          ]
-        },
-        {
-          "type": "item",
-          "weight": 1,
-          "name": "space:part_drawings",
-          "functions": [
-            {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.cooled_copper,item.space.copper_injector\"}"
-            }
-          ]
-        },
-        {
-          "type": "item",
-          "weight": 1,
-          "name": "space:part_drawings",
-          "functions": [
-            {
-              "function": "set_nbt",
-              "tag": "{parts:\"item.space.engine_1_nozzle,item.space.engine_1_extension\"}"
+              "function": "minecraft:set_components",
+              "components":
+              {
+                "space:part_drawing_groups": "item.space.engine_1_nozzle,item.space.engine_1_extension"
+              }
             }
           ]
         }

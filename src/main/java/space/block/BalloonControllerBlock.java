@@ -25,7 +25,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.BalloonControllerBlockEntity;
-import space.client.StarflightModClient;
 import space.item.StarflightItems;
 import space.util.FluidResourceType;
 
@@ -54,7 +53,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	@Override
 	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.balloon.description_1"), Text.translatable("block.space.balloon.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.balloon.description_1"), Text.translatable("block.space.balloon.description_2"));
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package space.block;
 
+import java.util.List;
+
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
@@ -11,11 +13,15 @@ import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item.TooltipContext;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
+import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +31,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
+import space.item.StarflightItems;
 
 public class AirwayBlock extends FacingBlock implements Waterloggable
 {
@@ -58,6 +65,12 @@ public class AirwayBlock extends FacingBlock implements Waterloggable
 		builder.add(CLOSED);
         builder.add(WATERLOGGED);
     }
+	
+	@Override
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
+	{
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.airway.description"));
+	}
 	
 	@Override
 	public BlockRenderType getRenderType(BlockState state)

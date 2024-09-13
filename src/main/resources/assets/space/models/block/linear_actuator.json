@@ -2,7 +2,7 @@
   "parent": "minecraft:block/cube_bottom_top",
   "textures": {
     "bottom": "space:block/linear_actuator_front",
-    "side": "space:block/linear_actuator_side",
+    "side": "space:block/iron_machine_casing",
     "top": "space:block/linear_actuator_back"
   }
 }

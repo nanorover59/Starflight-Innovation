@@ -12,9 +12,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.AirUtil;
 import space.util.BlockSearch;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class LeakBlockEntity extends BlockEntity
 {
@@ -54,7 +55,7 @@ public class LeakBlockEntity extends BlockEntity
 			if(world.getBlockState(pos.north()).getBlock() == Blocks.AIR)
 				dz -= 1;
 			
-			StarflightEffects.sendOutgas(world, pos, pos.add(dx, dy, dz), false);
+			OutgasS2CPacket.sendOutgas(world, pos, pos.add(dx, dy, dz), false);
 			blockEntity.particleTimer = 10 + world.random.nextInt(5);
 		}
 		else
@@ -63,7 +64,7 @@ public class LeakBlockEntity extends BlockEntity
 		// Play the sound effect.
 		if(blockEntity.soundTimer == 0)
 		{
-			((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), StarflightEffects.LEAK_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, world.random.nextLong());
+			((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), StarflightSoundEvents.LEAK_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, world.random.nextLong());
 			blockEntity.soundTimer = 70 + world.random.nextInt(10);
 		}
 		else

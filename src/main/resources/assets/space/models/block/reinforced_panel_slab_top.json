@@ -1,8 +1,0 @@
-{
-  "parent": "minecraft:block/slab_top",
-  "textures": {
-    "bottom": "space:block/reinforced_panels",
-    "side": "space:block/reinforced_panels",
-    "top": "space:block/reinforced_panels"
-  }
-}

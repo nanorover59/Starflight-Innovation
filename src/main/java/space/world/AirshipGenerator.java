@@ -182,11 +182,11 @@ public class AirshipGenerator
 						}
 						
 						if(shell && dz < (SHIP_LENGTH / 2) + CONE_Z + 1 && dz > -(SHIP_LENGTH / 2) - CONE_Z)
-							state = (dy == 2 && dz > (SHIP_LENGTH / 2) + 5) || (dy == 3 && dz > SHIP_LENGTH / 2) ? Blocks.TINTED_GLASS.getDefaultState() :  StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+							state = (dy == 2 && dz > (SHIP_LENGTH / 2) + 5) || (dy == 3 && dz > SHIP_LENGTH / 2) ? Blocks.TINTED_GLASS.getDefaultState() :  StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 						
 						// Airship Fins
 						if(dy == 0 && dz > -(SHIP_LENGTH / 2) - CONE_Z && radius > shipRadius && radius <= (shipRadius - dz) * 0.5)
-							state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+							state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 						
 						// Balloon Fins
 						double balloonRadius = Math.hypot(dx, dy - balloonGap);
@@ -203,7 +203,7 @@ public class AirshipGenerator
 							// Bulkhead Plates
 							{
 								if(dz == -(SHIP_LENGTH / 2) - CONE_Z + 1 || dz == forwardBulkhead)
-									state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+									state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 								
 								// Doors
 								if(dx == 0 && dz == forwardBulkhead && (dy == -7 || dy == -3 || dy == 1 || dy == 5))
@@ -213,7 +213,7 @@ public class AirshipGenerator
 							// Floors
 							if(dy == 0)
 							{
-								state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+								state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 								
 								// Ladders
 								if(dx == 0 && dz < SHIP_LENGTH / 2 && dz % 16 == 0)
@@ -223,7 +223,7 @@ public class AirshipGenerator
 							if(dy == 4 || dy == -4)
 							{
 								if(dz < forwardBulkhead)
-									state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+									state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 								else if(dz > forwardBulkhead && dz < forwardBulkhead + 4)
 									state = StarflightBlocks.WALKWAY.getDefaultState();
 							}
@@ -239,12 +239,12 @@ public class AirshipGenerator
 							double propRadius = Math.hypot(dx - BALLOON_WIDTH - PROP_RADIUS, dy - balloonGap);
 							
 							if((int) propRadius == PROP_RADIUS)
-								state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+								state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 							
 							propRadius = Math.hypot(dx + BALLOON_WIDTH + PROP_RADIUS, dy - balloonGap);
 							
 							if((int) propRadius == PROP_RADIUS)
-								state = StarflightBlocks.TITANIUM_PANELS.getDefaultState();
+								state = StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState();
 						}
 						
 						if(state != null)

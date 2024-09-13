@@ -1,16 +1,19 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "aa ",
-        "aba",
-        " aa"
+        "cbc",
+        "bab",
+        "cbc"
     ],
     "key": {
         "a": {
-            "item": "space:titanium_plate"
+            "item": "space:structural_titanium"
         },
         "b": {
-            "item": "space:titanium_frame"
+            "item": "space:titanium_plate"
+        },
+        "c": {
+            "item": "minecraft:redstone"
         }
     },
     "result": {

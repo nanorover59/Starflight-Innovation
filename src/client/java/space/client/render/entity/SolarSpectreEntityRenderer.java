@@ -25,7 +25,6 @@ import space.util.QuaternionUtil;
 public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEntity, SolarSpectreEntityModel<SolarSpectreEntity>>
 {
 	private static final Identifier TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/solar_spectre.png");
-	private static final Identifier EYES_TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/entity/solar_spectre_eyes.png");
 
 	public SolarSpectreEntityRenderer(EntityRendererFactory.Context context)
 	{
@@ -50,8 +49,6 @@ public class SolarSpectreEntityRenderer extends MobEntityRenderer<SolarSpectreEn
         float alpha = 0.8f;
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucentEmissive(this.getTexture(entity)));
         int argb = ColorHelper.Argb.fromFloats(alpha, 1.0f, 1.0f, 1.0f);
-        this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), argb);
-        vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEyes(EYES_TEXTURE));
         this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), argb);
 	}
 	

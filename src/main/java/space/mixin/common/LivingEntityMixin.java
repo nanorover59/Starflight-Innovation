@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -23,12 +24,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.entity.StarflightEntities;
+import space.entity.AlienMobEntity;
 import space.item.StarflightItems;
+import space.network.s2c.JetS2CPacket;
+import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
-import space.util.StarflightEffects;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity
@@ -81,7 +83,7 @@ public abstract class LivingEntityMixin extends Entity
 			{
 				BlockPos offset = this.getBlockPos().offset(direction, direction == Direction.UP ? Math.round(this.getHeight()) : 1);
 				
-				if(this.getWorld().getBlockState(offset).isAir())
+				if(!this.getWorld().getBlockState(offset).isAir())
 				{
 					wall = true;
 					break;
@@ -110,7 +112,7 @@ public abstract class LivingEntityMixin extends Entity
 		if(this.isSubmergedInWater())
 			airMultiplier = 1.0f;
 		
-		// Run oxygen supply and mob low gravity jump mechanics on the server side.
+		// Run oxygen supply mechanics on the server side.
 		if(!this.getWorld().isClient())
 		{
 			LivingEntity thisEntity = (LivingEntity) this.getWorld().getEntityById(getId());
@@ -123,6 +125,27 @@ public abstract class LivingEntityMixin extends Entity
 				boolean creativeFlying = thisEntity instanceof PlayerEntity && ((PlayerEntity) thisEntity).getAbilities().flying;
 				ItemStack chestplate = null;
 				float oxygen = 0.0f;
+				
+				if(thisEntity instanceof AlienMobEntity)
+				{
+					AlienMobEntity mob = (AlienMobEntity) thisEntity;
+					int temperatureCategory = data.getTemperatureCategory(thisEntity.getWorld().getSkyAngle(1.0f));
+					double pressure = data.getPressure();
+					
+					if(habitableAir)
+					{
+						temperatureCategory = Planet.TEMPERATE;
+						pressure = 1.0;
+						
+						if(!mob.oxygenCompatible())
+							thisEntity.setOnFire(true);
+					}
+					
+					if(!mob.isTemperatureSafe(temperatureCategory) || !mob.isPressureSafe(pressure) || (mob.requiresOxygen() && !habitableAir))
+						thisEntity.damage(thisEntity.getDamageSources().generic(), 1.0f);
+					
+					return;
+				}
 				
 				for(ItemStack stack : thisEntity.getArmorItems())
 				{
@@ -143,8 +166,7 @@ public abstract class LivingEntityMixin extends Entity
 					if(!thisEntity.isInLava())
 						thisEntity.setFireTicks(0);
 					
-					if(!thisEntity.getType().isIn(StarflightEntities.NO_OXYGEN_ENTITY_TAG))
-						thisEntity.damage(thisEntity.getDamageSources().generic(), 0.5f);
+					thisEntity.damage(thisEntity.getDamageSources().generic(), 1.0f);
 				}
 				else if(spaceSuitCheck == 4)
 				{
@@ -160,7 +182,7 @@ public abstract class LivingEntityMixin extends Entity
 						Vec3d deltaV = thisEntity.getRotationVector().multiply(0.1 * 0.05);
 						thisEntity.addVelocity(deltaV.getX(), deltaV.getY(), deltaV.getZ());
 						thisEntity.velocityModified = true;
-						StarflightEffects.sendJet(this.getWorld(), thisEntity.getPos().add(0.0, 0.65, 0.0), thisEntity.getVelocity().add(thisEntity.getRotationVector().multiply(-2.0)));
+						JetS2CPacket.sendJet(this.getWorld(), thisEntity.getPos().add(0.0, 0.65, 0.0), thisEntity.getVelocity().add(thisEntity.getRotationVector().multiply(-2.0)));
 					}
 					
 					thisEntity.setAir(thisEntity.getMaxAir());
@@ -169,6 +191,18 @@ public abstract class LivingEntityMixin extends Entity
 			}
 		}
 	}
+	
+	/*@Inject(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"), cancellable = true)
+	public void travelInject(Vec3d movementInput, CallbackInfo info)
+	{
+		//System.out.println(this.verticalCollision + "   " + this.horizontalCollision + "   " + airMultiplier);
+		
+		if(!this.verticalCollision && !this.horizontalCollision && airMultiplier == 0.0f)
+		{
+			this.move(MovementType.SELF, this.getVelocity());
+			info.cancel();
+		}
+	}*/
 	
 	/**
 	 * Modify the variable for living entity gravity.
@@ -198,7 +232,7 @@ public abstract class LivingEntityMixin extends Entity
 	public float frictionInject3(float f)
 	{
 		return 1.0f - (0.09f * airMultiplier);
-	}*/
+	}
 	
 	/**
 	 * Modify the lift for living entity fall flight.
@@ -218,24 +252,24 @@ public abstract class LivingEntityMixin extends Entity
 	/**
 	 * Modify movement input according to air resistance.
 	 */
-	/*@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"))
+	@ModifyVariable(method = "travel(Lnet/minecraft/util/math/Vec3d;)V", at = @At("HEAD"))
 	public Vec3d movementInputInject(Vec3d movementInput)
 	{
-		if(this.verticalCollision || this.horizontalCollision || horizontalSpeed < 0.1)
-			return movementInput;
-		else
+		if(gravity < 0.01)
 			return movementInput.multiply(airMultiplier);
-	}*/
+		else
+			return movementInput;
+	}
 	
 	/**
 	 * Properly recognize a zero drag environment.
 	 */
-	/*@Inject(method = "hasNoDrag()Z", at = @At("HEAD"), cancellable = true)
-	public void hasNoGravityInject(CallbackInfoReturnable<Boolean> info)
+	@Inject(method = "hasNoDrag()Z", at = @At("HEAD"), cancellable = true)
+	public void hasNoDragInject(CallbackInfoReturnable<Boolean> info)
 	{
-		if(!this.verticalCollision && !this.horizontalCollision && airMultiplier == 0.0f)
+		if(gravity < 0.01 && airMultiplier == 0.0f)
 			info.setReturnValue(true);
-	}*/
+	}
 	
 	/**
 	 * Reduce fall damage by the appropriate amount.

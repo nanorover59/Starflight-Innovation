@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_vent": {
+    "has_valve": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:vent"
+              "space:valve"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_vent",
+      "has_valve",
       "has_the_recipe"
     ]
   ]

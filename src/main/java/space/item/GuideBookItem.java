@@ -1,6 +1,5 @@
 package space.item;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -8,7 +7,6 @@ import net.minecraft.stat.Stats;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import space.client.gui.GuideBookScreen;
 
 public class GuideBookItem extends Item
 {
@@ -22,11 +20,11 @@ public class GuideBookItem extends Item
 	{
         ItemStack itemStack = user.getStackInHand(hand);
         
-        if(world.isClient)
+        /*if(world.isClient)
         {
         	MinecraftClient minecraft = MinecraftClient.getInstance();
         	minecraft.setScreen(new GuideBookScreen());
-        }
+        }*/
         
         user.incrementStat(Stats.USED.getOrCreateStat(this));
         return TypedActionResult.success(itemStack, world.isClient());

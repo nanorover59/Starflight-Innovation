@@ -11,8 +11,8 @@
           "name": "minecraft:potion",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{custom_potion_effects:[{id:speed,duration:1200,amplifier:5},{id:strength,duration:1200,amplifier:2},{id:resistance,duration:1200,amplifier:2}],display:{Name:'{\"text\":\"Blue Cow\"}',Lore:['{\"text\":\"Moo moo moo...\"}']},HideFlags:32,CustomPotionColor:255}"
+              "function": "minecraft:set_custom_data",
+              "tag": "{CustomPotionEffects:[{Id:speed,Duration:1200,Amplifier:5},{Id:strength,Duration:1200,Amplifier:2},{Id:resistance,Duration:1200,Amplifier:2}],display:{Name:'{\"text\":\"Blue Cow\"}',Lore:['{\"text\":\"Moo moo moo...\"}']},HideFlags:32,CustomPotionColor:255}"
             }
           ]
         },
@@ -22,8 +22,8 @@
           "name": "minecraft:potion",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{custom_potion_effects:[{id:slowness,duration:2400,amplifier:1},{id:haste,duration:2400,amplifier:4},{id:strength,duration:2400,amplifier:4},{id:jump_boost,duration:2400,amplifier:1},{id:nausea,duration:2400,amplifier:1},{id:blindness,duration:2400,amplifier:1}],display:{Name:'{\"text\":\"4 Juice\"}',Lore:['{\"text\":\"How it feels to drink 4 Juice!\"}']},HideFlags:32,CustomPotionColor:65535}"
+              "function": "minecraft:set_custom_data",
+              "tag": "{CustomPotionEffects:[{Id:slowness,Duration:2400,Amplifier:1},{Id:haste,Duration:2400,Amplifier:4},{Id:strength,Duration:2400,Amplifier:4},{Id:jump_boost,Duration:2400,Amplifier:1},{Id:nausea,Duration:2400,Amplifier:1},{Id:blindness,Duration:2400,Amplifier:1}],display:{Name:'{\"text\":\"4 Juice\"}',Lore:['{\"text\":\"How it feels to drink 4 Juice!\"}']},HideFlags:32,CustomPotionColor:65535}"
             }
           ]
         },
@@ -33,8 +33,8 @@
           "name": "minecraft:potion",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{custom_potion_effects:[{id:speed,duration:4800,amplifier:10},{id:jump_boost,duration:4800,amplifier:2},{id:resistance,duration:4800,amplifier:4},{id:saturation,duration:4800,amplifier:1}],display:{Name:'{\"text\":\"Stellar Gold\"}',Lore:['{\"text\":\"Possibly the most expensive beverage ever made!\"}','{\"text\":\"Better take a picture!\"}']},HideFlags:32,CustomPotionColor:16744528}"
+              "function": "minecraft:set_custom_data",
+              "tag": "{CustomPotionEffects:[{Id:speed,Duration:4800,Amplifier:10},{Id:jump_boost,Duration:4800,Amplifier:2},{Id:resistance,Duration:4800,Amplifier:4},{Id:saturation,Duration:4800,Amplifier:1}],display:{Name:'{\"text\":\"Stellar Gold\"}',Lore:['{\"text\":\"Possibly the most expensive beverage ever made!\"}','{\"text\":\"Better take a picture!\"}']},HideFlags:32,CustomPotionColor:16744528}"
             }
           ]
         },
@@ -44,8 +44,8 @@
           "name": "minecraft:potion",
           "functions": [
             {
-              "function": "set_nbt",
-              "tag": "{custom_potion_effects:[{id:haste,duration:4800,amplifier:3},{id:instant_damage,duration:4800,amplifier:10},{id:nausea,duration:4800,amplifier:21},{id:regeneration,duration:4800,amplifier:21},{id:fire_resistance,duration:4800,amplifier:21},{id:water_breathing,duration:4800,amplifier:21}],display:{Name:'{\"text\":\"Dank Dew\"}',Lore:['{\"text\":\"wow such mlg... much meme\"}','{\"text\":\"lololololololololololol\"}']},HideFlags:32,CustomPotionColor:52224}"
+              "function": "minecraft:set_custom_data",
+              "tag": "{CustomPotionEffects:[{Id:haste,Duration:4800,Amplifier:3},{Id:instant_damage,Duration:4800,Amplifier:10},{Id:nausea,Duration:4800,Amplifier:21},{Id:regeneration,Duration:4800,Amplifier:21},{Id:fire_resistance,Duration:4800,Amplifier:21},{Id:water_breathing,Duration:4800,Amplifier:21}],display:{Name:'{\"text\":\"Dank Dew\"}',Lore:['{\"text\":\"wow such mlg... much meme\"}','{\"text\":\"lololololololololololol\"}']},HideFlags:32,CustomPotionColor:52224}"
             }
           ]
         }

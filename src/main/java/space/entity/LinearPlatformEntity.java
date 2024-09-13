@@ -11,8 +11,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import space.util.StarflightEffects;
-import space.vessel.MovingCraftBlockData;
+import space.util.StarflightSoundEvents;
 
 public class LinearPlatformEntity extends MovingCraftEntity
 {
@@ -25,7 +24,7 @@ public class LinearPlatformEntity extends MovingCraftEntity
 		super(entityType, world);
 	}
 
-	public LinearPlatformEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlockData> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, BlockPos targetPos)
+	public LinearPlatformEntity(World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, BlockPos targetPos)
 	{
 		super(StarflightEntities.LINEAR_PLATFORM, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		this.targetPos = targetPos;
@@ -56,7 +55,7 @@ public class LinearPlatformEntity extends MovingCraftEntity
 
 		if(soundEffectTimer <= 0)
 		{
-			playSound(StarflightEffects.ELECTRIC_MOTOR_SOUND_EVENT, 1e3F, 1.0f);
+			playSound(StarflightSoundEvents.ELECTRIC_MOTOR_SOUND_EVENT, 1e3F, 1.0f);
 			soundEffectTimer = 12;
 		} else
 			soundEffectTimer--;
@@ -64,11 +63,7 @@ public class LinearPlatformEntity extends MovingCraftEntity
 		double speed = 0.1;
 		Vec3d difference = targetPos.toCenterPos().subtract(getPos());
 		Vec3d v = difference.normalize().multiply(speed);
-		setVelocity(v);
 		
-		if(stopTimer == 0)
-			move(MovementType.SELF, getVelocity());
-
 		if(v.length() == 0 || horizontalCollision || verticalCollision)
 			stopTimer++;
 		else
@@ -80,6 +75,14 @@ public class LinearPlatformEntity extends MovingCraftEntity
 			this.releaseBlocks();
 		} else
 			sendRenderData(false);
+		
+		if(stopTimer == 0)
+		{
+			setVelocity(v);
+			move(MovementType.SELF, getVelocity());
+		}
+		else
+			setVelocity(Vec3d.ZERO);
 		
 		updateTrackedBox();
 		setTrackedVelocity(getVelocity().toVector3f());

@@ -5,30 +5,28 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EntityType.Builder;
 import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.SpawnLocationTypes;
+import net.minecraft.entity.SpawnRestriction;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.Heightmap;
 import space.StarflightMod;
 
 public class StarflightEntities
 {
 	public static final EntityType<MovingCraftEntity> MOVING_CRAFT = registerEntity(Identifier.of(StarflightMod.MOD_ID, "moving_craft"), EntityType.Builder.<MovingCraftEntity>create(MovingCraftEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
-	public static final EntityType<RocketEntity> ROCKET = registerEntity(Identifier.of(StarflightMod.MOD_ID, "rocket"), EntityType.Builder.<RocketEntity>create(RocketEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
-	public static final EntityType<LinearPlatformEntity> LINEAR_PLATFORM = registerEntity(Identifier.of(StarflightMod.MOD_ID, "linear_platform"), EntityType.Builder.<LinearPlatformEntity>create(LinearPlatformEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
-	public static final EntityType<AirshipEntity> AIRSHIP = registerEntity(Identifier.of(StarflightMod.MOD_ID, "airship"), EntityType.Builder.<AirshipEntity>create(AirshipEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f));
-	public static final EntityType<PlasmaBallEntity> PLASMA_BALL = registerEntity(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), EntityType.Builder.<PlasmaBallEntity>create(PlasmaBallEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f));
-	public static final EntityType<DustEntity> DUST = registerEntity(Identifier.of(StarflightMod.MOD_ID, "dust"), EntityType.Builder.<DustEntity>create(DustEntity::new, SpawnGroup.MONSTER).dimensions(1.0f, 2.8f));
-	public static final EntityType<CeruleanEntity> CERULEAN = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cerulean"), EntityType.Builder.<CeruleanEntity>create(CeruleanEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.5f));
-	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = registerEntity(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), EntityType.Builder.<AncientHumanoidEntity>create(AncientHumanoidEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.8f));
-	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), EntityType.Builder.<SolarSpectreEntity>create(SolarSpectreEntity::new, SpawnGroup.MONSTER).dimensions(2.5f, 2.5f));
-	public static final EntityType<SolarEyesEntity> SOLAR_EYES = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_eyes"), EntityType.Builder.<SolarEyesEntity>create(SolarEyesEntity::new, SpawnGroup.AMBIENT).dimensions(0.5f, 0.5f));
-	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.5f));
-	public static final EntityType<CloudSharkEntity> CLOUD_SHARK = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), EntityType.Builder.<CloudSharkEntity>create(CloudSharkEntity::new, SpawnGroup.CREATURE).dimensions(2.5f, 1.0f));
-
-	// Entity Tags
-	public static final TagKey<EntityType<?>> NO_OXYGEN_ENTITY_TAG = TagKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "no_oxygen"));
+	public static final EntityType<RocketEntity> ROCKET = registerEntity(Identifier.of(StarflightMod.MOD_ID, "rocket"), EntityType.Builder.<RocketEntity>create(RocketEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).maxTrackingRange(12));
+	public static final EntityType<LinearPlatformEntity> LINEAR_PLATFORM = registerEntity(Identifier.of(StarflightMod.MOD_ID, "linear_platform"), EntityType.Builder.<LinearPlatformEntity>create(LinearPlatformEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).maxTrackingRange(12));
+	public static final EntityType<AirshipEntity> AIRSHIP = registerEntity(Identifier.of(StarflightMod.MOD_ID, "airship"), EntityType.Builder.<AirshipEntity>create(AirshipEntity::new, SpawnGroup.MISC).dimensions(0.5f, 0.5f).maxTrackingRange(12));
+	public static final EntityType<PlasmaBallEntity> PLASMA_BALL = registerEntity(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), EntityType.Builder.<PlasmaBallEntity>create(PlasmaBallEntity::new, SpawnGroup.MISC).dimensions(0.25f, 0.25f).maxTrackingRange(8));
+	public static final EntityType<DustEntity> DUST = registerEntity(Identifier.of(StarflightMod.MOD_ID, "dust"), EntityType.Builder.<DustEntity>create(DustEntity::new, SpawnGroup.MONSTER).dimensions(1.0f, 2.8f).maxTrackingRange(8));
+	public static final EntityType<CeruleanEntity> CERULEAN = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cerulean"), EntityType.Builder.<CeruleanEntity>create(CeruleanEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.5f).maxTrackingRange(8));
+	public static final EntityType<AncientHumanoidEntity> ANCIENT_HUMANOID = registerEntity(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), EntityType.Builder.<AncientHumanoidEntity>create(AncientHumanoidEntity::new, SpawnGroup.MONSTER).dimensions(0.5f, 1.8f).maxTrackingRange(8));
+	public static final EntityType<SolarSpectreEntity> SOLAR_SPECTRE = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_spectre"), EntityType.Builder.<SolarSpectreEntity>create(SolarSpectreEntity::new, SpawnGroup.MONSTER).dimensions(3.0f, 3.0f).maxTrackingRange(12));
+	public static final EntityType<SolarEyesEntity> SOLAR_EYES = registerEntity(Identifier.of(StarflightMod.MOD_ID, "solar_eyes"), EntityType.Builder.<SolarEyesEntity>create(SolarEyesEntity::new, SpawnGroup.AMBIENT).dimensions(0.75f, 0.75f));
+	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.75f).maxTrackingRange(12));
+	public static final EntityType<CloudSharkEntity> CLOUD_SHARK = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), EntityType.Builder.<CloudSharkEntity>create(CloudSharkEntity::new, SpawnGroup.MONSTER).dimensions(3.0f, 1.5f).maxTrackingRange(12));
 
 	public static void initializeEntities()
 	{
@@ -39,6 +37,13 @@ public class StarflightEntities
 		FabricDefaultAttributeRegistry.register(SOLAR_EYES, SolarEyesEntity.createSolarEyesAttributes());
 		FabricDefaultAttributeRegistry.register(STRATOFISH, StratofishEntity.createStratofishAttributes());
 		FabricDefaultAttributeRegistry.register(CLOUD_SHARK, CloudSharkEntity.createCloudSharkAttributes());
+		
+		SpawnRestriction.register(DUST, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, DustEntity::canDustSpawn);
+		SpawnRestriction.register(CERULEAN, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CeruleanEntity::canCeruleanSpawn);
+		SpawnRestriction.register(SOLAR_SPECTRE, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SolarSpectreEntity::canSolarSpectreSpawn);
+		SpawnRestriction.register(SOLAR_EYES, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, SolarEyesEntity::canSolarEyesSpawn);
+		SpawnRestriction.register(STRATOFISH, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, StratofishEntity::canStratofishSpawn);
+		SpawnRestriction.register(CLOUD_SHARK, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CloudSharkEntity::canCloudSharkSpawn);
 	}
 	
 	private static <T extends Entity> EntityType<T> registerEntity(Identifier id, Builder<T> type)

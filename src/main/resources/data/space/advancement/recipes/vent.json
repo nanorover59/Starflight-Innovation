@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_aluminum_ingot": {
+    "has_valve": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:aluminum_ingot"
+              "space:valve"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_aluminum_ingot",
+      "has_valve",
       "has_the_recipe"
     ]
   ]

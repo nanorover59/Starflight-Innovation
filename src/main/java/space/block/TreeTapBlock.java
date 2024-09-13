@@ -32,7 +32,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
-import space.client.StarflightModClient;
 import space.item.StarflightItems;
 
 public class TreeTapBlock extends WallMountedBlock implements Waterloggable
@@ -60,7 +59,7 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	@Override
 	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.tree_tap.description"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.tree_tap.description"));
 	}
 
 	@Override
@@ -146,7 +145,7 @@ public class TreeTapBlock extends WallMountedBlock implements Waterloggable
 	@Override
     public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random)
 	{
-		if(state.get(RUBBER_SAP).booleanValue() || random.nextInt(4) == 0)
+		if(state.get(RUBBER_SAP).booleanValue() || random.nextBoolean())
 			return;
 
 		world.setBlockState(pos, world.getBlockState(pos).with(RUBBER_SAP, true), Block.NOTIFY_LISTENERS);

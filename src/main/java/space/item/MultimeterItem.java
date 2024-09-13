@@ -17,7 +17,6 @@ import net.minecraft.world.World;
 import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.EnergyBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.client.StarflightModClient;
 
 public class MultimeterItem extends Item
 {
@@ -29,7 +28,7 @@ public class MultimeterItem extends Item
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.multimeter.description_1"), Text.translatable("item.space.multimeter.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space.multimeter.description_1"), Text.translatable("item.space.multimeter.description_2"));
 	}
 
 	@Override

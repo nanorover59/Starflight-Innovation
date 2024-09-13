@@ -10,8 +10,9 @@ import net.minecraft.world.World;
 import space.block.FluidPipeBlock;
 import space.block.StarflightBlocks;
 import space.block.VentBlock;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.FluidResourceType;
-import space.util.StarflightEffects;
+import space.util.StarflightSoundEvents;
 
 public class VentBlockEntity extends BlockEntity
 {
@@ -44,7 +45,7 @@ public class VentBlockEntity extends BlockEntity
 							{
 								Direction ventDirection = state.get(VentBlock.FACING);
 								BlockPos forwardPos = pos.offset(ventDirection);
-								StarflightEffects.sendOutgas(world, forwardPos, forwardPos.offset(ventDirection), false);
+								OutgasS2CPacket.sendOutgas(world, forwardPos, forwardPos.offset(ventDirection), false);
 								blockEntity.particleTimer = 5 + world.random.nextInt(5);
 							}
 							else
@@ -52,7 +53,7 @@ public class VentBlockEntity extends BlockEntity
 							
 							if(blockEntity.soundTimer == 0)
 							{
-								((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), StarflightEffects.LEAK_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, world.random.nextLong());
+								((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), StarflightSoundEvents.LEAK_SOUND_EVENT, SoundCategory.BLOCKS, 1.0f, 1.0f, world.random.nextLong());
 								blockEntity.soundTimer = 70 + world.random.nextInt(10);
 							}
 							else

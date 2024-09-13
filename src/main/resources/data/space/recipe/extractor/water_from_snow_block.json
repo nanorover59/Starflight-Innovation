@@ -1,0 +1,12 @@
+{
+  "type": "space:extractor",
+  "ingredient": {
+    "item": "minecraft:snow_block"
+  },
+  "result": {
+    "id": "minecraft:snow_block"
+  },
+  "water": 100.0,
+  "experience": 0.0,
+  "cookingtime": 100
+}

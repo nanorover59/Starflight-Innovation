@@ -17,7 +17,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
-import space.client.StarflightModClient;
 import space.util.BlockSearch;
 
 public class DividerItem extends Item
@@ -31,7 +30,7 @@ public class DividerItem extends Item
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space.divider.description_1"), Text.translatable("item.space.divider.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space.divider.description_1"), Text.translatable("item.space.divider.description_2"));
 	}
 
 	@Override

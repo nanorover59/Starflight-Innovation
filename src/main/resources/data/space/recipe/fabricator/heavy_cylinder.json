@@ -1,0 +1,11 @@
+{
+  "type": "space:metal_fabricator",
+  "ingredient": {
+    "item": "minecraft:iron_block"
+  },
+  "result": {
+    "id": "space:heavy_cylinder",
+    "count": 1
+  },
+  "machiningTime": 400
+}

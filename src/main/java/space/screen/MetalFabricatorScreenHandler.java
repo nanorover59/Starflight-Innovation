@@ -42,6 +42,7 @@ public class MetalFabricatorScreenHandler extends ScreenHandler
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
 		this.world = playerInventory.player.getWorld();
+		
 		this.addSlot(new Slot(inventory, 0, 19, 9)
 		{
 			@Override
@@ -60,12 +61,13 @@ public class MetalFabricatorScreenHandler extends ScreenHandler
 			public void setStack(ItemStack stack, ItemStack previousStack)
 			{
 				super.setStack(stack, previousStack);
-				availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, stack);
+				availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, stack, inventory.getStack(0));
 				
 				if(propertyDelegate.get(2) == 0)
 					propertyDelegate.set(3, -1);
 			}
 		});
+		
 		this.addSlot(new Slot(inventory, 1, 143, 9)
 		{
 			@Override
@@ -80,8 +82,36 @@ public class MetalFabricatorScreenHandler extends ScreenHandler
 				return propertyDelegate.get(2) == 0;
 			}
 		});
-		this.addSlot(new Slot(inventory, 2, 19, 35));
-		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 3, 143, 57));
+		
+		this.addSlot(new Slot(inventory, 2, 19, 35)
+		{
+			@Override
+			public void setStack(ItemStack stack, ItemStack previousStack)
+			{
+				super.setStack(stack, previousStack);
+				
+				if(propertyDelegate.get(2) == 0)
+				{
+					availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(2), stack);
+					propertyDelegate.set(3, -1);
+				}
+			}
+		});
+		
+		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 3, 143, 57)
+		{
+			@Override
+			public void setStack(ItemStack stack, ItemStack previousStack)
+			{
+				super.setStack(stack, previousStack);
+				
+				/*if(stack.isEmpty())
+				{
+					availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(2), stack);
+					propertyDelegate.set(3, -1);
+				}*/
+			}
+		});
 
 		for(int i = 0; i < 3; i++)
 		{
@@ -103,7 +133,7 @@ public class MetalFabricatorScreenHandler extends ScreenHandler
 	public List<RecipeEntry<MetalFabricatorRecipe>> getAvailableRecipes()
 	{
 		if(this.availableRecipes.isEmpty())
-			this.availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(0));
+			this.availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(2), inventory.getStack(0));
 		
 		return this.availableRecipes;
 	}
@@ -123,10 +153,16 @@ public class MetalFabricatorScreenHandler extends ScreenHandler
 	public boolean onButtonClick(PlayerEntity player, int id)
 	{
 		if(this.availableRecipes.isEmpty())
-			this.availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(0));
+			this.availableRecipes = MetalFabricatorBlockEntity.listAvailableRecipes(world, inventory.getStack(2), inventory.getStack(0));
 		
-		if(id > -1 && id < this.availableRecipes.size())
-			this.propertyDelegate.set(3, id);
+		List<RecipeEntry<MetalFabricatorRecipe>> allRecipes = MetalFabricatorBlockEntity.listAllRecipes(world);
+		RecipeEntry<MetalFabricatorRecipe> selectedRecipe = this.availableRecipes.get(id);
+		
+		for(int i = 0; i < allRecipes.size(); i++)
+		{
+			if(allRecipes.get(i).equals(selectedRecipe))
+				this.propertyDelegate.set(3, i);
+		}
 		
 		return true;
 	}

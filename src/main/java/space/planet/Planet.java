@@ -1,6 +1,7 @@
 package space.planet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import net.darkhax.ess.DataCompound;
 import net.minecraft.network.PacketByteBuf;
@@ -31,7 +32,7 @@ public class Planet implements Comparable<Planet>
 	private boolean isTidallyLocked;
 	private double mass;
 	private double radius;
-	private double parkingOrbitRadius;
+	private double lowOrbitAltitude;
 	private double periapsis;
 	private double apoapsis;
 	private double argumentOfPeriapsis;
@@ -67,15 +68,15 @@ public class Planet implements Comparable<Planet>
 	private PlanetDimensionData surface;
 	private PlanetDimensionData sky;
 	
-	public Planet(String name_, String parentName_, double mass_, double radius_, double parkingOrbitRadius_)
+	public Planet(String name_, String parentName_, double mass_, double radius_, double lowOrbitAltitude_)
 	{
 		name = name_;
 		parentName = parentName_;
 		mass = mass_;
 		radius = radius_;
-		parkingOrbitRadius = radius + parkingOrbitRadius_;
+		lowOrbitAltitude = lowOrbitAltitude_;
 		surfaceGravity = ((G * mass) / (radius * radius) / ((G * EARTH_MASS) / (EARTH_RADIUS * EARTH_RADIUS)));
-		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(parkingOrbitRadius, 3.0));
+		parkingOrbitAngularSpeed = Math.sqrt((G * mass) / Math.pow(radius + lowOrbitAltitude, 3.0));
 		position = new Vec3d(0.0, 0.0, 0.0);
 		velocity = new Vec3d(0.0, 0.0, 0.0);
 		acceleration = new Vec3d(0.0, 0.0, 0.0);
@@ -398,13 +399,15 @@ public class Planet implements Comparable<Planet>
 	/**
 	 * Get the temperature category of this object at the given sky angle.
 	 */
-	public int getTemperatureCategory(float skyAngle, boolean inOrbit)
+	/*public int getTemperatureCategory(float skyAngle, boolean inOrbit)
 	{
-		if(temperatureCategory >= TEMPERATE && (inOrbit || (getSurface() != null && getSurface().getPressure() < 0.01)))
-			return skyAngle < 0.25f || skyAngle > 0.75f ? HOT : COLD;
-			
-		return temperatureCategory;
-	}
+		//if(temperatureCategory >= TEMPERATE && (inOrbit || (getSurface() != null && getSurface().getPressure() < 0.01)))
+		//	return skyAngle < 0.25f || skyAngle > 0.75f ? HOT : COLD;
+		
+		//System.out.println(temperatureCategory);
+		
+		return getSurface().getTemperatureCategory();
+	}*/
 	
 	public double getSurfacePressure()
 	{
@@ -652,7 +655,7 @@ public class Planet implements Comparable<Planet>
 		axisOfRotation = axisOfRotation.rotateX((float) obliquity);
 		axisOfRotation = axisOfRotation.rotateY((float) precession);
 		surfaceViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, rotation).multiply(radius));
-		parkingOrbitViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + parkingOrbitRadius));
+		parkingOrbitViewpoint = absolutePosition.add(VectorUtil.rotateAboutAxis(new Vec3d(1.0, 0.0, 0.0), axisOfRotation, parkingOrbitAngle).multiply(radius + lowOrbitAltitude));
 		
 		if(isTidallyLocked)
 			surfaceViewpoint = absolutePosition.add(parent.getPosition().subtract(absolutePosition).normalize().multiply(radius));
@@ -675,7 +678,7 @@ public class Planet implements Comparable<Planet>
 	public double dVSurfaceToOrbit()
 	{
 		double pressure = getSurface() != null ? getSurface().getPressure() : 0.0;
-		return (circularOrbitVelocity(parkingOrbitRadius) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
+		return (circularOrbitVelocity(radius + lowOrbitAltitude) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
 	}
 	
 	/**
@@ -684,7 +687,7 @@ public class Planet implements Comparable<Planet>
 	public double dVSkyToOrbit()
 	{
 		double pressure = getSky() != null ? getSky().getPressure() : 0.0;
-		return (circularOrbitVelocity(parkingOrbitRadius) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
+		return (circularOrbitVelocity(radius + lowOrbitAltitude) * 1.08) + (1000.0 * Math.pow(pressure, 7.0 / 11.0));
 	}
 	
 	/**
@@ -692,10 +695,10 @@ public class Planet implements Comparable<Planet>
 	 */
 	public double dVOrbitToSurface()
 	{
-		if(getSurface() != null && getSurface().getPressure() < 0.001)
-			return dVSurfaceToOrbit();
+		if(getSurface() != null && getSurface().getPressure() > 0.001)
+			return 250.0;
 		
-		return 500.0;
+		return dVSurfaceToOrbit();
 	}
 	
 	/**
@@ -762,29 +765,30 @@ public class Planet implements Comparable<Planet>
 	{
 		double esc1 = 0;
 		double dvEsc1 = 0;
-		double startV1 = circularOrbitVelocity(parkingOrbitRadius);
-		double orbitRadius = parkingOrbitRadius;
+		double startV1 = circularOrbitVelocity(radius + lowOrbitAltitude);
+		double orbitRadius = radius + lowOrbitAltitude;
 		Planet p = this;
 		
 		while(true)
 		{
 			if(p.equals(other))
-				return p.dVTransfer(orbitRadius, p.parkingOrbitRadius, esc1, 0) + dvEsc1;
+				return p.dVTransfer(orbitRadius, p.radius + p.lowOrbitAltitude, esc1, 0) + dvEsc1;
 			
 			ArrayList<Planet> searchList = new ArrayList<Planet>();
 			boolean b = p.recursiveSearch(other, searchList);
 			
 			if(b)
 			{
+				
 				double esc2 = 0;
 				double dvEsc2 = 0;
-				double startV2 = searchList.get(0).circularOrbitVelocity(searchList.get(0).parkingOrbitRadius);
+				double startV2 = searchList.get(0).circularOrbitVelocity(searchList.get(0).radius + searchList.get(0).lowOrbitAltitude);
 				
 				for(int i = 0; i < searchList.size(); i++)
 				{
 					if(i == 0)
 					{
-						esc2 = searchList.get(i).escapeVelocity(searchList.get(i).parkingOrbitRadius);
+						esc2 = searchList.get(i).escapeVelocity(searchList.get(i).radius + searchList.get(i).lowOrbitAltitude);
 						
 						if(esc2 > startV2)
 							dvEsc2 += esc2 - startV2;
@@ -824,6 +828,53 @@ public class Planet implements Comparable<Planet>
 				p = p.parent;
 			}
 		}
+	}
+	
+	public StaticData getStaticData()
+	{
+		HashMap<String, PlanetDimensionData> dimensionDataMap = new HashMap<String, PlanetDimensionData>();
+		
+		if(orbit != null)
+			dimensionDataMap.put("orbit", orbit);
+		
+		if(surface != null)
+			dimensionDataMap.put("surface", surface);
+		
+		if(sky != null)
+			dimensionDataMap.put("sky", sky);
+		
+		return new StaticData(name, parentName, mass, radius, lowOrbitAltitude, periapsis, apoapsis, argumentOfPeriapsis, trueAnomaly, ascendingNode, inclination, isTidallyLocked, obliquity, rotationRate, simpleTexture, drawClouds, cloudRotationRate, dimensionDataMap);
+	}
+	
+	public void readStaticData(StaticData data)
+	{
+		name = data.name();
+		parentName = data.parentName();
+		mass = data.mass();
+		radius = data.radius();
+		lowOrbitAltitude = data.lowOrbitAltitude();
+		periapsis = data.periapsis();
+		apoapsis = data.apoapsis();
+		argumentOfPeriapsis = data.argumentOfPeriapsis();
+		trueAnomaly = data.trueAnomaly();
+		ascendingNode = data.ascendingNode();
+		inclination = data.inclination();
+		isTidallyLocked = data.isTidallyLocked();
+		obliquity = data.obliquity();
+		rotationRate = data.rotationRate();
+		simpleTexture = data.simpleTexture();
+		drawClouds = data.simpleTexture();
+		cloudRotationRate = data.cloudRotationRate();
+		HashMap<String, PlanetDimensionData> dimensionDataMap = data.dimensionDataMap();
+		
+		if(dimensionDataMap.containsKey("orbit"))
+			orbit = dimensionDataMap.get("orbit");
+		
+		if(dimensionDataMap.containsKey("surface"))
+			surface = dimensionDataMap.get("surface");
+		
+		if(dimensionDataMap.containsKey("sky"))
+			sky = dimensionDataMap.get("sky");
 	}
 	
 	public DynamicData getDynamicData()
@@ -886,6 +937,28 @@ public class Planet implements Comparable<Planet>
 			p.loadData(data, checkList);
 	}
 	
+	public static void writeStaticData(PacketByteBuf buffer, StaticData data)
+	{
+		buffer.writeString(data.name());
+		buffer.writeString(data.parentName());
+		buffer.writeDouble(data.mass());
+		buffer.writeDouble(data.radius());
+		buffer.writeDouble(data.lowOrbitAltitude());
+		buffer.writeDouble(data.periapsis());
+		buffer.writeDouble(data.apoapsis());
+		buffer.writeDouble(data.argumentOfPeriapsis());
+		buffer.writeDouble(data.trueAnomaly());
+		buffer.writeDouble(data.ascendingNode());
+		buffer.writeDouble(data.inclination());
+		buffer.writeBoolean(data.isTidallyLocked());
+		buffer.writeDouble(data.obliquity());
+		buffer.writeDouble(data.rotationRate());
+		buffer.writeBoolean(data.simpleTexture());
+		buffer.writeBoolean(data.drawClouds());
+		buffer.writeDouble(data.cloudRotationRate());
+		buffer.writeMap(data.dimensionDataMap(), PacketByteBuf::writeString, PlanetDimensionData::write);
+	}
+	
 	public static void writeDynamicData(PacketByteBuf buffer, DynamicData data)
 	{
 		buffer.writeVec3d(data.position());
@@ -896,6 +969,14 @@ public class Planet implements Comparable<Planet>
 		buffer.writeDouble(data.cloudRotation());
 		buffer.writeInt(data.cloudLevel());
 		buffer.writeInt(data.cloudTimer());
+	}
+	
+	public record StaticData(String name, String parentName, double mass, double radius, double lowOrbitAltitude, double periapsis, double apoapsis, double argumentOfPeriapsis, double trueAnomaly, double ascendingNode, double inclination, boolean isTidallyLocked, double obliquity, double rotationRate, boolean simpleTexture, boolean drawClouds, double cloudRotationRate, HashMap<String, PlanetDimensionData> dimensionDataMap)
+	{
+		public StaticData(PacketByteBuf buffer)
+	    {
+	    	this(buffer.readString(), buffer.readString(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readDouble(), buffer.readBoolean(), buffer.readDouble(), buffer.readDouble(), buffer.readBoolean(), buffer.readBoolean(), buffer.readDouble(), (HashMap<String, PlanetDimensionData>) buffer.readMap(PacketByteBuf::readString, PlanetDimensionData::new));
+	    }
 	}
 	
 	public record DynamicData(Vec3d position, Vec3d velocity, double rotation, double precession, double parkingOrbitAngle, double cloudRotation, int cloudLevel, int cloudTimer)

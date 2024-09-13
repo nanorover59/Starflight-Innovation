@@ -1,0 +1,18 @@
+{
+    "replace": false,
+    "values": [
+      "#minecraft:is_overworld",
+      "space:mercury_plains",
+      "space:mercury_hotspot",
+      "space:mercury_ice",
+      "space:venus_lowlands",
+      "space:venus_midlands",
+      "space:venus_volcanic_plains",
+      "space:moon_lowlands",
+      "space:moon_midlands",
+      "space:moon_ice",
+      "space:mars_lowlands",
+      "space:mars_midlands",
+      "space:mars_ice"
+    ]
+}

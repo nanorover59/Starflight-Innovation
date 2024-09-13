@@ -1,16 +1,16 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
+        " c ",
         "bab",
-        "aca",
-        "bab"
+        " c "
     ],
     "key": {
         "a": {
-            "item": "space:aluminum_ingot"
+            "item": "space:structural_aluminum"
         },
         "b": {
-            "item": "minecraft:orange_dye"
+            "item": "space:hydrogen_pipe"
         },
         "c": {
             "item": "minecraft:redstone"

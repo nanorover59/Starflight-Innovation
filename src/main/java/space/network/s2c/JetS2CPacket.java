@@ -1,10 +1,13 @@
 package space.network.s2c;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.WorldAccess;
 import space.StarflightMod;
 
 public record JetS2CPacket(Vec3d sourcePos, Vec3d velocity) implements CustomPayload
@@ -27,5 +30,11 @@ public record JetS2CPacket(Vec3d sourcePos, Vec3d velocity) implements CustomPay
 	public Id<? extends CustomPayload> getId()
 	{
 		return PACKET_ID;
+	}
+    
+    public static void sendJet(WorldAccess world, Vec3d sourcePos, Vec3d velocity)
+	{
+		for(ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList())
+			ServerPlayNetworking.send(player, new JetS2CPacket(sourcePos, velocity));
 	}
 }

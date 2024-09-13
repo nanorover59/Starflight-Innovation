@@ -10,11 +10,11 @@
             "item": "space:linear_track"
         },
         "b": {
-            "item": "space:control_unit"
+            "item": "minecraft:redstone"
         }
     },
     "result": {
         "id": "space:call_track",
-        "count": 1
+        "count": 2
     }
 }

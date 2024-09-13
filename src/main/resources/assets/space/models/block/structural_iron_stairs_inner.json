@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/inner_stairs",
+  "textures": {
+    "bottom": "space:block/structural_iron",
+    "side": "space:block/structural_iron",
+    "top": "space:block/structural_iron"
+  }
+}

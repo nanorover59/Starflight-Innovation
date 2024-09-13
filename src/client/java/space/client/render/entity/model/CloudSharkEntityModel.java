@@ -33,11 +33,11 @@ public class CloudSharkEntityModel<T extends CloudSharkEntity> extends SinglePar
 		modelPartData.addChild("base", ModelPartBuilder.create().uv(0, 0).cuboid(-4.0F, -6.0F, -14.1F, 8.0F, 12.0F, 24.0F, new Dilation(0.0F))
 		.uv(42, 68).cuboid(-4.0F, -4.0F, -24.1F, 8.0F, 8.0F, 10.0F, new Dilation(0.0F))
 		.uv(38, 50).cuboid(4.0F, -2.0F, -6.1F, 12.0F, 4.0F, 14.0F, new Dilation(0.0F))
-		.uv(54, 0).cuboid(16.0F, -1.0F, -4.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
-		.uv(24, 36).cuboid(28.0F, 0.0F, -2.1F, 14.0F, 0.0F, 14.0F, new Dilation(0.0F))
+		.uv(54, 0).cuboid(16.0F, -1.0F, -3.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
+		.uv(54, 0).cuboid(28.0F, -1.0F, -0.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
 		.uv(0, 36).cuboid(-16.0F, -2.0F, -6.1F, 12.0F, 4.0F, 14.0F, new Dilation(0.0F))
-		.uv(0, 54).cuboid(-28.0F, -1.0F, -4.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
-		.uv(26, 0).cuboid(-42.0F, 0.0F, -2.1F, 14.0F, 0.0F, 14.0F, new Dilation(0.0F))
+		.uv(0, 54).cuboid(-28.0F, -1.0F, -3.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
+		.uv(0, 54).cuboid(-40.0F, -1.0F, -0.1F, 12.0F, 2.0F, 14.0F, new Dilation(0.0F))
 		.uv(40, 4).cuboid(0.0F, -14.0F, -4.1F, 0.0F, 8.0F, 12.0F, new Dilation(0.0F))
 		.uv(0, 0).cuboid(0.0F, 6.0F, -4.1F, 0.0F, 8.0F, 12.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 18.0F, 0.1F));
 		modelPartData.addChild("tail1", ModelPartBuilder.create().uv(64, 16).cuboid(-3.0F, -4.0F, 0.0F, 6.0F, 8.0F, 12.0F, new Dilation(0.0F)), ModelTransform.pivot(0.0F, 18.0F, 10.0F));

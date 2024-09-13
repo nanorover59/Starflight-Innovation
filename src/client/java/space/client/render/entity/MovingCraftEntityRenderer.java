@@ -35,7 +35,6 @@ import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.World;
 import space.entity.MovingCraftEntity;
 import space.mixin.client.BlockModelRendererInvokerMixin;
-import space.vessel.MovingCraftBlockData;
 
 @Environment(value=EnvType.CLIENT)
 public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
@@ -60,7 +59,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		BlockPos centerBlockPosInitial = entity.getInitialBlockPos();
 		int lightLevel = WorldRenderer.getLightmapCoordinates(world, Blocks.AIR.getDefaultState(), centerBlockPos);
 		
-		for(MovingCraftBlockData block : entity.getExposedBlocks())
+		for(MovingCraftEntity.BlockData block : entity.getExposedBlocks())
 			renderBlock(world, matrixStack, vertexConsumerProvider, random, block, centerBlockPos, centerBlockPosInitial, lightLevel, entity.getYaw());
 	}
 	
@@ -70,7 +69,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
 		return PlayerScreenHandler.BLOCK_ATLAS_TEXTURE;
 	}
 	
-	public static void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, MovingCraftBlockData block, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
+	public static void renderBlock(BlockRenderView world, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, Random random, MovingCraftEntity.BlockData block, BlockPos centerBlockPos, BlockPos centerBlockPosInitial, int lightLevel, float craftYaw)
 	{
 		BlockState blockState = block.getBlockState();
 		BlockPos position = block.getPosition();
@@ -122,7 +121,7 @@ public class MovingCraftEntityRenderer extends EntityRenderer<MovingCraftEntity>
         matrixStack.pop();
 	}
 	
-	public static boolean canRenderSide(MovingCraftBlockData block, Direction direction)
+	public static boolean canRenderSide(MovingCraftEntity.BlockData block, Direction direction)
 	{
 		switch(direction)
 		{

@@ -13,7 +13,6 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FacingBlock;
 import net.minecraft.block.Waterloggable;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item.TooltipContext;
@@ -32,7 +31,7 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.CubicHermiteSpline;
@@ -42,7 +41,7 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	public static final MapCodec<RocketThrusterBlock> CODEC = RocketThrusterBlock.createCodec(RocketThrusterBlock::new);
 	
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	private static final double ISP_MULTIPLIER = 1.0;
+	private static final double ISP_MULTIPLIER = 1.5;
 	private final double standardGravity = 9.80665;
 	private final double massFlow;
 	private final double vacuumThrust;
@@ -176,14 +175,11 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
+		PlanetDimensionData data = PlanetList.getClient().getViewpointDimensionData();
 		double pressure = 1.0;
-		MinecraftClient client = MinecraftClient.getInstance();
 		
-		if(client.player != null)
-		{
-			PlanetDimensionData data = PlanetList.getClient().getViewpointDimensionData();
+		if(data != null)
 			pressure = data == null ? 1.0 : data.getPressure();
-		}
 		
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
@@ -192,6 +188,6 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(pressure) / 1000.0)).append("kN"));
 		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(pressure))).append("s"));
 		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
-		StarflightModClient.hiddenItemTooltip(tooltip, textList);
+		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 }

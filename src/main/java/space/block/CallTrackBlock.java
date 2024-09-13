@@ -59,7 +59,7 @@ public class CallTrackBlock extends Block
 							{
 								BlockState checkState = world.getBlockState(mutable.offset(checkDirection));
 	
-								if(checkState.getBlock() == StarflightBlocks.LINEAR_ACTUATOR)
+								if(checkState.getBlock() == StarflightBlocks.LINEAR_ACTUATOR && checkDirection == checkState.get(LinearActuatorBlock.FACING))
 								{
 									actuatorPos = mutable.offset(checkDirection).toImmutable();
 									targetPos = pos.offset(checkDirection);
@@ -75,7 +75,7 @@ public class CallTrackBlock extends Block
 			}
 			
 			if(actuatorPos != null && actuatorPos.getSquaredDistance(targetPos) > 0)
-				LinearActuatorBlock.spawnEntity(world, actuatorPos, targetPos, pos);
+				LinearActuatorBlock.spawnEntity(world, actuatorPos, pos, targetPos);
 			
 			world.setBlockState(pos, state.with(TRIGGERED, true), Block.NOTIFY_LISTENERS);
 		}

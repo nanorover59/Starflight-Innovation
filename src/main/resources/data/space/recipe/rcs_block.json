@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "cbc",
+        "bab",
+        "cbc"
+    ],
+    "key": {
+        "a": {
+            "item": "space:valve"
+        },
+        "b": {
+            "item": "space:mini_thruster"
+        },
+        "c": {
+            "item": "space:aluminum_plate"
+        }
+    },
+    "result": {
+        "id": "space:rcs_block",
+        "count": 1
+    }
+}

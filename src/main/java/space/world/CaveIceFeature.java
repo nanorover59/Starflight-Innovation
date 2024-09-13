@@ -249,7 +249,7 @@ public class CaveIceFeature extends Feature<CaveIceFeatureConfig>
 	
 	public static boolean canReplace(BlockState state)
 	{
-        return !state.isAir();
+        return !state.isAir() && state.getBlock() != StarflightBlocks.ICICLE;
     }
 
 	protected static boolean canGenerate(WorldAccess world, BlockPos pos)

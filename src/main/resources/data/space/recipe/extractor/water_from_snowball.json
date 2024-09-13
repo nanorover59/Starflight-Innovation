@@ -1,0 +1,12 @@
+{
+  "type": "space:extractor",
+  "ingredient": {
+    "item": "minecraft:snowball"
+  },
+  "result": {
+    "id": "minecraft:snowball"
+  },
+  "water": 25.0,
+  "experience": 0.0,
+  "cookingtime": 100
+}

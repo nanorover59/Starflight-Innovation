@@ -15,7 +15,7 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.StructureType;
-import space.world.MoonshaftGenerator.MoonshaftCore;
+import space.world.MoonshaftGenerator.MoonshaftCrossing;
 
 public class MoonshaftStructure extends Structure
 {
@@ -46,13 +46,13 @@ public class MoonshaftStructure extends Structure
 		ChunkPos chunkPos = context.chunkPos();
 		ChunkRandom chunkRandom = context.random();
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
-		int x = chunkPos.getStartX();
-		int z = chunkPos.getStartZ();
+		int x = chunkPos.getCenterX();
+		int z = chunkPos.getCenterZ();
 		int y = chunkGenerator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR, context.world(), context.noiseConfig());
-		int maxLevels = (y - chunkGenerator.getMinimumY()) / 12;
-		int depth = 24 + chunkRandom.nextInt(maxLevels) * 6;
-		BlockBox blockBox = MoonshaftCore.getBoundingBox(collector, chunkRandom, x, y, z, depth);
-		MoonshaftCore moonshaftPart = new MoonshaftCore(0, Direction.fromHorizontal(chunkRandom.nextInt(4)), blockBox);
+		int targetY = Math.max(0, y - (24 + chunkRandom.nextInt(128)));
+		int down = (y - targetY) / 6;
+		BlockBox blockBox = MoonshaftCrossing.getBoundingBox(collector, chunkRandom, x, y, z, 1, down);
+		MoonshaftCrossing moonshaftPart = new MoonshaftCrossing(0, blockBox, 0, down, Direction.fromHorizontal(chunkRandom.nextInt(4)));
 		collector.addPiece(moonshaftPart);
 		moonshaftPart.fillOpenings(moonshaftPart, collector, chunkRandom);
 		return y;

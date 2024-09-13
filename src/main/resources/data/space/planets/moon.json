@@ -3,7 +3,7 @@
     "parentName": "earth",
     "mass": 7.34767309e22,
     "radius": 1.7381e6,
-    "parkingOrbitRadius": 200e3,
+    "lowOrbitAltitude": 200e3,
     "periapsis": 3.633e8,
     "apoapsis": 4.055e8,
     "argumentOfPeriapsis": 5.55276502,

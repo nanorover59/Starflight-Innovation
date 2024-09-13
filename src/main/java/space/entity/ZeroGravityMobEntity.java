@@ -123,7 +123,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		else
 		{
 			int i = (int) (getBoundingBox().getAverageSideLength() * 2.0);
-			double acc = 0.15;
+			double acc = 0.1;
 			
 			if(world.getBlockState(getBlockPos().east(i)).blocksMovement())
 				addVelocity(-acc, 0.0, 0.0);
@@ -198,7 +198,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	
 	public float getTurningFactor()
 	{
-		return 0.25f;
+		return 0.1f;
 	}
 	
 	public boolean hasRunningGoals()
@@ -255,7 +255,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		@Override
 		public void tick()
 		{
-			updateMotion(getVelocityToCancel(), getVelocity().length() > 0.1 ? thrust : thrust * 0.25);
+			updateMotion(getVelocityToCancel(), thrust * getVelocity().length());
 		}
 
 		@Override
@@ -314,14 +314,15 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		@Override
 		public void tick()
 		{
+			int topY = getWorld().getTopPosition(Type.MOTION_BLOCKING_NO_LEAVES, getBlockPos()).getY();
+			
+			if(getPos().getY() < topY + 32.0 && getVelocity().getY() < 0.0)
+				entity.addVelocity(0.0, thrust * 0.0025, 0.0);
+			
 			targetDirection = pointOfInterest.subtract(getPos());
 			previousDistance = distance;
 			distance = targetDirection.length();
 			updateMotion(targetDirection, thrust);
-			
-			if(distance < 2.0)
-				setPointOfInterest();
-			
 			ticks++;
 		}
 		
@@ -339,11 +340,14 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		
 		private void setPointOfInterest()
 		{
-			boolean upBias = getY() < getWorld().getTopPosition(Type.WORLD_SURFACE, getBlockPos()).getY() + 8;
+			int topY = getWorld().getTopPosition(Type.MOTION_BLOCKING_NO_LEAVES, getBlockPos()).getY();
 			int dx = random.nextInt(range) - random.nextInt(range);
-			int dy = random.nextInt(range) - (upBias ? 0 : random.nextInt(range));
+			int dy = random.nextInt(range) - random.nextInt(range);
 			int dz = random.nextInt(range) - random.nextInt(range);
 			pointOfInterest = getPos().add(dx, dy, dz);
+			
+			if(pointOfInterest.getY() < topY + 32.0)
+				pointOfInterest = new Vec3d(pointOfInterest.getX(), topY + 32.0, pointOfInterest.getZ());
 		}
 	}
 	
@@ -391,9 +395,13 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 			if(getTarget() != null)
 			{
 				trackTargetEntity();
+				int topY = getWorld().getTopPosition(Type.MOTION_BLOCKING_NO_LEAVES, getBlockPos()).getY();
+				
+				if(getPos().getY() < topY + 16.0 && getVelocity().getY() < 0.0)
+					entity.addVelocity(0.0, thrust * 0.0025, 0.0);
 				
 				if(distance < 16.0)
-					updateMotion(targetDirection, thrust * -0.5f);
+					updateMotion(targetDirection, -thrust);
 				else
 					updateMotion(targetDirection, thrust);
 			}

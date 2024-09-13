@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/structural_iron_slab"
+    },
+    "type=double": {
+      "model": "space:block/structural_iron"
+    },
+    "type=top": {
+      "model": "space:block/structural_iron_slab_top"
+    }
+  }
+}

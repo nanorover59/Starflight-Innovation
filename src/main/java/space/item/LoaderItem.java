@@ -16,7 +16,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.block.FluidTankControllerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.client.StarflightModClient;
 import space.util.FluidResourceType;
 
 public class LoaderItem extends Item
@@ -33,7 +32,7 @@ public class LoaderItem extends Item
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		tooltip.add(Text.translatable("item.space.creative").formatted(Formatting.ITALIC, Formatting.RED));
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("item.space." + fluid.getName() + "_loader.description_1"), Text.translatable("item.space." + fluid.getName() + "_loader.description_2"));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space." + fluid.getName() + "_loader.description_1"), Text.translatable("item.space." + fluid.getName() + "_loader.description_2"));
 	}
 
 	@Override

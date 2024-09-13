@@ -33,9 +33,11 @@ public abstract class BackgroundRendererMixin
 			float fogFactor = 1.0f;
 			
 			if(dimensionData.isSky() && viewpointPlanet.hasCloudCover())
-				fogFactor = MathHelper.clamp((float) Math.abs(client.world.getBottomY() - camera.getPos().getY()) / 128.0f, 0.1f, 1.0f);
+				fogFactor = MathHelper.clamp((float) (camera.getPos().getY() - client.world.getBottomY()) / 128.0f, 0.1f, 1.0f);
 			else if(dimensionData.isCloudy())
-				fogFactor = MathHelper.clamp((float) Math.abs(client.world.getTopY() - camera.getPos().getY()) / 256.0f, 0.1f, 1.0f);
+				fogFactor = MathHelper.clamp((float) (client.world.getTopY() - camera.getPos().getY()) / 256.0f, 0.1f, 1.0f);
+			else if(dimensionData.getPlanet().getName().equals("mars") && client.world.isRaining())
+				fogFactor = MathHelper.clamp((float) (camera.getPos().getY() - client.world.getBottomY()) / 320.0f, 0.15f, 1.0f) / client.world.getRainGradient(tickDelta);
 			
 			if(fogFactor < 1.0f)
 			{

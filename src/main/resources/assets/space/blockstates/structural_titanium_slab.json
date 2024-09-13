@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/structural_titanium_slab"
+    },
+    "type=double": {
+      "model": "space:block/structural_titanium"
+    },
+    "type=top": {
+      "model": "space:block/structural_titanium_slab_top"
+    }
+  }
+}

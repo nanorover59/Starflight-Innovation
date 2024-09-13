@@ -1,9 +1,9 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "dcd",
-        "bab",
-        "dcd"
+        " b ",
+        "cac",
+        " b "
     ],
     "key": {
         "a": {
@@ -14,9 +14,6 @@
         },
         "c": {
             "item": "space:coil"
-        },
-        "d": {
-            "item": "space:copper_cable"
         }
     },
     "result": {

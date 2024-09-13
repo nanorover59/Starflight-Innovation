@@ -1,6 +1,12 @@
 {
   "type": "space:space",
   "generator": {
-    "type": "space:space"
+    "type": "minecraft:flat",
+    "settings": {
+      "biome": "space:space",
+      "lakes": false,
+      "features": false,
+      "layers": []
+    }
   }
 }

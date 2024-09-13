@@ -14,7 +14,7 @@ import space.recipe.StarflightRecipes;
 
 public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 {
-	private double pressure;
+	private double pressure = -1.0;
 	
 	public VacuumFurnaceBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
@@ -56,6 +56,9 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 	@Override
 	public double getInput()
 	{
+		if(pressure < 0.0)
+			updateExternalPressure();
+		
 		double localPower = ((EnergyBlock) getCachedState().getBlock()).getInput() * (1.0 + 3.0 * pressure);
 		return localPower / world.getTickManager().getTickRate();
 	}

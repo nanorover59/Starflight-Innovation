@@ -19,7 +19,7 @@ public class SimpleFacingBlock extends FacingBlock
 	public SimpleFacingBlock(Settings settings)
 	{
 		super(settings);
-		this.setDefaultState((BlockState) ((BlockState) ((BlockState) this.stateManager.getDefaultState()).with(FACING, Direction.UP)));
+		this.setDefaultState(this.stateManager.getDefaultState().with(FACING, Direction.UP));
 	}
 	
 	@Override

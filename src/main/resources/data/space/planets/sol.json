@@ -3,7 +3,7 @@
     "parentName": "null",
     "mass": 1.98847e30,
     "radius": 696.34e6,
-    "parkingOrbitRadius": 1000e6,
+    "lowOrbitAltitude": 1000e6,
     "periapsis": 0,
     "apoapsis": 0,
     "argumentOfPeriapsis": 0,

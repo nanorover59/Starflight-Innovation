@@ -29,7 +29,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.block.entity.VentBlockEntity;
-import space.client.StarflightModClient;
+import space.item.StarflightItems;
 import space.util.FluidResourceType;
 
 public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
@@ -51,16 +51,16 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	}
 
 	@Override
-	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
-	{
-		StarflightModClient.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description_1"), Text.translatable("block.space.vent.description_2"));
-	}
-
-	@Override
 	protected void appendProperties(StateManager.Builder<Block, BlockState> stateManager)
 	{
 		stateManager.add(FACING);
 		stateManager.add(VENT_STATE);
+	}
+	
+	@Override
+	public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
+	{
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.vent.description"));
 	}
 	
 	@Override

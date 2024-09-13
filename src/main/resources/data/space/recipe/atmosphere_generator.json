@@ -1,22 +1,21 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "dad",
-        "cbc",
-        "dad"
+        "dcd",
+        "bab"
     ],
     "key": {
         "a": {
-            "item": "space:aluminum_ingot"
+            "item": "space:valve"
         },
         "b": {
-            "item": "space:vent"
-        },
-        "c": {
             "item": "space:oxygen_pipe"
         },
+        "c": {
+            "item": "space:control_unit"
+        },
         "d": {
-            "item": "minecraft:redstone"
+            "item": "space:coil"
         }
     },
     "result": {

@@ -314,7 +314,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public boolean canExtract(int slot, ItemStack stack, Direction dir)
 	{
-		return true;
+		return slot == 1;
 	}
 
 	public void dropExperienceForRecipesUsed(ServerPlayerEntity player)

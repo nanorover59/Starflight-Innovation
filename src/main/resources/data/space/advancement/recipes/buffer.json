@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_iron_frame": {
+    "has_structural_iron": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:iron_frame"
+              "space:structural_iron"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_iron_frame",
+      "has_structural_iron",
       "has_the_recipe"
     ]
   ]

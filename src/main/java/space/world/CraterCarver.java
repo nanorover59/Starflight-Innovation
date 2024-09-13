@@ -68,32 +68,26 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 						
 						if(depth < 0)
 						{
-							for(int y = surfaceY + 4; y >= surfaceY + depth; y--)
+							for(int y = surfaceY + 4; y > surfaceY + depth; y--)
 							{
 								BlockState blockState = AIR;
 								mutable.set(x, y, z);
 								
-								if(ice)
+								if(ice && y < 50)
 								{
-									if(y < surfaceY - 9)
+									if(y < surfaceY - 4)
 										blockState = craterRandom.nextInt(16) == 0 ? Blocks.BLUE_ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState();
-									else if(y < surfaceY - 8)
-										blockState = Blocks.POWDER_SNOW.getDefaultState();
 								}
 								
 								chunk.setBlockState(mutable, blockState, false);
-								chunk.markBlockForPostProcessing(mutable);
+								BlockState upState = chunk.getBlockState(mutable.up());
+								BlockState downState = chunk.getBlockState(mutable.down());
 								
-								if(y == surfaceY + depth)
+								if(ice && blockState != AIR && upState.isAir())
+									chunk.setBlockState(mutable.up(), Blocks.POWDER_SNOW.getDefaultState(), false);
+								
+								if(y == surfaceY + depth + 1 && blockState.isAir() && !downState.isAir() && downState.getFluidState().isEmpty())
 									chunk.setBlockState(mutable.down(), surfaceState, false);
-							}
-						}
-						else
-						{
-							for(int y = surfaceY; y <= surfaceY + depth; y++)
-							{
-								mutable.set(x, y, z);
-								chunk.setBlockState(mutable, surfaceState, false);
 							}
 						}
 					}
@@ -102,6 +96,17 @@ public class CraterCarver extends Carver<CraterCarverConfig>
         }
 		
 		return true;
+	}
+	
+	private int getCraterDepth(int x, int z, int craterX, int craterZ, int radius, double rimWidth, double rimSteepness, double depthFactor)
+	{
+		double r = MathHelper.hypot(x - craterX, z - craterZ) / radius;
+		double parabola = r * r - 1.0;
+		double rimR = Math.min(r - rimWidth - 1.0, 0.0);
+		double rim = rimR * rimR * rimSteepness;
+		double shape = smoothMin(parabola, rim, 0.5);
+		shape = smoothMax(shape, -depthFactor, 0.5);
+		return (int) (shape * radius);
 	}
 	
 	@Override
@@ -133,17 +138,6 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 	{
 		float u = random.nextFloat();
 		return (float) (Math.pow((Math.pow(max, 1.0f - alpha) - Math.pow(min, 1.0f - alpha)) * u + Math.pow(min, 1.0f - alpha), 1.0f / (1.0f - alpha)));
-	}
-	
-	private int getCraterDepth(int x, int z, int craterX, int craterZ, int radius, double rimWidth, double rimSteepness, double depthFactor)
-	{
-		double r = MathHelper.hypot(x - craterX, z - craterZ) / radius;
-		double parabola = r * r - 1.0;
-		double rimR = Math.min(r - rimWidth - 1.0, 0.0);
-		double rim = rimR * rimR * rimSteepness;
-		double shape = smoothMin(parabola, rim, 0.5);
-		shape = smoothMax(shape, -depthFactor, 0.5);
-		return (int) (shape * radius);
 	}
 	
 	private double smoothMin(double a, double b, double c)

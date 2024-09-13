@@ -5,17 +5,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.s2c.play.WorldEventS2CPacket;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import space.entity.RocketEntity;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.AirUtil;
@@ -47,7 +41,7 @@ public abstract class ServerPlayerEntityMixin
 	/**
 	 * Prevent the portal sound effect from playing.
 	 */
-	@Redirect(method = "moveToWorld(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/entity/Entity;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
+	/*@Redirect(method = "moveToWorld(Lnet/minecraft/server/world/ServerWorld;)Lnet/minecraft/entity/Entity;", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"))
 	private void cancelPortalSound(ServerPlayNetworkHandler networkHandler, Packet<?> packet)
 	{
 		// Check if the packet is the portal travel event.
@@ -62,5 +56,5 @@ public abstract class ServerPlayerEntityMixin
 		
 		// Otherwise, send the packet normally.
 		networkHandler.sendPacket(packet);
-	}
+	}*/
 }

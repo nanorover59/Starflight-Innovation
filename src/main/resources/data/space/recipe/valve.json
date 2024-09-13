@@ -1,16 +1,14 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " a ",
-        "aba",
-        " a "
+        "bab"
     ],
     "key": {
         "a": {
-            "item": "space:aluminum_ingot"
+            "item": "space:structural_aluminum"
         },
         "b": {
-            "item": "space:rubber"
+            "item": "minecraft:copper_ingot"
         }
     },
     "result": {

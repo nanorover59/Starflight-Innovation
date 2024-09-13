@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:reaction_wheel"
+    ]
+  },
+  "criteria": {
+    "has_heavy_cylinder": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:heavy_cylinder"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:reaction_wheel"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_heavy_cylinder",
+      "has_the_recipe"
+    ]
+  ]
+}

@@ -13,8 +13,8 @@ import net.minecraft.world.World;
 import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.ValveBlockEntity;
+import space.network.s2c.OutgasS2CPacket;
 import space.util.BlockSearch;
-import space.util.StarflightEffects;
 
 public class FluidTankInsideBlock extends Block
 {
@@ -59,7 +59,7 @@ public class FluidTankInsideBlock extends Block
 							FluidTankControllerBlockEntity fluidTankController = (FluidTankControllerBlockEntity) blockEntity;
 							
 							if(fluidTankController.getStoredFluid() > fluidTankController.getFluidType().getStorageDensity() * 0.1)
-								StarflightEffects.sendOutgas(world, pos, sourcePos, true);
+								OutgasS2CPacket.sendOutgas(world, pos, sourcePos, true);
 							
 							if(fluidTankController.getStoredFluid() > fluidTankController.getFluidType().getStorageDensity())
 								blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, World.ExplosionSourceType.BLOCK);
@@ -84,7 +84,7 @@ public class FluidTankInsideBlock extends Block
 						BalloonControllerBlockEntity balloonController = (BalloonControllerBlockEntity) blockEntity;
 
 						if(balloonController.getStoredFluid() > 1.0)
-							StarflightEffects.sendOutgas(world, pos, sourcePos, true);
+							OutgasS2CPacket.sendOutgas(world, pos, sourcePos, true);
 
 						if(balloonController.getStoredFluid() > 2.0)
 							blockEntity.getWorld().createExplosion(null, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 3.0f, World.ExplosionSourceType.BLOCK);

@@ -1,8 +1,6 @@
 package space.util;
 
 import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.BiPredicate;
 
 import net.minecraft.block.Block;
@@ -32,7 +30,6 @@ import space.planet.PlanetDimensionData;
 
 public class AirUtil
 {
-	public static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(1); // For running habitable air updates in a separate thread. 
 	public static final int MAX_VOLUME = 262144;
 	
 	/**
