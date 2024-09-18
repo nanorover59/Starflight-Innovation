@@ -1,5 +1,7 @@
 package space.mixin.common;
 
+import java.util.List;
+
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -12,11 +14,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +29,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.entity.AlienMobEntity;
+import space.item.SpaceSuitItem;
 import space.item.StarflightItems;
 import space.network.s2c.JetS2CPacket;
 import space.planet.Planet;
@@ -112,7 +117,7 @@ public abstract class LivingEntityMixin extends Entity
 		if(this.isSubmergedInWater())
 			airMultiplier = 1.0f;
 		
-		// Run oxygen supply mechanics on the server side.
+		// Run the following mechanics on the server side.
 		if(!this.getWorld().isClient())
 		{
 			LivingEntity thisEntity = (LivingEntity) this.getWorld().getEntityById(getId());
@@ -149,12 +154,12 @@ public abstract class LivingEntityMixin extends Entity
 				
 				for(ItemStack stack : thisEntity.getArmorItems())
 				{
-					if(stack.getItem() == StarflightItems.SPACE_SUIT_HELMET || stack.getItem() == StarflightItems.SPACE_SUIT_LEGGINGS || stack.getItem() == StarflightItems.SPACE_SUIT_BOOTS)
-						spaceSuitCheck++;
-					else if(stack.getItem() == StarflightItems.SPACE_SUIT_CHESTPLATE)
+					if(stack.isIn(StarflightItems.SPACE_SUIT_ARMOR_ITEM_TAG))
 					{
 						spaceSuitCheck++;
-						chestplate = stack;
+						
+						if(stack.getItem() instanceof SpaceSuitItem && ((SpaceSuitItem) stack.getItem()).getType() == ArmorItem.Type.CHESTPLATE)
+							chestplate = stack;
 					}
 				}
 				
@@ -187,6 +192,19 @@ public abstract class LivingEntityMixin extends Entity
 					
 					thisEntity.setAir(thisEntity.getMaxAir());
 					chestplate.set(StarflightItems.OXYGEN, oxygen - oxygenUsed < 0.0f ? 0.0f : oxygen - oxygenUsed);
+				}
+				
+				// Magnetic Tool Attraction
+				if(thisEntity.getMainHandStack().isIn(StarflightItems.MAGNETIC_TOOL_ITEM_TAG))
+				{
+					double radius = 5.0;
+					List<ItemEntity> nearbyEntities = thisEntity.getWorld().getEntitiesByClass(ItemEntity.class, thisEntity.getBoundingBox().expand(radius), item -> true);
+
+					for(Entity entity : nearbyEntities)
+					{
+						Vec3d direction = thisEntity.getPos().subtract(entity.getEyePos()).normalize().multiply(0.1);
+						entity.addVelocity(direction);
+					}
 				}
 			}
 		}

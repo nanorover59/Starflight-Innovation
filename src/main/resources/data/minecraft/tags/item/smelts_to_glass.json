@@ -1,0 +1,10 @@
+{
+  "replace": false,
+  "values": [
+    "space:regolith",
+    "space:balsaltic_regolith",
+    "space:solarized_regolith",
+    "space:searing_regolith",
+    "space:ferric_sand"
+  ]
+}

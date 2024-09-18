@@ -1,5 +1,6 @@
 package space.world;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
@@ -9,6 +10,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
@@ -19,6 +21,7 @@ import net.minecraft.world.gen.carver.Carver;
 import net.minecraft.world.gen.carver.CarverContext;
 import net.minecraft.world.gen.carver.CarvingMask;
 import net.minecraft.world.gen.chunk.AquiferSampler;
+import space.block.StarflightBlocks;
 
 public class CraterCarver extends Carver<CraterCarverConfig>
 {
@@ -64,7 +67,14 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 						r /= radius;
 						int surfaceY = chunk.sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
 						int depth = getCraterDepth(x, z, craterX, craterZ, radius, rimWidth, rimSteepness, depthFactor);
-						BlockState surfaceState = chunk.getBlockState(new BlockPos(x, surfaceY, z));
+						ArrayList<BlockState> surface = new ArrayList<BlockState>();
+						mutable.set(x, surfaceY, z);
+						
+						while(!chunk.getBlockState(mutable).isIn(StarflightBlocks.WORLD_STONE_BLOCK_TAG) && !chunk.getBlockState(mutable).isAir() && mutable.getY() > -64)
+						{
+							surface.add(chunk.getBlockState(mutable));
+							mutable.move(Direction.DOWN);
+						}
 						
 						if(depth < 0)
 						{
@@ -80,14 +90,15 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 								}
 								
 								chunk.setBlockState(mutable, blockState, false);
-								BlockState upState = chunk.getBlockState(mutable.up());
-								BlockState downState = chunk.getBlockState(mutable.down());
 								
-								if(ice && blockState != AIR && upState.isAir())
-									chunk.setBlockState(mutable.up(), Blocks.POWDER_SNOW.getDefaultState(), false);
-								
-								if(y == surfaceY + depth + 1 && blockState.isAir() && !downState.isAir() && downState.getFluidState().isEmpty())
-									chunk.setBlockState(mutable.down(), surfaceState, false);
+								if(y == surfaceY + depth + 1)
+								{
+									for(BlockState surfaceState : surface)
+									{
+										mutable.move(Direction.DOWN);
+										chunk.setBlockState(mutable, surfaceState, false);
+									}
+								}
 							}
 						}
 					}

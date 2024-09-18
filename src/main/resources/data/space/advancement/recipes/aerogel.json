@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:aerogel"
+    ]
+  },
+  "criteria": {
+    "has_aeroplankton": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:aeroplankton",
+              "space:red_aeroplankton"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:aerogel"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_aeroplankton",
+      "has_the_recipe"
+    ]
+  ]
+}

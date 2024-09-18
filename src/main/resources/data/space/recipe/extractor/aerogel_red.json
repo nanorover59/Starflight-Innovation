@@ -1,0 +1,11 @@
+{
+  "type": "space:extractor",
+  "ingredient": {
+    "item": "space:red_aeroplankton"
+  },
+  "result": {
+    "id": "space:aerogel"
+  },
+  "experience": 0.1,
+  "cookingtime": 400
+}

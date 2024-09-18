@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "c c",
+        "b b",
+        "bab"
+    ],
+    "key": {
+        "a": {
+            "item": "space:space_suit_boots"
+        },
+        "b": {
+            "item": "space:aerogel"
+        },
+        "c": {
+            "item": "space:cooled_copper"
+        }
+    },
+    "result": {
+        "id": "space:thermal_boots",
+        "count": 1
+    }
+}

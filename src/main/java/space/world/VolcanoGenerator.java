@@ -5,6 +5,7 @@ import java.util.HashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.fluid.Fluids;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.Registries;
@@ -66,7 +67,7 @@ public class VolcanoGenerator
 		{
 			BlockState blockState = chunkGenerator.getColumnSample(pos.getX(), pos.getZ(), context.world(), noiseConfig).getState(mutable.getY());
 			
-			if(blockState.isIn(StarflightBlocks.VOLCANO_ALLOWED_BLOCK_TAG))
+			if(blockState.isIn(StarflightBlocks.WORLD_STONE_BLOCK_TAG))
 				worldStone = blockState;
 			
 			mutable.setY(mutable.getY() - 1);
@@ -109,9 +110,9 @@ public class VolcanoGenerator
 		registerVolcanoSettings("space:mercury_hotspot", new Settings(0.01, 0.25, 1.5));
 		registerVolcanoSettings("space:mercury_ice", new Settings(0.01, 0.25, 1.5));
 		
-		registerVolcanoSettings("space:venus_lowlands", new Settings(0.25, 1.25, 1.0));
-		registerVolcanoSettings("space:venus_midlands", new Settings(0.25, 1.25, 1.0));
-		registerVolcanoSettings("space:venus_volcanic_plains", new Settings(1.0, 0.1, 1.0));
+		registerVolcanoSettings("space:venus_lowlands", new Settings(0.25, 1.5, 1.0));
+		registerVolcanoSettings("space:venus_midlands", new Settings(0.25, 1.5, 1.0));
+		registerVolcanoSettings("space:venus_volcanic_plains", new Settings(1.0, 2.0, 1.0));
 		
 		registerVolcanoSettings("space:moon_lowlands", new Settings(0.01, 0.1, 1.0));
 		registerVolcanoSettings("space:moon_midlands", new Settings(0.01, 0.1, 1.0));
@@ -212,11 +213,12 @@ public class VolcanoGenerator
 				for(int z = 0; z < 16; z++)
 				{
 					mutable.set(chunkPos.getStartX() + x, 0, chunkPos.getStartZ() + z);
-					int surfaceY = world.getTopY(Heightmap.Type.OCEAN_FLOOR_WG, mutable.getX(), mutable.getZ());
 					double distanceFromCenter = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ);
-					BlockState surfaceState = world.getBlockState(mutable.setY(surfaceY));
+					int surfaceY = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, mutable.getX(), mutable.getZ());
+					mutable.setY(surfaceY - 1);
+					BlockState surfaceState = world.getBlockState(mutable);
 					
-					if(distanceFromCenter < baseRadius + 8)
+					if(distanceFromCenter < baseRadius + 16)
 					{
 						distanceFromCenter /= baseRadius;
 						double nx = (double) (mutable.getX() - centerX) / baseRadius;
@@ -247,7 +249,12 @@ public class VolcanoGenerator
 								volcanoState = surfaceState;
 							
 							if(world.getBlockState(mutable).getBlock() != Blocks.BEDROCK)
-								world.setBlockState(mutable, volcanoState, volcanoState.getBlock() == Blocks.LAVA ? Block.NOTIFY_ALL : Block.NOTIFY_LISTENERS);
+							{
+								world.setBlockState(mutable, volcanoState, Block.NOTIFY_LISTENERS);
+								
+								if(volcanoState.getBlock() == Blocks.LAVA)
+									world.scheduleFluidTick(mutable, Fluids.LAVA, 2);
+							}
 						}
 					}
 				}
@@ -274,7 +281,7 @@ public class VolcanoGenerator
 		private BlockState getVolcanoState(Random random, double distanceFromCenter, double heightFactor, int startY, int endY, int centerY, int lavaY, int y)
 		{
 			double distanceFactor = Math.pow(1.0 - distanceFromCenter, 2.0);
-			double basaltFactor = Math.pow((1.0 - distanceFromCenter) * 0.75 + ((endY - centerY) / heightFactor) * 0.75, 2.0);
+			double basaltFactor = Math.pow((1.0 - distanceFromCenter) * 0.75 + ((endY - centerY) / heightFactor) * 0.75, 2.0) * (activity + 0.5);
 			double randomSelector = random.nextDouble();
 			
 			if(distanceFromCenter < calderaFraction && endY <= lavaY)

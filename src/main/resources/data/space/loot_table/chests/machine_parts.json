@@ -134,7 +134,7 @@
         {
           "type": "item",
           "weight": 5,
-          "name": "space:control_unit",
+          "name": "space:circuit",
           "functions": [
             {
               "function": "set_count",

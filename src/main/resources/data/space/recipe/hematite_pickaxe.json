@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        " b ",
+        " b "
+    ],
+    "key": {
+        "a": {
+            "item": "space:hematite"
+        },
+        "b": {
+            "item": "space:aluminum_shaft"
+        }
+    },
+    "result": {
+        "id": "space:hematite_pickaxe",
+        "count": 1
+    }
+}

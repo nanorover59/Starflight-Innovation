@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:lunalight_from_blasting_lunalight_ore"
+    ]
+  },
+  "criteria": {
+    "has_lunalight_ore": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:lunalight_ore"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:lunalight_from_blasting_lunalight_ore"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_lunalight_ore",
+      "has_the_recipe"
+    ]
+  ]
+}

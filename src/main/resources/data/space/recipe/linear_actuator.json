@@ -1,9 +1,9 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
-        "bab",
-        " c "
+        "c",
+        "a",
+        "b"
     ],
     "key": {
         "a": {
@@ -13,7 +13,7 @@
             "item": "space:electric_motor"
         },
         "c": {
-            "item": "minecraft:redstone"
+            "item": "space:circuit"
         }
     },
     "result": {

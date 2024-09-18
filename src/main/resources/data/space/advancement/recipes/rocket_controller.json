@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_control_unit": {
+    "has_circuit": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:control_unit"
+              "space:circuit"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_control_unit",
+      "has_circuit",
       "has_the_recipe"
     ]
   ]

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:pointer_column"
+    ]
+  },
+  "criteria": {
+    "has_lunalight": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:lunalight"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:pointer_column"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_lunalight",
+      "has_the_recipe"
+    ]
+  ]
+}

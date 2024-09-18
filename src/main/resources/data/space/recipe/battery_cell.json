@@ -1,26 +1,18 @@
 {
-    "type": "minecraft:crafting_shaped",
-    "pattern": [
-        " a ",
-        "dbd",
-        " c "
-    ],
-    "key": {
-        "a": {
-            "item": "minecraft:redstone"
-        },
-        "b": {
-            "item": "minecraft:charcoal"
-        },
-        "c": {
-            "item": "minecraft:gold_nugget"
-        },
-        "d": {
-            "item": "minecraft:iron_nugget"
-        }
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:iron_plate"
     },
-    "result": {
-        "id": "space:battery_cell",
-        "count": 1
+    {
+      "item": "minecraft:redstone"
+    },
+    {
+      "item": "minecraft:charcoal"
     }
+  ],
+  "result": {
+    "id": "space:battery_cell",
+    "count": 1
+  }
 }

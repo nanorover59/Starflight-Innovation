@@ -1,23 +1,23 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " b ",
-        "cac",
+        " c ",
+        "cab",
         " b "
     ],
     "key": {
         "a": {
-            "item": "space:substrate"
+            "item": "space:lunalight"
         },
         "b": {
-            "item": "minecraft:redstone"
+            "item": "space:aluminum_ingot"
         },
         "c": {
-            "item": "minecraft:gold_nugget"
+            "item": "minecraft:glass"
         }
     },
     "result": {
-        "id": "space:control_unit",
+        "id": "space:lunar_lamp",
         "count": 1
     }
 }

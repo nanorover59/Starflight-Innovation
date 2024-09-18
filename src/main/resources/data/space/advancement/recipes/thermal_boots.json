@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:thermal_boots"
+    ]
+  },
+  "criteria": {
+    "has_aerogel": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:aerogel"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:thermal_boots"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_aerogel",
+      "has_the_recipe"
+    ]
+  ]
+}

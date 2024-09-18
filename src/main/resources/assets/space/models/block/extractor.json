@@ -1,12 +1,12 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "up": "space:block/iron_machine_casing",
-    "down": "space:block/iron_machine_casing",
+    "up": "space:block/titanium_machine_casing",
+    "down": "space:block/titanium_machine_casing",
     "north": "space:block/extractor_front",
-    "east": "space:block/iron_machine_casing",
-    "south": "space:block/iron_machine_casing",
-    "west": "space:block/iron_machine_casing",
-    "particle": "space:block/iron_machine_casing"
+    "east": "space:block/titanium_machine_casing",
+    "south": "space:block/titanium_machine_casing",
+    "west": "space:block/titanium_machine_casing",
+    "particle": "space:block/titanium_machine_casing"
   }
 }

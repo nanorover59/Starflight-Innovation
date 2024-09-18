@@ -56,12 +56,12 @@ import space.block.entity.AtmosphereGeneratorBlockEntity;
 import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.ElectricFurnaceBlockEntity;
+import space.block.entity.ElectricLightBlockEntity;
 import space.block.entity.ElectrolyzerBlockEntity;
 import space.block.entity.ExtractorBlockEntity;
 import space.block.entity.FluidPipeBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.LeakBlockEntity;
-import space.block.entity.LightColumnBlockEntity;
 import space.block.entity.MetalFabricatorBlockEntity;
 import space.block.entity.PumpBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
@@ -127,6 +127,8 @@ public class StarflightBlocks
 	public static final Block REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.LIGHT_GRAY).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
 	public static final Block ICY_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.LIGHT_BLUE_GRAY).strength(0.5F));
+	public static final Block LUNALIGHT_ORE = new LunalightOreBlock(AbstractBlock.Settings.copy(Blocks.REDSTONE_ORE));
+	public static final Block DEEPSLATE_LUNALIGHT_ORE = new LunalightOreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_REDSTONE_ORE));
 	public static final Block FERRIC_SAND = new ColoredFallingBlock(new ColorCode(0xB7633D), AbstractBlock.Settings.copy(Blocks.SAND).mapColor(MapColor.ORANGE));
 	public static final Block FERRIC_STONE = new Block(AbstractBlock.Settings.copy(Blocks.STONE));
 	public static final Block REDSLATE = new Block(AbstractBlock.Settings.copy(Blocks.SANDSTONE));
@@ -168,14 +170,15 @@ public class StarflightBlocks
 	public static final Block STIRLING_ENGINE = new StirlingEngineBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block ELECTRIC_FURNACE = new ElectricFurnaceBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block PUMP = new PumpBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
-	public static final Block EXTRACTOR = new ExtractorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block ELECTROLYZER = new ElectrolyzerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
+	public static final Block EXTRACTOR = new ExtractorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block VACUUM_FURNACE = new VacuumFurnaceBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK).luminance(createLightLevelFromLitBlockState(13)));
 	public static final Block METAL_FABRICATOR = new MetalFabricatorBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK).luminance(createLightLevelFromLitBlockState(7)));
 	public static final Block ATMOSPHERE_GENERATOR = new AtmosphereGeneratorBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block SOLAR_PANEL = new SolarPanelBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).strength(1.0f, 1.0f));
 	public static final Block BATTERY = new BatteryBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block LIGHT_COLUMN = new LightColumnBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(15)));
+	public static final Block LUNAR_LAMP = new ElectricLightBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).luminance(createLightLevelFromLitBlockState(15)));
 	public static final Block BREAKER_SWITCH = new BreakerSwitchBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block WATER_TANK = new WaterTankBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).nonOpaque());
 	public static final Block OXYGEN_TANK = new FluidTankControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), FluidResourceType.OXYGEN, FluidResourceType.OXYGEN.getStorageDensity());
@@ -204,10 +207,10 @@ public class StarflightBlocks
 	public static final Block RCS_BLOCK = new ReactionControlThrusterBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), ReactionControlThrusterBlock.DIAGONAL);
 	public static final Block LANDING_LEG = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
-	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 3.0e6, 380, 340, 100.0, 0.0);
-	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 2.0e6, 400, 380, 100.0, 0.0);
-	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.5e6, 415, 380, 100.0, Math.PI / 16.0);
-	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 455, 250, 100.0, 0.0);
+	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 1.25e6, 380, 340, 100.0, 0.0);
+	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 400, 380, 100.0, 0.0);
+	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 415, 380, 100.0, Math.PI / 16.0);
+	public static final Block ENGINE_1_VACUUM = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 0.5e6, 455, 250, 100.0, 0.0);
 	public static final Block COPPER_CABLE = new EnergyCableBlock(AbstractBlock.Settings.copy(Blocks.COPPER_BLOCK).strength(1.0f, 1.0f));
 	public static final Block WATER_PIPE = new FluidPipeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).strength(1.0f, 1.0f), FluidResourceType.WATER);
 	public static final Block OXYGEN_PIPE = new FluidPipeBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).strength(1.0f, 1.0f), FluidResourceType.OXYGEN);
@@ -221,7 +224,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<ElectricFurnaceBlockEntity> ELECTRIC_FURNACE_BLOCK_ENTITY = BlockEntityType.Builder.create(ElectricFurnaceBlockEntity::new, ELECTRIC_FURNACE, VACUUM_FURNACE).build(null);
 	public static final BlockEntityType<SolarPanelBlockEntity> SOLAR_PANEL_BLOCK_ENTITY = BlockEntityType.Builder.create(SolarPanelBlockEntity::new, SOLAR_PANEL).build(null);
 	public static final BlockEntityType<BatteryBlockEntity> BATTERY_BLOCK_ENTITY = BlockEntityType.Builder.create(BatteryBlockEntity::new, BATTERY).build(null);
-	public static final BlockEntityType<LightColumnBlockEntity> LIGHT_COLUMN_BLOCK_ENTITY = BlockEntityType.Builder.create(LightColumnBlockEntity::new, LIGHT_COLUMN).build(null);
+	public static final BlockEntityType<ElectricLightBlockEntity> ELECTRIC_LIGHT_BLOCK_ENTITY = BlockEntityType.Builder.create(ElectricLightBlockEntity::new, LIGHT_COLUMN, LUNAR_LAMP).build(null);
 	public static final BlockEntityType<FluidPipeBlockEntity> FLUID_PIPE_BLOCK_ENTITY = BlockEntityType.Builder.create(FluidPipeBlockEntity::new, WATER_PIPE, OXYGEN_PIPE, HYDROGEN_PIPE, WATER_PIPE_AL, OXYGEN_PIPE_AL, HYDROGEN_PIPE_AL).build(null);
 	public static final BlockEntityType<FluidTankControllerBlockEntity> FLUID_TANK_CONTROLLER_BLOCK_ENTITY = BlockEntityType.Builder.create(FluidTankControllerBlockEntity::new, OXYGEN_TANK, HYDROGEN_TANK).build(null);
 	public static final BlockEntityType<BalloonControllerBlockEntity> BALLOON_CONTROLLER_BLOCK_ENTITY = BlockEntityType.Builder.create(BalloonControllerBlockEntity::new, BALLOON_CONTROLLER).build(null);
@@ -243,7 +246,7 @@ public class StarflightBlocks
 	public static final TagKey<Block> BALLOON_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, Identifier.of(StarflightMod.MOD_ID, "balloon_blocks"));
 	public static final TagKey<Block> EDGE_CASE_TAG = TagKey.of(RegistryKeys.BLOCK, Identifier.of(StarflightMod.MOD_ID, "edge_case_blocks"));
 	public static final TagKey<Block> INSTANT_REMOVE_TAG = TagKey.of(RegistryKeys.BLOCK, Identifier.of(StarflightMod.MOD_ID, "instant_remove_blocks"));
-	public static final TagKey<Block> VOLCANO_ALLOWED_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, Identifier.of(StarflightMod.MOD_ID, "volcano_allowed_blocks"));
+	public static final TagKey<Block> WORLD_STONE_BLOCK_TAG = TagKey.of(RegistryKeys.BLOCK, Identifier.of(StarflightMod.MOD_ID, "world_stone_blocks"));
 
 	public static void initializeBlocks()
 	{
@@ -294,6 +297,8 @@ public class StarflightBlocks
 		initializeBlock(REGOLITH, "regolith");
 		initializeBlock(BALSALTIC_REGOLITH, "balsaltic_regolith");
 		initializeBlock(ICY_REGOLITH, "icy_regolith");
+		initializeBlock(LUNALIGHT_ORE, "lunalight_ore");
+		initializeBlock(DEEPSLATE_LUNALIGHT_ORE, "deepslate_lunalight_ore");
 		initializeBlock(FERRIC_SAND, "ferric_sand");
 		initializeBlock(FERRIC_STONE, "ferric_stone");
 		initializeBlock(REDSLATE, "redslate");
@@ -335,14 +340,15 @@ public class StarflightBlocks
 		initializeBlock(STIRLING_ENGINE, "stirling_engine");
 		initializeBlock(ELECTRIC_FURNACE, "electric_furnace");
 		initializeBlock(PUMP, "pump");
-		initializeBlock(EXTRACTOR, "extractor");
 		initializeBlock(ELECTROLYZER, "electrolyzer");
+		initializeBlock(EXTRACTOR, "extractor");
 		initializeBlock(VACUUM_FURNACE, "vacuum_furnace");
 		initializeBlock(METAL_FABRICATOR, "metal_fabricator");
 		initializeBlock(ATMOSPHERE_GENERATOR, "atmosphere_generator");
 		initializeBlock(SOLAR_PANEL, "solar_panel");
 		initializeBlock(BATTERY, "battery");
 		initializeBlock(LIGHT_COLUMN, "light_column");
+		initializeBlock(LUNAR_LAMP, "lunar_lamp");
 		initializeBlock(BREAKER_SWITCH, "breaker_switch", true, List.of(), List.of(Text.translatable("block.space.breaker_switch.description")));
 		initializeBlock(WATER_TANK, "water_tank");
 		initializeBlock(OXYGEN_TANK, "oxygen_tank");
@@ -387,7 +393,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "electric_furnace"), ELECTRIC_FURNACE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "solar_panel"), SOLAR_PANEL_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "battery"), BATTERY_BLOCK_ENTITY);
-		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "light_column"), LIGHT_COLUMN_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "electric_light"), ELECTRIC_LIGHT_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "fluid_pipe"), FLUID_PIPE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "fluid_tank_controller"), FLUID_TANK_CONTROLLER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "balloon_controller"), BALLOON_CONTROLLER_BLOCK_ENTITY);

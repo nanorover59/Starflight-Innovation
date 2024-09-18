@@ -8,14 +8,13 @@
     "Name": "space:dense_cloud"
   },
   "default_fluid": {
-    "Name": "minecraft:air",
-    "Properties": {}
+    "Name": "minecraft:air"
   },
   "noise": {
-    "min_y": -48,
-    "height": 256,
-    "size_horizontal": 2,
-    "size_vertical": 1
+    "min_y": 0,
+    "height": 128,
+    "size_horizontal": 4,
+    "size_vertical": 2
   },
   "noise_router": {
     "barrier": 0,
@@ -42,7 +41,10 @@
     },
     "continents": 0,
     "erosion": {
-      "type": "minecraft:end_islands"
+      "type": "minecraft:noise",
+      "noise": "minecraft:erosion",
+      "xz_scale": 1,
+      "y_scale": 1
     },
     "depth": 0,
     "ridges": 0,
@@ -51,7 +53,7 @@
       "type": "minecraft:squeeze",
       "argument": {
         "type": "minecraft:mul",
-        "argument1": 0.64,
+        "argument1": 0.6,
         "argument2": {
           "type": "minecraft:interpolated",
           "argument": {
@@ -63,10 +65,10 @@
                 "type": "minecraft:mul",
                 "argument1": {
                   "type": "minecraft:y_clamped_gradient",
-                  "from_y": -128,
-                  "to_y": 64,
-                  "from_value": 0,
-                  "to_value": 1
+                  "from_y": 64,
+                  "to_y": 192,
+                  "from_value": 1,
+                  "to_value": 0
                 },
                 "argument2": {
                   "type": "minecraft:add",

@@ -187,7 +187,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					}
 					else if(edgeCase.test(world, p))
 					{
-						volume += 0.75;
+						//volume += 0.75;
 
 						if(blockState.getBlock() instanceof FluidTankControllerBlock || blockState.getBlock() instanceof ValveBlock)
 							actionList.add(p);

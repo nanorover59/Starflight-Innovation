@@ -1,0 +1,17 @@
+{
+  "type": "space:extractor",
+  "ingredient": [
+    {
+      "item": "space:regolith"
+    },
+    {
+      "item": "space:solarized_regolith"
+    }
+  ],
+  "result": {
+    "id": "space:bauxite"
+  },
+  "oxygen": 50.0,
+  "experience": 0.1,
+  "cookingtime": 400
+}

@@ -125,7 +125,7 @@ public class PointerColumnBlock extends Block
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext context)
 	{
-		return this.getDefaultState().with(FACING, context.getPlayerLookDirection().getOpposite());
+		return this.getDefaultState().with(FACING, context.getSide().getOpposite());
 	}
 	
 	@Override

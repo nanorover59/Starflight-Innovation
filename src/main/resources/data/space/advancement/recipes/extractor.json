@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_iron_machine_casing": {
+    "has_lunar_lamp": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:iron_machine_casing"
+              "space:lunar_lamp"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_iron_machine_casing",
+      "has_lunar_lamp",
       "has_the_recipe"
     ]
   ]

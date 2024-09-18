@@ -33,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.world.World;
-import space.block.entity.LightColumnBlockEntity;
+import space.block.entity.ElectricLightBlockEntity;
 import space.item.StarflightItems;
 import space.util.BlockSearch;
 
@@ -68,7 +68,7 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		textList.add(Text.translatable("block.space.light_column.description"));
+		textList.add(Text.translatable("block.space.electric_light.description"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
@@ -142,12 +142,12 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
-		return new LightColumnBlockEntity(pos, state);
+		return new ElectricLightBlockEntity(pos, state);
 	}
 
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
-		return world.isClient ? null : validateTicker(type, StarflightBlocks.LIGHT_COLUMN_BLOCK_ENTITY, LightColumnBlockEntity::serverTick);
+		return world.isClient ? null : validateTicker(type, StarflightBlocks.ELECTRIC_LIGHT_BLOCK_ENTITY, ElectricLightBlockEntity::serverTick);
 	}
 }

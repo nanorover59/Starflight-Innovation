@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "space:hematite_sword",
+        "space:hematite_shovel",
+        "space:hematite_pickaxe",
+        "space:hematite_axe",
+        "space:hematite_hoe"
+    ]
+}

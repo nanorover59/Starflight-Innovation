@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "space:item/control_unit"
+    "layer0": "space:item/lunalight"
   }
 }

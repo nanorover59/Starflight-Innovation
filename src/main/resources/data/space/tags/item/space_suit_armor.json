@@ -1,0 +1,10 @@
+{
+    "replace": false,
+    "values": [
+        "space:space_suit_helmet",
+        "space:space_suit_chestplate",
+        "space:space_suit_leggings",
+        "space:space_suit_boots",
+        "space:thermal_boots"
+    ]
+}

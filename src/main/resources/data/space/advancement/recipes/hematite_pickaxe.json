@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:hematite_pickaxe"
+    ]
+  },
+  "criteria": {
+    "has_hematite": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:hematite"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:hematite_pickaxe"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_hematite",
+      "has_the_recipe"
+    ]
+  ]
+}

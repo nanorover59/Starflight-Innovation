@@ -1,0 +1,20 @@
+{
+  "type": "space:extractor",
+  "ingredient": [
+    {
+      "item": "space:balsaltic_regolith"
+    },
+    {
+      "item": "space:searing_regolith"
+    },
+    {
+      "item": "space:ferric_sand"
+    }
+  ],
+  "result": {
+    "id": "minecraft:raw_iron"
+  },
+  "oxygen": 50.0,
+  "experience": 0.1,
+  "cookingtime": 400
+}

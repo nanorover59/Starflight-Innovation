@@ -14,13 +14,13 @@ import space.block.EnergyBlock;
 import space.block.LightColumnBlock;
 import space.block.StarflightBlocks;
 
-public class LightColumnBlockEntity extends BlockEntity implements EnergyBlockEntity
+public class ElectricLightBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
 	private double energy;
 	
-	public LightColumnBlockEntity(BlockPos pos, BlockState state)
+	public ElectricLightBlockEntity(BlockPos pos, BlockState state)
 	{
-		super(StarflightBlocks.LIGHT_COLUMN_BLOCK_ENTITY, pos, state);
+		super(StarflightBlocks.ELECTRIC_LIGHT_BLOCK_ENTITY, pos, state);
 	}
 	
 	@Override
@@ -85,7 +85,7 @@ public class LightColumnBlockEntity extends BlockEntity implements EnergyBlockEn
 		this.energy = nbt.getDouble("energy");
 	}
 	
-	public static void serverTick(World world, BlockPos pos, BlockState state, LightColumnBlockEntity blockEntity)
+	public static void serverTick(World world, BlockPos pos, BlockState state, ElectricLightBlockEntity blockEntity)
 	{
 		blockEntity.changeEnergy(-blockEntity.getInput());
 		

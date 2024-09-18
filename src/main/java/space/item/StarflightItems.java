@@ -66,8 +66,13 @@ public class StarflightItems
         map.put(ArmorItem.Type.BODY, 3);
     }), 15, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0f, 0.0f, () -> Ingredient.ofItems(StarflightBlocks.REINFORCED_FABRIC), List.of(new ArmorMaterial.Layer(Identifier.ofVanilla("space_suit"), "", true), new ArmorMaterial.Layer(Identifier.ofVanilla("space_suit"), "_overlay", false)));
 	
-	// Tool Material
-	
+	public static final RegistryEntry<ArmorMaterial> THERMAL_ARMOR_MATERIAL = registerArmorMaterial("thermal", Util.make(new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class), map -> {
+		map.put(ArmorItem.Type.BOOTS, 2);
+		map.put(ArmorItem.Type.LEGGINGS, 5);
+		map.put(ArmorItem.Type.CHESTPLATE, 6);
+		map.put(ArmorItem.Type.HELMET, 2);
+		map.put(ArmorItem.Type.BODY, 5);
+    }), 15, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0f, 0.0f, () -> Ingredient.ofItems(StarflightItems.AEROGEL), List.of(new ArmorMaterial.Layer(Identifier.ofVanilla("thermal"), "", false)));
 	
 	// Items
 	public static final Item ALUMINUM_INGOT = new Item(new Settings());
@@ -75,10 +80,12 @@ public class StarflightItems
 	public static final Item TITANIUM_INGOT = new Item(new Settings());
 	public static final Item ILMENITE = new Item(new Settings());
 	public static final Item SULFUR = new Item(new Settings());
+	public static final Item LUNALIGHT = new Item(new Settings());
 	public static final Item HEMATITE = new Item(new Settings());
 	public static final Item RUBBER_SAP = new Item(new Settings());
 	public static final Item RUBBER_RESIN = new Item(new Settings());
 	public static final Item RUBBER = new Item(new Settings());
+	public static final Item AEROGEL = new Item(new Settings());
 	public static final Item CHEESE = new Item(new Settings().food(FoodComponents.APPLE));
 	public static final Item IRON_PLATE = new Item(new Settings());
 	public static final Item ALUMINUM_PLATE = new Item(new Settings());
@@ -87,7 +94,7 @@ public class StarflightItems
 	public static final Item COIL = new Item(new Settings());
 	public static final Item ELECTRIC_MOTOR = new Item(new Settings());
 	public static final Item SUBSTRATE = new Item(new Settings());
-	public static final Item CONTROL_UNIT = new Item(new Settings());
+	public static final Item CIRCUIT = new Item(new Settings());
 	public static final Item SOLAR_CELL = new Item(new Settings());
 	public static final Item HEAVY_CYLINDER = new Item(new Settings());
 	public static final Item MINI_THRUSTER = new Item(new Settings());
@@ -106,11 +113,16 @@ public class StarflightItems
 	public static final Item MULTIMETER = new MultimeterItem(new Settings().maxCount(1));
 	public static final Item WRENCH = new WrenchItem(new Settings().maxCount(1));
 	public static final Item DIAMOND_END_MILL = new Item(new Settings().maxCount(1).maxDamage(ToolMaterials.DIAMOND.getDurability() * 2));
-	public static final Item TITANIUM_SWORD = new SwordItem(ToolMaterials.DIAMOND, new Item.Settings());
-    public static final Item TITANIUM_SHOVEL = new ShovelItem(ToolMaterials.DIAMOND, new Item.Settings());
-    public static final Item TITANIUM_PICKAXE = new PickaxeItem(ToolMaterials.DIAMOND, new Item.Settings());
-    public static final Item TITANIUM_AXE = new AxeItem(ToolMaterials.DIAMOND, new Item.Settings());
-    public static final Item TITANIUM_HOE = new HoeItem(ToolMaterials.DIAMOND, new Item.Settings());
+	public static final Item TITANIUM_SWORD = new SwordItem(StarflightToolMaterials.TITANIUM, new Item.Settings().attributeModifiers(SwordItem.createAttributeModifiers(StarflightToolMaterials.TITANIUM, 3, -2.4F)));
+    public static final Item TITANIUM_SHOVEL = new ShovelItem(StarflightToolMaterials.TITANIUM, new Item.Settings().attributeModifiers(ShovelItem.createAttributeModifiers(StarflightToolMaterials.TITANIUM, 1.5F, -3.0F)));
+    public static final Item TITANIUM_PICKAXE = new PickaxeItem(StarflightToolMaterials.TITANIUM, new Item.Settings().attributeModifiers(PickaxeItem.createAttributeModifiers(StarflightToolMaterials.TITANIUM, 1.0F, -2.8F)));
+    public static final Item TITANIUM_AXE = new AxeItem(StarflightToolMaterials.TITANIUM, new Item.Settings().attributeModifiers(AxeItem.createAttributeModifiers(StarflightToolMaterials.TITANIUM, 6.0F, -3.1F)));
+    public static final Item TITANIUM_HOE = new HoeItem(StarflightToolMaterials.TITANIUM, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(StarflightToolMaterials.TITANIUM, -2.0F, -1.0F)));
+    public static final Item HEMATITE_SWORD = new SwordItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(SwordItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 3, -2.4F)));
+    public static final Item HEMATITE_SHOVEL = new ShovelItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(ShovelItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 1.5F, -3.0F)));
+    public static final Item HEMATITE_PICKAXE = new PickaxeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(PickaxeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 1.0F, -2.8F)));
+    public static final Item HEMATITE_AXE = new AxeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(AxeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 5.0F, -3.0F)));
+    public static final Item HEMATITE_HOE = new HoeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, -3.0F, 0.0F)));
 	public static final Item OXYGEN_LOADER = new LoaderItem(new Settings().maxCount(1), FluidResourceType.OXYGEN);
 	public static final Item HYDROGEN_LOADER = new LoaderItem(new Settings().maxCount(1), FluidResourceType.HYDROGEN);
 	public static final Item DIVIDER = new DividerItem(new Settings().maxCount(1));
@@ -121,6 +133,7 @@ public class StarflightItems
     public static final Item SPACE_SUIT_CHESTPLATE = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.CHESTPLATE, new Item.Settings().maxDamage(ArmorItem.Type.CHESTPLATE.getMaxDamage(15)).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 4.0f));
     public static final Item SPACE_SUIT_LEGGINGS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.LEGGINGS, new Item.Settings().maxDamage(ArmorItem.Type.LEGGINGS.getMaxDamage(15)));
     public static final Item SPACE_SUIT_BOOTS = new SpaceSuitItem(SPACE_SUIT_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings().maxDamage(ArmorItem.Type.BOOTS.getMaxDamage(15)));
+    public static final Item THERMAL_BOOTS = new SpaceSuitItem(THERMAL_ARMOR_MATERIAL, ArmorItem.Type.BOOTS, new Item.Settings().maxDamage(ArmorItem.Type.BOOTS.getMaxDamage(15)));
     
     // Structure Placer Items
     public static final Item ROCKET_1 = new StructurePlacerItem(new Settings().maxCount(1), 7, 20, 7, "rocket_1");
@@ -134,6 +147,8 @@ public class StarflightItems
 	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
 	
 	// Item Tags
+	public static final TagKey<Item> SPACE_SUIT_ARMOR_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "space_suit_armor"));
+	public static final TagKey<Item> MAGNETIC_TOOL_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "magnetic_tool"));
 	public static final TagKey<Item> NO_OXYGEN_FUEL_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "no_oxygen_fuel"));
 	public static final TagKey<Item> COMBUSTION_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "combustion"));
     
@@ -161,10 +176,12 @@ public class StarflightItems
 		registerItem(TITANIUM_INGOT, "titanium_ingot");
 		registerItem(ILMENITE, "ilmenite");
 		registerItem(SULFUR, "sulfur");
+		registerItem(LUNALIGHT, "lunalight");
 		registerItem(HEMATITE, "hematite");
 		registerItem(RUBBER_SAP, "rubber_sap");
 		registerItem(RUBBER_RESIN, "rubber_resin");
 		registerItem(RUBBER, "rubber");
+		registerItem(AEROGEL, "aerogel");
 		registerItem(CHEESE, "cheese");
 		registerItem(IRON_PLATE, "iron_plate");
 		registerItem(ALUMINUM_PLATE, "aluminum_plate");
@@ -173,7 +190,7 @@ public class StarflightItems
 		registerItem(COIL, "coil");
 		registerItem(ELECTRIC_MOTOR, "electric_motor");
 		registerItem(SUBSTRATE, "substrate");
-		registerItem(CONTROL_UNIT, "control_unit");
+		registerItem(CIRCUIT, "circuit");
 		registerItem(SOLAR_CELL, "solar_cell");
 		registerItem(HEAVY_CYLINDER, "heavy_cylinder");
 		registerItem(MINI_THRUSTER, "mini_thruster");
@@ -195,6 +212,11 @@ public class StarflightItems
 		registerItem(TITANIUM_PICKAXE, "titanium_pickaxe");
 		registerItem(TITANIUM_AXE, "titanium_axe");
 		registerItem(TITANIUM_HOE, "titanium_hoe");
+		registerItem(HEMATITE_SWORD, "hematite_sword");
+		registerItem(HEMATITE_SHOVEL, "hematite_shovel");
+		registerItem(HEMATITE_PICKAXE, "hematite_pickaxe");
+		registerItem(HEMATITE_AXE, "hematite_axe");
+		registerItem(HEMATITE_HOE, "hematite_hoe");
 		registerItemHidden(WAND, "item_wand");
 		
 		// Armor Items
@@ -202,6 +224,7 @@ public class StarflightItems
 		registerItem(SPACE_SUIT_CHESTPLATE, "space_suit_chestplate");
 		registerItem(SPACE_SUIT_LEGGINGS, "space_suit_leggings");
 		registerItem(SPACE_SUIT_BOOTS, "space_suit_boots");
+		registerItem(THERMAL_BOOTS, "thermal_boots");
 		
 		// Part Drawings
 		registerItemHidden(PART_DRAWINGS, "part_drawings");
@@ -246,14 +269,14 @@ public class StarflightItems
 		ItemGroupEvents.modifyEntriesEvent(ITEM_GROUP).register(content -> content.add(stack));
 	}
 	
-	private static void enterPlanetariumCardItem(String name, int primaryColor, int secondaryColor)
+	/*private static void enterPlanetariumCardItem(String name, int primaryColor, int secondaryColor)
 	{
 		ItemStack stack = new ItemStack(PLANETARIUM_CARD);
 		stack.set(PLANET_NAME, name);
 		stack.set(PRIMARY_COLOR, primaryColor);
 		stack.set(SECONDARY_COLOR, secondaryColor);
 		ItemGroupEvents.modifyEntriesEvent(ITEM_GROUP).register(content -> content.add(stack));
-	}
+	}*/
 	
 	private static RegistryEntry<ArmorMaterial> registerArmorMaterial(String id, EnumMap<ArmorItem.Type, Integer> defense, int enchantability, RegistryEntry<SoundEvent> equipSound, float toughness, float knockbackResistance, Supplier<Ingredient> repairIngredient, List<ArmorMaterial.Layer> layers)
 	{

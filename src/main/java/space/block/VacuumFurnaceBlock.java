@@ -37,8 +37,7 @@ public class VacuumFurnaceBlock extends ElectricFurnaceBlock
 		DecimalFormat df = new DecimalFormat("#.##");
 		textList.add(Text.translatable("block.space.energy_consumer_nominal").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.energy_consumer_local").append(String.valueOf(df.format(getInput() * (1.0 + 3.0 * pressure)))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
-		textList.add(Text.translatable("block.space.vacuum_furnace.description_1"));
-		textList.add(Text.translatable("block.space.vacuum_furnace.description_2"));
+		textList.add(Text.translatable("block.space.vacuum_furnace.description"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	

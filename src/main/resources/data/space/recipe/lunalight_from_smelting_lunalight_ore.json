@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "space:lunalight_ore"
+  },
+  "result": {
+    "id": "space:lunalight"
+  },
+  "experience": 1.0,
+  "cookingtime": 100
+}

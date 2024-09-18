@@ -26,7 +26,8 @@
       "space:ore_copper",
       "space:ore_bauxite",
       "space:ore_sulfur",
-      "space:ore_ilmenite"
+      "space:ore_ilmenite",
+      "space:ore_lunalight"
     ],
     [
       "space:spring_lava"

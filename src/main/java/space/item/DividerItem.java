@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiPredicate;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -73,25 +72,12 @@ public class DividerItem extends Item
 					cx /= count;
 					cy /= count;
 					cz /= count;
-					BlockState fillState = null;
 					
 					for(BlockPos p : checkList)
 					{
 						if(p.getY() == Math.round(cy))
 						{
-							int i = 0;
-							
-							while(fillState == null)
-							{
-								BlockState state = world.getBlockState(position.add(i, 0, 0));
-								
-								if(state.isAir())
-									fillState = state;
-								else
-									i++;
-							}
-							
-							world.setBlockState(p, fillState);
+							world.setBlockState(p, StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState());
 							
 							if(p.getX() == Math.round(cx) && p.getZ() == Math.round(cz))
 							{

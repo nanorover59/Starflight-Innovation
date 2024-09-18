@@ -48,6 +48,7 @@
     "space:pump",
     "space:electrolyzer",
     "space:light_column",
+    "space:lunar_lamp",
     "space:oxygen_dispenser",
     "space:atmosphere_generator",
     "space:oxygen_sensor",
