@@ -60,21 +60,4 @@ public class WrenchItem extends Item
 		
 		return ActionResult.FAIL;
 	}
-	
-	/*
-	@Override
-	public boolean canMine(BlockState blockState, World world, BlockPos pos, PlayerEntity player)
-	{
-		if(world.isClient || player.isCreative())
-			return true;
-		
-		 if(blockState.getBlock() instanceof EnergyBlock || blockState.getBlock() instanceof FluidUtilityBlock)
-		 {
-			 blockState.onStacksDropped((ServerWorld) world, pos, getDefaultStack());
-			 world.setBlockState(pos, Blocks.AIR.getDefaultState());
-		 }
-		
-		return true;
-	}
-	*/
 }

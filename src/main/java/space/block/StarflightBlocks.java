@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.AmethystClusterBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -15,6 +16,7 @@ import net.minecraft.block.CarpetBlock;
 import net.minecraft.block.ColoredFallingBlock;
 import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.block.ExperienceDroppingBlock;
+import net.minecraft.block.HangingRootsBlock;
 import net.minecraft.block.LadderBlock;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.MapColor;
@@ -152,6 +154,9 @@ public class StarflightBlocks
 	public static final Block LYCOPHYTE_TOP = new LycophyteBlock(AbstractBlock.Settings.copy(Blocks.BIG_DRIPLEAF_STEM), true);
 	public static final Block LYCOPHYTE_STEM = new LycophyteBlock(AbstractBlock.Settings.copy(Blocks.BIG_DRIPLEAF_STEM), false);
 	public static final Block REDSTONE_BLOSSOM = new RedstoneBlossomBlock(StatusEffects.STRENGTH, 8.0f, AbstractBlock.Settings.copy(Blocks.TORCHFLOWER).mapColor(MapColor.BRIGHT_RED).luminance(state -> 7).offset(AbstractBlock.OffsetType.NONE));
+	public static final Block MARS_ROOTS = new HangingRootsBlock(AbstractBlock.Settings.copy(Blocks.HANGING_ROOTS).mapColor(MapColor.PURPLE));
+	public static final Block MARS_POTATOES = new MarsPotatoesBlock(AbstractBlock.Settings.copy(Blocks.POTATOES).mapColor(MapColor.PURPLE));
+	public static final Block REDSTONE_CLUSTER = new AmethystClusterBlock(7.0f, 3.0f, AbstractBlock.Settings.copy(Blocks.AMETHYST_CLUSTER).mapColor(MapColor.RED));
 	public static final Block DENSE_CLOUD = new DenseCloudBlock(AbstractBlock.Settings.copy(Blocks.POWDER_SNOW).solidBlock(Blocks::never).suffocates(Blocks::never).blockVision(Blocks::always));
 	public static final Block VOLCANIC_SLATE = new Block(AbstractBlock.Settings.copy(Blocks.DEEPSLATE));
 	public static final Block AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
@@ -322,6 +327,8 @@ public class StarflightBlocks
 		initializeBlock(LYCOPHYTE_TOP, "lycophyte_top");
 		initializeBlock(LYCOPHYTE_STEM, "lycophyte_stem", false, List.of(), List.of());
 		initializeBlock(REDSTONE_BLOSSOM, "redstone_blossom");
+		initializeBlock(MARS_ROOTS, "mars_roots");
+		initializeBlock(REDSTONE_CLUSTER, "redstone_cluster");
 		initializeBlock(DENSE_CLOUD, "dense_cloud");
 		initializeBlock(VOLCANIC_SLATE, "volcanic_slate");
 		initializeBlock(AEROPLANKTON, "aeroplankton");

@@ -2,6 +2,5 @@
   "type" : "space:airship",
   "biomes" : "space:venus_sky",
   "step" : "surface_structures",
-  "spawn_overrides" : {},
-  "terrain_adaptation" : "none"
+  "spawn_overrides" : {}
 }

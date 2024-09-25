@@ -1,8 +1,8 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "bcb",
-        " a ",
+        "b b",
+        "cac",
         "b b"
     ],
     "key": {
@@ -13,7 +13,7 @@
             "item": "space:electric_motor"
         },
         "c": {
-            "item": "space:circuit"
+            "item": "space:advanced_circuit"
         }
     },
     "result": {

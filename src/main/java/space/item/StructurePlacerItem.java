@@ -20,8 +20,10 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import space.StarflightMod;
+import space.block.EnergyBlock;
 import space.block.FluidTankControllerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
+import space.util.BlockSearch;
 
 public class StructurePlacerItem extends Item
 {
@@ -97,8 +99,6 @@ public class StructurePlacerItem extends Item
 	
 	private void postPlacement(ServerWorld world, BlockPos start, BlockPos end)
 	{
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		
 		for(int i = start.getX(); i < end.getX(); i++)
 		{
 			for(int j = start.getY(); j < end.getY(); j++)
@@ -107,25 +107,21 @@ public class StructurePlacerItem extends Item
 				{
 					BlockPos blockPos = new BlockPos(i, j, k);
 					Block block = world.getBlockState(blockPos).getBlock();
+					BlockEntity blockEntity = world.getBlockEntity(blockPos);
 					
-					if(block instanceof FluidTankControllerBlock)
-						checkList.add(blockPos);
+					if(block instanceof EnergyBlock)
+						BlockSearch.energyConnectionSearch(world, blockPos);
+					
+					if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
+					{
+						FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
+
+						if(world.getBlockState(blockPos).getBlock() instanceof FluidTankControllerBlock)
+							((FluidTankControllerBlock) world.getBlockState(blockPos).getBlock()).initializeFluidTank(world, blockPos, fluidTank);
+
+						fluidTank.setStoredFluid(fluidTank.getStorageCapacity());
+					}
 				}
-			}
-		}
-		
-		for(BlockPos blockPos : checkList)
-		{
-			BlockEntity blockEntity = world.getBlockEntity(blockPos);
-			
-			if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-			{
-				FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
-				
-				if(world.getBlockState(blockPos).getBlock() instanceof FluidTankControllerBlock)
-					((FluidTankControllerBlock) world.getBlockState(blockPos).getBlock()).initializeFluidTank(world, blockPos, fluidTank);
-				
-				fluidTank.setStoredFluid(fluidTank.getStorageCapacity());
 			}
 		}
 	}

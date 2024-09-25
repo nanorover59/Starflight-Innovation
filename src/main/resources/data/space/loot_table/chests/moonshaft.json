@@ -11,6 +11,11 @@
       "entries": [
         {
           "type": "minecraft:loot_table",
+          "weight": 20,
+          "value": "space:chests/construction"
+        },
+        {
+          "type": "minecraft:loot_table",
           "weight": 10,
           "value": "space:chests/equipment"
         },
@@ -18,6 +23,11 @@
           "type": "minecraft:loot_table",
           "weight": 10,
           "value": "space:chests/machine_parts"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 5,
+          "value": "space:chests/crafting"
         }
       ]
     },

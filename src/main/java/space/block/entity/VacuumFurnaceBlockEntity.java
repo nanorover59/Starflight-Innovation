@@ -50,7 +50,7 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 	@Override
 	public int getCookTime()
 	{
-		return (Integer) getFirstMatchRecipeOptional().map(recipe -> ((AbstractCookingRecipe) recipe.value()).getCookingTime()).orElse(200) / 4;
+		return (getFirstMatchRecipeOptional().map(recipe -> ((AbstractCookingRecipe) recipe.value()).getCookingTime()).orElse(200)) / 8;
 	}
 	
 	@Override

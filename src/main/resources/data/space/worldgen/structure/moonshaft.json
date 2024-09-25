@@ -9,6 +9,5 @@
     "space:mars_ice"
   ],
   "step" : "underground_structures",
-  "spawn_overrides" : {},
-  "terrain_adaptation" : "none"
+  "spawn_overrides" : {}
 }

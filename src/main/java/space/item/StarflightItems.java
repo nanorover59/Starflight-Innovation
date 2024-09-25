@@ -6,11 +6,14 @@ import java.util.function.Supplier;
 
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.block.Block;
 import net.minecraft.component.ComponentType;
 import net.minecraft.component.type.FoodComponents;
+import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.HoeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Item.Settings;
@@ -81,12 +84,14 @@ public class StarflightItems
 	public static final Item ILMENITE = new Item(new Settings());
 	public static final Item SULFUR = new Item(new Settings());
 	public static final Item LUNALIGHT = new Item(new Settings());
+	public static final Item REDSTONE_CRYSTAL = new Item(new Settings());
 	public static final Item HEMATITE = new Item(new Settings());
 	public static final Item RUBBER_SAP = new Item(new Settings());
 	public static final Item RUBBER_RESIN = new Item(new Settings());
 	public static final Item RUBBER = new Item(new Settings());
 	public static final Item AEROGEL = new Item(new Settings());
 	public static final Item CHEESE = new Item(new Settings().food(FoodComponents.APPLE));
+	public static final Item MARS_POTATO = new AliasedBlockItem(StarflightBlocks.MARS_POTATOES, new Item.Settings().food(FoodComponents.POTATO));
 	public static final Item IRON_PLATE = new Item(new Settings());
 	public static final Item ALUMINUM_PLATE = new Item(new Settings());
 	public static final Item TITANIUM_PLATE = new Item(new Settings());
@@ -95,6 +100,7 @@ public class StarflightItems
 	public static final Item ELECTRIC_MOTOR = new Item(new Settings());
 	public static final Item SUBSTRATE = new Item(new Settings());
 	public static final Item CIRCUIT = new Item(new Settings());
+	public static final Item ADVANCED_CIRCUIT = new Item(new Settings());
 	public static final Item SOLAR_CELL = new Item(new Settings());
 	public static final Item HEAVY_CYLINDER = new Item(new Settings());
 	public static final Item MINI_THRUSTER = new Item(new Settings());
@@ -137,6 +143,8 @@ public class StarflightItems
     
     // Structure Placer Items
     public static final Item ROCKET_1 = new StructurePlacerItem(new Settings().maxCount(1), 7, 20, 7, "rocket_1");
+    public static final Item ROCKET_2 = new StructurePlacerItem(new Settings().maxCount(1), 9, 41, 17, "rocket_2");
+    public static final Item SOLAR_BASE = new StructurePlacerItem(new Settings().maxCount(1), 21, 7, 17, "solar_base");
     
     // Spawn Egg Items
     public static final Item CERULEAN_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CERULEAN, 0x1485AD, 0x000000, new Item.Settings());
@@ -145,6 +153,7 @@ public class StarflightItems
 	public static final Item SOLAR_SPECTRE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SOLAR_SPECTRE, 0xE9F3FD, 0xC8E2F9, new Item.Settings());
 	public static final Item STRATOFISH_SPAWN_EGG = new SpawnEggItem(StarflightEntities.STRATOFISH, 0xFFE8FA, 0x7B6D9E, new Item.Settings());
 	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
+	public static final Item CAVE_LAMPREY_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CAVE_LAMPREY, 0xB71C1C, 0x6F1111, new Item.Settings());
 	
 	// Item Tags
 	public static final TagKey<Item> SPACE_SUIT_ARMOR_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "space_suit_armor"));
@@ -177,12 +186,14 @@ public class StarflightItems
 		registerItem(ILMENITE, "ilmenite");
 		registerItem(SULFUR, "sulfur");
 		registerItem(LUNALIGHT, "lunalight");
+		registerItem(REDSTONE_CRYSTAL, "redstone_crystal");
 		registerItem(HEMATITE, "hematite");
 		registerItem(RUBBER_SAP, "rubber_sap");
 		registerItem(RUBBER_RESIN, "rubber_resin");
 		registerItem(RUBBER, "rubber");
 		registerItem(AEROGEL, "aerogel");
 		registerItem(CHEESE, "cheese");
+		registerAliasedBlockItem(MARS_POTATO, "mars_potatoes", "mars_potato");
 		registerItem(IRON_PLATE, "iron_plate");
 		registerItem(ALUMINUM_PLATE, "aluminum_plate");
 		registerItem(TITANIUM_PLATE, "titanium_plate");
@@ -191,6 +202,7 @@ public class StarflightItems
 		registerItem(ELECTRIC_MOTOR, "electric_motor");
 		registerItem(SUBSTRATE, "substrate");
 		registerItem(CIRCUIT, "circuit");
+		registerItem(ADVANCED_CIRCUIT, "advanced_circuit");
 		registerItem(SOLAR_CELL, "solar_cell");
 		registerItem(HEAVY_CYLINDER, "heavy_cylinder");
 		registerItem(MINI_THRUSTER, "mini_thruster");
@@ -241,6 +253,8 @@ public class StarflightItems
 		registerItem(HYDROGEN_LOADER, "hydrogen_loader");
 		registerItem(DIVIDER, "divider");
 		registerItem(ROCKET_1, "rocket_1");
+		registerItem(ROCKET_2, "rocket_2");
+		registerItem(SOLAR_BASE, "solar_base");
 		
 		// Spawn Egg Items
 		registerItem(CERULEAN_SPAWN_EGG, "cerulean_spawn_egg");
@@ -249,6 +263,7 @@ public class StarflightItems
 		registerItem(SOLAR_SPECTRE_SPAWN_EGG, "solar_spectre_spawn_egg");
 		registerItem(STRATOFISH_SPAWN_EGG, "stratofish_spawn_egg");
 		registerItem(CLOUD_SHARK_SPAWN_EGG, "cloud_shark_spawn_egg");
+		registerItem(CAVE_LAMPREY_SPAWN_EGG, "cave_lamprey_spawn_egg");
 	}
 	
 	private static void registerItem(Item item, String name)
@@ -260,6 +275,15 @@ public class StarflightItems
 	private static void registerItemHidden(Item item, String name)
 	{
 		Registry.register(Registries.ITEM, Identifier.of(StarflightMod.MOD_ID, name), item);
+	}
+	
+	private static void registerAliasedBlockItem(Item item, String blockName, String itemName)
+	{
+		Block block = ((BlockItem) item).getBlock();
+		String mod_id = StarflightMod.MOD_ID;
+		Registry.register(Registries.BLOCK, Identifier.of(mod_id, blockName), block);
+		Registry.register(Registries.ITEM, Identifier.of(mod_id, itemName), item);
+		ItemGroupEvents.modifyEntriesEvent(StarflightItems.ITEM_GROUP).register(content -> content.add(item));
 	}
 	
 	private static void enterPartDrawingsItem(String parts)

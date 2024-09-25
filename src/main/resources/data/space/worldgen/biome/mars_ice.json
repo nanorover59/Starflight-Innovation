@@ -30,6 +30,10 @@
     [
       "space:spring_lava",
       "minecraft:underwater_magma"
+    ],
+    [
+      "space:mars_roots_water",
+      "space:redstone_cluster_water"
     ]
   ],
   "has_precipitation": false,
@@ -39,7 +43,14 @@
     "axolotls": [],
     "creature": [],
     "misc": [],
-    "monster": [],
+    "monster": [
+      {
+        "type": "space:cave_lamprey",
+        "maxCount": 4,
+        "minCount": 1,
+        "weight": 10
+      }
+    ],
     "underground_water_creature": [],
     "water_ambient": [],
     "water_creature": []

@@ -43,6 +43,7 @@ import space.client.render.MarsDimensionEffect;
 import space.client.render.StarflightRenderEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
+import space.client.render.entity.CaveLampreyEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.CloudSharkEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
@@ -52,6 +53,7 @@ import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
+import space.client.render.entity.model.CaveLampreyEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.CloudSharkEntityModel;
 import space.client.render.entity.model.DustEntityModel;
@@ -77,6 +79,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_PLASMA_BALL_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "plasma_ball"), "main");
 	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
 	public static final EntityModelLayer MODEL_CLOUD_SHARK_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), "main");
+	public static final EntityModelLayer MODEL_CAVE_LAMPREY_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
@@ -103,6 +106,9 @@ public class StarflightModClient implements ClientModInitializer
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_TOP, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.LYCOPHYTE_STEM, RenderLayer.getCutout());
 		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.REDSTONE_BLOSSOM, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.MARS_ROOTS, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.MARS_POTATOES, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(StarflightBlocks.REDSTONE_CLUSTER, RenderLayer.getCutout());
 		ColorProviderRegistry.BLOCK.register((state, view, pos, tintIndex) -> 0x437346, StarflightBlocks.RUBBER_LEAVES);
 		ColorProviderRegistry.ITEM.register((itemstack, i) -> 0x437346, StarflightBlocks.RUBBER_LEAVES.asItem());
 		
@@ -153,6 +159,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_EYES, (context) -> new SolarEyesEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CLOUD_SHARK, (context) -> new CloudSharkEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.CAVE_LAMPREY, (context) -> new CaveLampreyEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
@@ -163,6 +170,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_PLASMA_BALL_LAYER, PlasmaBallEntityRenderer::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CLOUD_SHARK_LAYER, CloudSharkEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_CAVE_LAMPREY_LAYER, CaveLampreyEntityModel::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();

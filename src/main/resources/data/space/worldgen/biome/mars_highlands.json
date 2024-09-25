@@ -33,6 +33,10 @@
       "minecraft:underwater_magma"
     ],
     [
+      "space:mars_roots_water",
+      "space:redstone_cluster_water"
+    ],
+    [
       "space:surface_rock"
     ]
   ],
@@ -47,6 +51,12 @@
       {
         "type": "space:dust",
         "maxCount": 1,
+        "minCount": 1,
+        "weight": 10
+      },
+      {
+        "type": "space:cave_lamprey",
+        "maxCount": 4,
         "minCount": 1,
         "weight": 10
       }

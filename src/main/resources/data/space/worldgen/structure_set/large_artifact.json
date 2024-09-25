@@ -1,10 +1,6 @@
 {
   "structures" : [
     {
-      "structure" : "space:moon_small_structure",
-      "weight" : 1
-    },
-    {
       "structure" : "space:biodome",
       "weight" : 1
     },
@@ -16,7 +12,7 @@
   "placement" : {
     "salt" : 95426513,
     "spacing" : 32,
-    "separation" : 16,
+    "separation" : 24,
     "type" : "minecraft:random_spread"
   }
 }

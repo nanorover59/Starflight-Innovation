@@ -1,20 +1,16 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        "aa ",
-        "aba",
-        " aa"
+        "aa",
+        "aa"
     ],
     "key": {
         "a": {
-            "item": "space:titanium_plate"
-        },
-        "b": {
-            "item": "space:titanium_frame"
+            "item": "space:titanium_ingot"
         }
     },
     "result": {
         "id": "space:structural_titanium",
-        "count": 1
+        "count": 4
     }
 }

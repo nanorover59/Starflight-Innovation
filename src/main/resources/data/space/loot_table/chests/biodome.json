@@ -1,48 +1,58 @@
 {
   "type": "minecraft:chest",
   "pools": [
-  	{
-      "rolls": 8,
-      "bonus_rolls": 8,
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 6
+      },
+      "bonus_rolls": 0,
       "entries": [
         {
-          "type": "loot_table",
+          "type": "minecraft:loot_table",
           "weight": 10,
-          "name": "space:chests/equipment"
+          "value": "space:chests/equipment"
         },
         {
-          "type": "loot_table",
-          "weight": 20,
-          "name": "space:chests/construction"
-        },
-        {
-          "type": "loot_table",
-          "weight": 20,
-          "name": "space:chests/agriculture"
-        },
-        {
-          "type": "loot_table",
-          "weight": 20,
-          "name": "space:chests/forestry"
-        },
-        {
-          "type": "loot_table",
-          "weight": 20,
-          "name": "space:chests/crafting"
-        },
-        {
-          "type": "loot_table",
+          "type": "minecraft:loot_table",
           "weight": 10,
-          "name": "space:chests/mk1_drawings"
+          "value": "space:chests/machine_parts"
         },
         {
-          "type": "loot_table",
-          "weight": 1,
-          "name": "space:chests/beverages"
+          "type": "minecraft:loot_table",
+          "weight": 20,
+          "value": "space:chests/construction"
         },
         {
-          "type": "minecraft:empty",
-          "weight": 20
+          "type": "minecraft:loot_table",
+          "weight": 20,
+          "value": "space:chests/crafting"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 20,
+          "value": "space:chests/agriculture"
+        },
+        {
+          "type": "minecraft:loot_table",
+          "weight": 20,
+          "value": "space:chests/forestry"
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 0,
+        "max": 2
+      },
+      "bonus_rolls": 0,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "weight": 10,
+          "value": "space:chests/mk1_drawings"
         }
       ]
     }

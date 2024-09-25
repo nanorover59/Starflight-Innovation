@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "bbb",
+        "cac"
+    ],
+    "key": {
+        "a": {
+            "item": "space:substrate"
+        },
+        "b": {
+            "item": "space:redstone_crystal"
+        },
+        "c": {
+            "item": "minecraft:diamond"
+        }
+    },
+    "result": {
+        "id": "space:advanced_circuit",
+        "count": 1
+    }
+}

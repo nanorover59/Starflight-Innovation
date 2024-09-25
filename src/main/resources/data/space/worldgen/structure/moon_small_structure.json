@@ -1,15 +1,14 @@
 {
-  "type": "minecraft:jigsaw",
-  "biomes": "space:moon_midlands",
-  "step": "surface_structures",
-  "spawn_overrides": {},
-  "terrain_adaptation": "beard_thin",
-  "start_pool": "space:moon_small_structure",
-  "size": 1,
-  "start_height": {
-    "absolute": 0
-  },
-  "project_start_to_heightmap": "OCEAN_FLOOR_WG",
-  "max_distance_from_center": 80,
-  "use_expansion_hack": false
+  "type" : "space:artifact",
+  "biomes": [
+    "space:moon_lowlands",
+    "space:moon_midlands",
+    "space:moon_ice",
+    "space:mars_lowlands",
+    "space:mars_midlands",
+    "space:mars_ice"
+  ],
+  "step" : "underground_structures",
+  "spawn_overrides" : {},
+  "artifact_type" : 0
 }

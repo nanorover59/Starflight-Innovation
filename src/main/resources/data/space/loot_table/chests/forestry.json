@@ -91,8 +91,22 @@
         },
         {
           "type": "item",
+          "weight": 20,
+          "name": "space:rubber_sapling",
+          "functions": [
+            {
+              "function": "set_count",
+              "count": {
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "item",
           "weight": 1,
-          "name": "minecraft:iron_axe"
+          "name": "space:titanium_axe"
         }
       ]
     }

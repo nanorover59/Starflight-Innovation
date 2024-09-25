@@ -141,20 +141,10 @@
             {
               "function": "set_count",
               "count": {
+                "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
               }
-            }
-          ]
-        },
-        {
-          "type": "item",
-          "weight": 2,
-          "name": "space:oxygen_tank_item",
-          "functions": [
-            {
-              "function": "set_nbt",
-              "tag": "{oxygen: 2.0}"
             }
           ]
         }

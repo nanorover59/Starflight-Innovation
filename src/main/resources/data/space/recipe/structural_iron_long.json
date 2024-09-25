@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aa ",
+        "aba",
+        " aa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:iron_plate"
+        },
+        "b": {
+            "item": "space:iron_frame"
+        }
+    },
+    "result": {
+        "id": "space:structural_iron",
+        "count": 1
+    }
+}

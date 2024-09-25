@@ -1,0 +1,16 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aa",
+        "aa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:structural_aluminum"
+        }
+    },
+    "result": {
+        "id": "space:metal_crafting_table",
+        "count": 1
+    }
+}

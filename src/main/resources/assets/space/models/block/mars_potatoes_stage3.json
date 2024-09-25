@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/crop",
+  "textures": {
+    "crop": "space:block/mars_potatoes_stage3"
+  }
+}

@@ -44,6 +44,10 @@ public class StarflightWorldGeneration
 	public static final StructurePieceType VOLCANO_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "volcano_piece"), VolcanoGenerator.Piece::new);
 	public static final StructureType<VolcanoStructure> VOLCANO_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "volcano"), () -> VolcanoStructure.CODEC);
 	
+	// Artifact Structure
+	public static final StructurePieceType ARTIFACT_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "artifact_piece"), ArtifactGenerator.Piece::new);
+	public static final StructureType<ArtifactStructure> ARTIFACT_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "artifact"), () -> ArtifactStructure.CODEC);
+	
 	// Bio Dome Structure
 	public static final StructurePieceType OUTPOST_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "biodome_piece"), BioDomeGenerator.Piece::new);
 	public static final StructureType<BioDomeStructure> OUTPOST_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "biodome"), () -> BioDomeStructure.CODEC);

@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "a a",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:structural_aluminum"
+        }
+    },
+    "result": {
+        "id": "space:storage_cube",
+        "count": 1
+    }
+}

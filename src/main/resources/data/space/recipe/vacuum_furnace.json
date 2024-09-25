@@ -1,18 +1,21 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " b ",
-        "cac",
-        " b "
+        "dbd",
+        "dad",
+        "dcd"
     ],
     "key": {
         "a": {
             "item": "space:titanium_machine_casing"
         },
         "b": {
-            "item": "space:pump"
+            "item": "space:advanced_circuit"
         },
         "c": {
+            "item": "space:pump"
+        },
+        "d": {
             "item": "space:coil"
         }
     },

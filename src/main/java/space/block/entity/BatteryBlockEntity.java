@@ -99,42 +99,74 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 	{
 		int batteryCount = 0;
 		
-		for(ItemStack stack : this.inventory)
+		if(amount > 0.0)
 		{
-			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-				continue;
+			for(ItemStack stack : this.inventory)
+			{
+				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+					continue;
+				
+				double charge = stack.get(StarflightItems.ENERGY);
+				
+				if(charge < stack.get(StarflightItems.MAX_ENERGY))
+					batteryCount++;
+			}
 			
-			double charge = stack.get(StarflightItems.ENERGY);
+			if(batteryCount == 0)
+				return 0;
 			
-			if(charge < stack.get(StarflightItems.MAX_ENERGY))
-				batteryCount++;
+			float fraction = (float) (amount / batteryCount);
+			
+			for(ItemStack stack : this.inventory)
+			{
+				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+					continue;
+				
+				float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
+				float previousCharge = stack.get(StarflightItems.ENERGY);
+				
+				if(previousCharge + fraction > maxCharge)
+				{
+					stack.set(StarflightItems.ENERGY, maxCharge);
+					amount -= (previousCharge + fraction) - maxCharge;
+				}
+				else
+					stack.set(StarflightItems.ENERGY, previousCharge + fraction);
+			}
 		}
-		
-		if(batteryCount == 0)
-			return 0;
-		
-		float fraction = (float) (amount / batteryCount);
-		
-		for(ItemStack stack : this.inventory)
+		else
 		{
-			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-				continue;
-			
-			float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
-			float previousCharge = stack.get(StarflightItems.ENERGY);
-			
-			if(previousCharge + fraction > maxCharge)
+			for(ItemStack stack : this.inventory)
 			{
-				stack.set(StarflightItems.ENERGY, maxCharge);
-				amount -= (previousCharge + fraction) - maxCharge;
+				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+					continue;
+				
+				double charge = stack.get(StarflightItems.ENERGY);
+				
+				if(charge > 0.0)
+					batteryCount++;
 			}
-			else if(previousCharge + fraction < 0)
+			
+			if(batteryCount == 0)
+				return 0;
+			
+			float fraction = (float) (amount / batteryCount);
+			
+			for(ItemStack stack : this.inventory)
 			{
-				stack.set(StarflightItems.ENERGY, 0.0f);
-				amount -= previousCharge + fraction;
+				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+					continue;
+				
+				float previousCharge = stack.get(StarflightItems.ENERGY);
+				
+				if(previousCharge + fraction < 0)
+				{
+					stack.set(StarflightItems.ENERGY, 0.0f);
+					amount -= previousCharge + fraction;
+				}
+				else
+					stack.set(StarflightItems.ENERGY, previousCharge + fraction);
 			}
-			else
-				stack.set(StarflightItems.ENERGY, previousCharge + fraction);
 		}
 		
 		world.updateComparators(pos, world.getBlockState(pos).getBlock());
@@ -177,6 +209,6 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, BatteryBlockEntity blockEntity)
 	{
-		EnergyBlockEntity.transferEnergy(blockEntity, 0.5);
+		EnergyBlockEntity.transferEnergy(blockEntity, blockEntity.getOutput());
 	}
 }

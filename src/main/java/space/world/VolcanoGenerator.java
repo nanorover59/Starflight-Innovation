@@ -18,6 +18,7 @@ import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
@@ -215,7 +216,11 @@ public class VolcanoGenerator
 					mutable.set(chunkPos.getStartX() + x, 0, chunkPos.getStartZ() + z);
 					double distanceFromCenter = MathHelper.hypot(mutable.getX() - centerX, mutable.getZ() - centerZ);
 					int surfaceY = world.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, mutable.getX(), mutable.getZ());
-					mutable.setY(surfaceY - 1);
+					mutable.setY(surfaceY);
+					
+					while(!world.getBlockState(mutable).blocksMovement() && mutable.getY() > world.getBottomY())
+						mutable.move(Direction.DOWN);
+					
 					BlockState surfaceState = world.getBlockState(mutable);
 					
 					if(distanceFromCenter < baseRadius + 16)
