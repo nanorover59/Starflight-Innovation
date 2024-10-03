@@ -9,7 +9,7 @@
             "item": "space:aluminum_ingot"
         },
         "b": {
-            "item": "minecraft:tinted_glass"
+            "item": "minecraft:glass"
         }
     },
     "result": {

@@ -25,7 +25,6 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -60,6 +59,7 @@ import space.block.FluidTankInsideBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
+import space.inventory.ImplementedInventory;
 import space.mixin.common.EntityInvokerMixin;
 import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
@@ -607,21 +607,21 @@ public class MovingCraftEntity extends Entity
 				BlockEntity blockEntity = world.getBlockEntity(pos);
 	
 				if(blockEntity != null)
+				{
+					if(blockEntity instanceof ImplementedInventory)
+						((ImplementedInventory) blockEntity).clear();
+					
 					blockEntity.read(new NbtCompound(), world.getRegistryManager());
+				}
 			}
 		}
-
+		
 		for(MovingCraftEntity.BlockData blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
 			if(!isBlockSolid(world, pos))
-			{
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
-
-				for(Entity item : world.getEntitiesByClass(ItemEntity.class, Box.enclosing(pos.add(-1, -1, -1), pos.add(1, 1, 1)), b -> true))
-					item.remove(RemovalReason.DISCARDED);
-			}
+				world.removeBlock(pos, false);
 		}
 
 		for(MovingCraftEntity.BlockData blockData : blocks)
@@ -629,7 +629,7 @@ public class MovingCraftEntity extends Entity
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
 			if(isBlockSolid(world, pos))
-				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+				world.removeBlock(pos, false);
 		}
 	}
 	

@@ -29,6 +29,7 @@ import space.network.s2c.PlanetDynamicDataS2CPacket;
 import space.network.s2c.PlanetStaticDataS2CPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
 import space.network.s2c.UnlockPlanetS2CPacket;
+import space.network.s2c.VolcanicVentS2CPacket;
 import space.particle.StarflightParticleTypes;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
@@ -46,6 +47,7 @@ public class StarflightNetworkingS2C
 		ClientPlayNetworking.registerGlobalReceiver(RocketControllerDataS2CPacket.PACKET_ID, (payload, context) -> RocketControllerScreen.receiveDisplayDataUpdate((RocketControllerDataS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(FizzS2CPacket.PACKET_ID, (payload, context) -> receiveFizz((FizzS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(OutgasS2CPacket.PACKET_ID, (payload, context) -> receiveOutgas((OutgasS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(VolcanicVentS2CPacket.PACKET_ID, (payload, context) -> receiveVolcanicVent((VolcanicVentS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(JetS2CPacket.PACKET_ID, (payload, context) -> receiveJet((JetS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(UnlockPlanetS2CPacket.PACKET_ID, (payload, context) -> receiveUnlockPlanet((UnlockPlanetS2CPacket) payload, context));
 	}
@@ -179,7 +181,12 @@ public class StarflightNetworkingS2C
 			((MovingCraftEntity) entity).getEntityOffsets().clear();
 			
 			for(int id : passengerMap.keySet())
-				((MovingCraftEntity) entity).getEntityOffsets().put(clientWorld.getEntityById(id).getUuid(), passengerMap.get(id));
+			{
+				Entity passenger = clientWorld.getEntityById(id);
+				
+				if(passenger != null)
+					((MovingCraftEntity) entity).getEntityOffsets().put(passenger.getUuid(), passengerMap.get(id));
+			}
 		});
 	}
 	
@@ -220,6 +227,39 @@ public class StarflightNetworkingS2C
 				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
 				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.25 + random.nextDouble() * 0.25);
 				clientWorld.addParticle(StarflightParticleTypes.AIR_FILL, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+			}
+		});
+	}
+	
+	public static void receiveVolcanicVent(VolcanicVentS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		BlockPos pos1 = payload.blockPos1();
+		BlockPos pos2 = payload.blockPos2();
+		MinecraftClient client = context.client();
+		
+		client.execute(() -> {
+			ClientWorld clientWorld = client.world;
+			Random random = Random.createLocal();
+			Vec3i unitVector = pos2.subtract(pos1);
+			int particleCount = 4 + random.nextInt(4);
+			
+			if(clientWorld == null)
+				return;
+			
+			for(int i = 0; i < particleCount; i++)
+			{
+				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(1.0 + random.nextDouble() * 0.5);
+				velocity.add(random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble()).multiply(0.25 + random.nextDouble() * 0.25);
+				clientWorld.addParticle(ParticleTypes.LAVA, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
+			}
+			
+			for(int i = 0; i < particleCount; i++)
+			{
+				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
+				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(1.0 + random.nextDouble() * 0.5);
+				velocity.add(random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble()).multiply(0.25 + random.nextDouble() * 0.25);
+				clientWorld.addParticle(ParticleTypes.FLAME, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 			}
 		});
 	}

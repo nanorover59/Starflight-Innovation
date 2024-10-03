@@ -165,12 +165,12 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
 			ArrayList<BlockPos> updateList = new ArrayList<BlockPos>();
-			double supply = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
+			double supply = AirUtil.searchSupply(world, pos, checkList, BlockSearch.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
 			
 			//System.out.println("searchSupply: " + (System.currentTimeMillis() - time));
 			//time = System.currentTimeMillis();
 			
-			boolean tooLarge = !AirUtil.findVolume(world, frontPos, foundList, updateList, AirUtil.MAX_VOLUME);
+			boolean tooLarge = !AirUtil.findVolume(world, frontPos, foundList, updateList, BlockSearch.MAX_VOLUME);
 			double required = foundList.size() * HabitableAirBlock.DENSITY;
 			
 			//System.out.println("findVolume: " + (System.currentTimeMillis() - time));

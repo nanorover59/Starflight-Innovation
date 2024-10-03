@@ -22,13 +22,13 @@ import net.minecraft.structure.StructurePiece;
 import net.minecraft.structure.StructurePiecesHolder;
 import net.minecraft.structure.StructurePlacementData;
 import net.minecraft.structure.StructureTemplate;
-import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockBox;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Direction.Axis;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
@@ -41,7 +41,7 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.VerticalBlockSample;
 import net.minecraft.world.gen.structure.Structure;
 import space.StarflightMod;
-import space.block.AirwayBlock;
+import space.block.LightColumnBlock;
 import space.block.SolidLeverBlock;
 import space.block.StarflightBlocks;
 import space.block.StorageCubeBlock;
@@ -57,21 +57,7 @@ public class BioDomeGenerator
 	private static final Block SLAB = StarflightBlocks.STRUCTURAL_ALUMINUM_SLAB;
 	private static final RegistryKey<LootTable> LOOT_TABLE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(StarflightMod.MOD_ID, "chests/biodome"));
 	private static final Identifier AIRLOCK = Identifier.of(StarflightMod.MOD_ID, "sliding_airlock");
-	private static final Identifier OXYGEN_SOURCE_UPPER = Identifier.of(StarflightMod.MOD_ID, "biodome_oxygen_source_upper");
-	private static final Identifier OXYGEN_SOURCE_LOWER = Identifier.of(StarflightMod.MOD_ID, "biodome_oxygen_source_lower");
-	
-	private static final Identifier[] ROOMS_1 = {
-		Identifier.of(StarflightMod.MOD_ID, "biodome_archives"),
-		Identifier.of(StarflightMod.MOD_ID, "biodome_orange_beds"),
-		Identifier.of(StarflightMod.MOD_ID, "biodome_cyan_beds"),
-		Identifier.of(StarflightMod.MOD_ID, "biodome_machines")
-	};
-	
-	private static final Identifier[] ROOMS_2 = {
-			Identifier.of(StarflightMod.MOD_ID, "biodome_small_oxygen_tank"),
-			Identifier.of(StarflightMod.MOD_ID, "biodome_small_hydrogen_tank"),
-			Identifier.of(StarflightMod.MOD_ID, "biodome_track_stack")
-	};
+	private static final Identifier OXYGEN_SOURCE = Identifier.of(StarflightMod.MOD_ID, "biodome_oxygen");
 	
 	public static void addPieces(Structure.Context context, BlockPos pos, StructurePiecesHolder holder)
 	{
@@ -229,13 +215,15 @@ public class BioDomeGenerator
 							
 							double dxz = MathHelper.hypot(dx, dz);
 							
-							if((int) dxz <= CENTER_RADIUS && y <= CENTER_HEIGHT)
+							if((int) dxz <= CENTER_RADIUS && y <= CENTER_HEIGHT + 1)
 							{
 								if((int) dxz == CENTER_RADIUS)
 								{
 									if(y > 0)
 									{
-										if(y % LEVEL_HEIGHT == 0)
+										if(y == CENTER_HEIGHT + 1)
+											state = StarflightBlocks.SOLAR_PANEL.getDefaultState();
+										else if(y % LEVEL_HEIGHT == 0)
 											state = StarflightBlocks.RIVETED_ALUMINUM.getDefaultState();
 										else
 											state = Blocks.GLASS.getDefaultState();
@@ -245,17 +233,29 @@ public class BioDomeGenerator
 								}
 								else if((int) dxz < CENTER_RADIUS)
 								{
-									if(y == CENTER_HEIGHT)
-										state = Blocks.GLASS.getDefaultState();
+									if(y == CENTER_HEIGHT + 1)
+										state = StarflightBlocks.SOLAR_PANEL.getDefaultState();
+									else if(y == CENTER_HEIGHT)
+										state = StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState();
 									else if(y % LEVEL_HEIGHT == 0)
 										state = y > 0 ? StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState() : StarflightBlocks.STRUCTURAL_IRON.getDefaultState();
 									else
 										state = Blocks.AIR.getDefaultState();
 								}
 							}
-							else if(y < 0 && y % LEVEL_HEIGHT != 0 && Math.abs(dx) > 4 && Math.abs(dz) > 4 && (dx - 4) % 8 == 0 && (dz - 4) % 8 == 0)
-								state = StarflightBlocks.RIVETED_ALUMINUM.getDefaultState();
+							else if(y < 0 && y % LEVEL_HEIGHT != 0 && ((dx - 4) % 8 == 0 || (dz - 4) % 8 == 0))
+							{
+								boolean door = ((y - 1) % LEVEL_HEIGHT == 0 || (y - 2) % LEVEL_HEIGHT == 0 || (y - 3) % LEVEL_HEIGHT == 0)
+											&& (dx % 8 == 0 || dz % 8 == 0 || (dx - 1) % 8 == 0 || (dz - 1) % 8 == 0 || (dx + 1) % 8 == 0 || (dz + 1) % 8 == 0);
+								
+								if(!door)
+									state = getBrickType(serverWorld);
+							}
 							
+							//else if(y < 0 && y % LEVEL_HEIGHT != 0 && Math.abs(dx) > 4 && Math.abs(dz) > 4 && (dx - 4) % 8 == 0 && (dz - 4) % 8 == 0)
+							//	state = StarflightBlocks.RIVETED_ALUMINUM.getDefaultState();
+							
+							// Spawn the tower.
 							if(pos.equals(center))
 								details.put(center, 0);
 							
@@ -273,7 +273,7 @@ public class BioDomeGenerator
 									else if(!details.containsKey(pos))
 										details.put(pos, 3);
 								}
-								else if(y < 0 && y % LEVEL_HEIGHT == 0 && !(Direction.fromVector(cellX, 0, cellZ) == getFacing() && cellDistance == 2) && !details.containsKey(pos))
+								else if(y < 0 && y % LEVEL_HEIGHT == 0 && !details.containsKey(pos))
 									details.put(pos, 4);
 							}
 						}
@@ -294,16 +294,20 @@ public class BioDomeGenerator
 				if(type == 0)
 				{
 					// Tower and Spiral Staircase
+					BlockState verticalLight = StarflightBlocks.LIGHT_COLUMN.getDefaultState().with(LightColumnBlock.AXIS, Axis.Y);
 					fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 1, -3, -3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
 					fill(world, chunkBox, 3, chunkCenterPos.getY() - SHELL_RADIUS + 1, -3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
 					fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 1, -3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, -3);
 					fill(world, chunkBox, -3, chunkCenterPos.getY() - SHELL_RADIUS + 1, 3, 3, chunkCenterPos.getY() + CENTER_HEIGHT - 1, 3);
-					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, 2, chunkCenterPos.getY() - 1, 2, Blocks.GLASS.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, -2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, -2, 2, chunkCenterPos.getY() - 1, -2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, 2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -2, chunkCenterPos.getY() - SHELL_RADIUS + 1, 2, -2, chunkCenterPos.getY() - 1, 2, StarflightBlocks.STRUCTURAL_TITANIUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -1, chunkCenterPos.getY() - SHELL_RADIUS + 1, -1, 1, chunkCenterPos.getY() - 1, 1, Blocks.WATER.getDefaultState(), AIR, false);
+					
+					int startY = chunkCenterPos.getY() - SHELL_RADIUS + 1;
+					int endY = chunkCenterPos.getY() + CENTER_HEIGHT - 8;
+					fillWithOutline(world, chunkBox, -2, startY, -2, 2, endY, 2, StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, -2, startY, -2, -2, endY, -2, verticalLight, AIR, false);
+					fillWithOutline(world, chunkBox, 2, startY, -2, 2, endY, -2, verticalLight, AIR, false);
+					fillWithOutline(world, chunkBox, 2, startY, 2, 2, endY, 2, verticalLight, AIR, false);
+					fillWithOutline(world, chunkBox, -2, startY, 2, -2, endY, 2, verticalLight, AIR, false);
+					//fillWithOutline(world, chunkBox, -1, chunkCenterPos.getY() - SHELL_RADIUS + 1, -1, 1, chunkCenterPos.getY() - 1, 1, Blocks.WATER.getDefaultState(), AIR, false);
 					
 					for(int y = -SHELL_RADIUS; y < 0; y++)
 					{
@@ -344,7 +348,12 @@ public class BioDomeGenerator
 					}
 					
 					addDoor(world, chunkBox, 0, centerY + 1, -6);
-					this.addBlock(world, StarflightBlocks.PLANETARIUM.getDefaultState().mirror(BlockMirror.FRONT_BACK), 0, centerY + CENTER_HEIGHT - LEVEL_HEIGHT + 1, 0, chunkBox);
+					//this.addBlock(world, StarflightBlocks.PLANETARIUM.getDefaultState().mirror(BlockMirror.FRONT_BACK), 0, centerY + CENTER_HEIGHT - LEVEL_HEIGHT + 1, 0, chunkBox);
+					BlockRotation rotation = getRotationFromDirection(getFacing());
+					BlockPos placementPos = pos.add(new BlockPos(-2, CENTER_HEIGHT - 12, -2).rotate(rotation));
+					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(OXYGEN_SOURCE).get();
+					StructurePlacementData placementData = new StructurePlacementData().setRotation(rotation);
+					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);
 				}
 				else if(type == 1)
 				{
@@ -358,7 +367,7 @@ public class BioDomeGenerator
 				else if(type == 2)
 				{
 					// Oxygen Source
-					Direction direction = Direction.fromVector(pos.getX() - center.getX(), 0, pos.getZ() - center.getZ());
+					/*Direction direction = Direction.fromVector(pos.getX() - center.getX(), 0, pos.getZ() - center.getZ());
 					BlockRotation rotation = getRotationFromDirection(direction);
 					BlockPos placementPos = pos.subtract(new BlockPos(5, 18, 4).rotate(rotation));
 					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(OXYGEN_SOURCE_UPPER).get();
@@ -366,7 +375,7 @@ public class BioDomeGenerator
 					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);
 					placementPos = pos.subtract(new BlockPos(5, 30, 4).rotate(rotation));
 					template = world.toServerWorld().getStructureTemplateManager().getTemplate(OXYGEN_SOURCE_LOWER).get();
-					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);
+					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);*/
 					
 				}
 				else if(type == 3)
@@ -407,54 +416,10 @@ public class BioDomeGenerator
 				{
 					// Underground Rooms
 					int y = pos.getY();
-					fillWithOutline(world, chunkBox, -4, y, -4, 4, y + 5, 4, StarflightBlocks.STRUCTURAL_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -4, y + 1, -4, -4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -4, y + 1, 4, -4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 4, y + 1, -4, 4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 4, y + 1, 4, 4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -3, y + 5, -3, 3, y + 5, 3, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					addBlock(world, StarflightBlocks.AIRWAY.getDefaultState().with(AirwayBlock.FACING, Direction.EAST), -4, y + 4, 0, chunkBox);
-					addBlock(world, StarflightBlocks.AIRWAY.getDefaultState().with(AirwayBlock.FACING, Direction.WEST), 4, y + 4, 0, chunkBox);
-					addDoor(world, chunkBox, 0, y + 1, -4);
-					
-					Identifier roomStructure;
-					
-					if(random.nextInt(6) == 0)
-						roomStructure = ROOMS_2[random.nextInt(ROOMS_2.length)];
-					else
-						roomStructure = ROOMS_1[random.nextInt(ROOMS_1.length)];
-					
-					BlockRotation rotation = getRotationFromDirection(getFacing());
-					pos = pos.up().subtract(new BlockPos(3, 0, 3).rotate(rotation));
-					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(roomStructure).get();
-					StructurePlacementData placementdata = new StructurePlacementData().setRotation(rotation);
-					template.place(world, pos, pos, placementdata, random, Block.NOTIFY_LISTENERS);
-					
-					/*if(world.getRandom().nextInt(4) == 0)
-					{
-						int count = 1 + world.getRandom().nextInt(3);
-						
-						for(int i = 0; i < count; i++)
-						{
-							int x = world.getRandom().nextInt(4) - world.getRandom().nextInt(4);
-							int z = world.getRandom().nextInt(4) - world.getRandom().nextInt(4);
-							
-							if(getBlockAt(world, x, y + 1, z, chunkBox).isAir() && !getBlockAt(world, x, y, z, chunkBox).isAir())
-								addLoot(world, chunkBox, x, y + 1, z);
-						}
-					}*/
-					
-					if(world.getRandom().nextInt(4) == 0)
-					{
-						int count = 1 + world.getRandom().nextInt(3);
-						
-						for(int i = 0; i < count; i++)
-						{
-							int x = world.getRandom().nextInt(4) - world.getRandom().nextInt(4);
-							int z = world.getRandom().nextInt(4) - world.getRandom().nextInt(4);
-							addMob(world, world.getRandom(), x, y + 1, z + 6);
-						}
-					}
+					fillWithOutline(world, chunkBox, -4, y + 1, -4, 4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, -4, y + 1, 4, 4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, -4, y + 1, -4, -4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
+					fillWithOutline(world, chunkBox, 4, y + 1, -4, 4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
 				}
 			}
 			
@@ -468,6 +433,12 @@ public class BioDomeGenerator
 			addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState(), x, y, z, chunkBox);
 			addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState().with(DoorBlock.HALF, DoubleBlockHalf.UPPER), x, y + 1, z, chunkBox);
 			addBlock(world, StarflightBlocks.LEVER_BLOCK.getDefaultState().with(SolidLeverBlock.FACING, Direction.NORTH), x - 1, y + 1, z, chunkBox);
+		}
+		
+		private void addDirectionalDoor(StructureWorldAccess world, BlockBox chunkBox, int x, int y, int z, Direction direction)
+		{
+			addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState().with(DoorBlock.FACING, direction), x, y, z, chunkBox);
+			addBlock(world, StarflightBlocks.AIRLOCK_DOOR.getDefaultState().with(DoorBlock.HALF, DoubleBlockHalf.UPPER).with(DoorBlock.FACING, direction), x, y + 1, z, chunkBox);
 		}
 		
 		private void addLoot(StructureWorldAccess world, BlockBox chunkBox, int x, int y, int z)

@@ -6,13 +6,13 @@
     ]
   },
   "criteria": {
-    "has_lunar_lamp": {
+    "has_lunalight": {
       "trigger": "minecraft:inventory_changed",
       "conditions": {
         "items": [
           {
             "items": [
-              "space:lunar_lamp"
+              "space:lunalight"
             ]
           }
         ]
@@ -27,7 +27,7 @@
   },
   "requirements": [
     [
-      "has_lunar_lamp",
+      "has_lunalight",
       "has_the_recipe"
     ]
   ]

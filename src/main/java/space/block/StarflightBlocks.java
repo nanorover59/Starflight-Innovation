@@ -73,6 +73,7 @@ import space.block.entity.StorageCubeBlockEntity;
 import space.block.entity.VacuumFurnaceBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.block.entity.VentBlockEntity;
+import space.block.entity.VolcanicVentBlockEntity;
 import space.block.entity.WaterTankBlockEntity;
 import space.item.DescriptiveBlockItem;
 import space.item.StarflightItems;
@@ -159,6 +160,7 @@ public class StarflightBlocks
 	public static final Block REDSTONE_CLUSTER = new AmethystClusterBlock(7.0f, 3.0f, AbstractBlock.Settings.copy(Blocks.AMETHYST_CLUSTER).mapColor(MapColor.RED));
 	public static final Block DENSE_CLOUD = new DenseCloudBlock(AbstractBlock.Settings.copy(Blocks.POWDER_SNOW).solidBlock(Blocks::never).suffocates(Blocks::never).blockVision(Blocks::always));
 	public static final Block VOLCANIC_SLATE = new Block(AbstractBlock.Settings.copy(Blocks.DEEPSLATE));
+	public static final Block VOLCANIC_VENT = new VolcanicVentBlock(AbstractBlock.Settings.copy(Blocks.MAGMA_BLOCK));
 	public static final Block AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
 	public static final Block RED_AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
 	public static final Block PITCH_BLACK = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));
@@ -244,6 +246,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<RocketControllerBlockEntity> ROCKET_CONTROLLER_BLOCK_ENTITY = BlockEntityType.Builder.create(RocketControllerBlockEntity::new, ROCKET_CONTROLLER).build(null);
 	public static final BlockEntityType<AtmosphereGeneratorBlockEntity> ATMOSPHERE_GENERATOR_BLOCK_ENTITY = BlockEntityType.Builder.create(AtmosphereGeneratorBlockEntity::new, ATMOSPHERE_GENERATOR).build(null);
 	public static final BlockEntityType<LeakBlockEntity> LEAK_BLOCK_ENTITY = BlockEntityType.Builder.create(LeakBlockEntity::new, LEAK).build(null);
+	public static final BlockEntityType<VolcanicVentBlockEntity> VOLCANIC_VENT_BLOCK_ENTITY = BlockEntityType.Builder.create(VolcanicVentBlockEntity::new, VOLCANIC_VENT).build(null);
 	public static final BlockEntityType<StorageCubeBlockEntity> STORAGE_CUBE_BLOCK_ENTITY = BlockEntityType.Builder.create(StorageCubeBlockEntity::new, STORAGE_CUBE).build(null);
 
 	// Block Tags
@@ -331,6 +334,7 @@ public class StarflightBlocks
 		initializeBlock(REDSTONE_CLUSTER, "redstone_cluster");
 		initializeBlock(DENSE_CLOUD, "dense_cloud");
 		initializeBlock(VOLCANIC_SLATE, "volcanic_slate");
+		initializeBlock(VOLCANIC_VENT, "volcanic_vent");
 		initializeBlock(AEROPLANKTON, "aeroplankton");
 		initializeBlock(RED_AEROPLANKTON, "red_aeroplankton");
 		initializeBlock(PITCH_BLACK, "pitch_black", false, List.of(), List.of());
@@ -415,6 +419,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "rocket_controller"), ROCKET_CONTROLLER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "atmosphere_generator"), ATMOSPHERE_GENERATOR_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "leak"), LEAK_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "volcanic_vent"), VOLCANIC_VENT_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "storage_cube"), STORAGE_CUBE_BLOCK_ENTITY);
 		
 		// Setup extra block behavior.

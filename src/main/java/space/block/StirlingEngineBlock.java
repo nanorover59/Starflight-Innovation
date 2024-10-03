@@ -155,6 +155,7 @@ public class StirlingEngineBlock extends BlockWithEntity implements EnergyBlock
 		if(!state.isOf(newState.getBlock()))
 		{
 			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
 			if(blockEntity instanceof StirlingEngineBlockEntity)
 			{
 				if(world instanceof ServerWorld)

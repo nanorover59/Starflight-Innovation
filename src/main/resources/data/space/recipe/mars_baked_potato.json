@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "space:mars_potato"
+  },
+  "result": {
+    "id": "space:mars_baked_potato"
+  },
+  "experience": 0.5,
+  "cookingtime": 200
+}

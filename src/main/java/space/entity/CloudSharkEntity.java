@@ -70,7 +70,7 @@ public class CloudSharkEntity extends StratofishEntity
 	
 	public static boolean canCloudSharkSpawn(EntityType<CloudSharkEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
 	{
-        return random.nextInt(2) == 0;
+        return random.nextInt(4) == 0;
     }
 	
 	class AttackGoal extends Goal

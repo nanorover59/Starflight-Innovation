@@ -92,6 +92,7 @@ public class StarflightItems
 	public static final Item AEROGEL = new Item(new Settings());
 	public static final Item CHEESE = new Item(new Settings().food(FoodComponents.APPLE));
 	public static final Item MARS_POTATO = new AliasedBlockItem(StarflightBlocks.MARS_POTATOES, new Item.Settings().food(FoodComponents.POTATO));
+	public static final Item MARS_BAKED_POTATO = new Item(new Settings().food(FoodComponents.BAKED_POTATO));
 	public static final Item IRON_PLATE = new Item(new Settings());
 	public static final Item ALUMINUM_PLATE = new Item(new Settings());
 	public static final Item TITANIUM_PLATE = new Item(new Settings());
@@ -113,6 +114,7 @@ public class StarflightItems
 	public static final Item ENGINE_1_EXTENSION = new Item(new Settings());
 	public static final Item GUIDE_BOOK = new GuideBookItem(new Settings().maxCount(1));
 	public static final Item BATTERY_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0.0f).component(MAX_ENERGY, 2048.0f));
+	public static final Item RED_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0.0f).component(MAX_ENERGY, 8192.0f));
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new Settings().maxCount(1).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 2.0f));
 	public static final Item PART_DRAWINGS = new PartDrawingsItem(new Settings().maxCount(1).rarity(Rarity.RARE).component(PART_DRAWING_GROUPS, ""));
 	public static final Item PLANETARIUM_CARD = new PlanetariumCardItem(new Settings().maxCount(1).rarity(Rarity.EPIC).component(PLANET_NAME, "").component(PRIMARY_COLOR, -1).component(SECONDARY_COLOR, -1));
@@ -194,6 +196,7 @@ public class StarflightItems
 		registerItem(AEROGEL, "aerogel");
 		registerItem(CHEESE, "cheese");
 		registerAliasedBlockItem(MARS_POTATO, "mars_potatoes", "mars_potato");
+		registerItem(MARS_BAKED_POTATO, "mars_baked_potato");
 		registerItem(IRON_PLATE, "iron_plate");
 		registerItem(ALUMINUM_PLATE, "aluminum_plate");
 		registerItem(TITANIUM_PLATE, "titanium_plate");
@@ -215,6 +218,7 @@ public class StarflightItems
 		registerItem(ENGINE_1_EXTENSION, "engine_1_extension");
 		registerItemHidden(GUIDE_BOOK, "guide_book");
 		registerItem(BATTERY_CELL, "battery_cell");
+		registerItem(RED_CELL, "red_cell");
 		registerItem(OXYGEN_TANK_ITEM, "oxygen_tank_item");
 		registerItem(MULTIMETER, "multimeter");
 		registerItem(WRENCH, "wrench");

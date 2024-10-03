@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:titanium_plate"
+    },
+    {
+      "item": "space:redstone_crystal"
+    },
+    {
+      "item": "minecraft:diamond"
+    }
+  ],
+  "result": {
+    "id": "space:red_cell",
+    "count": 1
+  }
+}

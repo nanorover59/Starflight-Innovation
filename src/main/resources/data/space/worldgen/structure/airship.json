@@ -1,6 +1,20 @@
 {
-  "type" : "space:airship",
-  "biomes" : "space:venus_sky",
-  "step" : "surface_structures",
-  "spawn_overrides" : {}
+  "type": "minecraft:jigsaw",
+  "biomes": "space:venus_sky",
+  "step": "surface_structures",
+  "spawn_overrides": {},
+  "start_pool": "space:airship_rear",
+  "size": 1,
+  "terrain_adaptation": "none",
+  "start_height": {
+    "type": "minecraft:uniform",
+    "min_inclusive": {
+      "absolute": 64
+    },
+    "max_inclusive": {
+      "absolute": 128
+    }
+  },
+  "max_distance_from_center": 80,
+  "use_expansion_hack": true
 }

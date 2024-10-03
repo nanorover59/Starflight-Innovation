@@ -8,7 +8,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.HopperScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import space.item.StarflightItems;
+import space.item.BatteryCellItem;
 
 public class BatteryScreenHandler extends ScreenHandler
 {
@@ -91,7 +91,7 @@ public class BatteryScreenHandler extends ScreenHandler
 
 		public static boolean matches(ItemStack stack)
 		{
-			return stack.isOf(StarflightItems.BATTERY_CELL);
+			return stack.getItem() instanceof BatteryCellItem;
 		}
 
 		@Override

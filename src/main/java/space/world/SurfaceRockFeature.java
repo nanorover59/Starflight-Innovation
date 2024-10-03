@@ -26,7 +26,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 	{
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		BlockPos blockPos = structureWorldAccess.getTopPosition(Heightmap.Type.OCEAN_FLOOR_WG, context.getOrigin());
+		BlockPos blockPos = structureWorldAccess.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, context.getOrigin());
 		Mutable mutable = blockPos.down(2 + random.nextInt(16)).mutableCopy();
 		BlockState rockState = null;
 		
@@ -34,7 +34,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		{
 			BlockState blockState = structureWorldAccess.getBlockState(mutable);
 			
-			if(blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+			if(blockState.isOpaque() && blockState.isIn(BlockTags.PICKAXE_MINEABLE))
 				rockState = blockState;
 			
 			mutable.setY(mutable.getY() - 1);

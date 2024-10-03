@@ -99,13 +99,13 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	@Override
 	public int getRadiationRange()
 	{
-		return 128;
+		return 32;
 	}
 
 	@Override
 	public float getRadiationStrength()
 	{
-		return getTarget() != null ? 1.5f : 0.0f;
+		return 2.0f;
 	}
 
 	@Override
@@ -157,9 +157,9 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 		{
 			playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
 			double distance = distanceTo(getTarget());
-			double dx = (getTarget().getX() + getTarget().getVelocity().getX() * 4.0) - getX();
-			double dy = (getTarget().getBodyY(0.5) + getTarget().getVelocity().getY() * 4.0) - getBodyY(0.5);
-			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ() * 4.0) - getZ();
+			double dx = (getTarget().getX() + getTarget().getVelocity().getX()) - getX();
+			double dy = (getTarget().getBodyY(0.5) + getTarget().getVelocity().getY()) - getBodyY(0.5);
+			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ()) - getZ();
 			double ds = Math.sqrt(Math.sqrt(distance)) * 0.5;
 			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, 2.297 * ds), dy, getRandom().nextTriangular(dz, 2.297 * ds)));
 			plasmaBallEntity.setPosition(plasmaBallEntity.getX(), getPos().getY(), plasmaBallEntity.getZ());
@@ -190,7 +190,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 		else
 			return false;
 		
-		return random.nextDouble() / solarMultiplier < 0.0001;
+		return random.nextDouble() / solarMultiplier < 0.00005;
     }
 
 	class EscapeFlightGoal extends Goal

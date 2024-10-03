@@ -1,0 +1,22 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " a ",
+        "cbc"
+    ],
+    "key": {
+        "a": {
+            "item": "space:circuit"
+        },
+        "b": {
+            "item": "space:riveted_aluminum"
+        },
+        "c": {
+            "item": "minecraft:iron_nugget"
+        }
+    },
+    "result": {
+        "id": "space:airship_controller",
+        "count": 1
+    }
+}

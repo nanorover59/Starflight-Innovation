@@ -13,12 +13,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.BooleanProperty;
-import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
 import space.network.s2c.OutgasS2CPacket;
@@ -27,58 +22,12 @@ import space.util.BlockSearch;
 
 public class HabitableAirBlock extends AirBlock
 {
-	public static final BooleanProperty UNSTABLE = Properties.UNSTABLE;
 	public static final double DENSITY = 1.0; // The density of habitable air in kilograms per cubic meter.
 	
 	public HabitableAirBlock(Settings settings)
 	{
 		super(settings);
-		this.setDefaultState(this.stateManager.getDefaultState().with(UNSTABLE, false));
 	}
-	
-	@Override
-	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
-	{
-		builder.add(UNSTABLE);
-	}
-
-    @Override
-    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random)
-    {
-        if(world.isClient || !state.get(UNSTABLE).booleanValue())
-        	return;
-        
-        BiPredicate<World, BlockPos> include = (w, p) -> {
-			BlockState blockState = w.getBlockState(p);
-			return !AirUtil.airBlocking(w, p) || blockState.getBlock() == StarflightBlocks.HABITABLE_AIR;
-		};
-		
-		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
-			BlockState blockState = w.getBlockState(p);
-			return blockState.getBlock() == StarflightBlocks.ATMOSPHERE_GENERATOR;
-		};
-		
-		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-		ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
-		BlockSearch.search(world, pos, checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
-		
-		for(BlockPos blockPos : foundList)
-		{
-			BlockEntity blockEntity = world.getBlockEntity(blockPos);
-
-			if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
-			{
-				if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() == 0)
-					AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
-				else
-					world.setBlockState(pos, state.with(UNSTABLE, false), Block.NOTIFY_LISTENERS);
-
-				return;
-			}
-		}
-		
-		AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
-    }
 	
 	@Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block block, BlockPos fromPos, boolean notify)
@@ -88,10 +37,7 @@ public class HabitableAirBlock extends AirBlock
 		
 		BlockState currentNeighborState = world.getBlockState(fromPos);
 		
-		if(block == StarflightBlocks.HABITABLE_AIR || block == StarflightBlocks.LEAK)
-			return;
-		
-		if(currentNeighborState.getBlock() == block && !(block instanceof SealedDoorBlock || block instanceof SealedTrapdoorBlock || block instanceof AirwayBlock))
+		if(currentNeighborState.getBlock() == StarflightBlocks.HABITABLE_AIR || currentNeighborState.getBlock() == StarflightBlocks.LEAK)
 			return;
 
 		//long time = System.currentTimeMillis();
@@ -126,9 +72,10 @@ public class HabitableAirBlock extends AirBlock
 				if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 				{
 					if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() == 0)
-						setUnstable(world, pos, state);
-					else
-						world.setBlockState(pos, state.with(UNSTABLE, false), Block.NOTIFY_LISTENERS);
+					{
+						((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, world.random.nextLong());
+						AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
+					}
 
 					if(AirUtil.requestSupply(world, blockPos, volumeList.size() * DENSITY, StarflightBlocks.ATMOSPHERE_GENERATOR))
 						AirUtil.fillVolume(world, volumeList, updateList);
@@ -142,7 +89,8 @@ public class HabitableAirBlock extends AirBlock
 				}
 			}
 
-			setUnstable(world, pos, state);
+			((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, world.random.nextLong());
+			AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
 		}
 		else
 		{
@@ -163,7 +111,7 @@ public class HabitableAirBlock extends AirBlock
 		}
     }
 	
-	@Override
+	/*@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
 		if(world.isClient)
@@ -179,9 +127,9 @@ public class HabitableAirBlock extends AirBlock
 			BlockPos offset = pos.offset(direction);
 			checkSource(world, offset, set);
 		}
-	}
+	}*/
 	
-	public static void checkSource(World world, BlockPos pos, Set<BlockPos> set)
+	/*public static void checkSource(World world, BlockPos pos, Set<BlockPos> set)
 	{
 		BlockState state = world.getBlockState(pos);
 		
@@ -208,20 +156,7 @@ public class HabitableAirBlock extends AirBlock
 			}
 		}
 
-		if(!source)
-			setUnstable(world, pos, state);
-	}
-	
-	public static void setUnstable(World world, BlockPos pos, BlockState state)
-	{
-		if(!state.get(UNSTABLE))
-		{
-			world.setBlockState(pos, state.with(UNSTABLE, true), Block.NOTIFY_LISTENERS);
-			
-			if(!world.getBlockTickScheduler().isQueued(pos, state.getBlock()))
-				world.scheduleBlockTick(pos, state.getBlock(), 400 + world.getRandom().nextInt(200));
-			
-			//System.out.println("Unstable");
-		}
-	}
+		//if(!source)
+		//	setUnstable(world, pos, state);
+	}*/
 }

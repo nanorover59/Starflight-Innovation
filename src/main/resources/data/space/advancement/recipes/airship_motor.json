@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:airship_motor"
+    ]
+  },
+  "criteria": {
+    "has_iron_machine_casing": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:iron_machine_casing"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:airship_motor"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_iron_machine_casing",
+      "has_the_recipe"
+    ]
+  ]
+}

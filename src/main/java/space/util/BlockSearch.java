@@ -23,8 +23,8 @@ import space.block.entity.EnergyBlockEntity;
 
 public class BlockSearch
 {
-	public static final int MAX_VOLUME = 262144;
-	public static final int MAX_DISTANCE = 128;
+	public static final int MAX_VOLUME = 2097152;
+	public static final int MAX_DISTANCE = 256;
 	private static final Direction[] DIRECTIONS = Direction.values();
 	
 	/**
@@ -197,7 +197,7 @@ public class BlockSearch
 		Set<BlockPos> foundSet = new HashSet<BlockPos>();
 		stack.push(pos);
 		
-		while(stack.size() > 0 && set.size() < AirUtil.MAX_VOLUME)
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
 		{
 			BlockPos blockPos = stack.pop();
 			
@@ -223,7 +223,7 @@ public class BlockSearch
 				foundSet.add(blockPos);
 		}
 		
-		if(set.size() < AirUtil.MAX_VOLUME)
+		if(set.size() < MAX_VOLUME)
 		{
 			for(BlockPos blockPos : foundSet)
 			{

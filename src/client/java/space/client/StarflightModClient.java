@@ -222,7 +222,7 @@ public class StarflightModClient implements ClientModInitializer
 			}
 			
 			// Radiation Shader Effect
-			if(client.world != null && client.player != null)
+			if(client.world != null && client.player != null && !client.player.isCreative() && !client.player.isSpectator())
 			{
 				float maxRadiation = 0.0f;
 				

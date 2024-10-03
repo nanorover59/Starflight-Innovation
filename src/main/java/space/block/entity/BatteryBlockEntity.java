@@ -172,6 +172,35 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 		world.updateComparators(pos, world.getBlockState(pos).getBlock());
 		return amount;
 	}
+	
+	public void setEnergy(double amount)
+	{
+		int batteryCount = 0;
+		
+		for(ItemStack stack : this.inventory)
+		{
+			if(!stack.isEmpty() && stack.contains(StarflightItems.ENERGY) && stack.contains(StarflightItems.MAX_ENERGY))
+				batteryCount++;
+		}
+		
+		if(batteryCount == 0)
+			return;
+		
+		float fraction = (float) (amount / batteryCount);
+		
+		for(ItemStack stack : this.inventory)
+		{
+			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+				continue;
+			
+			float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
+			
+			if(fraction > maxCharge)
+				stack.set(StarflightItems.ENERGY, maxCharge);
+			else
+				stack.set(StarflightItems.ENERGY, fraction);
+		}
+	}
 
 	@Override
 	public ArrayList<BlockPos> getOutputs()

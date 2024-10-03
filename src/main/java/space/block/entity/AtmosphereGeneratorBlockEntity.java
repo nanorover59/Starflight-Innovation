@@ -15,7 +15,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.AtmosphereGeneratorBlock;
 import space.block.EnergyBlock;
-import space.block.HabitableAirBlock;
 import space.block.StarflightBlocks;
 
 public class AtmosphereGeneratorBlockEntity extends BlockEntity implements EnergyBlockEntity
@@ -97,9 +96,8 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Energ
 		
 		if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 		{
-			if(blockEntity.energy == 0 && !frontState.get(HabitableAirBlock.UNSTABLE))
+			if(blockEntity.energy == 0 && frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)
 			{
-				HabitableAirBlock.setUnstable(world, frontPos, frontState);
 				MutableText text = Text.translatable("block.space.atmosphere_generator.error_power");
 				
 				for(PlayerEntity player : world.getPlayers())

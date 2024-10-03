@@ -75,11 +75,6 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 		return SoundEvents.BLOCK_STONE_STEP;
 	}
 	
-	public float getSoundVolume()
-	{
-		return 0.5f;
-	}
-	
 	@Override
 	public boolean isPressureSafe(double pressure)
 	{
@@ -107,7 +102,7 @@ public class AncientHumanoidEntity extends ZombieEntity implements AlienMobEntit
 	@Override
 	public float getRadiationStrength()
 	{
-		return getTarget() != null ? 0.5f : 0.0f;
+		return 0.5f;
 	}
 	
 	@Override

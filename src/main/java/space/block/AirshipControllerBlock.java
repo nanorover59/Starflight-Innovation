@@ -27,7 +27,9 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.entity.BalloonControllerBlockEntity;
+import space.block.entity.BatteryBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
+import space.block.entity.SolarPanelBlockEntity;
 import space.entity.AirshipEntity;
 import space.entity.MovingCraftEntity;
 import space.planet.PlanetDimensionData;
@@ -92,6 +94,9 @@ public class AirshipControllerBlock extends Block
         double mass = 0.0;
         double volume = 0.0;
         double balloonVolume = 0.0;
+        double energySupply = 0.0;
+        double energyCapacity = 0.0;
+        double solarProduction = 0.0;
         
         for(BlockPos pos : positionList)
         {
@@ -116,6 +121,17 @@ public class AirshipControllerBlock extends Block
 						centerPos = fluidTank.getCenterOfMass().toCenterPos();
 						centerOfMass = centerOfMass.add(centerPos.getX() * fluidTankMass, centerPos.getY() * fluidTankMass, centerPos.getZ() * fluidTankMass);
 					}
+				}
+				else if(blockEntity instanceof BatteryBlockEntity)
+				{
+					BatteryBlockEntity battery = (BatteryBlockEntity) blockEntity;
+					energySupply += battery.getEnergyStored();
+					energyCapacity += battery.getEnergyCapacity();
+				}
+				else if(blockEntity instanceof SolarPanelBlockEntity)
+				{
+					SolarPanelBlockEntity solarPanel = (SolarPanelBlockEntity) blockEntity;
+					solarProduction += ((EnergyBlock) solarPanel.getCachedState().getBlock()).getOutput();
 				}
         	}
         }
@@ -198,7 +214,7 @@ public class AirshipControllerBlock extends Block
         
         BlockPos centerPos = BlockPos.ofFloored(centerOfMass);
         ArrayList<MovingCraftEntity.BlockData> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(centerOfMass.getX()), MathHelper.floor(centerOfMass.getY()), MathHelper.floor(centerOfMass.getZ())), positionList);
-        AirshipEntity entity = new AirshipEntity(world, centerPos, blockDataList, world.getBlockState(position).get(FACING), mass, volume, momentOfInertia1.toVector3f(), momentOfInertia2.toVector3f());
+        AirshipEntity entity = new AirshipEntity(world, centerPos, blockDataList, world.getBlockState(position).get(FACING), mass, volume, momentOfInertia1.toVector3f(), momentOfInertia2.toVector3f(), energySupply, energyCapacity, solarProduction);
         MovingCraftEntity.removeBlocksFromWorld(world, centerPos, blockDataList);
         world.spawnEntity(entity);
 		return ActionResult.SUCCESS;

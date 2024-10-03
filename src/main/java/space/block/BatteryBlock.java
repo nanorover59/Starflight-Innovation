@@ -17,11 +17,13 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
@@ -31,6 +33,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -104,6 +107,16 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	{
 		if(!state.isOf(newState.getBlock()))
 		{
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+			
+			if(blockEntity instanceof BatteryBlockEntity)
+			{
+				if(world instanceof ServerWorld)
+					ItemScatterer.spawn(world, (BlockPos) pos, (Inventory) ((BatteryBlockEntity) blockEntity));
+
+				world.updateComparators(pos, this);
+			}
+			
 			if(!world.isClient)
 				BlockSearch.energyConnectionSearch(world, pos);
 			

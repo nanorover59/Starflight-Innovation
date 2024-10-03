@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:mars_baked_potato"
+    ]
+  },
+  "criteria": {
+    "has_mars_potato": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:mars_potato"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:mars_baked_potato"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_mars_potato",
+      "has_the_recipe"
+    ]
+  ]
+}

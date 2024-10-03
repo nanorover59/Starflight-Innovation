@@ -1,19 +1,22 @@
 {
     "type": "minecraft:crafting_shaped",
     "pattern": [
-        " c ",
+        "dcd",
         "bab",
-        " c "
+        "dcd"
     ],
     "key": {
         "a": {
             "item": "space:titanium_machine_casing"
         },
         "b": {
-            "item": "space:lunar_lamp"
+            "item": "space:coil"
         },
         "c": {
             "item": "space:cooled_copper"
+        },
+        "d": {
+            "item": "space:lunalight"
         }
     },
     "result": {

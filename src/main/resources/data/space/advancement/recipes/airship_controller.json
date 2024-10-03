@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:airship_controller"
+    ]
+  },
+  "criteria": {
+    "has_circuit": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:circuit"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:airship_controller"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_circuit",
+      "has_the_recipe"
+    ]
+  ]
+}

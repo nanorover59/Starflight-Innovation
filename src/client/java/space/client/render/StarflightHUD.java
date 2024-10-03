@@ -99,6 +99,7 @@ public class StarflightHUD
         int scaledHeight = client.getWindow().getScaledHeight();
 		AirshipEntity airshipEntity = (AirshipEntity) client.player.getVehicle();
         int hudColor = 0xC800FF00;
+        int energyColor = 0xFAF0CC28;
         float hudScale = 0.5f;
         
         if(airshipEntity.clientQuaternion == null || airshipEntity.clientQuaternionPrevious == null)
@@ -110,6 +111,7 @@ public class StarflightHUD
 		context.getMatrices().push();
 		context.getMatrices().scale(hudScale, hudScale, hudScale);
 		drawReadouts(context, textRenderer, airshipEntity, tickDelta, 50, 320, hudColor);
+		drawEnergyLevel(context, textRenderer, airshipEntity, tickDelta, scaledWidth - 70, scaledHeight - 200, energyColor);
 		drawNavBall(context, tickDelta, airshipEntity.getForwardDirection(), false, quaternion, new Vector3f(airshipEntity.getTrackedVelocity()), 80, 395);
 		context.getMatrices().pop();
 	}
@@ -188,6 +190,19 @@ public class StarflightHUD
 		context.drawCenteredTextWithShadow(textRenderer, df.format(hydrogenLevel * 100.0f) + "%", x + (barWidth / 2) , y + barHeight + 20, hydrogenColor);
 		context.drawCenteredTextWithShadow(textRenderer, "O2", x + (int) (barWidth * 2.5), y + barHeight + 4, oxygenColor);
 		context.drawCenteredTextWithShadow(textRenderer, df.format(oxygenLevel * 100.0f) + "%", x + (int) (barWidth * 2.5), y + barHeight + 20, oxygenColor);
+	}
+	
+	public static void drawEnergyLevel(DrawContext context, TextRenderer textRenderer, AirshipEntity rocketEntity, float tickDelta, int x, int y, int energyColor)
+	{
+		int barWidth = 16;
+		int barHeight = 160;
+		float energyLevel = rocketEntity.getEnergyLevel();
+        int energyOffset = (int) Math.round(barHeight * (1.0 - energyLevel));
+        DecimalFormat df = new DecimalFormat("#");
+        context.fill(x, y, x + barWidth, y + barHeight, 0x80000017);
+		context.fill(x, y + energyOffset, x + barWidth, y + barHeight, energyColor);
+		context.drawCenteredTextWithShadow(textRenderer, "EC", x + (barWidth / 2), y + barHeight + 4, energyColor);
+		context.drawCenteredTextWithShadow(textRenderer, df.format(energyLevel * 100.0f) + "%", x + (barWidth / 2) , y + barHeight + 20, energyColor);
 	}
 	
 	public static void drawNavBall(DrawContext context, float tickDelta, Direction direction, boolean facingUp, Quaternionf rotation, Vector3f velocity, int x, int y)

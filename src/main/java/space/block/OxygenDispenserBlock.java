@@ -28,6 +28,7 @@ import space.item.OxygenTankItem;
 import space.item.StarflightItems;
 import space.network.s2c.FizzS2CPacket;
 import space.util.AirUtil;
+import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
 public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
@@ -91,7 +92,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 				return ActionResult.PASS;
 
 			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			double availableOxygen = AirUtil.searchSupply(world, pos, checkList, AirUtil.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
+			double availableOxygen = AirUtil.searchSupply(world, pos, checkList, BlockSearch.MAX_VOLUME, StarflightBlocks.OXYGEN_DISPENSER);
 			
 			// Do effects and transfer oxygen.
 			if(availableOxygen >= requiredOxygen)

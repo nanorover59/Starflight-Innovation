@@ -15,6 +15,7 @@ import space.network.s2c.PlanetDynamicDataS2CPacket;
 import space.network.s2c.PlanetStaticDataS2CPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
 import space.network.s2c.UnlockPlanetS2CPacket;
+import space.network.s2c.VolcanicVentS2CPacket;
 
 public class StarflightNetworkingC2S
 {
@@ -28,6 +29,7 @@ public class StarflightNetworkingC2S
 		PayloadTypeRegistry.playS2C().register(RocketControllerDataS2CPacket.PACKET_ID, RocketControllerDataS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(FizzS2CPacket.PACKET_ID, FizzS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(OutgasS2CPacket.PACKET_ID, OutgasS2CPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(VolcanicVentS2CPacket.PACKET_ID, VolcanicVentS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(JetS2CPacket.PACKET_ID, JetS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(UnlockPlanetS2CPacket.PACKET_ID, UnlockPlanetS2CPacket.PACKET_CODEC);
 		

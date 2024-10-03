@@ -106,10 +106,10 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 		this.energy = nbt.getDouble("energy");
 	}
 	
-	public static void serverTick(World world, BlockPos pos, BlockState state, SolarPanelBlockEntity blockEntity)
+	public static double getSolarMultiplier(World world, BlockPos pos)
 	{
-		if(!world.getDimension().hasSkyLight() || !(blockEntity instanceof SolarPanelBlockEntity))
-			return;
+		if(!world.getDimension().hasSkyLight())
+			return 0.0;
 		
 		double solarMultiplier = 1.0;
 		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
@@ -134,10 +134,17 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 		else if(f > lowLimit2)
 			angleMultiplier = Math.pow(1.0 - ((f - highLimit2) / (lowLimit2 - highLimit2)), 1.0 / 3.0);
 		else
+			return 0.0;
+		
+		return solarMultiplier * angleMultiplier;
+	}
+	
+	public static void serverTick(World world, BlockPos pos, BlockState state, SolarPanelBlockEntity blockEntity)
+	{
+		if(!world.getDimension().hasSkyLight() || !(blockEntity instanceof SolarPanelBlockEntity))
 			return;
 		
-		// The final energy output per tick.9
-		double output = blockEntity.getOutput() * solarMultiplier * angleMultiplier;
+		double output = blockEntity.getOutput() * getSolarMultiplier(world, pos);
 		blockEntity.changeEnergy(output);
 		EnergyBlockEntity.transferEnergy(blockEntity, output);
 	}

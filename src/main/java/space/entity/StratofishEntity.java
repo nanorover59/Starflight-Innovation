@@ -86,6 +86,12 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
     }
 	
 	@Override
+	public boolean canImmediatelyDespawn(double distance)
+	{
+		return false;
+	}
+	
+	@Override
 	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
 	{
 		return true;
@@ -93,7 +99,7 @@ public class StratofishEntity extends FlyingEntity implements AlienMobEntity
 	
 	public static boolean canStratofishSpawn(EntityType<StratofishEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
 	{
-        return random.nextInt(2) == 0;
+        return random.nextInt(4) == 0;
     }
 	
 	@Override

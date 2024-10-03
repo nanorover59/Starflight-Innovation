@@ -41,12 +41,12 @@ public class VolcanoGenerator
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		ChunkRandom random = context.random();
 		NoiseConfig noiseConfig = context.noiseConfig();
-		double spawnChance = 0.1;
+		double spawnChance = 0.05;
 		int baseRadius = random.nextBetween(32, 128);
 		double heightFactor = baseRadius * (1.0 + random.nextDouble() * 1.5);
 		double calderaFraction = 0.15 + random.nextDouble() * 0.1;
 		double noiseFraction = 0.1 + random.nextDouble() * 0.2;
-		double activity = random.nextDouble();
+		double activity = Math.clamp(random.nextDouble() * 2.0, 0.0, 1.0);
 		double oreFactor = MathHelper.lerp(random.nextDouble(), 0.1, 0.25);
 		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(), noiseConfig);
 		RegistryEntry<Biome> biome = context.biomeSource().getBiome(pos.getX(), surfaceY, pos.getZ(), noiseConfig.getMultiNoiseSampler());
@@ -111,17 +111,17 @@ public class VolcanoGenerator
 		registerVolcanoSettings("space:mercury_hotspot", new Settings(0.01, 0.25, 1.5));
 		registerVolcanoSettings("space:mercury_ice", new Settings(0.01, 0.25, 1.5));
 		
-		registerVolcanoSettings("space:venus_lowlands", new Settings(0.25, 1.5, 1.0));
-		registerVolcanoSettings("space:venus_midlands", new Settings(0.25, 1.5, 1.0));
-		registerVolcanoSettings("space:venus_volcanic_plains", new Settings(1.0, 2.0, 1.0));
+		registerVolcanoSettings("space:venus_lowlands", new Settings(0.25, 3.0, 1.0));
+		registerVolcanoSettings("space:venus_midlands", new Settings(0.25, 3.0, 1.0));
+		registerVolcanoSettings("space:venus_volcanic_plains", new Settings(1.0, 5.0, 1.0));
 		
 		registerVolcanoSettings("space:moon_lowlands", new Settings(0.01, 0.1, 1.0));
 		registerVolcanoSettings("space:moon_midlands", new Settings(0.01, 0.1, 1.0));
 		registerVolcanoSettings("space:moon_ice", new Settings(0.01, 0.1, 1.0));
 		
-		registerVolcanoSettings("space:mars_lowlands", new Settings(0.1, 0.25, 1.0));
-		registerVolcanoSettings("space:mars_midlands", new Settings(0.1, 0.25, 1.0));
-		registerVolcanoSettings("space:mars_ice", new Settings(0.1, 0.25, 1.0));
+		registerVolcanoSettings("space:mars_lowlands", new Settings(0.05, 0.5, 1.0));
+		registerVolcanoSettings("space:mars_midlands", new Settings(0.05, 0.5, 1.0));
+		registerVolcanoSettings("space:mars_ice", new Settings(0.05, 0.5, 1.0));
 	}
 	
 	public static void registerVolcanoSettings(String biomeName, Settings settings)
@@ -205,7 +205,7 @@ public class VolcanoGenerator
 		@Override
 		public void generate(StructureWorldAccess world, StructureAccessor structureAccessor, ChunkGenerator chunkGenerator, Random random, BlockBox chunkBox, ChunkPos chunkPos, BlockPos pivot)
 		{
-			PerlinNoise noise = new PerlinNoise(combineSeeds(centerX, centerY, centerZ));
+			PerlinNoise noise = new PerlinNoise(centerX, centerY, centerZ);
 			BlockPos.Mutable mutable = new BlockPos.Mutable();
 			int lavaY = centerY + getVolcanoHeight(0.0, 0.0, 0.0, noise);
 			
@@ -326,25 +326,6 @@ public class VolcanoGenerator
 			}
 				
 			return worldStone;
-		}
-		
-		private long combineSeeds(long ... seeds)
-		{
-			long mix = 0;
-			
-			for(int i = 0; i < seeds.length; i++)
-			{
-				long seed = seeds[i];
-				seed ^= (seed << 21);
-				seed ^= (seed >>> 35);
-				seed ^= (seed << 4);
-				mix += seed;
-			}
-			
-			mix ^= (mix << 21);
-			mix ^= (mix >>> 35);
-			mix ^= (mix << 4);
-			return mix;
 		}
 	}
 }

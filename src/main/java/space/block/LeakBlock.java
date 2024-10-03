@@ -49,43 +49,6 @@ public class LeakBlock extends BlockWithEntity
 	}
 
 	@Override
-	public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random)
-	{
-		double vx = 0.0;
-		double vy = 0.0;
-		double vz = 0.0;
-		
-		if(world.getBlockState(pos.east()).getBlock() == Blocks.AIR)
-			vx += 1.0;
-		
-		if(world.getBlockState(pos.west()).getBlock() == Blocks.AIR)
-			vx -= 1.0;
-		
-		if(world.getBlockState(pos.up()).getBlock() == Blocks.AIR)
-			vy += 1.0;
-		
-		if(world.getBlockState(pos.down()).getBlock() == Blocks.AIR)
-			vy -= 1.0;
-		
-		if(world.getBlockState(pos.south()).getBlock() == Blocks.AIR)
-			vz += 1.0;
-		
-		if(world.getBlockState(pos.north()).getBlock() == Blocks.AIR)
-			vz -= 1.0;
-		
-		double vf = 1.0 - random.nextDouble() * 0.25;
-		int count = 2 + random.nextInt(3);
-        	
-        for(int i = 0; i < count; i++)
-        {
-			double xOffset = 0.5 + random.nextDouble() - random.nextDouble();
-			double yOffset = 0.5 + random.nextDouble() - random.nextDouble();
-			double zOffset = 0.5 + random.nextDouble() - random.nextDouble();
-			world.addParticle(StarflightParticleTypes.AIR_FILL, pos.getX() + xOffset, pos.getY() + yOffset, pos.getZ() + zOffset, vx * vf, vy * vf, vz * vf);
-		}
-	}
-
-	@Override
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new LeakBlockEntity(pos, state);

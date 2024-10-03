@@ -1,8 +1,6 @@
 package space.block;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.function.BiPredicate;
 
 import net.minecraft.block.BlockSetType;
@@ -40,15 +38,12 @@ public class SealedDoorBlock extends DoorBlock
 
 		ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
 		ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
-		Set<BlockPos> set = new HashSet<BlockPos>();
 		BlockSearch.search(world, pos, checkList, foundList, include, edgeCase, BlockSearch.MAX_VOLUME, true);
 		
 		for(BlockPos blockPos : foundList)
 		{
 			if(newState.get(OPEN))
 				world.updateNeighbor(blockPos, StarflightBlocks.AIRLOCK_DOOR, pos);
-			else
-				HabitableAirBlock.checkSource(world, blockPos, set);
 		}
 	}
 }

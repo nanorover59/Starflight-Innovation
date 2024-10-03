@@ -30,8 +30,6 @@ import space.planet.PlanetDimensionData;
 
 public class AirUtil
 {
-	public static final int MAX_VOLUME = 262144;
-	
 	/**
 	 * Get the air resistance multiplier for the atmospheric conditions at the given location.
 	 */
@@ -86,7 +84,7 @@ public class AirUtil
 		};
 		
 		BiPredicate<World, BlockPos> passThrough = (w, p) -> {
-			return w.getBlockState(p).getBlock() != Blocks.AIR;
+			return w.getBlockState(p).getBlock() != Blocks.AIR && !airBlocking(w, p);
 		};
 		
 		BiPredicate<World, BlockPos> edgeCase = (w, p) -> {
@@ -106,7 +104,7 @@ public class AirUtil
 			BlockState blockState = world.getBlockState(pos);
 			
 			if(blockState.getBlock() == Blocks.AIR)
-				world.setBlockState(pos, StarflightBlocks.HABITABLE_AIR.getDefaultState(), Block.NOTIFY_LISTENERS);		
+				world.setBlockState(pos, StarflightBlocks.HABITABLE_AIR.getDefaultState(), Block.FORCE_STATE);		
 		}
 		
 		for(BlockPos pos : updateList)
@@ -142,10 +140,9 @@ public class AirUtil
 		for(BlockPos pos : checkList)
 		{
 			BlockState blockState = world.getBlockState(pos);
-			FluidState fluidState = world.getFluidState(pos);
 			
 			if(blockState.getBlock() == StarflightBlocks.HABITABLE_AIR || blockState.getBlock() == StarflightBlocks.LEAK)
-				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.FORCE_STATE);
 			else if(blockState.isIn(StarflightBlocks.INSTANT_REMOVE_TAG))
 			{
 				if(blockState.isIn(BlockTags.SAPLINGS) && world.getRandom().nextBoolean())
@@ -154,7 +151,7 @@ public class AirUtil
 					continue;
 				}
 				
-				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS);
+				world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
 				Block.dropStacks(blockState, world, pos, world.getBlockEntity(pos));
 			}
 		}

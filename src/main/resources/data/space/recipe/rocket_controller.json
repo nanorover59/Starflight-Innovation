@@ -13,10 +13,10 @@
             "item": "space:riveted_aluminum"
         },
         "c": {
-            "item": "minecraft:iron_nugget"
+            "item": "minecraft:iron_ingot"
         },
         "d": {
-            "item": "minecraft:glass_pane"
+            "item": "minecraft:glass"
         }
     },
     "result": {
