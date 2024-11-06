@@ -1,9 +1,9 @@
 {
   "type": "space:crater",
   "config": {
-    "probability": 0.5,
+    "probability": 0.15,
     "y": {
-      "absolute": 0
+      "above_bottom": 128
     },
     "yScale": 1.0,
     "lava_level": {
@@ -40,6 +40,7 @@
         "max_exclusive": 0.125,
         "min_inclusive": -0.125
       }
-    }
+    },
+    "ice": false
   }
 }

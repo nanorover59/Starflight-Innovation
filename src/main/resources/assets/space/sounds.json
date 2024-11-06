@@ -19,13 +19,16 @@
       "space:storage_cube"
     ]
   },
-  "thruster": {
-    "subtitle": "subtitles.space.thruster",
+  "rocket_engine": {
+    "subtitle": "subtitles.space.rocket_engine",
     "sounds": [
-      "space:thruster0",
-      "space:thruster1",
-      "space:thruster2",
-      "space:thruster3"
+      "space:rocket_engine"
+    ]
+  },
+  "airship_motor": {
+    "subtitle": "subtitles.space.airship_motor",
+    "sounds": [
+      "space:airship_motor"
     ]
   },
   "leak": {

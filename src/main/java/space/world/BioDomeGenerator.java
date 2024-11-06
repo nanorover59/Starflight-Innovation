@@ -33,7 +33,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.random.ChunkRandom;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
-import net.minecraft.world.Heightmap.Type;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.StructureAccessor;
@@ -64,7 +63,7 @@ public class BioDomeGenerator
 		ChunkRandom random = context.random();
 		int radius = 64;
 		//pos = pos.add(8, 0, 8);
-		int surfaceY = context.chunkGenerator().getHeightOnGround(pos.getX(), pos.getZ(), Type.WORLD_SURFACE_WG, context.world(), context.noiseConfig());
+		int surfaceY = context.chunkGenerator().getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(), context.noiseConfig());
 		
 		for(int i = 0; i < 8; i++)
 		{
@@ -262,19 +261,13 @@ public class BioDomeGenerator
 							// Spawn grid structures.
 							if((int) distance < SHELL_RADIUS - 4 && !(dx == 0 && dz == 0) && dx % 16 == 0 && dz % 16 == 0)
 							{
-								int cellX = dx / 16;
-								int cellZ = dz / 16;
-								double cellDistance = Math.hypot(cellX, cellZ);
-								
 								if(y == 0)
 								{
-									if(Direction.fromVector(cellX, 0, cellZ) == getFacing() && cellDistance == 2)
-										details.put(pos, 2);
-									else if(!details.containsKey(pos))
+									if(!details.containsKey(pos))
 										details.put(pos, 3);
 								}
 								else if(y < 0 && y % LEVEL_HEIGHT == 0 && !details.containsKey(pos))
-									details.put(pos, 4);
+									details.put(pos, 2);
 							}
 						}
 						else if(y > 0 && distance - SHELL_RADIUS - 8 < y)
@@ -366,17 +359,31 @@ public class BioDomeGenerator
 				}
 				else if(type == 2)
 				{
-					// Oxygen Source
-					/*Direction direction = Direction.fromVector(pos.getX() - center.getX(), 0, pos.getZ() - center.getZ());
-					BlockRotation rotation = getRotationFromDirection(direction);
-					BlockPos placementPos = pos.subtract(new BlockPos(5, 18, 4).rotate(rotation));
-					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(OXYGEN_SOURCE_UPPER).get();
-					StructurePlacementData placementData = new StructurePlacementData().setRotation(rotation);
-					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);
-					placementPos = pos.subtract(new BlockPos(5, 30, 4).rotate(rotation));
-					template = world.toServerWorld().getStructureTemplateManager().getTemplate(OXYGEN_SOURCE_LOWER).get();
-					template.place(world, placementPos, placementPos, placementData, random, Block.NOTIFY_LISTENERS);*/
+					// Underground Rooms
+					BlockState brickState = getBrickType(serverWorld);
+					int y = pos.getY();
+					fillWithOutline(world, chunkBox, -4, y + 1, -4, 4, y + 5, -4, brickState, AIR, false);
+					fillWithOutline(world, chunkBox, -4, y + 1, 4, 4, y + 5, 4, brickState, AIR, false);
+					fillWithOutline(world, chunkBox, -4, y + 1, -4, -4, y + 5, 4, brickState, AIR, false);
+					fillWithOutline(world, chunkBox, 4, y + 1, -4, 4, y + 5, 4, brickState, AIR, false);
+					int doorCount = random.nextInt(2);
 					
+					for(int i = 0; i < doorCount; i++)
+					{
+						int d = random.nextInt(4);
+						
+						switch(d)
+						{
+						case 0:
+							fill(world, chunkBox, -1, y + 1, -4, 1, y + 3, -4);
+						case 1:
+							fill(world, chunkBox, -1, y + 1, 4, 1, y + 3, 4);
+						case 2:
+							fill(world, chunkBox, -4, y + 1, -1, -4, y + 3, 1);
+						case 3:
+							fill(world, chunkBox, 4, y + 1, -1, 4, y + 3, 1);
+						}
+					}
 				}
 				else if(type == 3)
 				{
@@ -411,15 +418,6 @@ public class BioDomeGenerator
 							fillWithOutline(world, chunkBox, x, y + 1, z, x, y + 4 + random.nextInt(4), z, Blocks.STRIPPED_OAK_LOG.getDefaultState(), AIR, false);
 						}
 					}
-				}
-				else if(type == 4)
-				{
-					// Underground Rooms
-					int y = pos.getY();
-					fillWithOutline(world, chunkBox, -4, y + 1, -4, 4, y + 5, -4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -4, y + 1, 4, 4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, -4, y + 1, -4, -4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
-					fillWithOutline(world, chunkBox, 4, y + 1, -4, 4, y + 5, 4, StarflightBlocks.RIVETED_ALUMINUM.getDefaultState(), AIR, false);
 				}
 			}
 			

@@ -1,0 +1,14 @@
+{
+  "structures" : [
+    {
+      "structure" : "space:airship_wreck",
+      "weight" : 1
+    }
+  ],
+  "placement" : {
+    "salt" : 57348922,
+    "spacing" : 32,
+    "separation" : 16,
+    "type" : "minecraft:random_spread"
+  }
+}

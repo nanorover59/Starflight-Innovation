@@ -41,7 +41,7 @@ import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
-@Mixin(WorldRenderer.class)
+@Mixin(value = WorldRenderer.class, priority = 1600)	
 public abstract class WorldRendererMixin
 {
 	@Shadow @Final private MinecraftClient client;

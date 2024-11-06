@@ -6,7 +6,7 @@
       "weight": 1,
       "element": {
         "location": "space:airship_front",
-        "processors": "minecraft:empty",
+        "processors": "space:base",
 		"projection": "rigid",
         "element_type": "minecraft:single_pool_element"
       }

@@ -16,14 +16,13 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
+import space.block.VolcanicVentBlock;
 import space.network.s2c.VolcanicVentS2CPacket;
-import space.util.StarflightSoundEvents;
 
 public class VolcanicVentBlockEntity extends BlockEntity
 {
 	private boolean active = false;
 	private int timer;
-	private int particleTimer = 0;
 	private int soundTimer = 0;
 
 	public VolcanicVentBlockEntity(BlockPos blockPos, BlockState blockState)
@@ -33,9 +32,10 @@ public class VolcanicVentBlockEntity extends BlockEntity
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, VolcanicVentBlockEntity blockEntity)
 	{
-		if(blockEntity.active)
+		Direction direction = blockEntity.getCachedState().get(VolcanicVentBlock.FACING);
+		
+		if(blockEntity.active && !world.getBlockState(pos.offset(direction)).blocksMovement())
 		{
-			Direction direction = Direction.UP;
 			Vec3d vector = new Vec3d(direction.getVector().getX(), direction.getVector().getY(), direction.getVector().getZ()).multiply(0.1);
 			Box box = Box.enclosing(pos, pos.offset(direction, 8)).expand(1);
 			List<Entity> entities = world.getEntitiesByClass(Entity.class, box, entity -> true);
@@ -46,19 +46,13 @@ public class VolcanicVentBlockEntity extends BlockEntity
 				entity.velocityModified = true;
 				entity.setOnFireFor(4);
 			}
-				
-			//if(blockEntity.particleTimer == 0)
-			//{
-				VolcanicVentS2CPacket.sendVolcanicVent(world, pos.offset(direction), pos.offset(direction, 2));
-				blockEntity.particleTimer = 5;
-			//}
-			//else
-				blockEntity.particleTimer--;
+			
+			VolcanicVentS2CPacket.sendVolcanicVent(world, pos.offset(direction), pos.offset(direction, 2));
 			
 			// Play the sound effect.
 			if(blockEntity.soundTimer == 0)
 			{
-				((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.BLOCKS, 2.0f, 0.1f, world.random.nextLong());
+				((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.ENTITY_BLAZE_SHOOT, SoundCategory.BLOCKS, 2.0f, 1.0f, world.random.nextLong());
 				blockEntity.soundTimer = 15;
 			}
 			else
@@ -71,7 +65,7 @@ public class VolcanicVentBlockEntity extends BlockEntity
 		else
 		{
 			blockEntity.active = !blockEntity.active;
-			blockEntity.timer = 60;
+			blockEntity.timer = 60 + world.getRandom().nextInt(120);
 		}
 	}
 	

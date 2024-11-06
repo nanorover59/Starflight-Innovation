@@ -1,0 +1,15 @@
+{
+  "name": "space:launch_pad",
+  "fallback": "minecraft:empty",
+  "elements": [
+	{	
+      "weight": 1,
+      "element": {
+        "location": "space:launch_pad",
+        "processors": "space:base",
+		"projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

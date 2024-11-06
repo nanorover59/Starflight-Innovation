@@ -241,7 +241,7 @@ public class StarflightNetworkingS2C
 			ClientWorld clientWorld = client.world;
 			Random random = Random.createLocal();
 			Vec3i unitVector = pos2.subtract(pos1);
-			int particleCount = 4 + random.nextInt(4);
+			int particleCount = 4 + random.nextInt(2);
 			
 			if(clientWorld == null)
 				return;
@@ -249,7 +249,7 @@ public class StarflightNetworkingS2C
 			for(int i = 0; i < particleCount; i++)
 			{
 				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(1.0 + random.nextDouble() * 0.5);
+				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(2.0 + random.nextDouble());
 				velocity.add(random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble()).multiply(0.25 + random.nextDouble() * 0.25);
 				clientWorld.addParticle(ParticleTypes.LAVA, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 			}
@@ -257,7 +257,7 @@ public class StarflightNetworkingS2C
 			for(int i = 0; i < particleCount; i++)
 			{
 				Vec3d offset = new Vec3d(random.nextDouble(), random.nextDouble(), random.nextDouble());
-				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(1.0 + random.nextDouble() * 0.5);
+				Vec3d velocity = new Vec3d(unitVector.getX(), unitVector.getY(), unitVector.getZ()).normalize().multiply(0.5 + random.nextDouble() * 0.5);
 				velocity.add(random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble(), random.nextDouble() - random.nextDouble()).multiply(0.25 + random.nextDouble() * 0.25);
 				clientWorld.addParticle(ParticleTypes.FLAME, pos1.getX() + offset.getX(), pos1.getY() + offset.getY(), pos1.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 			}

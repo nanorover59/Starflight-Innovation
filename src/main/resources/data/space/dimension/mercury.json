@@ -9,33 +9,33 @@
         "biome" : "space:mercury_plains",
         "parameters" : {
           "temperature" : [ -0.75, 0.75 ],
-          "humidity" : [ 0, 0 ],
-          "continentalness" : [ -1, -0.25 ],
-          "erosion" : [ 0, 1 ],
-          "weirdness" : [ 0, 1 ],
-          "depth" : 0,
+          "humidity" : [ -1, 1 ],
+          "continentalness" : [ -1, 1 ],
+          "erosion" : [ -1, 1 ],
+          "weirdness" : [ -1, 1 ],
+          "depth" : [ -1, 1 ],
           "offset" : 0
         }
       }, {
         "biome" : "space:mercury_hotspot",
         "parameters" : {
           "temperature" : [ 0.75, 1 ],
-          "humidity" : [ 0, 0 ],
-          "continentalness" : [ -0.25, 0.75 ],
-          "erosion" : [ 0, 1 ],
-          "weirdness" : [ 0, 1 ],
-          "depth" : 0,
+          "humidity" : [ -1, 1 ],
+          "continentalness" : [ -1, 1 ],
+          "erosion" : [ -1, 1 ],
+          "weirdness" : [ -1, 1 ],
+          "depth" : [ -1, 1 ],
           "offset" : 0
         }
       }, {
         "biome" : "space:mercury_ice",
         "parameters" : {
-          "temperature" : [ -1, -0.75 ],
-          "humidity" : [ 0, 0 ],
-          "continentalness" : [ -0.25, 0.75 ],
-          "erosion" : [ 0, 1 ],
-          "weirdness" : [ 0, 1 ],
-          "depth" : 0,
+          "temperature" : [ -1, -0.5 ],
+          "humidity" : [ -1, 1 ],
+          "continentalness" : [ -1, 1 ],
+          "erosion" : [ -1, 1 ],
+          "weirdness" : [ -1, 1 ],
+          "depth" : [ 0, 1 ],
           "offset" : 0
         }
       } ]

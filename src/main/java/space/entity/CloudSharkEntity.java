@@ -31,7 +31,7 @@ public class CloudSharkEntity extends StratofishEntity
 	{
 		this.goalSelector.add(2, new AttackGoal());
         this.goalSelector.add(3, new CircleMovementGoal());
-        this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true, (entity) -> !(entity.getVehicle() instanceof CloudSharkEntity)));
+        this.targetSelector.add(1, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true, (entity) -> (entity.getVehicle() == null)));
     }
 	
 	@Override

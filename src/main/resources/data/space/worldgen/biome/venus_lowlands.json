@@ -40,7 +40,8 @@
       "space:venus_blackstone"
     ],
     [
-      "minecraft:spring_lava"
+      "minecraft:spring_lava",
+      "space:volcanic_vent"
     ],
     [
       "space:surface_rock"

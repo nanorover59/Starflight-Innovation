@@ -1,5 +1,30 @@
 {
   "variants": {
-    "": { "model": "space:block/volcanic_vent" }
+    "facing=down": {
+      "model": "space:block/volcanic_vent",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "space:block/volcanic_vent",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "space:block/volcanic_vent",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "space:block/volcanic_vent",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "space:block/volcanic_vent"
+    },
+    "facing=west": {
+      "model": "space:block/volcanic_vent",
+      "x": 90,
+      "y": 270
+    }
   }
 }

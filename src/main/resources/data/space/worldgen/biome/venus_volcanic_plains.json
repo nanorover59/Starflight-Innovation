@@ -36,10 +36,13 @@
       "space:ore_sulfur",
       "space:ore_ilmenite",
       "minecraft:ore_magma",
-      "minecraft:delta",
-      "minecraft:spring_lava",
       "space:ore_magma",
       "space:venus_blackstone"
+    ],
+    [
+      "minecraft:spring_lava",
+      "minecraft:delta",
+      "space:volcanic_vent"
     ]
   ],
   "has_precipitation": false,

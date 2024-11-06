@@ -56,7 +56,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 	public boolean isClimbing()
 	{
 		return false;
-	}
+	} 
 
 	@Override
 	public boolean handleFallDamage(float fallDistance, float damageMultiplier, DamageSource damageSource)
@@ -267,7 +267,7 @@ public class ZeroGravityMobEntity extends PathAwareEntity
 		@Override
 		public boolean canStop()
 		{
-			return getVelocity().length() < 0.05;
+			return getVelocity().length() < 0.1;
 		}
 		
 		private Vec3d getVelocityToCancel()

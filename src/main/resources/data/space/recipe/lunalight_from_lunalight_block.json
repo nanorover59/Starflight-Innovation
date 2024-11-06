@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "space:lunalight_block"
+    }
+  ],
+  "result": {
+    "id": "space:lunalight",
+    "count": 9
+  }
+}

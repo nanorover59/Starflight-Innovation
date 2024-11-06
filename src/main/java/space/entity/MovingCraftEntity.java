@@ -45,6 +45,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.property.Properties;
 import net.minecraft.state.property.Property;
+import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -59,7 +60,6 @@ import space.block.FluidTankInsideBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
-import space.inventory.ImplementedInventory;
 import space.mixin.common.EntityInvokerMixin;
 import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
@@ -482,8 +482,6 @@ public class MovingCraftEntity extends Entity
 				Vec3d boxCenter = box.getCenter();
 				Vec3d otherBoxCenter = otherBox.getCenter();
 				
-				//System.out.println(intersection.getAverageSideLength());
-				
 				if(ix < iy && ix < iz && offset.getX() == 0.0)
 				{
 					if(boxCenter.getX() < otherBoxCenter.getX())
@@ -602,17 +600,12 @@ public class MovingCraftEntity extends Entity
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 			
-			if(world.getBlockState(pos).getBlock() instanceof BlockEntityProvider)
+			if(world.getBlockEntity(pos) instanceof BlockEntity blockEntity)
 			{
-				BlockEntity blockEntity = world.getBlockEntity(pos);
-	
-				if(blockEntity != null)
-				{
-					if(blockEntity instanceof ImplementedInventory)
-						((ImplementedInventory) blockEntity).clear();
-					
-					blockEntity.read(new NbtCompound(), world.getRegistryManager());
-				}
+				if(blockEntity instanceof Inventory)
+					((Inventory) blockEntity).clear();
+				
+				blockEntity.read(new NbtCompound(), world.getRegistryManager());
 			}
 		}
 		
@@ -621,7 +614,10 @@ public class MovingCraftEntity extends Entity
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
 			if(!isBlockSolid(world, pos))
-				world.removeBlock(pos, false);
+			{
+				FluidState fluidState = world.getFluidState(pos);
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS);
+			}
 		}
 
 		for(MovingCraftEntity.BlockData blockData : blocks)
@@ -629,7 +625,10 @@ public class MovingCraftEntity extends Entity
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
 			if(isBlockSolid(world, pos))
-				world.removeBlock(pos, false);
+			{
+				FluidState fluidState = world.getFluidState(pos);
+				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS);
+			}
 		}
 	}
 	
@@ -1049,7 +1048,6 @@ public class MovingCraftEntity extends Entity
 				
 				if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
 					blockEntityData = blockEntity.createNbt((RegistryWrapper.WrapperLookup) world.getRegistryManager());
-				
 			}
 			
 			return new MovingCraftEntity.BlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, world.isReceivingRedstonePower(blockPos), storedFluid);
@@ -1072,6 +1070,20 @@ public class MovingCraftEntity extends Entity
 				
 				if(direction != Direction.UP && direction != Direction.DOWN)
 					blockState = blockState.with(Properties.HORIZONTAL_FACING, direction);
+			}
+			else
+			{
+				Direction direction = Direction.transform(rotationMatrix, Direction.NORTH);
+				BlockRotation rotation = BlockRotation.NONE;
+				
+				if(direction == Direction.SOUTH)
+		        	rotation = BlockRotation.CLOCKWISE_180;
+				else if(direction == Direction.EAST)
+					rotation = BlockRotation.CLOCKWISE_90;
+		        else if(direction == Direction.WEST)
+		        	rotation = BlockRotation.COUNTERCLOCKWISE_90;
+				
+				blockState = blockState.rotate(rotation);
 			}
 			
 	        Vector3f offset = new Vector3f(position.getX(), position.getY(), position.getZ()).rotate(quaternion);
@@ -1110,7 +1122,6 @@ public class MovingCraftEntity extends Entity
 			}
 			
 			world.setBlockState(blockPos, blockState, Block.NOTIFY_LISTENERS);
-			world.scheduleBlockTick(blockPos, blockState.getBlock(), 0);
 			BlockEntity blockEntity = world.getBlockEntity(blockPos);
 			
 			if(blockEntity != null && blockEntityData != null)

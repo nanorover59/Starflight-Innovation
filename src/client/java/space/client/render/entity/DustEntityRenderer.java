@@ -12,7 +12,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
 import space.StarflightMod;
 import space.client.StarflightModClient;
 import space.client.render.entity.model.DustEntityModel;
@@ -34,15 +33,13 @@ public class DustEntityRenderer extends MobEntityRenderer<DustEntity, DustEntity
         if(((Entity) entity).isInvisible())
             return;
         
-        float yaw = -MathHelper.lerpAngleDegrees(g, entity.prevHeadYaw, entity.headYaw);
-        float pitch = MathHelper.lerpAngleDegrees(g, entity.prevPitch, entity.getPitch()) + 180.0f;
         double x = (double) entity.getStamina() / (double) DustEntity.INITIAL_STAMINA; 
         float alpha = (float) (1.0 - Math.pow((x * 2.0) + 1.0, -3.0));
         int argb = ColorHelper.Argb.fromFloats(alpha, 1.0f, 1.0f, 1.0f);
         VertexConsumer vertexConsumer = vertexConsumerProvider.getBuffer(RenderLayer.getEntityTranslucent(this.getTexture(entity)));
         ((DustEntityModel<DustEntity>) this.getModel()).copyStateTo(this.model);
         this.model.animateModel(entity, entity.limbAnimator.getPos(g), entity.limbAnimator.getSpeed(g), g);
-        this.model.setAngles(entity, entity.limbAnimator.getPos(g), entity.limbAnimator.getSpeed(g), getAnimationProgress(entity, g), yaw, pitch);
+        this.model.setAngles(entity, entity.limbAnimator.getPos(g), entity.limbAnimator.getSpeed(g), getAnimationProgress(entity, g), entity.getHeadYaw(), entity.getPitch());
         this.model.render(matrixStack, vertexConsumer, i, LivingEntityRenderer.getOverlay(entity, 0.0f), argb);
 	}
 

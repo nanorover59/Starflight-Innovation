@@ -25,6 +25,7 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.gen.StructureAccessor;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.noise.NoiseConfig;
@@ -49,7 +50,7 @@ public class VolcanoGenerator
 		double activity = Math.clamp(random.nextDouble() * 2.0, 0.0, 1.0);
 		double oreFactor = MathHelper.lerp(random.nextDouble(), 0.1, 0.25);
 		int surfaceY = chunkGenerator.getHeightOnGround(pos.getX(), pos.getZ(), Heightmap.Type.OCEAN_FLOOR_WG, context.world(), noiseConfig);
-		RegistryEntry<Biome> biome = context.biomeSource().getBiome(pos.getX(), surfaceY, pos.getZ(), noiseConfig.getMultiNoiseSampler());
+		RegistryEntry<Biome> biome = context.biomeSource().getBiome(BiomeCoords.fromBlock(pos.getX()), BiomeCoords.fromBlock(surfaceY), BiomeCoords.fromBlock(pos.getZ()), noiseConfig.getMultiNoiseSampler());
 		Settings settings = volcanoSettings.get(biome.getIdAsString());
 		Mutable mutable = new Mutable(pos.getX(), surfaceY, pos.getZ());
 		BlockState worldStone = null;

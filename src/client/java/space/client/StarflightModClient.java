@@ -43,6 +43,7 @@ import space.client.render.MarsDimensionEffect;
 import space.client.render.StarflightRenderEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
+import space.client.render.entity.BlockShellEntityRenderer;
 import space.client.render.entity.CaveLampreyEntityRenderer;
 import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.CloudSharkEntityRenderer;
@@ -53,6 +54,7 @@ import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
+import space.client.render.entity.model.BlockShellEntityModel;
 import space.client.render.entity.model.CaveLampreyEntityModel;
 import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.CloudSharkEntityModel;
@@ -80,6 +82,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
 	public static final EntityModelLayer MODEL_CLOUD_SHARK_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), "main");
 	public static final EntityModelLayer MODEL_CAVE_LAMPREY_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), "main");
+	public static final EntityModelLayer MODEL_BLOCK_SHELL_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "block_shell"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
@@ -160,6 +163,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CLOUD_SHARK, (context) -> new CloudSharkEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CAVE_LAMPREY, (context) -> new CaveLampreyEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.BLOCK_SHELL, (context) -> new BlockShellEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
@@ -171,6 +175,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CLOUD_SHARK_LAYER, CloudSharkEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CAVE_LAMPREY_LAYER, CaveLampreyEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_BLOCK_SHELL_LAYER, BlockShellEntityModel::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();
@@ -245,6 +250,8 @@ public class StarflightModClient implements ClientModInitializer
 				
 				StarflightRenderEffects.radiation = maxRadiation;
 			}
+			else
+				StarflightRenderEffects.radiation = 0.0f;
 		});
 		
 		// Client Disconnect Event

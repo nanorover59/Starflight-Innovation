@@ -44,18 +44,18 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 
 	public static DefaultAttributeContainer.Builder createSolarSpectreAttributes()
 	{
-		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 512.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 50.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0);
+		return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 1024.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 5.0);
 	}
 
 	@Override
 	protected void initGoals()
 	{
-		this.goalSelector.add(3, new CancelVelocityGoal(this, 15.0));
-		this.goalSelector.add(4, new EscapeFlightGoal(this, 15.0));
-		this.goalSelector.add(5, new TrackTargetGoal(this, 15.0, 8000, true));
-		this.goalSelector.add(6, new RandomFlightGoal(this, 15.0, 120, 64));
+		this.goalSelector.add(3, new CancelVelocityGoal(this, 12.0));
+		this.goalSelector.add(4, new EscapeFlightGoal(this, 8.0));
+		this.goalSelector.add(5, new TrackTargetGoal(this, 8.0, 8000, true));
+		this.goalSelector.add(6, new RandomFlightGoal(this, 8.0, 120, 64));
 		this.targetSelector.add(1, new RevengeGoal(this, new Class[0]));
-		this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, false));
+		this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 			int topY = world.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, getBlockPos()).getY();
 			
             if(topY > world.getBottomY())
-            	this.setPosition(getPos().getX(), topY + random.nextBetween(128, 256), getPos().getZ());
+            	this.setPosition(getPos().getX(), topY + random.nextBetween(64, 128), getPos().getZ());
             else
             	this.setPosition(getPos().getX(), random.nextBetween(0, 256), getPos().getZ());
             
@@ -99,7 +99,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 	@Override
 	public int getRadiationRange()
 	{
-		return 32;
+		return 64;
 	}
 
 	@Override
@@ -157,12 +157,12 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 		{
 			playSound(SoundEvents.ENTITY_BLAZE_SHOOT, 1.0f, 1.0f);
 			double distance = distanceTo(getTarget());
-			double dx = (getTarget().getX() + getTarget().getVelocity().getX()) - getX();
-			double dy = (getTarget().getBodyY(0.5) + getTarget().getVelocity().getY()) - getBodyY(0.5);
-			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ()) - getZ();
+			double dx = (getTarget().getX() + getTarget().getVelocity().getX() * 20.0) - getX();
+			double dy = (getTarget().getEyeY() + getTarget().getVelocity().getY() * 20.0) - getY();
+			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ() * 20.0) - getZ();
 			double ds = Math.sqrt(Math.sqrt(distance)) * 0.5;
-			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, 2.297 * ds), dy, getRandom().nextTriangular(dz, 2.297 * ds)));
-			plasmaBallEntity.setPosition(plasmaBallEntity.getX(), getPos().getY(), plasmaBallEntity.getZ());
+			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, ds * 1.5), dy, getRandom().nextTriangular(dz, ds * 1.5)));
+			plasmaBallEntity.setPosition(getX(), getY(), getZ());
 			world.spawnEntity(plasmaBallEntity);
 			plasmaBallFireCooldown = 5;
 			plasmaBalls--;
@@ -190,7 +190,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 		else
 			return false;
 		
-		return random.nextDouble() / solarMultiplier < 0.00005;
+		return random.nextDouble() / solarMultiplier < 0.0001;
     }
 
 	class EscapeFlightGoal extends Goal

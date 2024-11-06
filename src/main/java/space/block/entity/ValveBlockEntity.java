@@ -1,5 +1,6 @@
 package space.block.entity;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 import net.minecraft.block.BlockState;
@@ -80,6 +81,8 @@ public class ValveBlockEntity extends BlockEntity
 		if(world.isClient || blockEntity.getMode() != 1 || blockEntity.getFluidTankController() == null || blockEntity.getFluidTankController().getStoredFluid() <= 0)
 			return;
 		
+		double fluidRemaining = Math.min(blockEntity.getFluidTankController().getStoredFluid(), blockEntity.fluid.getStorageDensity() / 36.0);
+		
 		for(Direction direction : Direction.values())
 		{
 			BlockPos offsetPos = pos.offset(direction);
@@ -87,22 +90,11 @@ public class ValveBlockEntity extends BlockEntity
 			
 			if(adjacentState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) adjacentState.getBlock()).getFluidType().getID() == blockEntity.getFluidType().getID())
 			{
-				FluidPipeBlockEntity adjacentBlockEntity = ((FluidPipeBlockEntity) world.getBlockEntity(offsetPos));
-				double adjecentCapacity = adjacentBlockEntity.getStorageCapacity();
-				double adjecentFluid = adjacentBlockEntity.getStoredFluid();
-				
-				if(adjecentFluid < adjecentCapacity)
-				{
-					double deltaFluid = Math.min(blockEntity.getFluidTankController().getStoredFluid(), adjecentCapacity - adjecentFluid);
-					blockEntity.getFluidTankController().changeStoredFluid(-deltaFluid);
-					adjacentBlockEntity.changeStoredFluid(deltaFluid);
-					blockEntity.markDirty();
-					adjacentBlockEntity.markDirty();
-					
-					/*ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-					double remaining = ElectrolyzerBlockEntity.recursiveSpread(world, offsetPos, checkList, StarflightBlocks.HYDROGEN_PIPE_CAPACITY, "hydrogen", 2048);
-					blockEntity.getFluidTankController().changeStoredFluid(remaining - StarflightBlocks.HYDROGEN_PIPE_CAPACITY);*/
-				}
+				ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
+				double fluidToTransfer = fluidRemaining;
+				fluidRemaining = PumpBlockEntity.recursiveSpread(world, offsetPos, checkList, fluidToTransfer, blockEntity.fluid, 2048);
+				blockEntity.getFluidTankController().changeStoredFluid(-(fluidToTransfer - fluidRemaining));
+				blockEntity.markDirty();
 			}
 		}
     }

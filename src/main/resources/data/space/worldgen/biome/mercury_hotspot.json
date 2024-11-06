@@ -1,6 +1,7 @@
 {
   "carvers": {
     "air": [
+      "space:lunar_cave",
       "space:mercury_crater"
     ]
   },

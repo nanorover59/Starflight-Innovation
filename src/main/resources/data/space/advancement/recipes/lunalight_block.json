@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:lunalight_block"
+    ]
+  },
+  "criteria": {
+    "has_lunalight": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:lunalight"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:lunalight_block"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_lunalight",
+      "has_the_recipe"
+    ]
+  ]
+}

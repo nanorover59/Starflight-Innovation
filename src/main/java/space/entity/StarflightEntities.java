@@ -28,6 +28,7 @@ public class StarflightEntities
 	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.75f).eyeHeight(0.375f).maxTrackingRange(12));
 	public static final EntityType<CloudSharkEntity> CLOUD_SHARK = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), EntityType.Builder.<CloudSharkEntity>create(CloudSharkEntity::new, SpawnGroup.MONSTER).dimensions(3.0f, 1.5f).eyeHeight(1.5f).maxTrackingRange(12));
 	public static final EntityType<CaveLampreyEntity> CAVE_LAMPREY = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), EntityType.Builder.<CaveLampreyEntity>create(CaveLampreyEntity::new, SpawnGroup.MONSTER).dimensions(0.75f, 0.5f).eyeHeight(0.25f).maxTrackingRange(8));
+	public static final EntityType<BlockShellEntity> BLOCK_SHELL = registerEntity(Identifier.of(StarflightMod.MOD_ID, "block_shell"), EntityType.Builder.<BlockShellEntity>create(BlockShellEntity::new, SpawnGroup.MONSTER).dimensions(0.75f, 0.75f).maxTrackingRange(8));
 
 	public static void initializeEntities()
 	{
@@ -39,6 +40,7 @@ public class StarflightEntities
 		FabricDefaultAttributeRegistry.register(STRATOFISH, StratofishEntity.createStratofishAttributes());
 		FabricDefaultAttributeRegistry.register(CLOUD_SHARK, CloudSharkEntity.createCloudSharkAttributes());
 		FabricDefaultAttributeRegistry.register(CAVE_LAMPREY, CaveLampreyEntity.createCaveLampreyAttributes());
+		FabricDefaultAttributeRegistry.register(BLOCK_SHELL, BlockShellEntity.createBlockShellAttributes());
 		
 		SpawnRestriction.register(DUST, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, DustEntity::canDustSpawn);
 		SpawnRestriction.register(CERULEAN, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CeruleanEntity::canCeruleanSpawn);

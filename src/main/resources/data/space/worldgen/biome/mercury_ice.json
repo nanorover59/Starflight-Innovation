@@ -1,7 +1,8 @@
 {
   "carvers": {
     "air": [
-      "space:mercury_crater"
+      "space:lunar_cave",
+      "space:mercury_ice_crater"
     ]
   },
   "downfall": 0.0,
@@ -30,11 +31,13 @@
       "space:ore_ilmenite",
       "space:ore_lunalight"
     ],
-    [ 
-      "space:surface_rock",
+    [
       "space:cave_ice",
       "space:cave_ice_pile",
       "space:powder_snow_lake"
+    ],
+    [
+      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,

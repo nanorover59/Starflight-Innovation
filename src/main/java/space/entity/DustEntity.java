@@ -56,7 +56,7 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
 	
 	public static DefaultAttributeContainer.Builder createDustAttributes()
 	{
-        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25).add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.4f);
+        return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25).add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0);
     }
 	
 	@Override
@@ -175,7 +175,7 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
 	
 	public static boolean canDustSpawn(EntityType<DustEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
 	{
-		int chance = world.getServer().getOverworld().isRaining() ? 128 : 256;
+		int chance = world.getServer().getOverworld().isRaining() ? 64 : 256;
         return random.nextInt(chance) == 0 && world.isSkyVisible(pos) && world.getBlockState(pos.down()).getBlock() == StarflightBlocks.FERRIC_SAND;
     }
 	

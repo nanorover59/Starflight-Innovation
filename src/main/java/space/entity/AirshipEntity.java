@@ -35,6 +35,7 @@ import space.network.c2s.AirshipInputC2SPacket;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.util.QuaternionUtil;
+import space.util.StarflightSoundEvents;
 
 public class AirshipEntity extends MovingCraftEntity
 {
@@ -53,6 +54,7 @@ public class AirshipEntity extends MovingCraftEntity
 	private float forwardReverseControl;
 	private float lateralControl;
 	private float rotationControl;
+	private int soundEffectTimer;
 	
 	public AirshipEntity(EntityType<? extends AirshipEntity> entityType, World world)
 	{
@@ -265,43 +267,62 @@ public class AirshipEntity extends MovingCraftEntity
 		Vector3f netForce = new Vector3f();
 		Vector3f netMoment = new Vector3f();
 		Quaternionf quaternion = getQuaternion();
+		float t = 90.0f + data.getTemperatureCategory(getWorld().getSkyAngle(1.0f)) * 100.0f;
+		float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
+		float height = (float) (getUpperHeight() - getLowerHeight());
+		float maxR = (float) Math.max(Math.max(getXWidth(), getZWidth()), height);
+		float drag = 0.5f * airDensity * (float) (Math.min(getXWidth() * height, getZWidth() * height) * Math.pow(getVelocity().length() * 20.0, 2.0));
+		float angularDrag = (float) Math.PI * airDensity * (float) Math.pow(maxR, 5.0) * 5.0f;
 		
 		if(energySupply > 0.0)
 		{
+			boolean soundEffect = false;
+			
 			for(Thruster thruster : thrusters)
 			{
 				Vector3f position = thruster.getPosition();
-				Vector3f force = thruster.getForce(quaternion, 1.0);
+				Vector3f force = thruster.getForce(quaternion, 1.0).mul(Math.min(airDensity, 8.0f));
 				
 				if(checkThruster(thruster.position, thruster.direction))
 				{
 					forceAtPosition(force, position, netForce, netMoment);
 					energySupply -= 1.6;
+					soundEffect = true;
 				}
 				else if(checkThruster(thruster.position, new Vector3f(thruster.direction).mul(-1.0f)))
 				{
 					forceAtPosition(new Vector3f(force).mul(-1.0f), position, netForce, netMoment);
 					energySupply -= 1.6;
+					soundEffect = true;
 				}
 			}
 			
 			if(energySupply < 0.0)
 				energySupply = 0.0;
+			
+			if(soundEffect)
+			{
+				if(soundEffectTimer <= 0)
+				{
+					playSound(StarflightSoundEvents.AIRSHIP_MOTOR_SOUND_EVENT, 1e6F, 1.0f);
+					soundEffectTimer = 39;
+				}
+				else
+					soundEffectTimer--;
+			}
+			//else
+			//	soundEffectTimer = 0;
 		}
 		
 		Vector3f angles = new Vector3f();
 		getQuaternion().getEulerAnglesYXZ(angles);
-		//boolean b = getForwardDirection() == Direction.NORTH || getForwardDirection() == Direction.SOUTH;
 		netMoment.add(angles.x() * 10000000.0f, 0.0f, angles.z() * 10000000.0f);
 		netForce.rotate(quaternion);
+		netForce.add(getVelocity().normalize().toVector3f().mul(-drag));
 		
-		if(data.getPressure() > 0)
+		if(angularVelocity.length() > 0.0f)
 		{
-			float t = 90.0f + data.getTemperatureCategory(getWorld().getSkyAngle(1.0f)) * 100.0f;
-			float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
-			float height = (float) (getUpperHeight() - getLowerHeight());
-			float drag = 0.5f * airDensity * (float) (Math.min(getXWidth() * height, getZWidth() * height) * Math.pow(getVelocity().length() * 20.0, 2.0));
-			netForce.add(getVelocity().normalize().toVector3f().mul(-drag));
+			netMoment.add(new Vector3f(Math.signum(angularVelocity.x()) * angularVelocity.x() * angularVelocity.x(), Math.signum(angularVelocity.y()) * angularVelocity.y() * angularVelocity.y(), Math.signum(angularVelocity.z()) * angularVelocity.z() * angularVelocity.z()).mul(angularDrag));
 			angularVelocity.mul(0.95f);
 		}
 		

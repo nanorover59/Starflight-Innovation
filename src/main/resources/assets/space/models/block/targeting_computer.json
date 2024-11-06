@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/targeting_computer",
+    "bottom": "space:block/riveted_aluminum",
+    "front": "space:block/riveted_aluminum",
+    "side": "space:block/riveted_aluminum"
+  }
+}

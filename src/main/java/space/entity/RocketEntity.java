@@ -18,6 +18,7 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -33,8 +34,10 @@ import space.block.ReactionControlThrusterBlock;
 import space.block.ReactionWheelBlock;
 import space.block.RocketThrusterBlock;
 import space.block.StarflightBlocks;
+import space.block.TargetingComputerBlock;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
+import space.item.StarflightItems;
 import space.network.c2s.RocketInputC2SPacket;
 import space.network.c2s.RocketTravelButtonC2SPacket;
 import space.network.s2c.OpenNavigationScreenS2CPacket;
@@ -230,59 +233,18 @@ public class RocketEntity extends MovingCraftEntity
 		{
 			if(soundEffectTimer <= 0)
 			{
-				playSound(StarflightSoundEvents.THRUSTER_SOUND_EVENT, 1e6F, 0.8F + this.random.nextFloat() * 0.01f);
-				soundEffectTimer = 5;
+				playSound(StarflightSoundEvents.ROCKET_ENGINE_SOUND_EVENT, 1e6f, 1.0f);
+				soundEffectTimer = 39;
 			} else
 				soundEffectTimer--;
 		}
 
 		tickPhysics();
 		checkDimensionChange();
-
-		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
-		Vector3f trackedVelocity = getTrackedVelocity();
-		float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f; // Get the craft's speed in m/s.
-
+		
 		// Turn back into blocks when landed.
-		if(this.age > 10 && (verticalCollision || horizontalCollision || ((autoState == 2 || getHoldStop() > 20) && data.isOrbit() && craftSpeed < 4.0)))
+		if(checkLanded())
 		{
-			boolean crashLandingFlag = false;
-
-			// Crash landing effects go here.
-			if((verticalCollision || horizontalCollision) && craftSpeed > 10.0)
-			{
-				BlockPos bottom = getBlockPos().add(0, (int) -getLowerHeight(), 0);
-				float power = Math.min(craftSpeed / 5.0f, 10.0f);
-				int count = random.nextBetween(4, 5);
-
-				getWorld().createExplosion(this, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, false, World.ExplosionSourceType.NONE);
-
-				/*
-				 * for(int i = 0; i < count; i++) { Vec3d offset = new Vec3d(maxWidth *
-				 * random.nextDouble(), 3.0 * (0.5 - random.nextDouble()), 0.0); offset =
-				 * offset.rotateY((float) Math.PI * 2.0f * random.nextFloat());
-				 * world.createExplosion(null, bottom.getX() + 0.5 + offset.getX(),
-				 * bottom.getY() + 0.5 + offset.getY(), bottom.getZ() + 0.5 + offset.getZ(),
-				 * power, fire, DestructionType.DESTROY); }
-				 */
-
-				crashLandingFlag = true;
-			}
-
-			// Extra displacement to avoid clipping into the ground.
-			/*
-			 * if(verticalCollision) { for(int i = 0; i < 128; i++) { if(!verticalCollision)
-			 * break;
-			 * 
-			 * this.move(MovementType.SELF, new Vec3d(0.0, 0.1, 0.0)); } }
-			 */
-
-			if(crashLandingFlag)
-			{
-				int yOffset = random.nextBetween(MathHelper.floor(craftSpeed / 10.0f), MathHelper.floor(craftSpeed / 10.0f) + 1) * (trackedVelocity.y() > 0.0f ? 1 : -1);
-				this.setPosition(getPos().add(0.0, yOffset, 0.0));
-			}
-
 			sendRenderData(true);
 			this.releaseBlocks();
 		}
@@ -378,6 +340,32 @@ public class RocketEntity extends MovingCraftEntity
 
 		nominalISP = nominalThrust / massFlowSum;
 		averageVEVacuum = nominalThrustVacuum / massFlowSumVacuum;
+	}
+	
+	public void checkTargetingComputers(World nextWorld)
+	{
+		for(MovingCraftEntity.BlockData blockData : blocks)
+		{
+			BlockState blockState = blockData.getBlockState();
+			Block block = blockState.getBlock();
+			
+			if(block instanceof TargetingComputerBlock)
+			{
+				NbtCompound nbt = blockData.getBlockEntityData();
+				
+				if(nbt.contains("stack"))
+				{
+					ItemStack stack = (ItemStack) ItemStack.fromNbt(getWorld().getRegistryManager(), nbt.getCompound("stack")).orElse(ItemStack.EMPTY);
+					
+					if(stack.contains(StarflightItems.PLANET_NAME) && stack.get(StarflightItems.PLANET_NAME).equals(nextWorld.getRegistryKey().getValue().getPath()))
+					{
+						arrivalPos = stack.get(StarflightItems.POSITION);
+						arrivalDirection = stack.get(StarflightItems.DIRECTION).getHorizontal();
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -485,6 +473,41 @@ public class RocketEntity extends MovingCraftEntity
 		else if(yawControl == -1.0f && yawMoment > 0.0f)
 			return true;
 
+		return false;
+	}
+	
+	private boolean checkLanded()
+	{
+		if(this.age > 10)
+		{
+			PlanetDimensionData data = PlanetList.getDimensionDataForWorld(getWorld());
+			Vector3f trackedVelocity = getTrackedVelocity();
+			float craftSpeed = (float) MathHelper.magnitude(trackedVelocity.x(), trackedVelocity.y(), trackedVelocity.z()) * 20.0f;
+			
+			if(verticalCollision || horizontalCollision)
+			{
+				// Crash landing effects go here.
+				if(craftSpeed > 10.0)
+				{
+					BlockPos bottom = getBlockPos().add(0, (int) -getLowerHeight(), 0);
+					float power = Math.min(craftSpeed / 5.0f, 10.0f);
+					getWorld().createExplosion(this, bottom.getX() + 0.5, bottom.getY() + 0.5, bottom.getZ() + 0.5, power, false, World.ExplosionSourceType.NONE);
+					int yOffset = random.nextBetween(MathHelper.floor(craftSpeed / 10.0f), MathHelper.floor(craftSpeed / 10.0f) + 1) * (trackedVelocity.y() > 0.0f ? 1 : -1);
+					this.setPosition(getPos().add(0.0, yOffset, 0.0));
+				}
+				
+				return true;
+			}
+			else if(data.isOrbit())
+			{
+				if(getHoldStop() > 20 && craftSpeed < 4.0)
+					return true;
+				
+				if(autoState == 2 && getY() - getLowerHeight() - arrivalPos.getY() < 0.1)
+					return true;
+			}
+		}
+		
 		return false;
 	}
 
@@ -676,6 +699,7 @@ public class RocketEntity extends MovingCraftEntity
 				useDeltaV(requiredDeltaV);
 			}
 			
+			checkTargetingComputers(nextWorld);
 			float arrivalYaw = (Direction.fromHorizontal(arrivalDirection).asRotation() - getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
 			this.changeDimension(nextWorld, new Vec3d(arrivalPos.getX() + 0.5, arrivalY, arrivalPos.getZ() + 0.5), arrivalYaw);
 		}
@@ -942,7 +966,8 @@ public class RocketEntity extends MovingCraftEntity
 							nextWorld = rocketEntity.getServer().getWorld(currentPlanet.getSurface().getWorldKey());
 
 						rocketEntity.setVelocity(0.0, -2.0, 0.0);
-					} else
+					}
+					else
 					{
 						if(planet == currentPlanet)
 						{
@@ -966,7 +991,8 @@ public class RocketEntity extends MovingCraftEntity
 							rocketEntity.velocityDirty = true;
 							rocketEntity.pausePhysics = false;
 							rocketEntity.throttle = 0.0;
-						} else
+						}
+						else
 						{
 							// Travel to the next planet's orbit dimension.
 							nextWorld = rocketEntity.getServer().getWorld(planet.getOrbit().getWorldKey());
@@ -979,7 +1005,8 @@ public class RocketEntity extends MovingCraftEntity
 					{
 						if(requiredDeltaV > 0.0)
 							rocketEntity.useDeltaV(requiredDeltaV);
-
+						
+						rocketEntity.checkTargetingComputers(nextWorld);
 						rocketEntity.autoState = 2;
 						float arrivalYaw = (Direction.fromHorizontal(rocketEntity.arrivalDirection).asRotation() - rocketEntity.getForwardDirection().getOpposite().asRotation()) * (float) (Math.PI / 180.0);
 						rocketEntity.changeDimension(nextWorld, new Vec3d(rocketEntity.arrivalPos.getX() + 0.5, arrivalY, rocketEntity.arrivalPos.getZ() + 0.5), arrivalYaw);

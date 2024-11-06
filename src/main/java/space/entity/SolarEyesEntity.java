@@ -18,7 +18,6 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.particle.StarflightParticleTypes;
@@ -41,7 +40,7 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 	
 	public static DefaultAttributeContainer.Builder createSolarEyesAttributes()
 	{
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0);
+        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 32.0).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 8.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 2.0);
     }
 	
 	@Override
@@ -168,7 +167,7 @@ public class SolarEyesEntity extends MobEntity implements AlienMobEntity
 		else
 			decreaseAngerTime();
 		
-		if(entityCollided != null || world.getLightLevel(LightType.SKY, getBlockPos()) > 4)
+		if(entityCollided != null)
 		{
 			if(entityCollided != null)
 				tryAttack(entityCollided);

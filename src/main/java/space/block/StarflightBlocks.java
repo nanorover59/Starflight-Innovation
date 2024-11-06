@@ -12,6 +12,7 @@ import net.minecraft.block.AmethystClusterBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.BulbBlock;
 import net.minecraft.block.CarpetBlock;
 import net.minecraft.block.ColoredFallingBlock;
 import net.minecraft.block.CraftingTableBlock;
@@ -70,6 +71,7 @@ import space.block.entity.RocketControllerBlockEntity;
 import space.block.entity.SolarPanelBlockEntity;
 import space.block.entity.StirlingEngineBlockEntity;
 import space.block.entity.StorageCubeBlockEntity;
+import space.block.entity.TargetingComputerBlockEntity;
 import space.block.entity.VacuumFurnaceBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.block.entity.VentBlockEntity;
@@ -102,6 +104,7 @@ public class StarflightBlocks
 	public static final Block STRUCTURAL_IRON_SLAB = new SlabBlock(AbstractBlock.Settings.copy(STRUCTURAL_IRON));
 	public static final Block STRUCTURAL_IRON_WALL = new WallBlock(AbstractBlock.Settings.copy(STRUCTURAL_IRON));
 	public static final Block IRON_ROUND_DECO = new Block(AbstractBlock.Settings.copy(STRUCTURAL_IRON));
+	public static final Block IRON_BULB = new BulbBlock(AbstractBlock.Settings.copy(Blocks.COPPER_BULB).luminance(createLightLevelFromLitBlockState(10)));
 	public static final Block BUFFER = new SimpleFacingBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK));
 	public static final Block IRON_MACHINE_CASING = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.COPPER));
 	public static final Block TITANIUM_BLOCK = new Block(AbstractBlock.Settings.copy(ALUMINUM_BLOCK).strength(6.0f, 7.0f).sounds(BlockSoundGroup.COPPER));
@@ -130,6 +133,7 @@ public class StarflightBlocks
 	public static final Block REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.LIGHT_GRAY).strength(0.5F));
 	public static final Block BALSALTIC_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
 	public static final Block ICY_REGOLITH = new ColoredFallingBlock(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.LIGHT_BLUE_GRAY).strength(0.5F));
+	public static final Block LUNALIGHT_BLOCK = new Block(AbstractBlock.Settings.copy(Blocks.AMETHYST_BLOCK).mapColor(MapColor.CYAN).luminance(state -> 13));
 	public static final Block LUNALIGHT_ORE = new LunalightOreBlock(AbstractBlock.Settings.copy(Blocks.REDSTONE_ORE));
 	public static final Block DEEPSLATE_LUNALIGHT_ORE = new LunalightOreBlock(AbstractBlock.Settings.copy(Blocks.DEEPSLATE_REDSTONE_ORE));
 	public static final Block FERRIC_SAND = new ColoredFallingBlock(new ColorCode(0xB7633D), AbstractBlock.Settings.copy(Blocks.SAND).mapColor(MapColor.ORANGE));
@@ -214,6 +218,7 @@ public class StarflightBlocks
 	public static final Block RCS_BLOCK = new ReactionControlThrusterBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK), ReactionControlThrusterBlock.DIAGONAL);
 	public static final Block LANDING_LEG = new FrameBlock(AbstractBlock.Settings.copy(ALUMINUM_FRAME).nonOpaque());
 	public static final Block ROCKET_CONTROLLER = new RocketControllerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
+	public static final Block TARGETING_COMPUTER = new TargetingComputerBlock(AbstractBlock.Settings.copy(ALUMINUM_BLOCK));
 	public static final Block ENGINE_0 = new RocketThrusterBlock(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).sounds(BlockSoundGroup.ANVIL), 1.25e6, 380, 340, 100.0, 0.0);
 	public static final Block ENGINE_1 = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 400, 380, 100.0, 0.0);
 	public static final Block ENGINE_1_GIMBAL = new RocketThrusterBlock(AbstractBlock.Settings.copy(TITANIUM_BLOCK), 1.0e6, 415, 380, 100.0, Math.PI / 16.0);
@@ -244,6 +249,7 @@ public class StarflightBlocks
 	public static final BlockEntityType<VacuumFurnaceBlockEntity> VACUUM_FURNACE_BLOCK_ENTITY = BlockEntityType.Builder.create(VacuumFurnaceBlockEntity::new, VACUUM_FURNACE).build(null);
 	public static final BlockEntityType<MetalFabricatorBlockEntity> METAL_FABRICATOR_BLOCK_ENTITY = BlockEntityType.Builder.create(MetalFabricatorBlockEntity::new, METAL_FABRICATOR).build(null);
 	public static final BlockEntityType<RocketControllerBlockEntity> ROCKET_CONTROLLER_BLOCK_ENTITY = BlockEntityType.Builder.create(RocketControllerBlockEntity::new, ROCKET_CONTROLLER).build(null);
+	public static final BlockEntityType<TargetingComputerBlockEntity> TARGETING_COMPUTER_BLOCK_ENTITY = BlockEntityType.Builder.create(TargetingComputerBlockEntity::new, TARGETING_COMPUTER).build(null);
 	public static final BlockEntityType<AtmosphereGeneratorBlockEntity> ATMOSPHERE_GENERATOR_BLOCK_ENTITY = BlockEntityType.Builder.create(AtmosphereGeneratorBlockEntity::new, ATMOSPHERE_GENERATOR).build(null);
 	public static final BlockEntityType<LeakBlockEntity> LEAK_BLOCK_ENTITY = BlockEntityType.Builder.create(LeakBlockEntity::new, LEAK).build(null);
 	public static final BlockEntityType<VolcanicVentBlockEntity> VOLCANIC_VENT_BLOCK_ENTITY = BlockEntityType.Builder.create(VolcanicVentBlockEntity::new, VOLCANIC_VENT).build(null);
@@ -277,6 +283,7 @@ public class StarflightBlocks
 		initializeBlock(STRUCTURAL_IRON_SLAB, "structural_iron_slab");
 		initializeBlock(STRUCTURAL_IRON_WALL, "structural_iron_wall");
 		initializeBlock(IRON_ROUND_DECO, "iron_round_deco");
+		initializeBlock(IRON_BULB, "iron_bulb");
 		initializeBlock(BUFFER, "buffer");
 		initializeBlock(IRON_MACHINE_CASING, "iron_machine_casing");
 		initializeBlock(TITANIUM_BLOCK, "titanium_block");
@@ -305,6 +312,7 @@ public class StarflightBlocks
 		initializeBlock(REGOLITH, "regolith");
 		initializeBlock(BALSALTIC_REGOLITH, "balsaltic_regolith");
 		initializeBlock(ICY_REGOLITH, "icy_regolith");
+		initializeBlock(LUNALIGHT_BLOCK, "lunalight_block");
 		initializeBlock(LUNALIGHT_ORE, "lunalight_ore");
 		initializeBlock(DEEPSLATE_LUNALIGHT_ORE, "deepslate_lunalight_ore");
 		initializeBlock(FERRIC_SAND, "ferric_sand");
@@ -388,6 +396,7 @@ public class StarflightBlocks
 		initializeBlock(RCS_BLOCK, "rcs_block");
 		initializeBlock(LANDING_LEG, "landing_leg", true, List.of(), List.of(Text.translatable("block.space.landing_leg.description")));
 		initializeBlock(ROCKET_CONTROLLER, "rocket_controller");
+		initializeBlock(TARGETING_COMPUTER, "targeting_computer");
 		initializeBlock(ENGINE_0, "engine_0");
 		initializeBlock(ENGINE_1, "engine_1");
 		initializeBlock(ENGINE_1_GIMBAL, "engine_1_gimbal");
@@ -417,6 +426,7 @@ public class StarflightBlocks
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "vacuum_furnace"), VACUUM_FURNACE_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "metal_fabricator"), METAL_FABRICATOR_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "rocket_controller"), ROCKET_CONTROLLER_BLOCK_ENTITY);
+		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "targeting_computer"), TARGETING_COMPUTER_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "atmosphere_generator"), ATMOSPHERE_GENERATOR_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "leak"), LEAK_BLOCK_ENTITY);
 		Registry.register(Registries.BLOCK_ENTITY_TYPE, Identifier.of(StarflightMod.MOD_ID, "volcanic_vent"), VOLCANIC_VENT_BLOCK_ENTITY);

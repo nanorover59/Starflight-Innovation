@@ -1,0 +1,15 @@
+{
+  "name": "space:rocket",
+  "fallback": "minecraft:empty",
+  "elements": [
+	{	
+      "weight": 1,
+      "element": {
+        "location": "space:rocket_1_wg",
+        "processors": "space:base",
+		"projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+{
+  "variants": {
+    "lit=false": { "model": "space:block/iron_bulb" },
+    "lit=true": { "model": "space:block/iron_bulb_on" }
+  }
+}

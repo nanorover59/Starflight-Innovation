@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
@@ -34,7 +35,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		{
 			BlockState blockState = structureWorldAccess.getBlockState(mutable);
 			
-			if(blockState.isOpaque() && blockState.isIn(BlockTags.PICKAXE_MINEABLE))
+			if(blockState.isOpaque() && blockState.isIn(BlockTags.PICKAXE_MINEABLE) && blockState.getBlock() != Blocks.MAGMA_BLOCK)
 				rockState = blockState;
 			
 			mutable.setY(mutable.getY() - 1);

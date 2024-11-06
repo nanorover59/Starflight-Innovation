@@ -39,9 +39,12 @@
       "minecraft:delta",
       "minecraft:small_basalt_columns",
       "minecraft:large_basalt_columns",
-      "minecraft:spring_lava",
       "space:ore_magma",
       "space:venus_blackstone"
+    ],
+    [
+      "minecraft:spring_lava",
+      "space:volcanic_vent"
     ]
   ],
   "has_precipitation": false,

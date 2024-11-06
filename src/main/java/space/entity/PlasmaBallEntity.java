@@ -30,6 +30,12 @@ public class PlasmaBallEntity extends AbstractFireballEntity
 	{
 		super((EntityType<? extends PlasmaBallEntity>) StarflightEntities.PLASMA_BALL, x, y, z, velocity, world);
 	}
+	
+	@Override
+	public boolean shouldRender(double distance)
+	{
+		return true;
+	}
 
 	@Override
 	protected void onEntityHit(EntityHitResult entityHitResult)

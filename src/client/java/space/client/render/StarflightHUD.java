@@ -85,10 +85,10 @@ public class StarflightHUD
         int centerY = scaledHeight / 2;
 		context.getMatrices().push();
 		context.getMatrices().scale(hudScale, hudScale, hudScale);
-		drawReadouts(context, textRenderer, rocketEntity, tickDelta, 60, 320, hudColor);
+		drawReadouts(context, textRenderer, rocketEntity, tickDelta, 60, scaledHeight - 150, hudColor);
 		drawThrottle(context, textRenderer, rocketEntity, tickDelta, 20, scaledHeight - 200, throttleColor);
 		drawFuelLevels(context, textRenderer, rocketEntity, tickDelta, scaledWidth - 70, scaledHeight - 200, hydrogenColor, oxygenColor);
-		drawNavBall(context, tickDelta, rocketEntity.getForwardDirection(), true, quaternion, new Vector3f(rocketEntity.getTrackedVelocity()), 90, 395);
+		drawNavBall(context, tickDelta, rocketEntity.getForwardDirection(), true, quaternion, new Vector3f(rocketEntity.getTrackedVelocity()), 90, scaledHeight - 80);
 		context.getMatrices().pop();
 	}
 	
@@ -110,9 +110,9 @@ public class StarflightHUD
 		scaledHeight /= hudScale;
 		context.getMatrices().push();
 		context.getMatrices().scale(hudScale, hudScale, hudScale);
-		drawReadouts(context, textRenderer, airshipEntity, tickDelta, 50, 320, hudColor);
+		drawReadouts(context, textRenderer, airshipEntity, tickDelta, 50, scaledHeight - 150, hudColor);
 		drawEnergyLevel(context, textRenderer, airshipEntity, tickDelta, scaledWidth - 70, scaledHeight - 200, energyColor);
-		drawNavBall(context, tickDelta, airshipEntity.getForwardDirection(), false, quaternion, new Vector3f(airshipEntity.getTrackedVelocity()), 80, 395);
+		drawNavBall(context, tickDelta, airshipEntity.getForwardDirection(), false, quaternion, new Vector3f(airshipEntity.getTrackedVelocity()), 80, scaledHeight - 80);
 		context.getMatrices().pop();
 	}
 	

@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "aaa",
+        "aaa",
+        "aaa"
+    ],
+    "key": {
+        "a": {
+            "item": "space:lunalight"
+        }
+    },
+    "result": {
+        "id": "space:lunalight_block",
+        "count": 1
+    }
+}

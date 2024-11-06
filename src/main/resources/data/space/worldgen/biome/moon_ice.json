@@ -1,7 +1,8 @@
 {
   "carvers": {
     "air": [
-      "space:moon_crater"
+      "space:lunar_cave",
+      "space:moon_ice_crater"
     ]
   },
   "downfall": 0.0,

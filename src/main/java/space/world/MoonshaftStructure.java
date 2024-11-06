@@ -48,7 +48,7 @@ public class MoonshaftStructure extends Structure
 		ChunkGenerator chunkGenerator = context.chunkGenerator();
 		int x = chunkPos.getCenterX();
 		int z = chunkPos.getCenterZ();
-		int y = chunkGenerator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR, context.world(), context.noiseConfig());
+		int y = chunkGenerator.getHeight(x, z, Heightmap.Type.OCEAN_FLOOR_WG, context.world(), context.noiseConfig());
 		int targetY = Math.max(0, y - (24 + chunkRandom.nextInt(128)));
 		int down = (y - targetY) / 6;
 		BlockBox blockBox = MoonshaftCrossing.getBoundingBox(collector, chunkRandom, x, y, z, 1, down);

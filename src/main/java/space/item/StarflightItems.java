@@ -40,6 +40,8 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
 import net.minecraft.util.Util;
 import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import space.StarflightMod;
 import space.block.StarflightBlocks;
 import space.entity.StarflightEntities;
@@ -59,6 +61,8 @@ public class StarflightItems
 	public static final ComponentType<String> PLANET_NAME = ComponentType.<String>builder().codec(Codecs.NON_EMPTY_STRING).packetCodec(PacketCodecs.STRING).build();
 	public static final ComponentType<Integer> PRIMARY_COLOR = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
 	public static final ComponentType<Integer> SECONDARY_COLOR = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
+	public static final ComponentType<BlockPos> POSITION = ComponentType.<BlockPos>builder().codec(BlockPos.CODEC).packetCodec(BlockPos.PACKET_CODEC).build();
+	public static final ComponentType<Direction> DIRECTION = ComponentType.<Direction>builder().codec(Direction.CODEC).packetCodec(Direction.PACKET_CODEC).build();
 	
 	// Armor Material
 	public static final RegistryEntry<ArmorMaterial> SPACE_SUIT_ARMOR_MATERIAL = registerArmorMaterial("space_suit", Util.make(new EnumMap<ArmorItem.Type, Integer>(ArmorItem.Type.class), map -> {
@@ -118,6 +122,7 @@ public class StarflightItems
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new Settings().maxCount(1).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 2.0f));
 	public static final Item PART_DRAWINGS = new PartDrawingsItem(new Settings().maxCount(1).rarity(Rarity.RARE).component(PART_DRAWING_GROUPS, ""));
 	public static final Item PLANETARIUM_CARD = new PlanetariumCardItem(new Settings().maxCount(1).rarity(Rarity.EPIC).component(PLANET_NAME, "").component(PRIMARY_COLOR, -1).component(SECONDARY_COLOR, -1));
+	public static final Item TARGETING_CARD = new TargetingCardItem(new Settings().maxCount(1).component(PLANET_NAME, "").component(POSITION, BlockPos.ORIGIN).component(DIRECTION, Direction.NORTH));
 	public static final Item MULTIMETER = new MultimeterItem(new Settings().maxCount(1));
 	public static final Item WRENCH = new WrenchItem(new Settings().maxCount(1));
 	public static final Item DIAMOND_END_MILL = new Item(new Settings().maxCount(1).maxDamage(ToolMaterials.DIAMOND.getDurability() * 2));
@@ -147,12 +152,14 @@ public class StarflightItems
     public static final Item ROCKET_1 = new StructurePlacerItem(new Settings().maxCount(1), 7, 20, 7, "rocket_1");
     public static final Item ROCKET_2 = new StructurePlacerItem(new Settings().maxCount(1), 9, 41, 17, "rocket_2");
     public static final Item SOLAR_BASE = new StructurePlacerItem(new Settings().maxCount(1), 21, 7, 17, "solar_base");
+    public static final Item AIRSHIP = new StructurePlacerItem(new Settings().maxCount(1), 15, 16, 9, "small_airship");
     
     // Spawn Egg Items
     public static final Item CERULEAN_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CERULEAN, 0x1485AD, 0x000000, new Item.Settings());
 	public static final Item DUST_SPAWN_EGG = new SpawnEggItem(StarflightEntities.DUST, 0xBE673F, 0x82342B, new Item.Settings());
 	public static final Item ANCIENT_HUMANOID_SPAWN_EGG = new SpawnEggItem(StarflightEntities.ANCIENT_HUMANOID, 0xF8F9F9, 0x154360, new Item.Settings());
 	public static final Item SOLAR_SPECTRE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SOLAR_SPECTRE, 0xE9F3FD, 0xC8E2F9, new Item.Settings());
+	public static final Item BLOCK_SHELL_SPAWN_EGG = new SpawnEggItem(StarflightEntities.BLOCK_SHELL, 0x455A64, 0xECF8FD, new Item.Settings());
 	public static final Item STRATOFISH_SPAWN_EGG = new SpawnEggItem(StarflightEntities.STRATOFISH, 0xFFE8FA, 0x7B6D9E, new Item.Settings());
 	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
 	public static final Item CAVE_LAMPREY_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CAVE_LAMPREY, 0xB71C1C, 0x6F1111, new Item.Settings());
@@ -180,6 +187,8 @@ public class StarflightItems
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(StarflightMod.MOD_ID, "planet_name"), PLANET_NAME);
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(StarflightMod.MOD_ID, "primary_color"), PRIMARY_COLOR);
 		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(StarflightMod.MOD_ID, "secondary_color"), SECONDARY_COLOR);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(StarflightMod.MOD_ID, "position"), POSITION);
+		Registry.register(Registries.DATA_COMPONENT_TYPE, Identifier.of(StarflightMod.MOD_ID, "direction"), DIRECTION);
 		
 		// Items
 		registerItem(ALUMINUM_INGOT, "aluminum_ingot");
@@ -220,6 +229,7 @@ public class StarflightItems
 		registerItem(BATTERY_CELL, "battery_cell");
 		registerItem(RED_CELL, "red_cell");
 		registerItem(OXYGEN_TANK_ITEM, "oxygen_tank_item");
+		registerItem(TARGETING_CARD, "targeting_card");
 		registerItem(MULTIMETER, "multimeter");
 		registerItem(WRENCH, "wrench");
 		registerItem(DIAMOND_END_MILL, "diamond_end_mill");
@@ -259,12 +269,14 @@ public class StarflightItems
 		registerItem(ROCKET_1, "rocket_1");
 		registerItem(ROCKET_2, "rocket_2");
 		registerItem(SOLAR_BASE, "solar_base");
+		registerItem(AIRSHIP, "airship");
 		
 		// Spawn Egg Items
 		registerItem(CERULEAN_SPAWN_EGG, "cerulean_spawn_egg");
 		registerItem(DUST_SPAWN_EGG, "dust_spawn_egg");
 		registerItem(ANCIENT_HUMANOID_SPAWN_EGG, "ancient_humanoid_spawn_egg");
 		registerItem(SOLAR_SPECTRE_SPAWN_EGG, "solar_spectre_spawn_egg");
+		registerItem(BLOCK_SHELL_SPAWN_EGG, "block_shell_spawn_egg");
 		registerItem(STRATOFISH_SPAWN_EGG, "stratofish_spawn_egg");
 		registerItem(CLOUD_SHARK_SPAWN_EGG, "cloud_shark_spawn_egg");
 		registerItem(CAVE_LAMPREY_SPAWN_EGG, "cave_lamprey_spawn_egg");
