@@ -161,7 +161,7 @@ public class SolarSpectreEntity extends ZeroGravityMobEntity implements AlienMob
 			double dy = (getTarget().getEyeY() + getTarget().getVelocity().getY() * 20.0) - getY();
 			double dz = (getTarget().getZ() + getTarget().getVelocity().getZ() * 20.0) - getZ();
 			double ds = Math.sqrt(Math.sqrt(distance)) * 0.5;
-			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, ds * 1.5), dy, getRandom().nextTriangular(dz, ds * 1.5)));
+			PlasmaBallEntity plasmaBallEntity = new PlasmaBallEntity(world, this, new Vec3d(getRandom().nextTriangular(dx, ds * 2.5), dy, getRandom().nextTriangular(dz, ds * 2.5)));
 			plasmaBallEntity.setPosition(getX(), getY(), getZ());
 			world.spawnEntity(plasmaBallEntity);
 			plasmaBallFireCooldown = 5;

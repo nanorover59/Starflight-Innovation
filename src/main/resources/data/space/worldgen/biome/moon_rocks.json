@@ -57,6 +57,18 @@
           "maxCount": 1,
           "minCount": 1,
           "weight": 10
+      },
+      {
+        "type": "space:solar_spectre",
+        "maxCount": 1,
+        "minCount": 1,
+        "weight": 10
+      },
+      {
+          "type": "space:block_shell",
+          "maxCount": 2,
+          "minCount": 1,
+          "weight": 10
       }
     ],
     "underground_water_creature": [],

@@ -1,0 +1,34 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "space:targeting_computer"
+    ]
+  },
+  "criteria": {
+    "has_advanced_circuit": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "space:advanced_circuit"
+            ]
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "space:targeting_computer"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_advanced_circuit",
+      "has_the_recipe"
+    ]
+  ]
+}

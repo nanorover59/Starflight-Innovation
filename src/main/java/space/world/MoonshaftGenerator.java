@@ -38,6 +38,7 @@ import space.block.PointerColumnBlock;
 import space.block.StarflightBlocks;
 import space.block.StorageCubeBlock;
 import space.entity.AncientHumanoidEntity;
+import space.entity.BlockShellEntity;
 import space.entity.StarflightEntities;
 
 public class MoonshaftGenerator
@@ -363,7 +364,7 @@ public class MoonshaftGenerator
 			return false;
 		}
 		
-		private void addMob(StructureWorldAccess world, Random random, int x, int y, int z)
+		private void addAncientHumanoid(StructureWorldAccess world, Random random, int x, int y, int z)
 		{
 			BlockPos.Mutable blockPos = this.offsetPos(x, y, z);
 			
@@ -371,6 +372,19 @@ public class MoonshaftGenerator
 			{
 				AncientHumanoidEntity entity = new AncientHumanoidEntity(StarflightEntities.ANCIENT_HUMANOID, world.toServerWorld());
 				entity.initEquipment(random, world.getLocalDifficulty(blockPos));
+				entity.setPosition(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+				world.spawnEntity(entity);
+			}
+		}
+		
+		private void addBlockShell(StructureWorldAccess world, Random random, int x, int y, int z)
+		{
+			BlockPos.Mutable blockPos = this.offsetPos(x, y, z);
+			
+			if(world.getBlockState(blockPos).isAir() && !world.getBlockState(((BlockPos) blockPos).down()).isAir())
+			{
+				BlockShellEntity entity = new BlockShellEntity(StarflightEntities.BLOCK_SHELL, world.toServerWorld());
+				entity.setWearingBlock(StarflightBlocks.STORAGE_CUBE.getDefaultState());
 				entity.setPosition(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
 				world.spawnEntity(entity);
 			}
@@ -459,14 +473,24 @@ public class MoonshaftGenerator
 						this.addBlock(world, SOLID_BLOCK.getDefaultState(), 3, -1, z, chunkBox);
 				}
 
-				if(random.nextInt(120) == 0)
-					this.addChest(world, chunkBox, random, -1, 0, z, LOOT_TABLE);
+				if(random.nextInt(80) == 0)
+				{
+					if(random.nextInt(3) == 0)
+						this.addBlockShell(world, random, -1, 0, z);
+					else
+						this.addChest(world, chunkBox, random, -1, 0, z, LOOT_TABLE);
+				}
 
-				if(random.nextInt(120) == 0)
-					this.addChest(world, chunkBox, random, 3, 0, z, LOOT_TABLE);
+				if(random.nextInt(80) == 0)
+				{
+					if(random.nextInt(3) == 0)
+						this.addBlockShell(world, random, 3, 0, z);
+					else
+						this.addChest(world, chunkBox, random, 3, 0, z, LOOT_TABLE);
+				}
 
-				if(random.nextInt(120) == 0)
-					this.addMob(world, random, 0, 0, z);
+				if(random.nextInt(100) == 0)
+					this.addAncientHumanoid(world, random, 0, 0, z);
 			}
 		}
 

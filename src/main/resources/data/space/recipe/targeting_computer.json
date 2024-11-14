@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "c",
+        "a",
+        "b"
+    ],
+    "key": {
+        "a": {
+            "item": "space:advanced_circuit"
+        },
+        "b": {
+            "item": "space:riveted_aluminum"
+        },
+        "c": {
+            "item": "minecraft:glass"
+        }
+    },
+    "result": {
+        "id": "space:targeting_computer",
+        "count": 1
+    }
+}

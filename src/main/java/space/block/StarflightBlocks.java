@@ -164,7 +164,7 @@ public class StarflightBlocks
 	public static final Block REDSTONE_CLUSTER = new AmethystClusterBlock(7.0f, 3.0f, AbstractBlock.Settings.copy(Blocks.AMETHYST_CLUSTER).mapColor(MapColor.RED));
 	public static final Block DENSE_CLOUD = new DenseCloudBlock(AbstractBlock.Settings.copy(Blocks.POWDER_SNOW).solidBlock(Blocks::never).suffocates(Blocks::never).blockVision(Blocks::always));
 	public static final Block VOLCANIC_SLATE = new Block(AbstractBlock.Settings.copy(Blocks.DEEPSLATE));
-	public static final Block VOLCANIC_VENT = new VolcanicVentBlock(AbstractBlock.Settings.copy(Blocks.MAGMA_BLOCK));
+	public static final Block VOLCANIC_VENT = new VolcanicVentBlock(AbstractBlock.Settings.copy(Blocks.MAGMA_BLOCK).luminance(state -> 3));
 	public static final Block AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
 	public static final Block RED_AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
 	public static final Block PITCH_BLACK = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));

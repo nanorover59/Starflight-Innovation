@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " c ",
+        "bab",
+        " b "
+    ],
+    "key": {
+        "a": {
+            "item": "space:circuit"
+        },
+        "b": {
+            "item": "space:hematite"
+        },
+        "c": {
+            "item": "minecraft:compass"
+        }
+    },
+    "result": {
+        "id": "space:targeting_card",
+        "count": 1
+    }
+}

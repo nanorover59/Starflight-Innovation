@@ -75,7 +75,7 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 	@Override
 	public double getInput()
 	{
-		return 0.25;
+		return 0.1;
 	}
 	
 	@Override

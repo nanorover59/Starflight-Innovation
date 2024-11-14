@@ -30,6 +30,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 
@@ -53,7 +54,7 @@ public class BlockShellEntity extends HostileEntity implements AlienMobEntity
 
 	public static DefaultAttributeContainer.Builder createBlockShellAttributes()
 	{
-		return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 16.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 2.0);
+		return HostileEntity.createHostileAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 16.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0);
 	}
 
 	@Override
@@ -176,6 +177,23 @@ public class BlockShellEntity extends HostileEntity implements AlienMobEntity
 		
 		super.tick();
 	}
+	
+	@Override
+	public int getLimitPerChunk()
+	{
+		return 2;
+	}
+	
+	@Override
+	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
+	{
+		return true;
+	}
+	
+	public static boolean canBlockShellSpawn(EntityType<BlockShellEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
+	{
+        return random.nextInt(128) == 0 && world.isSkyVisible(pos);
+    }
 
 	@Override
 	public void writeCustomDataToNbt(NbtCompound nbt)
@@ -202,11 +220,5 @@ public class BlockShellEntity extends HostileEntity implements AlienMobEntity
 		}
 
 		this.setWearingBlock(blockState);
-	}
-
-	@Override
-	public boolean canSpawn(WorldAccess world, SpawnReason spawnReason)
-	{
-		return true;
 	}
 }

@@ -9,6 +9,7 @@ import net.minecraft.client.render.block.BlockRenderManager;
 import net.minecraft.client.render.entity.feature.FeatureRenderer;
 import net.minecraft.client.render.entity.feature.FeatureRendererContext;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.RotationAxis;
 import space.client.render.entity.model.BlockShellEntityModel;
 import space.entity.BlockShellEntity;
 
@@ -30,7 +31,8 @@ public class BlockShellFeatureRenderer extends FeatureRenderer<BlockShellEntity,
 		if(blockState != null)
 		{
 			matrixStack.push();
-			matrixStack.translate(-0.5F, blockShellEntity.isHiding() ? 0.5F : 0.25F, -0.5F);
+			matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(180.0F));
+			matrixStack.translate(-0.5F, blockShellEntity.isHiding() ? -1.5F : -1.25F, -0.5F);
 			this.blockRenderManager.renderBlockAsEntity(blockState, matrixStack, vertexConsumerProvider, i, OverlayTexture.DEFAULT_UV);
 			matrixStack.pop();
 		}

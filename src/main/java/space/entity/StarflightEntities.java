@@ -49,6 +49,7 @@ public class StarflightEntities
 		SpawnRestriction.register(STRATOFISH, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, StratofishEntity::canStratofishSpawn);
 		SpawnRestriction.register(CLOUD_SHARK, SpawnLocationTypes.UNRESTRICTED, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CloudSharkEntity::canCloudSharkSpawn);
 		SpawnRestriction.register(CAVE_LAMPREY, SpawnLocationTypes.IN_WATER, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CaveLampreyEntity::canCaveLampreySpawn);
+		SpawnRestriction.register(BLOCK_SHELL, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, BlockShellEntity::canBlockShellSpawn);
 	}
 	
 	private static <T extends Entity> EntityType<T> registerEntity(Identifier id, Builder<T> type)

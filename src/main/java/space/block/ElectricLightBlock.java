@@ -70,7 +70,7 @@ public class ElectricLightBlock extends BlockWithEntity implements BlockEntityPr
 	@Override
 	public double getInput()
 	{
-		return 0.25;
+		return 0.1;
 	}
 	
 	@Override

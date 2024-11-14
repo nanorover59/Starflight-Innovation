@@ -175,7 +175,7 @@ public class DustEntity extends HostileEntity implements AlienMobEntity
 	
 	public static boolean canDustSpawn(EntityType<DustEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random)
 	{
-		int chance = world.getServer().getOverworld().isRaining() ? 64 : 256;
+		int chance = world.getServer().getOverworld().isRaining() ? 64 : 128;
         return random.nextInt(chance) == 0 && world.isSkyVisible(pos) && world.getBlockState(pos.down()).getBlock() == StarflightBlocks.FERRIC_SAND;
     }
 	

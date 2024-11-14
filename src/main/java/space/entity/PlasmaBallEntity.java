@@ -61,7 +61,7 @@ public class PlasmaBallEntity extends AbstractFireballEntity
 	{
 		super.onCollision(hitResult);
 		World world = getWorld();
-
+		
 		if(world.isClient)
 			discard();
 		else
