@@ -26,8 +26,11 @@ public class SpaceSuitItem extends ArmorItem
 	{
 		if(this.getSlotType() == EquipmentSlot.CHEST && stack.contains(StarflightItems.OXYGEN))
 		{
-			DecimalFormat df = new DecimalFormat("#.##");
-			tooltip.add(Text.translatable("item.space.oxygen_tank_item.description").append(df.format(stack.get(StarflightItems.OXYGEN)) + "kg"));
+			DecimalFormat df = new DecimalFormat("#.#");
+			float oxygen = stack.get(StarflightItems.OXYGEN);
+			float maxOxygen = stack.get(StarflightItems.MAX_OXYGEN);
+			tooltip.add(Text.literal(df.format(oxygen) + " / " + df.format(maxOxygen) + " kg"));
+			tooltip.add(Text.literal(df.format((oxygen / maxOxygen) * 100.0f) + "%"));
 		}
 	}
 }

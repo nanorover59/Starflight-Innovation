@@ -1,17 +1,21 @@
 {
   "structures" : [
     {
-      "structure" : "space:biodome",
-      "weight" : 1
+      "structure" : "space:base",
+      "weight" : 2
     },
     {
       "structure" : "space:moonshaft",
+      "weight" : 2
+    },
+    {
+      "structure" : "space:biodome",
       "weight" : 1
     }
   ],
   "placement" : {
     "salt" : 95426513,
-    "spacing" : 64,
+    "spacing" : 48,
     "separation" : 12,
     "type" : "minecraft:random_spread"
   }

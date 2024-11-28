@@ -271,8 +271,8 @@ public class AirshipEntity extends MovingCraftEntity
 		float airDensity = (float) (data.getPressure() * 101325.0) / (t * 287.05f);
 		float height = (float) (getUpperHeight() - getLowerHeight());
 		float maxR = (float) Math.max(Math.max(getXWidth(), getZWidth()), height);
-		float drag = 0.5f * airDensity * (float) (Math.min(getXWidth() * height, getZWidth() * height) * Math.pow(getVelocity().length() * 20.0, 2.0));
-		float angularDrag = (float) Math.PI * airDensity * (float) Math.pow(maxR, 5.0) * 5.0f;
+		float drag = airDensity * (float) (Math.min(getXWidth() * height, getZWidth() * height) * Math.pow(getVelocity().length() * 20.0, 2.0));
+		float angularDrag = (float) Math.PI * airDensity * (float) Math.pow(maxR, 5.0) * 10.0f;
 		
 		if(energySupply > 0.0)
 		{

@@ -20,9 +20,11 @@ public class BatteryCellItem extends Item
 	{
 		if(stack.contains(StarflightItems.ENERGY))
 		{
-			DecimalFormat df = new DecimalFormat("#.##");
-			tooltip.add(Text.translatable("item.space.battery_cell.description").append(df.format(stack.get(StarflightItems.ENERGY)) + "kJ"));
-			//stack.setDamage((int) (getMaxDamage() * (MAX_CHARGE / stack.getNbt().getDouble("charge"))));
+			DecimalFormat df = new DecimalFormat("#.#");
+			float energy = stack.get(StarflightItems.ENERGY);
+			float maxEnergy = stack.get(StarflightItems.MAX_ENERGY);
+			tooltip.add(Text.literal(df.format(energy) + " / " + df.format(maxEnergy) + " kJ"));
+			tooltip.add(Text.literal(df.format((energy / maxEnergy) * 100.0f) + "%"));
 		}
 	}
 }

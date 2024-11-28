@@ -12,6 +12,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FacingBlock;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -90,6 +91,12 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	public BlockRenderType getRenderType(BlockState state)
 	{
 		return BlockRenderType.MODEL;
+	}
+	
+	@Override
+	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
+	{
+		return Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 15.99, 16.0);
 	}
 
 	@Override

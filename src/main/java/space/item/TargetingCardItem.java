@@ -26,7 +26,7 @@ public class TargetingCardItem extends Item
 		if(stack.contains(StarflightItems.PLANET_NAME))
 		{
 			if(stack.get(StarflightItems.PLANET_NAME).isEmpty())
-				tooltip.add(Text.translatable("item.space.targeting_card.unset"));
+				StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("item.space.targeting_card.unset"));
 			else
 			{
 				if(stack.get(StarflightItems.PLANET_NAME).endsWith("_orbit"))
