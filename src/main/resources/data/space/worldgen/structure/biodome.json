@@ -9,5 +9,5 @@
     "space:mars_ice"
   ],
   "step" : "surface_structures",
-  "spawn_overrides" : {}
+  "spawn_overrides": {}
 }

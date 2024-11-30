@@ -16,7 +16,6 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.VertexBuffer;
-import net.minecraft.client.render.BackgroundRenderer;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
@@ -41,7 +40,7 @@ import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 @Environment(value=EnvType.CLIENT)
-@Mixin(value = WorldRenderer.class, priority = 1600)	
+@Mixin(value = WorldRenderer.class)	
 public abstract class WorldRendererMixin
 {
 	@Shadow @Final private MinecraftClient client;
@@ -61,7 +60,8 @@ public abstract class WorldRendererMixin
 	@Shadow @Final private static Identifier MOON_PHASES;
 	@Shadow @Final private static Identifier CLOUDS;
 	
-	@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
+	//@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("RETURN"))
 	public void renderSkyInject(Matrix4f matrix4f, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean thickFog, Runnable fogCallback, CallbackInfo info)
 	{
 		Planet viewpointPlanet = PlanetList.getClient().getViewpointPlanet();
@@ -84,22 +84,21 @@ public abstract class WorldRendererMixin
 			Tessellator tessellator = Tessellator.getInstance();
 			MatrixStack matrixStack = new MatrixStack();
 	        matrixStack.multiplyPositionMatrix(matrix4f);
-			BackgroundRenderer.clearFog();
-			RenderSystem.depthMask(false);
-			RenderSystem.disableBlend();
-			//RenderSystem.disableTexture();
+	        
+	        //RenderSystem.disableDepthTest();
+	        RenderSystem.depthMask(false);
+	        RenderSystem.enableBlend();
+	        RenderSystem.defaultBlendFunc();
 			
 			// Ensure a black background.
-			RenderSystem.setShaderColor(0.0f, 0.0f, 0.0f, 1.0f);
-			RenderSystem.setShader(GameRenderer::getPositionProgram);
-			BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION);
-			bufferBuilder.vertex(projectionMatrix, -10.0f, -10.0f, 0.0f);
-			bufferBuilder.vertex(projectionMatrix,  10.0f, -10.0f, 0.0f);
-			bufferBuilder.vertex(projectionMatrix,  10.0f,  10.0f, 0.0f);
-			bufferBuilder.vertex(projectionMatrix, -10.0f,  10.0f, 0.0f);
+			RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+			RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/environment/background.png"));
+			BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE_COLOR);
+			bufferBuilder.vertex(projectionMatrix, -1.0f, -1.0f, 0.0f).texture(0.0f, 0.0f).color(0.0f, 0.0f, 0.0f, 1.0f);
+			bufferBuilder.vertex(projectionMatrix,  1.0f, -1.0f, 0.0f).texture(1.0f, 0.0f).color(0.0f, 0.0f, 0.0f, 1.0f);
+			bufferBuilder.vertex(projectionMatrix,  1.0f,  1.0f, 0.0f).texture(1.0f, 1.0f).color(0.0f, 0.0f, 0.0f, 1.0f);
+			bufferBuilder.vertex(projectionMatrix, -1.0f,  1.0f, 0.0f).texture(0.0f, 1.0f).color(0.0f, 0.0f, 0.0f, 1.0f);
 			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
 			
 			// Render the stars and milky way.
 			Vec3d viewpointVector = viewpoint.subtract(viewpointPlanetPosition);
@@ -124,8 +123,7 @@ public abstract class WorldRendererMixin
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrixStack.peek().getPositionMatrix();
-				float milkyWayFactor = 0.8f;
-				//RenderSystem.enableTexture();
+				float milkyWayFactor = 0.6f;
 				RenderSystem.setShader(GameRenderer::getPositionProgram);
 				RenderSystem.setShaderColor(starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor, starFactor * milkyWayFactor);
 				RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/environment/milky_way.png"));
@@ -148,112 +146,105 @@ public abstract class WorldRendererMixin
 				PlanetRenderer.render(planet, matrixStack, tickDelta, celestialFactor, s < 0.95f);
 			
 			// Apply the bloom shader effect for players with fabulous graphics.
-			if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightRenderEffects.bloomShader != null && starFactor > 0.5f)
+			/*if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightRenderEffects.bloomShader != null && starFactor > 0.5f)
 			{
 				StarflightRenderEffects.bloomShader.render(tickDelta);
 				client.getFramebuffer().beginWrite(false);
-			}
+			}*/
 			
-			// Apply the sky color on atmospheric planets.
-			if(!starrySky)
+			// Apply the sky color.
+			Vec3d skyRGB = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
+			float skyR = (float) skyRGB.getX();
+			float skyG = (float) skyRGB.getY();
+			float skyB = (float) skyRGB.getZ();
+			float v = MathHelper.clamp(MathHelper.cos(world.getSkyAngle(tickDelta) * ((float) Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
+			Vec3d vec3d = client.gameRenderer.getCamera().getPos().subtract(2.0, 2.0, 2.0).multiply(0.25);
+			Vec3d fogRGB = CubicSampler.sampleColor(vec3d, (x, y, z) -> world.getDimensionEffects().adjustFogColor(Vec3d.unpackRgb(client.world.getBiomeForNoiseGen(x, y, z).value().getFogColor()), v));
+			float fogR = (float) fogRGB.getX();
+			float fogG = (float) fogRGB.getY();
+			float fogB = (float) fogRGB.getZ();
+			float fogYOffset = 0.0f;
+			float rain = world.getRainGradient(tickDelta);
+			float thunder = world.getThunderGradient(tickDelta);
+			float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
+
+			if(rain > 0.0f)
 			{
-				Vec3d skyRGB = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
-				float skyR = (float) skyRGB.getX();
-				float skyG = (float) skyRGB.getY();
-				float skyB = (float) skyRGB.getZ();
-				float v = MathHelper.clamp(MathHelper.cos(world.getSkyAngle(tickDelta) * ((float)Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
-				Vec3d vec3d = client.gameRenderer.getCamera().getPos().subtract(2.0, 2.0, 2.0).multiply(0.25);
-				Vec3d fogRGB = CubicSampler.sampleColor(vec3d, (x, y, z) -> world.getDimensionEffects().adjustFogColor(Vec3d.unpackRgb(client.world.getBiomeForNoiseGen(x, y, z).value().getFogColor()), v));
-				float fogR = (float) fogRGB.getX();
-				float fogG = (float) fogRGB.getY();
-				float fogB = (float) fogRGB.getZ();
-				float fogYOffset = 0.0f;
-				float rain = world.getRainGradient(tickDelta);
-				float thunder = world.getThunderGradient(tickDelta);
-				float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
-	            
-				if(rain > 0.0f)
-				{
-					float rgFactor = 1.0f - rain * 0.5f;
-					float bFactor = 1.0f - rain * 0.4f;
-					fogR *= rgFactor;
-					fogG *= rgFactor;
-					fogB *= bFactor;
-				}
-				
-				if(thunder > 0.0f)
-				{
-					float factor = 1.0f - rain * 0.5f;
-					fogR *= factor;
-					fogG *= factor;
-					fogB *= factor;
-				}
-				
-				if(dimensionData.isSky() && viewpointPlanet.hasCloudCover())
-		        	fogYOffset = 128.0f * MathHelper.clamp(1.0f - (float) Math.abs(client.world.getBottomY() - camera.getPos().getY()) / 128.0f, 0.0f, 1.0f);
-				
-				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
-				RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-				RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-				//Matrix4f matrix4f = matrixStack.peek().getPositionMatrix();
-		        bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		        bufferBuilder.vertex(matrix4f, 0.0f, fogYOffset + 16.0f, 0.0f).color(skyR, skyG, skyB, 0.8f);
-		        
-		        for(int i = 0; i <= 16; i++)
+				float rgFactor = 1.0f - rain * 0.5f;
+				float bFactor = 1.0f - rain * 0.4f;
+				fogR *= rgFactor;
+				fogG *= rgFactor;
+				fogB *= bFactor;
+			}
+
+			if(thunder > 0.0f)
+			{
+				float factor = 1.0f - rain * 0.5f;
+				fogR *= factor;
+				fogG *= factor;
+				fogB *= factor;
+			}
+
+			if(dimensionData.isSky() && viewpointPlanet.hasCloudCover())
+				fogYOffset = 128.0f * MathHelper.clamp(1.0f - (float) Math.abs(client.world.getBottomY() - camera.getPos().getY()) / 128.0f, 0.0f, 1.0f);
+
+			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+			RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
+			RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/environment/background.png"));
+			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+			bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
+			bufferBuilder.vertex(matrix4f, 0.0f, fogYOffset + 16.0f, 0.0f).texture(0.5f, 0.5f).color(skyR, skyG, skyB, 0.8f);
+
+			for(int i = 0; i <= 16; i++)
+			{
+				float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+				float sinTheta = MathHelper.sin(theta);
+				float cosTheta = MathHelper.cos(theta);
+				bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, range * sinTheta).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(fogR, fogG, fogB, 0.8f);
+			}
+
+			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+			bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
+			bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).texture(0.5f, 0.5f).color(fogR, fogG, fogB, 0.8f);
+
+			for(int i = 0; i <= 16; i++)
+			{
+				float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+				float sinTheta = MathHelper.sin(theta);
+				float cosTheta = MathHelper.cos(theta);
+				bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, -range * sinTheta).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(fogR, fogG, fogB, 0.8f);
+			}
+
+			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+
+			// Render the sunset effect.
+			float skyAngle = (float) trueAzimuth;
+			float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
+
+			if(fs != null)
+			{
+				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+				matrixStack.push();
+				matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0f));
+				matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(this.world.getSkyAngleRadians(tickDelta)) < 0.0f ? 180.0f : 0.0f));
+				matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0f));
+				matrix4f = matrixStack.peek().getPositionMatrix();
+				bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
+				bufferBuilder.vertex(matrix4f, 0.0f, 0.0f, 16.0f).texture(0.5f, 0.5f).color(fs[0], fs[1], fs[2], fs[3]);
+
+				for(int i = 0; i <= 16; i++)
 				{
 					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
 					float sinTheta = MathHelper.sin(theta);
 					float cosTheta = MathHelper.cos(theta);
-		        	bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, range * sinTheta).color(fogR, fogG, fogB, 0.8f);
+					bufferBuilder.vertex(matrix4f, range * sinTheta, range * cosTheta, -cosTheta * 64.0f * fs[3]).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(0.0f, 0.0f, 0.0f, 0.0f);
 				}
-		        
-		        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-		        bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		        bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).color(fogR, fogG, fogB, 0.8f);
-		        
-		        for(int i = 0; i <= 16; i++)
-				{
-					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
-					float sinTheta = MathHelper.sin(theta);
-					float cosTheta = MathHelper.cos(theta);
-		        	bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, -range * sinTheta).color(fogR, fogG, fogB, 0.8f);
-				}
-		        
-		        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-		        
-				// Render the sunset effect.
-				float skyAngle = (float) trueAzimuth;
-				float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
-				
-				if(fs != null)
-				{
-					RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-					matrixStack.push();
-					matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0f));
-		            matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(this.world.getSkyAngleRadians(tickDelta)) < 0.0f ? 180.0f : 0.0f));
-		            matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0f));
-		            matrix4f = matrixStack.peek().getPositionMatrix();
-					bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-					bufferBuilder.vertex(matrix4f, 0.0f, 100.0f, 0.0f).color(fs[0], fs[1], fs[2], fs[3]);
 
-					for(int i = 0; i <= 16; i++)
-					{
-						float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
-						float sinTheta = MathHelper.sin(theta);
-						float cosTheta = MathHelper.cos(theta);
-						bufferBuilder.vertex(matrix4f, sinTheta * 120.0f, cosTheta * 120.0f, -cosTheta * 40.0f * fs[3]).color(fs[0], fs[1], fs[2], 0.0f);
-					}
-
-					BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-					matrixStack.pop();
-				}
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+				matrixStack.pop();
 			}
 			
-			// End of custom sky rendering.
-			//RenderSystem.enableTexture();
 			RenderSystem.depthMask(true);
-			RenderSystem.disableBlend();
-			info.cancel();
 		}
 	}
 	

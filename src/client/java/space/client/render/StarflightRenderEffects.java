@@ -109,7 +109,7 @@ public class StarflightRenderEffects
 			float d = random.nextFloat() * 2.0f - 1.0f;
 			float e = random.nextFloat() * 2.0f - 1.0f;
 			float f = random.nextFloat() * 2.0f - 1.0f;
-			float g = 0.4f * (1.0f + (random.nextFloat() * 0.1f)); // Star size.
+			float g = 0.5f * (1.0f + (random.nextFloat() * 0.1f)); // Star size.
 			float h = d * d + e * e + f * f;
 
 			if(h < 0.01 || h > 1.0)

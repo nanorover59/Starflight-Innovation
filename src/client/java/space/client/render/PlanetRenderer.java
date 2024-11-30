@@ -92,7 +92,7 @@ public class PlanetRenderer
 				if(!weather)
 					brightness = 1.0f;
 				
-				RenderSystem.setShaderColor(brightness, brightness, brightness, 0.95f);
+				RenderSystem.setShaderColor(brightness, brightness, brightness, 1.0f);
 				RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 				RenderSystem.setShaderTexture(0, getTexture(planet.getName() + "_haze"));
 				BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
