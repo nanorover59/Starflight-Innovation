@@ -33,6 +33,7 @@
       "minecraft:underwater_magma"
     ],
     [
+      "space:freeze_water",
       "space:mars_roots_water",
       "space:redstone_cluster_water"
     ],

@@ -1,0 +1,8 @@
+{
+  "feature": "space:freeze_water",
+  "placement": [
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -42,6 +42,9 @@ public class StarflightWorldGeneration
 	// Aeroplankton Feature
 	public static final Feature<DefaultFeatureConfig> AEROPLANKTON = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "aeroplankton"), new AeroplanktonFeature(DefaultFeatureConfig.CODEC));
 
+	// Freeze Water Feature
+	public static final Feature<DefaultFeatureConfig> FREEZE_WATER = Registry.register(Registries.FEATURE, Identifier.of(StarflightMod.MOD_ID, "freeze_water"), new FreezeWaterFeature(DefaultFeatureConfig.CODEC));
+	
 	// Impact Crater Carver
 	public static final Carver<CraterCarverConfig> CRATER_CARVER = Registry.register(Registries.CARVER, Identifier.of(StarflightMod.MOD_ID, "crater"), new CraterCarver(CraterCarverConfig.CRATER_CODEC));
 
