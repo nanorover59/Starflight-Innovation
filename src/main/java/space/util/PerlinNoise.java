@@ -10,7 +10,7 @@ public class PerlinNoise
 	public PerlinNoise(long ... seeds)
 	{
 		permutation = new int[PERMUTATION_SIZE * 2]; // Double the array to avoid overflow.
-		Random random = new Random(combineSeeds());
+		Random random = new Random(combineSeeds(seeds));
 
 		// Fill permutation array with values 0 to 255 and shuffle.
 		int[] perm = new int[PERMUTATION_SIZE];

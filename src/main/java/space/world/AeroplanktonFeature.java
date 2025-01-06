@@ -38,7 +38,7 @@ public class AeroplanktonFeature extends Feature<DefaultFeatureConfig>
 		Vector3f vector = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
 		Vector3f axis = new Vector3f(random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat(), random.nextFloat() - random.nextFloat()).normalize();
 		vector.rotateAxis((float) (Math.PI * 2.0) * random.nextFloat(), axis.x(), axis.y(), axis.z());
-			
+		
 		for(int i = 0; i < divisions; i++)
 		{
 			Vector3f pos = new Vector3f(origin.getX(), origin.getY(), origin.getZ());

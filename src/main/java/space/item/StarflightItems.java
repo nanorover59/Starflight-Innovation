@@ -8,7 +8,10 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.Block;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.component.type.FoodComponents;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ArmorMaterial;
@@ -81,6 +84,9 @@ public class StarflightItems
 		map.put(ArmorItem.Type.BODY, 5);
     }), 15, SoundEvents.ITEM_ARMOR_EQUIP_CHAIN, 0.0f, 0.0f, () -> Ingredient.ofItems(StarflightItems.AEROGEL), List.of(new ArmorMaterial.Layer(Identifier.ofVanilla("thermal"), "", false)));
 	
+	// Food Components
+	public static final FoodComponent VURNBERRY_FOOD_COMPONENT = new FoodComponent.Builder().nutrition(2).saturationModifier(0.1F).statusEffect(new StatusEffectInstance(StatusEffects.FIRE_RESISTANCE, 600, 1), 1.0F).build();
+	
 	// Items
 	public static final Item ALUMINUM_INGOT = new Item(new Settings());
 	public static final Item BAUXITE = new Item(new Settings());
@@ -97,6 +103,7 @@ public class StarflightItems
 	public static final Item CHEESE = new Item(new Settings().food(FoodComponents.APPLE));
 	public static final Item MARS_POTATO = new AliasedBlockItem(StarflightBlocks.MARS_POTATOES, new Item.Settings().food(FoodComponents.POTATO));
 	public static final Item MARS_BAKED_POTATO = new Item(new Settings().food(FoodComponents.BAKED_POTATO));
+	public static final Item VURNBERRY = new Item(new Settings().food(VURNBERRY_FOOD_COMPONENT));
 	public static final Item IRON_PLATE = new Item(new Settings());
 	public static final Item ALUMINUM_PLATE = new Item(new Settings());
 	public static final Item TITANIUM_PLATE = new Item(new Settings());
@@ -206,6 +213,7 @@ public class StarflightItems
 		registerItem(CHEESE, "cheese");
 		registerAliasedBlockItem(MARS_POTATO, "mars_potatoes", "mars_potato");
 		registerItem(MARS_BAKED_POTATO, "mars_baked_potato");
+		registerItem(VURNBERRY, "vurnberry");
 		registerItem(IRON_PLATE, "iron_plate");
 		registerItem(ALUMINUM_PLATE, "aluminum_plate");
 		registerItem(TITANIUM_PLATE, "titanium_plate");

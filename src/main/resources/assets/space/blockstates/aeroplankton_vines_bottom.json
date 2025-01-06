@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "berries=false": {
+      "model": "space:block/aeroplankton_vines_bottom"
+    },
+    "berries=true": {
+      "model": "space:block/aeroplankton_vines_bottom_berries"
+    }
+  }
+}

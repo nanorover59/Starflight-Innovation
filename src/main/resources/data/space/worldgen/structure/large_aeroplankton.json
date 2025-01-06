@@ -1,0 +1,9 @@
+{
+  "type" : "space:large_aeroplankton",
+  "biomes": [
+    "space:venus_sky",
+    "space:venus_plankton_bloom"
+  ],
+  "step" : "raw_generation",
+  "spawn_overrides" : {}
+}

@@ -14,6 +14,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.BulbBlock;
 import net.minecraft.block.CarpetBlock;
+import net.minecraft.block.CaveVines;
+import net.minecraft.block.CaveVinesHeadBlock;
 import net.minecraft.block.ColoredFallingBlock;
 import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.block.ExperienceDroppingBlock;
@@ -167,6 +169,8 @@ public class StarflightBlocks
 	public static final Block VOLCANIC_VENT = new VolcanicVentBlock(AbstractBlock.Settings.copy(Blocks.MAGMA_BLOCK).luminance(state -> 3));
 	public static final Block AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
 	public static final Block RED_AEROPLANKTON = new Block(AbstractBlock.Settings.copy(Blocks.MOSS_BLOCK));
+	public static final Block AEROPLANKTON_VINES = new AeroplanktonVinesBodyBlock(AbstractBlock.Settings.copy(Blocks.CAVE_VINES));
+	public static final Block AEROPLANKTON_VINES_BOTTOM = new AeroplanktonVinesHeadBlock(AbstractBlock.Settings.copy(Blocks.CAVE_VINES_PLANT));
 	public static final Block PITCH_BLACK = new Block(AbstractBlock.Settings.copy(Blocks.IRON_BLOCK).strength(256.0f, 256.0f));
 	public static final Block SOLARIZED_REGOLITH = new HotRegolith(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.STONE_GRAY).strength(0.5F));
 	public static final Block SEARING_REGOLITH = new HotRegolith(new ColorCode(-8356741), AbstractBlock.Settings.copy(Blocks.GRAVEL).mapColor(MapColor.ORANGE).strength(0.5F));
@@ -345,6 +349,8 @@ public class StarflightBlocks
 		initializeBlock(VOLCANIC_VENT, "volcanic_vent");
 		initializeBlock(AEROPLANKTON, "aeroplankton");
 		initializeBlock(RED_AEROPLANKTON, "red_aeroplankton");
+		initializeBlock(AEROPLANKTON_VINES, "aeroplankton_vines");
+		initializeBlock(AEROPLANKTON_VINES_BOTTOM, "aeroplankton_vines_bottom", false, List.of(), List.of());
 		initializeBlock(PITCH_BLACK, "pitch_black", false, List.of(), List.of());
 		initializeBlock(SOLARIZED_REGOLITH, "solarized_regolith");
 		initializeBlock(SEARING_REGOLITH, "searing_regolith");

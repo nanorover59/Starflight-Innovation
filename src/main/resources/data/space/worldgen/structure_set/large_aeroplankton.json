@@ -1,0 +1,14 @@
+{
+  "structures" : [
+    {
+      "structure" : "space:large_aeroplankton",
+      "weight" : 1
+    }
+  ],
+  "placement" : {
+    "salt" : 78492456,
+    "spacing" : 16,
+    "separation" : 8,
+    "type" : "minecraft:random_spread"
+  }
+}

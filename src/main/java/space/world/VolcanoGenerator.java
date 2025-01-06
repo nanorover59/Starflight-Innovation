@@ -92,7 +92,6 @@ public class VolcanoGenerator
 		BlockPos center = pos.add(random.nextInt(16), surfaceY - 8, random.nextInt(16));
 		int chunkRadius = (baseRadius >> 4) + 2;
 		
-		
 		for(int x = -chunkRadius; x <= chunkRadius; x++)
 		{
 			for(int z = -chunkRadius; z <= chunkRadius; z++)

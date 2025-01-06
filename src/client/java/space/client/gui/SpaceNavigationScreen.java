@@ -1,6 +1,7 @@
 package space.client.gui;
 
-import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
 
 import org.joml.Matrix4f;
 import org.lwjgl.glfw.GLFW;
@@ -12,7 +13,8 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gl.Framebuffer;
+import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.BufferBuilder;
@@ -23,8 +25,8 @@ import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.NarratorManager;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
@@ -39,14 +41,21 @@ import space.planet.PlanetList;
 @Environment(EnvType.CLIENT)
 public class SpaceNavigationScreen extends Screen
 {
+	private static final Identifier GUI_ELEMENTS = Identifier.of(StarflightMod.MOD_ID, "textures/gui/planet_map.png");
     private static final Identifier SELECTION_TEXTURE = Identifier.of(StarflightMod.MOD_ID, "textures/gui/planet_selection.png");
     private static final int MARGIN = 12;
-    private static final int GREEN = 0xFF6ABE30;
-	private static final int RED = 0xFFDC3222;
+	private static final int ORBIT_LINES = 0xFF614566;
+	private static final int ORBIT_LINES_HIGHLIGHT = 0xFF9652A3;
+	private static Framebuffer orbitLinesBuffer;
 	private boolean mouseHold = false;
 	private double scaleFactor = 4.0e-10;
-	private static double transferDeltaV;
+	private static double transferDV;
+	private static double surfaceToOrbitDV;
+	private static double orbitToSurfaceDV;
+	private static boolean fromOrbit;
+	private static boolean toOrbit;
     private double deltaV;
+    private ArrayList<Planet> planetsToRender = new ArrayList<Planet>();
 	private Planet selectedPlanet = null;
 	private Planet calculationPlanetFrom = null;
 	private Planet calculationPlanetTo = null;
@@ -55,6 +64,11 @@ public class SpaceNavigationScreen extends Screen
 	{
 		super(NarratorManager.EMPTY);
 		this.deltaV = deltaV;
+		transferDV = 0;
+		surfaceToOrbitDV = 0;
+		orbitToSurfaceDV = 0;
+		fromOrbit = false;
+		toOrbit = false;
 	}
 	
 	@Override
@@ -72,7 +86,14 @@ public class SpaceNavigationScreen extends Screen
 	@Override
     protected void init()
 	{
-		//transferDeltaV = 0.0;
+		if(orbitLinesBuffer != null)
+			orbitLinesBuffer.delete();
+		
+		int frameWidth = client.getWindow().getFramebufferWidth();
+		int frameHeight = client.getWindow().getFramebufferHeight();
+		int bufferWidth = 512;
+		int bufferHeight = (int) (bufferWidth * ((float) frameHeight / (float) frameWidth));
+		orbitLinesBuffer = new SimpleFramebuffer(bufferWidth, bufferHeight, false, MinecraftClient.IS_SYSTEM_MAC);
 		
         ScreenMouseEvents.afterMouseScroll(this).register((screen, mouseX, mouseY, horizontalAmount, verticalAmount) -> {
             if(verticalAmount < 0)
@@ -88,67 +109,69 @@ public class SpaceNavigationScreen extends Screen
 		PlanetList planetList = PlanetList.getClient();
 		
 		if(selectedPlanet == null)
-			selectedPlanet = planetList.getByName("sol");
+			selectPlanet(planetList, planetList.getByName("sol"));
 		
 		if(selectedPlanet == null)
 			return;
 		
-		int x = width / 2;
-		int y = height / 2;
 		boolean mouseDown = GLFW.glfwGetMouseButton(MinecraftClient.getInstance().getWindow().getHandle(), GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		MinecraftClient client = MinecraftClient.getInstance();
-		Planet currentPlanet = planetList.getViewpointPlanet();
-		double selectedPlanetX = selectedPlanet.getPosition().getX() * scaleFactor;
-		double selectedPlanetY = selectedPlanet.getPosition().getZ() * scaleFactor;
-		double focusX = selectedPlanetX;
-		double focusY = selectedPlanetY;
-		boolean nothingSelected = mouseDown;
+		Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
+		int hoverPlanet = -1;
 		
 		if(!mouseDown)
 			mouseHold = false;
 		
 		// Render the displayed planets.
-		context.fill(0, 0, width, height, -100, 0xFF000000);
+		int x = (orbitLinesBuffer.textureWidth / 2) - 42;
+		int y = (orbitLinesBuffer.textureHeight / 2) - 20;
+		int sideButtonX = 4;
+		int sideButtonY = 4;
+		context.fill(0, 0, width, height, 0, 0xFF000000);
+		orbitLinesBuffer.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		orbitLinesBuffer.clear(MinecraftClient.IS_SYSTEM_MAC);
+		orbitLinesBuffer.beginWrite(false);
 		
-		for(int i = 0; i < planetList.getPlanets().size(); i++)
+		for(int i = 0; i < planetsToRender.size(); i++)
 		{
-			// Planet planet = planetList.get(i);
-			Planet planet = planetList.getPlanets().get(i);
-
-			if(planet != selectedPlanet && planet.getParent() != selectedPlanet)
-				continue;
-
+			Planet planet = planetsToRender.get(i);
 			int renderType = planet.getName().equals("sol") ? 1 : 0;
 			float renderWidth = Math.max(planet == selectedPlanet ? 8.0f : 4.0f, (float) (planet.getRadius() * scaleFactor));
-			float px = (float) ((planet.getPosition().getX() * scaleFactor) + x - focusX);
-			float py = (float) ((planet.getPosition().getZ() * scaleFactor) + y - focusY);
-			Matrix4f matrix = context.getMatrices().peek().getPositionMatrix();
-
-			// drawGlow(matrix, px, py, 8.0f, 1.0f, 1.0f, 1.0f);
-			// !planet.unlocked || 
+			float px = (float) (((planet.getPosition().getX() - selectedPlanet.getPosition().getX()) * scaleFactor) + x);
+			float py = (float) (((planet.getPosition().getZ() - selectedPlanet.getPosition().getZ()) * scaleFactor) + y);
+			
+			// Skip planets too close to the center at scale.
 			if(planet != selectedPlanet && Math.sqrt(Math.pow(px - x, 2.0) + Math.pow(py - y, 2.0)) < 8.0)
 				continue;
 
-			// Draw the planet's orbit in the GUI.
-			drawOrbitEllipse(matrix, planet, (float) x, (float) y, 256);
-
-			if(!inBounds(px, py))
-				continue;
-
-			// Draw the planet in the GUI.
+			// Check if the mouse cursor is hovering over any planet or its side button.
 			int selection = planetSelect(client, px, py, renderWidth, mouseX, mouseY, mouseDown);
+			
+			if(!planet.equals(selectedPlanet))
+			{
+				sideButtonY += 16;
+				
+				if(selection == 0 && mouseX > sideButtonX && mouseX < sideButtonX + 78 && mouseY > sideButtonY && mouseY < sideButtonY + 14)
+					selection = mouseDown ? 2 : 1;
+			}
+			
+			// Draw the planet's orbit in the GUI.
+			drawOrbitEllipse(matrix, planet, (float) x, (float) y, 256, scaleFactor, selection > 0 ? ORBIT_LINES_HIGHLIGHT : ORBIT_LINES);
+			
+			// Draw the planet in the GUI.
 			RenderSystem.setShaderTexture(0, renderType == 1 ? Identifier.of(StarflightMod.MOD_ID, "textures/environment/sol.png") : PlanetRenderer.getTexture(planet.getName()));
 
 			if(renderType == 1)
 			{
-				drawGlow(matrix, px, py, 16.0f, 1.0f, 1.0f, 1.0f);
+				drawGlow(matrix, px, py, 32.0f, 1.0f, 1.0f, 1.0f);
 				drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 			}
 			else if(planet.hasSimpleTexture())
 				drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth);
 			else
 				drawTexturedQuad(matrix, px, py, (8.0f / 16.0f) - (1.0f / 16.0f), 0.0f, (8.0f / 16.0f), 1.0f, renderWidth);
-
+			
+			
 			if(mouseHold || planet == selectedPlanet)
 				continue;
 
@@ -156,94 +179,157 @@ public class SpaceNavigationScreen extends Screen
 			{
 				RenderSystem.setShaderTexture(0, SELECTION_TEXTURE);
 				drawTexturedQuad(matrix, px, py, 0.0f, 0.0f, 1.0f, 1.0f, renderWidth * 1.5f);
+				hoverPlanet = i;
 
 				if(selection > 1)
-				{
-					selectedPlanet = planet;
-					mouseHold = true;
-					nothingSelected = false;
-					scaleFactor = getInitialScaleFactor(selectedPlanet);
-					
-					if(deltaV >= 0.0)
-						transferDeltaV = currentPlanet.dVToPlanet(selectedPlanet);
-				}
+					selectPlanet(planetList, planet);
 			}
 		}
 		
+		orbitLinesBuffer.endWrite();
+	    client.getFramebuffer().beginWrite(false);
+	    RenderSystem.enableBlend();
+	    RenderSystem.defaultBlendFunc();
+	    orbitLinesBuffer.draw(client.getWindow().getFramebufferWidth(), client.getWindow().getFramebufferHeight(), false);
+	    RenderSystem.disableBlend();
 		x = MARGIN;
 		y = MARGIN;
-        DecimalFormat df = new DecimalFormat("#.#");
         
+        // Planet Selection Buttons
+        sideButtonY = 4;
+        Text selectedPlanetName = Text.translatable("planet.space." + selectedPlanet.getName());
+        context.drawTexture(GUI_ELEMENTS, (width / 2) - 45, 4, 0, 48, 90, 16);
+        context.drawText(textRenderer, selectedPlanetName, (width / 2) - textRenderer.getWidth(selectedPlanetName) / 2, 8, Colors.WHITE, false);
+        
+        for(int i = 0; i < planetsToRender.size(); i++)
+		{
+			Planet planet = planetsToRender.get(i);
+			
+			if(planet.equals(selectedPlanet))
+				continue;
+			
+			sideButtonY += 16;
+			context.drawTexture(GUI_ELEMENTS, sideButtonX, sideButtonY, 0, hoverPlanet == i ? 14 : 0, 78, 14);
+			context.drawText(textRenderer, Text.translatable("planet.space." + planet.getName()), sideButtonX + 4, sideButtonY + 3, Colors.WHITE, false);
+        }
+        
+        boolean backHover = mouseX > sideButtonX && mouseX < sideButtonX + 78 && mouseY > 4 && mouseY < 18;
+        context.drawTexture(GUI_ELEMENTS, sideButtonX, 4, 0, selectedPlanet.getParent() == null ? 28 : (backHover ? 14 : 0), 78, 14);
+		context.drawText(textRenderer, Text.literal("..."), sideButtonX + 4, 7, Colors.WHITE, false);
+        
+		if(backHover && mouseDown && !mouseHold && selectedPlanet.getParent() != null)
+			selectPlanet(planetList, selectedPlanet.getParent());
+		
+		int rightSideX = width - 82;
+		
         if(deltaV < 0.0)
         {
-        	// Planetarium screen text and buttons.
+        	boolean departureHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > 4 && mouseY < 36;
+        	boolean arrivalHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > 38 && mouseY < 70;
+        	context.drawTexture(GUI_ELEMENTS, rightSideX, 4, 96, departureHover ? 32 : 0, 78, 32);
+        	context.drawTexture(GUI_ELEMENTS, rightSideX, 38, 96, arrivalHover ? 32 : 0, 78, 32);
+        	context.drawTexture(GUI_ELEMENTS, rightSideX, 78, 96, 64, 78, 32);
+        	context.drawText(textRenderer, Text.translatable("space.navigation.departure"), rightSideX + 4, 8, Colors.WHITE, false);
+        	context.drawText(textRenderer, Text.translatable("space.navigation.arrival"), rightSideX + 4, 42, Colors.WHITE, false);
+        	context.drawText(textRenderer, Text.translatable("space.navigation.deltav"), rightSideX + 4, 82, Colors.WHITE, false);
+        	
         	if(calculationPlanetFrom != null)
         	{
-        		MutableText toOrbit = Text.translatable("space.navigation.to_orbit").append(df.format(calculationPlanetFrom.dVSurfaceToOrbit())).append("m/s");
-        		MutableText toSurface = Text.translatable("space.navigation.to_surface").append(df.format(calculationPlanetFrom.dVOrbitToSurface())).append("m/s");
-        		selectButton(context, textRenderer, Text.translatable("planet.space." + calculationPlanetFrom.getName()), true, x, y, mouseX, mouseY, mouseDown);
-        		context.drawTextWithShadow(textRenderer, toOrbit, x, y + 14, GREEN);
-        		context.drawTextWithShadow(textRenderer, toSurface, x, y + 28, GREEN);
+        		context.drawText(textRenderer, Text.translatable("planet.space." + calculationPlanetFrom.getName()), rightSideX + 4, 17, Colors.WHITE, false);
+        		context.drawText(textRenderer, Text.translatable("space.navigation." + (fromOrbit ? "orbit" : "surface")), rightSideX + 4, 26, Colors.LIGHT_GRAY, false);
         	}
-        	else
-        		selectButton(context, textRenderer, Text.translatable("space.navigation.select_from"), true, x, y, mouseX, mouseY, mouseDown);
         	
         	if(calculationPlanetTo != null)
         	{
-        		MutableText toOrbit = Text.translatable("space.navigation.to_orbit").append(df.format(calculationPlanetTo.dVSurfaceToOrbit())).append("m/s");
-        		MutableText toSurface = Text.translatable("space.navigation.to_surface").append(df.format(calculationPlanetTo.dVOrbitToSurface())).append("m/s");
-        		x = width - (Math.max(textRenderer.getWidth(toOrbit), textRenderer.getWidth(toSurface)) + MARGIN);
-        		selectButton(context, textRenderer, Text.translatable("planet.space." + calculationPlanetTo.getName()), false, x, y, mouseX, mouseY, mouseDown);
-        		context.drawTextWithShadow(textRenderer, toOrbit, x, y + 14, GREEN);
-        		context.drawTextWithShadow(textRenderer, toSurface, x, y + 28, GREEN);
+        		context.drawText(textRenderer, Text.translatable("planet.space." + calculationPlanetTo.getName()), rightSideX + 4, 51, Colors.WHITE, false);
+        		context.drawText(textRenderer, Text.translatable("space.navigation." + (toOrbit ? "orbit" : "surface")), rightSideX + 4, 60, Colors.LIGHT_GRAY, false);
         	}
-        	else
-        		selectButton(context, textRenderer, Text.translatable("space.navigation.select_to"), false, width - (textRenderer.getWidth(Text.translatable("space.navigation.select_to")) + MARGIN), y, mouseX, mouseY, mouseDown);
-        
+        	
+        	double totalDV = (fromOrbit ? 0 : surfaceToOrbitDV) + (toOrbit ? 0 : orbitToSurfaceDV) + transferDV;
+        	
         	if(calculationPlanetFrom != null && calculationPlanetTo != null)
-        		context.drawCenteredTextWithShadow(textRenderer, Text.translatable("space.navigation.transfer").append(df.format(transferDeltaV)).append("m/s"), width / 2, y, GREEN);
+        		context.drawText(textRenderer, Text.literal(Math.round(totalDV) + "m/s"), rightSideX + 4, 92, Colors.WHITE, false);
+        	
+        	if(departureHover && mouseDown && !mouseHold)
+            {
+        		if(calculationPlanetFrom == selectedPlanet)
+        			fromOrbit = !fromOrbit;
+        		else
+        			fromOrbit = false;
+        		
+            	calculationPlanetFrom = selectedPlanet;
+            	surfaceToOrbitDV = calculationPlanetFrom.dVSurfaceToOrbit();
+            	
+            	if(calculationPlanetFrom != null && calculationPlanetTo != null)
+            	{
+            		transferDV = calculationPlanetFrom.dVToPlanet(calculationPlanetTo);
+            		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
+            	}
+            	
+            	mouseHold = true;
+            }
+        	
+        	if(arrivalHover && mouseDown && !mouseHold)
+            {
+        		if(calculationPlanetTo == selectedPlanet)
+        			toOrbit = !toOrbit;
+        		else
+        			toOrbit = false;
+        		
+            	calculationPlanetTo = selectedPlanet;
+            	orbitToSurfaceDV = calculationPlanetTo.dVOrbitToSurface();
+            	
+            	if(calculationPlanetFrom != null && calculationPlanetTo != null)
+            	{
+            		transferDV = calculationPlanetFrom.dVToPlanet(calculationPlanetTo);
+            		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
+            	}
+            	
+            	mouseHold = true;
+            }
         }
         else
         {
-        	// Navigation screen text and buttons.
-	        context.drawTextWithShadow(textRenderer, Text.translatable("planet.space." + currentPlanet.getName()), x, y, GREEN);
-	        
-	        if(currentPlanet.getSurface() != null)
-	        {
-	        	travelButton(context, textRenderer, Text.translatable("space.navigation.to_surface").append(df.format(currentPlanet.dVOrbitToSurface())).append("m/s"), currentPlanet.getName(), currentPlanet.dVOrbitToSurface(), true, x, y + 14, mouseX, mouseY, mouseDown);
-	        	travelButton(context, textRenderer, Text.translatable("space.navigation.stay"), currentPlanet.getName(), 0.0, false, x, y + 28, mouseX, mouseY, mouseDown);
-	        }
-	        else
-	        	travelButton(context, textRenderer, Text.translatable("space.navigation.stay"), currentPlanet.getName(), 0.0, false, x, y + 14, mouseX, mouseY, mouseDown);
-	        
-	        if(selectedPlanet != currentPlanet)
-	        {
-		        if(selectedPlanet.getOrbit() != null)
-		        {
-		        	MutableText text = Text.translatable("space.navigation.transfer").append(df.format(transferDeltaV)).append("m/s");
-		        	x = width - (textRenderer.getWidth(text) + MARGIN);
-		        	context.drawTextWithShadow(textRenderer, Text.translatable("planet.space." + selectedPlanet.getName()), x, y, transferDeltaV < deltaV ? GREEN : RED);
-		        	travelButton(context, textRenderer, text, selectedPlanet.getName(), transferDeltaV, false, x, y + 14, mouseX, mouseY, mouseDown);
-		        }
-		        else
-		        {
-		        	MutableText text = Text.translatable("planet.space." + selectedPlanet.getName());
-		        	x = width - (textRenderer.getWidth(text) + MARGIN);
-		        	context.drawTextWithShadow(textRenderer, text, x, y, GREEN);
-		        }
-	        }
+			Planet viewpointPlanet = planetList.getViewpointPlanet();
+			boolean originPlanet = selectedPlanet.equals(viewpointPlanet);
+        	boolean actionHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > 4 && mouseY < 36;
+        	double actionDV = 0;
+        	
+        	if(originPlanet && viewpointPlanet.getSurface() != null)
+        		actionDV = planetList.getViewpointPlanet().dVOrbitToSurface();
+        	else if(selectedPlanet.getOrbit() != null)
+        		actionDV = planetList.getViewpointPlanet().dVToPlanet(selectedPlanet);
+        	
+        	if(actionDV > 0)
+        	{
+        		context.drawTexture(GUI_ELEMENTS, rightSideX, 4, 96, actionDV > deltaV ? 64 : (actionHover ? 32 : 0), 78, 32);
+        		context.drawText(textRenderer, Text.translatable("space.navigation." + (originPlanet ? "land" : "transfer")), rightSideX + 4, 8, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		context.drawText(textRenderer, Text.literal(Math.round(actionDV) + "m/s"), rightSideX + 4, 17, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		
+        		if(deltaV >= actionDV && actionHover && mouseDown && !mouseHold)
+                {
+            		ClientPlayNetworking.send(new RocketTravelButtonC2SPacket(selectedPlanet.getName(), actionDV, originPlanet));
+            		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
+            		mouseHold = true;
+            		close();
+                }
+        	}
         }
-        
-		// Select planets in the GUI.
-		if(nothingSelected && !mouseHold && selectedPlanet.getParent() != null)
-		{
-			selectedPlanet = selectedPlanet.getParent();
-			scaleFactor = getInitialScaleFactor(selectedPlanet);
-			mouseHold = true;
-			
-			if(deltaV >= 0.0)
-				transferDeltaV = currentPlanet.dVToPlanet(selectedPlanet);
-		}
+	}
+	
+	private void selectPlanet(PlanetList planetList, Planet planet)
+	{
+		selectedPlanet = planet;
+		scaleFactor = getInitialScaleFactor(selectedPlanet);
+		mouseHold = true;
+		planetsToRender.clear();
+		planetsToRender.add(selectedPlanet);
+		planetsToRender.addAll(selectedPlanet.getSatellites());
+		planetsToRender.sort(Comparator.comparing(Planet::getPeriapsis));
+		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
+		
+		if(deltaV >= 0.0)
+			transferDV = planetList.getViewpointPlanet().dVToPlanet(selectedPlanet);
 	}
 	
 	private void drawTexturedQuad(Matrix4f matrix, float x, float y, float u0, float v0, float u1, float v1, float size)
@@ -251,14 +337,14 @@ public class SpaceNavigationScreen extends Screen
 		Tessellator tessellator = Tessellator.getInstance();
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
-        bufferBuilder.vertex(matrix, x - size, y + size, 0.001f).texture(u0, v1);
-        bufferBuilder.vertex(matrix, x + size, y + size, 0.001f).texture(u1, v1);
-        bufferBuilder.vertex(matrix, x + size, y - size, 0.001f).texture(u1, v0);
-        bufferBuilder.vertex(matrix, x - size, y - size, 0.001f).texture(u0, v0);
-        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+        bufferBuilder.vertex(matrix, x - size, y + size, 0.0f).texture(u0, v1);
+        bufferBuilder.vertex(matrix, x + size, y + size, 0.0f).texture(u1, v1);
+        bufferBuilder.vertex(matrix, x + size, y - size, 0.0f).texture(u1, v0);
+        bufferBuilder.vertex(matrix, x - size, y - size, 0.0f).texture(u0, v0);
+        BufferRenderer.drawWithGlobalProgram(bufferBuilder.end()); 
     }
 	
-	private void drawOrbitEllipse(Matrix4f matrix, Planet planet, float centerX, float centerY, int divisions)
+	private void drawOrbitEllipse(Matrix4f matrix, Planet planet, float centerX, float centerY, int divisions, double scale, int colorRGB)
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
@@ -269,16 +355,16 @@ public class SpaceNavigationScreen extends Screen
         {
         	float theta = (float) i * (float) (Math.PI * 2.0) / divisions;
         	Vec3d r1 = planet.getRelativePositionAtTrueAnomaly(theta);
-        	float x1 = (float) (r1.getX() * scaleFactor) + centerX;
-        	float y1 = (float) (r1.getZ() * scaleFactor) + centerY;
+        	float x1 = (float) (r1.getX() * scale) + centerX;
+        	float y1 = (float) (r1.getZ() * scale) + centerY;
         	Vec3d r2 = planet.getRelativePositionAtTrueAnomaly(theta + ((Math.PI * 2.0f) / divisions));
-        	float x2 = (float) (r2.getX() * scaleFactor) + centerX;
-        	float y2 = (float) (r2.getZ() * scaleFactor) + centerY;
+        	float x2 = (float) (r2.getX() * scale) + centerX;
+        	float y2 = (float) (r2.getZ() * scale) + centerY;
         	
         	if(inBounds(x1, y1) && inBounds(x2, y2))
         	{
-        		bufferBuilder.vertex(matrix, x1, y1, 0.0001f).color(0.8f, 0.4f, 1.0f, 0.8f);
-        		bufferBuilder.vertex(matrix, x2, y2, 0.0001f).color(0.8f, 0.4f, 1.0f, 0.8f);
+        		bufferBuilder.vertex(matrix, x1, y1, -100.0f).color(colorRGB);
+        		bufferBuilder.vertex(matrix, x2, y2, -100.0f).color(colorRGB);
         		count++;
         	}
         }
@@ -291,9 +377,10 @@ public class SpaceNavigationScreen extends Screen
 	{
 		Tessellator tessellator = Tessellator.getInstance();
 		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 		BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
-		bufferBuilder.vertex(matrix, x, y, 0.00001f).color(r, g, b, 0.8f);
+		bufferBuilder.vertex(matrix, x, y, 1.0f).color(r, g, b, 10.0f);
 
 		for(int i = 0; i <= 16; i++)
 		{
@@ -303,9 +390,9 @@ public class SpaceNavigationScreen extends Screen
 			float radius = size;
 			
 			if(i % 4 == 0)
-				radius *= 1.15f;
+				radius *= 1.15f; 
 			
-			bufferBuilder.vertex(matrix, x + (radius * cosTheta), y - (radius * sinTheta), 0.00001f).color(r, g, b, 0.0f);
+			bufferBuilder.vertex(matrix, x + (radius * cosTheta), y - (radius * sinTheta), 10.0f).color(r, g, b, 0.0f);
 		}
 
 		BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
@@ -347,47 +434,6 @@ public class SpaceNavigationScreen extends Screen
 			
 			return (1.0 / maxDistance) * 80.0;
 		}
-	}
-	
-	private void selectButton(DrawContext context, TextRenderer textRenderer, Text buttonText, boolean from, int x, int y, int mouseX, int mouseY, boolean mouseDown)
-	{
-		int textWidth = textRenderer.getWidth(buttonText);
-        boolean hover = mouseX > x && mouseX < x + textWidth && mouseY > y && mouseY < y + 12;
-        context.drawText(textRenderer, buttonText, x + (hover ? 2 : 0), y, GREEN, true);
-        context.drawBorder(x + (hover ? 2 : 0) - 2, y - 2, textWidth + 3, 12, GREEN);
-        
-        if(hover && mouseDown && !mouseHold)
-        {
-        	if(from)
-        		calculationPlanetFrom = selectedPlanet;
-        	else
-        		calculationPlanetTo = selectedPlanet;
-        	
-        	if(calculationPlanetFrom != null && calculationPlanetTo != null)
-        	{
-        		transferDeltaV = calculationPlanetFrom.dVToPlanet(calculationPlanetTo);
-        		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
-        	}
-        	
-        	mouseHold = true;
-        }
-	}
-	
-	private void travelButton(DrawContext context, TextRenderer textRenderer, Text buttonText, String planetName, double requiredDeltaV, boolean landing, int x, int y, int mouseX, int mouseY, boolean mouseDown)
-	{
-		int textWidth = textRenderer.getWidth(buttonText);
-        boolean hover = requiredDeltaV < deltaV && mouseX > x && mouseX < x + textWidth && mouseY > y && mouseY < y + 12;
-        int color = requiredDeltaV < deltaV ? (hover ? 0xFF00FF00 : GREEN) : RED;
-        context.drawText(textRenderer, buttonText, x + (hover ? 2 : 0), y, color, true);
-        context.drawBorder(x + (hover ? 2 : 0) - 2, y - 2, textWidth + 3, 12, color);
-        
-        if(hover && mouseDown && !mouseHold)
-        {
-    		ClientPlayNetworking.send(new RocketTravelButtonC2SPacket(planetName, requiredDeltaV, landing));
-    		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
-    		mouseHold = true;
-    		close();
-        }
 	}
 	
 	public static void receiveOpenNavigationScreen(OpenNavigationScreenS2CPacket payload, ClientPlayNetworking.Context context)

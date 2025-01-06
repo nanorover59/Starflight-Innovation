@@ -57,6 +57,7 @@ public class BioDomeGenerator
 	private static final RegistryKey<LootTable> LOOT_TABLE = RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(StarflightMod.MOD_ID, "chests/biodome"));
 	private static final Identifier AIRLOCK = Identifier.of(StarflightMod.MOD_ID, "sliding_airlock");
 	private static final Identifier OXYGEN_SOURCE = Identifier.of(StarflightMod.MOD_ID, "biodome_oxygen");
+	private static final Identifier BUILDING = Identifier.of(StarflightMod.MOD_ID, "biodome_building");
 	
 	public static void addPieces(Structure.Context context, BlockPos pos, StructurePiecesHolder holder)
 	{
@@ -388,7 +389,7 @@ public class BioDomeGenerator
 				else if(type == 3)
 				{
 					// Gardens
-					int y = chunkCenterPos.getY() + 1;
+					/*int y = chunkCenterPos.getY() + 1;
 					fillWithOutline(world, chunkBox, -5, y, -5, 5, y, -5, getBrickStairsType(serverWorld, Direction.NORTH), AIR, false);
 					fillWithOutline(world, chunkBox, -5, y, 5, 5, y, 5, getBrickStairsType(serverWorld, Direction.SOUTH), AIR, false);
 					fillWithOutline(world, chunkBox, 5, y, -5, 5, y, 5, getBrickStairsType(serverWorld, Direction.WEST), AIR, false);
@@ -417,7 +418,13 @@ public class BioDomeGenerator
 							int z = random.nextInt(5) - random.nextInt(5);
 							fillWithOutline(world, chunkBox, x, y + 1, z, x, y + 4 + random.nextInt(4), z, Blocks.STRIPPED_OAK_LOG.getDefaultState(), AIR, false);
 						}
-					}
+					}*/
+					
+					BlockRotation rotation = BlockRotation.random(random);
+					pos = pos.subtract(new BlockPos(6, -1, 6).rotate(rotation));
+					StructureTemplate template = world.toServerWorld().getStructureTemplateManager().getTemplate(BUILDING).get();
+					StructurePlacementData placementdata = new StructurePlacementData().setRotation(rotation);
+					template.place(world, pos, pos, placementdata, random, Block.NOTIFY_LISTENERS);
 				}
 			}
 			

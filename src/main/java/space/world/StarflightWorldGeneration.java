@@ -61,6 +61,10 @@ public class StarflightWorldGeneration
 	public static final StructurePieceType MOONSHAFT_CROSSING = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "moonshaft_crossing"), MoonshaftGenerator.MoonshaftCrossing::new);
 	public static final StructureType<MoonshaftStructure> MOONSHAFT_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "moonshaft"), () -> MoonshaftStructure.CODEC);
 	
+	// Large Aeroplankton Structure
+	public static final StructurePieceType LARGE_AEROPLANKTON_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "large_aeroplankton_piece"), LargeAeroplanktonGenerator.Piece::new);
+	public static final StructureType<LargeAeroplanktonStructure> LARGE_AEROPLANKTON_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "large_aeroplankton"), () -> LargeAeroplanktonStructure.CODEC);
+	
 	public static void initializeWorldGeneration()
 	{
 		// Overworld Ores
