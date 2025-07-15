@@ -1,10 +1,15 @@
 package space.world;
 
+import java.util.Map;
+
 import com.mojang.serialization.Codec;
 
+import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
@@ -14,6 +19,7 @@ import net.minecraft.world.StructureWorldAccess;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
+import net.minecraft.world.gen.structure.Structure;
 
 public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 {
@@ -27,9 +33,18 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 	{
 		StructureWorldAccess structureWorldAccess = context.getWorld();
 		Random random = context.getRandom();
-		BlockPos blockPos = structureWorldAccess.getTopPosition(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, context.getOrigin());
+		BlockPos blockPos = structureWorldAccess.getTopPosition(Heightmap.Type.OCEAN_FLOOR_WG, context.getOrigin());
 		Mutable mutable = blockPos.down(2 + random.nextInt(16)).mutableCopy();
 		BlockState rockState = null;
+		
+		Registry<Structure> structureRegistry = context.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE);
+		Map<Structure, LongSet> structureReferences = context.getWorld().getChunk(blockPos).getStructureReferences();
+		
+		for(Structure structure : structureReferences.keySet())
+		{
+			if(structureRegistry.getEntry(structure).isIn(StarflightWorldGeneration.NO_CRATERS))
+				return false;
+		}
 		
 		while(rockState == null && mutable.getY() > structureWorldAccess.getBottomY())
 		{
@@ -41,7 +56,7 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 			mutable.setY(mutable.getY() - 1);
 		}
 		
-		if(rockState == null || structureWorldAccess.getBlockState(blockPos.up()).isOpaque())
+		if(rockState == null)
 			return true;
 		
 		int rockSize = (int) powerLaw(random, 2.5f, 1.0f, 5.0f);

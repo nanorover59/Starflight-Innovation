@@ -14,7 +14,7 @@ public class TimeStepsCommand
 {
 	public static void register(CommandDispatcher<ServerCommandSource> dispatcher)
 	{
-		dispatcher.register(literal("timesteps").requires(source -> source.hasPermissionLevel(2)).then(argument("steps", IntegerArgumentType.integer(0, 3200)).executes(ctx -> timeSteps(ctx, IntegerArgumentType.getInteger(ctx, "steps")))));
+		dispatcher.register(literal("timesteps").requires(source -> source.hasPermissionLevel(2)).then(argument("steps", IntegerArgumentType.integer(0, 32000)).executes(ctx -> timeSteps(ctx, IntegerArgumentType.getInteger(ctx, "steps")))));
 	}
 	
 	public static int timeSteps(CommandContext<ServerCommandSource> context, int integerArgument)

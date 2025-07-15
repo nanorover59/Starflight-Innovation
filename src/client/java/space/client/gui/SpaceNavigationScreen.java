@@ -291,24 +291,54 @@ public class SpaceNavigationScreen extends Screen
         else
         {
 			Planet viewpointPlanet = planetList.getViewpointPlanet();
+			boolean fromOrbit = planetList.getViewpointDimensionData().isOrbit();
 			boolean originPlanet = selectedPlanet.equals(viewpointPlanet);
-        	boolean actionHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > 4 && mouseY < 36;
-        	double actionDV = 0;
+			int travelButtonY = 4;
+			double dVSurfaceToOrbit = planetList.getViewpointDimensionData().isSky() ? viewpointPlanet.dVSkyToOrbit() : viewpointPlanet.dVSurfaceToOrbit();
         	
-        	if(originPlanet && viewpointPlanet.getSurface() != null)
-        		actionDV = planetList.getViewpointPlanet().dVOrbitToSurface();
-        	else if(selectedPlanet.getOrbit() != null)
-        		actionDV = planetList.getViewpointPlanet().dVToPlanet(selectedPlanet);
-        	
-        	if(actionDV > 0)
+        	if(selectedPlanet.getSurface() != null)
         	{
-        		context.drawTexture(GUI_ELEMENTS, rightSideX, 4, 96, actionDV > deltaV ? 64 : (actionHover ? 32 : 0), 78, 32);
-        		context.drawText(textRenderer, Text.translatable("space.navigation." + (originPlanet ? "land" : "transfer")), rightSideX + 4, 8, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
-        		context.drawText(textRenderer, Text.literal(Math.round(actionDV) + "m/s"), rightSideX + 4, 17, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		boolean surfaceHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > travelButtonY && mouseY < (travelButtonY + 32);
+            	double actionDV = viewpointPlanet.dVToPlanet(selectedPlanet) + selectedPlanet.dVOrbitToSurface();
+            	
+            	if(!fromOrbit)
+            		actionDV += dVSurfaceToOrbit;
+            	
+            	if(!fromOrbit && originPlanet)
+            		actionDV = 0;
+            	
+            	context.drawTexture(GUI_ELEMENTS, rightSideX, travelButtonY, 96, actionDV > deltaV ? 64 : (surfaceHover ? 32 : 0), 78, 32);
+            	context.drawText(textRenderer, Text.translatable("space.navigation.surface"), rightSideX + 4, travelButtonY + 4, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		context.drawText(textRenderer, Text.literal(Math.round(actionDV) + "m/s"), rightSideX + 4, travelButtonY + 13, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
         		
-        		if(deltaV >= actionDV && actionHover && mouseDown && !mouseHold)
+        		if(deltaV >= actionDV && surfaceHover && mouseDown && !mouseHold)
                 {
-            		ClientPlayNetworking.send(new RocketTravelButtonC2SPacket(selectedPlanet.getName(), actionDV, originPlanet));
+            		ClientPlayNetworking.send(new RocketTravelButtonC2SPacket(selectedPlanet.getName(), actionDV, true));
+            		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
+            		mouseHold = true;
+            		close();
+                }
+        	}
+        	
+        	if(selectedPlanet.getOrbit() != null)
+        	{
+        		travelButtonY += 40;
+        		boolean orbitHover = mouseX > rightSideX && mouseX < rightSideX + 78 && mouseY > travelButtonY && mouseY < (travelButtonY + 32);
+        		double actionDV = viewpointPlanet.dVToPlanet(selectedPlanet);
+        		
+        		if(!fromOrbit)
+            		actionDV += dVSurfaceToOrbit;
+        		
+        		if(fromOrbit && originPlanet)
+            		actionDV = 0;
+            	
+            	context.drawTexture(GUI_ELEMENTS, rightSideX, travelButtonY, 96, actionDV > deltaV ? 64 : (orbitHover ? 32 : 0), 78, 32);
+        		context.drawText(textRenderer, Text.translatable("space.navigation.orbit"), rightSideX + 4, travelButtonY + 4, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		context.drawText(textRenderer, Text.literal(Math.round(actionDV) + "m/s"), rightSideX + 4, travelButtonY + 13, deltaV < actionDV ? Colors.RED : Colors.WHITE, false);
+        		
+        		if(deltaV >= actionDV && orbitHover && mouseDown && !mouseHold)
+                {
+            		ClientPlayNetworking.send(new RocketTravelButtonC2SPacket(selectedPlanet.getName(), actionDV, false));
             		client.player.playSound(SoundEvents.UI_BUTTON_CLICK.value(), 0.5F, 1.0F);
             		mouseHold = true;
             		close();
@@ -319,6 +349,9 @@ public class SpaceNavigationScreen extends Screen
 	
 	private void selectPlanet(PlanetList planetList, Planet planet)
 	{
+		if(planet == null)
+			return;
+		
 		selectedPlanet = planet;
 		scaleFactor = getInitialScaleFactor(selectedPlanet);
 		mouseHold = true;

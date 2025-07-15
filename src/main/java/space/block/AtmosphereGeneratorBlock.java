@@ -73,22 +73,22 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer", df.format(getInput())).formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.atmosphere_generator.description_1"));
 		textList.add(Text.translatable("block.space.atmosphere_generator.description_2"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 4.0;
+		return 4;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 64.0;
+		return 64;
 	}
 	
 	@Override
@@ -138,15 +138,9 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 	}
 	
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.OXYGEN;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction != (Direction) state.get(FACING).getOpposite();
+		return fluidType == FluidResourceType.OXYGEN && direction != (Direction) state.get(FACING).getOpposite();
 	}
 	
 	@Override
@@ -160,46 +154,46 @@ public class AtmosphereGeneratorBlock extends BlockWithEntity implements FluidUt
 		
 		if(world.isReceivingRedstonePower(pos) && !state.get(LIT) && !fromPos.equals(frontPos) && frontState.getBlock() == Blocks.AIR)
 		{
-			//long time = System.currentTimeMillis();
+			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
-			ArrayList<BlockPos> updateList = new ArrayList<BlockPos>();
-			double supply = AirUtil.searchSupply(world, pos, checkList, BlockSearch.MAX_VOLUME, StarflightBlocks.ATMOSPHERE_GENERATOR);
-			
-			//System.out.println("searchSupply: " + (System.currentTimeMillis() - time));
-			//time = System.currentTimeMillis();
-			
-			boolean tooLarge = !AirUtil.findVolume(world, frontPos, foundList, updateList, BlockSearch.MAX_VOLUME);
-			double required = foundList.size() * HabitableAirBlock.DENSITY;
-			
-			//System.out.println("findVolume: " + (System.currentTimeMillis() - time));
-			//time = System.currentTimeMillis();
-			
-			if(tooLarge || required > supply)
+			if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 			{
-				MutableText text = Text.translatable("block.space.atmosphere_generator.error_" + (tooLarge ? "volume" : "supply"));
+				AtmosphereGeneratorBlockEntity atmosphereGeneratorBlockEntity = (AtmosphereGeneratorBlockEntity) blockEntity;
+				ArrayList<BlockPos> foundList = new ArrayList<BlockPos>();
+				ArrayList<BlockPos> updateList = new ArrayList<BlockPos>();
 				
-				for(PlayerEntity player : world.getPlayers())
+				//System.out.println("searchSupply: " + (System.currentTimeMillis() - time));
+				//time = System.currentTimeMillis();
+				
+				boolean tooLarge = !AirUtil.findVolume(world, frontPos, foundList, updateList, BlockSearch.MAX_VOLUME);
+				long required = foundList.size() * HabitableAirBlock.DENSITY;
+				
+				//System.out.println("findVolume: " + (System.currentTimeMillis() - time));
+				//time = System.currentTimeMillis();
+				
+				if(!tooLarge && atmosphereGeneratorBlockEntity.requestSupply(world, pos, required))
 				{
-		            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
-		            	player.sendMessage(text, true);
-		        }
-			}
-			else
-			{
-				AirUtil.useSupply(world, checkList, required);
-				
-				//System.out.println("useSupply: " + (System.currentTimeMillis() - time));
-				//time = System.currentTimeMillis();
-				
-				AirUtil.fillVolume(world, foundList, updateList);
-				
-				//System.out.println("fillVolume: " + foundList.size() + " " + (System.currentTimeMillis() - time));
-				//time = System.currentTimeMillis();
-				
-				world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
-				OutgasS2CPacket.sendOutgas(world, pos, frontPos, true);
+					//System.out.println("useSupply: " + (System.currentTimeMillis() - time));
+					//time = System.currentTimeMillis();
+					
+					AirUtil.fillVolume(world, foundList, updateList);
+					
+					//System.out.println("fillVolume: " + foundList.size() + " " + (System.currentTimeMillis() - time));
+					//time = System.currentTimeMillis();
+					
+					world.setBlockState(pos, (BlockState) state.with(AtmosphereGeneratorBlock.LIT, true), Block.NOTIFY_ALL);
+					OutgasS2CPacket.sendOutgas(world, pos, frontPos, true);
+				}
+				else
+				{
+					MutableText text = Text.translatable("block.space.atmosphere_generator.error_" + (tooLarge ? "volume" : "supply"));
+					
+					for(PlayerEntity player : world.getPlayers())
+					{
+			            if(player.squaredDistanceTo(pos.getX(), pos.getY(), pos.getZ()) < 1024.0)
+			            	player.sendMessage(text, true);
+			        }
+				}
 			}
 		}
 		else if(frontState.getBlock() == StarflightBlocks.HABITABLE_AIR)

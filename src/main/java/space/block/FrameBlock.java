@@ -5,7 +5,6 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
@@ -15,7 +14,6 @@ import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 
@@ -33,12 +31,6 @@ public class FrameBlock extends Block implements Waterloggable
 	protected void appendProperties(StateManager.Builder<Block, BlockState> builder)
 	{
 		builder.add(WATERLOGGED);
-	}
-	
-	@Override
-	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context)
-	{
-		return Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 15.99, 16.0);
 	}
 	
 	@Override

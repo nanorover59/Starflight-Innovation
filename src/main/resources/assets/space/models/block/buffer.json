@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/cube_bottom_top",
   "textures": {
-    "bottom": "space:block/structural_iron",
+    "bottom": "space:block/aluminum_machine",
     "side": "space:block/buffer_side",
     "top": "space:block/buffer_front"
   }

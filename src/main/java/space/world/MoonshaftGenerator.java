@@ -38,7 +38,7 @@ import space.block.PointerColumnBlock;
 import space.block.StarflightBlocks;
 import space.block.StorageCubeBlock;
 import space.entity.AncientHumanoidEntity;
-import space.entity.BlockShellEntity;
+import space.entity.MimicEntity;
 import space.entity.StarflightEntities;
 
 public class MoonshaftGenerator
@@ -377,13 +377,13 @@ public class MoonshaftGenerator
 			}
 		}
 		
-		private void addBlockShell(StructureWorldAccess world, Random random, int x, int y, int z)
+		private void addMimic(StructureWorldAccess world, Random random, int x, int y, int z)
 		{
 			BlockPos.Mutable blockPos = this.offsetPos(x, y, z);
 			
 			if(world.getBlockState(blockPos).isAir() && !world.getBlockState(((BlockPos) blockPos).down()).isAir())
 			{
-				BlockShellEntity entity = new BlockShellEntity(StarflightEntities.BLOCK_SHELL, world.toServerWorld());
+				MimicEntity entity = new MimicEntity(StarflightEntities.MIMIC, world.toServerWorld());
 				entity.setWearingBlock(StarflightBlocks.STORAGE_CUBE.getDefaultState());
 				entity.setPosition(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
 				world.spawnEntity(entity);
@@ -476,7 +476,7 @@ public class MoonshaftGenerator
 				if(random.nextInt(80) == 0)
 				{
 					if(random.nextInt(3) == 0)
-						this.addBlockShell(world, random, -1, 0, z);
+						this.addMimic(world, random, -1, 0, z);
 					else
 						this.addChest(world, chunkBox, random, -1, 0, z, LOOT_TABLE);
 				}
@@ -484,7 +484,7 @@ public class MoonshaftGenerator
 				if(random.nextInt(80) == 0)
 				{
 					if(random.nextInt(3) == 0)
-						this.addBlockShell(world, random, 3, 0, z);
+						this.addMimic(world, random, 3, 0, z);
 					else
 						this.addChest(world, chunkBox, random, 3, 0, z, LOOT_TABLE);
 				}
@@ -529,8 +529,8 @@ public class MoonshaftGenerator
 			
 			if(light)
 			{
-				this.addBlock(world, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), minX - 1, minY - 1, z, boundingBox);
-				this.addBlock(world, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), maxX + 1, minY - 1, z, boundingBox);
+				//this.addBlock(world, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), minX - 1, minY - 1, z, boundingBox);
+				//this.addBlock(world, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), maxX + 1, minY - 1, z, boundingBox);
 			}
 		}
 	}
@@ -670,9 +670,9 @@ public class MoonshaftGenerator
 						
 						if(i < (down + 1) * 3)
 						{
-							world.setBlockState(xpPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
-							world.setBlockState(zpPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
-							world.setBlockState(zmPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+							//world.setBlockState(xpPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+							//world.setBlockState(zpPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+							//world.setBlockState(zmPos, StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
 						}
 						
 						elevatorY = y;
@@ -727,10 +727,10 @@ public class MoonshaftGenerator
 				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMinX() - 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, this.boundingBox.getMaxY());
 				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMinZ() - 1, this.boundingBox.getMaxY());
 				this.generateCrossingPillar(world, chunkBox, this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY(), this.boundingBox.getMaxZ() + 1, this.boundingBox.getMaxY());
-				world.setBlockState(new BlockPos(this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
-				world.setBlockState(new BlockPos(this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
-				world.setBlockState(new BlockPos(this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
-				world.setBlockState(new BlockPos(this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+				//world.setBlockState(new BlockPos(this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+				//world.setBlockState(new BlockPos(this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMinZ() - 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+				//world.setBlockState(new BlockPos(this.boundingBox.getMinX() - 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
+				//world.setBlockState(new BlockPos(this.boundingBox.getMaxX() + 1, this.boundingBox.getMinY() - 1, this.boundingBox.getMaxZ() + 1), StarflightBlocks.IRON_BULB.getDefaultState().with(BulbBlock.LIT, true), Block.NOTIFY_LISTENERS);
 			}
 		}
 		

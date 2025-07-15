@@ -78,15 +78,21 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 	}
 	
 	@Override
-	public double getOutput()
+	public long getOutput()
 	{
-		return 16.0;
+		return 16;
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 16.0;
+		return 16;
+	}
+	
+	@Override
+	public long getEnergyCapacity()
+	{
+		return 16384;
 	}
 	
 	@Override
@@ -156,7 +162,7 @@ public class BatteryBlock extends BlockWithEntity implements EnergyBlock
 			return 0;
 		
 		BatteryBlockEntity blockEntity = (BatteryBlockEntity) world.getBlockEntity(pos);
-		return Math.min((int) Math.ceil((blockEntity.getEnergyStored() / blockEntity.getEnergyCapacity()) * 15.0), 15);
+		return Math.min((int) Math.ceil((blockEntity.getEnergy() / blockEntity.getEnergyCapacity()) * 15.0), 15);
 	}
 	
 	@Override

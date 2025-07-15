@@ -30,10 +30,12 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
-import space.block.RocketControllerBlock;
 import space.block.StarflightBlocks;
+import space.client.gui.AdvancedFabricatorScreen;
 import space.client.gui.BatteryScreen;
+import space.client.gui.ElectricCrafterScreen;
 import space.client.gui.ElectricFurnaceScreen;
+import space.client.gui.ElectrolyzerScreen;
 import space.client.gui.ExtractorScreen;
 import space.client.gui.MetalFabricatorScreen;
 import space.client.gui.RocketControllerScreen;
@@ -43,22 +45,26 @@ import space.client.render.MarsDimensionEffect;
 import space.client.render.StarflightRenderEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
 import space.client.render.entity.AncientHumanoidEntityRenderer;
-import space.client.render.entity.BlockShellEntityRenderer;
 import space.client.render.entity.CaveLampreyEntityRenderer;
-import space.client.render.entity.CeruleanEntityRenderer;
 import space.client.render.entity.CloudSharkEntityRenderer;
 import space.client.render.entity.DustEntityRenderer;
+import space.client.render.entity.LunarMechEntityRenderer;
+import space.client.render.entity.MetallicScorpionEntityRenderer;
+import space.client.render.entity.MimicEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
 import space.client.render.entity.PlasmaBallEntityRenderer;
+import space.client.render.entity.SeleniteEntityRenderer;
 import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
 import space.client.render.entity.StratofishEntityRenderer;
 import space.client.render.entity.model.AncientHumanoidEntityModel;
-import space.client.render.entity.model.BlockShellEntityModel;
 import space.client.render.entity.model.CaveLampreyEntityModel;
-import space.client.render.entity.model.CeruleanEntityModel;
 import space.client.render.entity.model.CloudSharkEntityModel;
 import space.client.render.entity.model.DustEntityModel;
+import space.client.render.entity.model.LunarMechEntityModel;
+import space.client.render.entity.model.MetallicScorpionEntityModel;
+import space.client.render.entity.model.MimicEntityModel;
+import space.client.render.entity.model.SeleniteEntityModel;
 import space.client.render.entity.model.SolarSpectreEntityModel;
 import space.client.render.entity.model.StratofishEntityModel;
 import space.entity.AlienMobEntity;
@@ -73,7 +79,7 @@ import space.screen.StarflightScreens;
 public class StarflightModClient implements ClientModInitializer
 {
 	public static final EntityModelLayer MODEL_DUST_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "dust"), "main");
-	public static final EntityModelLayer MODEL_CERULEAN_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cerulean"), "main");
+	public static final EntityModelLayer MODEL_SELENITE_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "selenite"), "main");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "main");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "inner_armor");
 	public static final EntityModelLayer MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "ancient_humanoid"), "outer_armor");
@@ -82,7 +88,9 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_STRATOFISH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "stratofish"), "main");
 	public static final EntityModelLayer MODEL_CLOUD_SHARK_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), "main");
 	public static final EntityModelLayer MODEL_CAVE_LAMPREY_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), "main");
-	public static final EntityModelLayer MODEL_BLOCK_SHELL_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "block_shell"), "main");
+	public static final EntityModelLayer MODEL_MIMIC_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "mimic"), "main");
+	public static final EntityModelLayer MODEL_METALLIC_SCORPION_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "metallic_scorpion"), "main");
+	public static final EntityModelLayer MODEL_LUNAR_MECH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "lunar_mech"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
 	
@@ -147,9 +155,13 @@ public class StarflightModClient implements ClientModInitializer
 		// GUIs
 		HandledScreens.register(StarflightScreens.STIRLING_ENGINE_SCREEN_HANDLER, StirlingEngineScreen::new);
 		HandledScreens.register(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, ElectricFurnaceScreen::new);
+		HandledScreens.register(StarflightScreens.ELECTRIC_CRAFTER_SCREEN_HANDLER, ElectricCrafterScreen::new);
 		HandledScreens.register(StarflightScreens.METAL_FABRICATOR_SCREEN_HANDLER, MetalFabricatorScreen::new);
+		HandledScreens.register(StarflightScreens.ELECTROLYZER_SCREEN_HANDLER, ElectrolyzerScreen::new);
+		HandledScreens.register(StarflightScreens.FABRICATION_STATION_SCREEN_HANDLER, AdvancedFabricatorScreen::new);
 		HandledScreens.register(StarflightScreens.EXTRACTOR_SCREEN_HANDLER, ExtractorScreen::new);
 		HandledScreens.register(StarflightScreens.BATTERY_SCREEN_HANDLER, BatteryScreen::new);
+		HandledScreens.register(StarflightScreens.ROCKET_CONTROLLER_SCREEN_HANDLER, RocketControllerScreen::new);
 		
 		// Entity Rendering
 		EntityRendererRegistry.register(StarflightEntities.MOVING_CRAFT, (context) -> new MovingCraftEntityRenderer(context));
@@ -158,17 +170,19 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.AIRSHIP, (context) -> new MovingCraftEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.PLASMA_BALL, (context) -> new PlasmaBallEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.DUST, (context) -> new DustEntityRenderer(context));
-		EntityRendererRegistry.register(StarflightEntities.CERULEAN, (context) -> new CeruleanEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.SELENITE, (context) -> new SeleniteEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.ANCIENT_HUMANOID, (context) -> new AncientHumanoidEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_SPECTRE, (context) -> new SolarSpectreEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.SOLAR_EYES, (context) -> new SolarEyesEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.STRATOFISH, (context) -> new StratofishEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CLOUD_SHARK, (context) -> new CloudSharkEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.CAVE_LAMPREY, (context) -> new CaveLampreyEntityRenderer(context));
-		EntityRendererRegistry.register(StarflightEntities.BLOCK_SHELL, (context) -> new BlockShellEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.MIMIC, (context) -> new MimicEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.METALLIC_SCORPION, (context) -> new MetallicScorpionEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.LUNAR_MECH, (context) -> new LunarMechEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(MODEL_CERULEAN_LAYER, CeruleanEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_SELENITE_LAYER, SeleniteEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_LAYER, AncientHumanoidEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_INNER_ARMOR_LAYER, StarflightModClient::getInnerArmorModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_ANCIENT_HUMANOID_OUTER_ARMOR_LAYER, StarflightModClient::getOuterArmorModelData);
@@ -177,7 +191,9 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_STRATOFISH_LAYER, StratofishEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CLOUD_SHARK_LAYER, CloudSharkEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CAVE_LAMPREY_LAYER, CaveLampreyEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(MODEL_BLOCK_SHELL_LAYER, BlockShellEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_MIMIC_LAYER, MimicEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_METALLIC_SCORPION_LAYER, MetallicScorpionEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_LUNAR_MECH_LAYER, LunarMechEntityModel::getTexturedModelData);
 		
 		// Particles
 		StarflightParticleManager.initializeParticles();
@@ -197,13 +213,6 @@ public class StarflightModClient implements ClientModInitializer
 			
 			// Rocket user input.
 			StarflightControls.vehicleControls(client);
-			
-			// Open screens that do not have a handler.
-			if(RocketControllerBlock.openScreen != null)
-			{
-				client.setScreen(new RocketControllerScreen(client.world.getRegistryKey().getValue().toString(), RocketControllerBlock.openScreen));
-				RocketControllerBlock.openScreen = null;
-			}
 			
 			// Weather particle effects.
 			if(!client.isPaused() && client.world != null && client.player != null && client.world.getRainGradient(1.0f) > 0.0f)

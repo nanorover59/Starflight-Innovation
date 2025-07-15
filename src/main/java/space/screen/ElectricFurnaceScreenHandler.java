@@ -17,6 +17,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.FurnaceOutputSlot;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
+import space.item.StarflightItems;
 import space.recipe.StarflightRecipes;
 
 public class ElectricFurnaceScreenHandler extends ScreenHandler
@@ -27,19 +28,20 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 
 	public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
-		this(syncId, playerInventory, new SimpleInventory(2), new ArrayPropertyDelegate(3));
+		this(syncId, playerInventory, new SimpleInventory(3), new ArrayPropertyDelegate(3));
 	}
 
 	public ElectricFurnaceScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
 	{
 		super(StarflightScreens.ELECTRIC_FURNACE_SCREEN_HANDLER, syncId);
-		checkSize(inventory, 2);
+		checkSize(inventory, 3);
 		checkDataCount(propertyDelegate, 3);
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
 		this.world = playerInventory.player.getWorld();
-		this.addSlot(new Slot(inventory, 0, 56, 35));
-		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 1, 116, 35));
+		this.addSlot(new Slot(inventory, 0, 56, 17));
+		this.addSlot(new Slot(inventory, 1, 56, 53));
+		this.addSlot(new FurnaceOutputSlot(playerInventory.player, inventory, 2, 116, 35));
 		
 		for(int i = 0; i < 3; i++)
 		{
@@ -94,53 +96,6 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 		return this.inventory.canPlayerUse(player);
 	}
 
-	public ItemStack transferSlot(PlayerEntity player, int index)
-	{
-		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot) this.slots.get(index);
-		if(slot != null && slot.hasStack())
-		{
-			ItemStack itemStack2 = slot.getStack();
-			itemStack = itemStack2.copy();
-			if(index == 1)
-			{
-				if(!this.insertItem(itemStack2, 2, 38, true))
-					return ItemStack.EMPTY;
-
-				slot.onQuickTransfer(itemStack2, itemStack);
-			}
-			else if(index != 0)
-			{
-				if(this.isSmeltable(itemStack2))
-				{
-					if(!this.insertItem(itemStack2, 0, 1, false))
-						return ItemStack.EMPTY;
-				}
-				else if(index >= 2 && index < 29)
-				{
-					if(!this.insertItem(itemStack2, 29, 38, false))
-						return ItemStack.EMPTY;
-				}
-				else if(index >= 29 && index < 38 && !this.insertItem(itemStack2, 2, 29, false))
-					return ItemStack.EMPTY;
-			}
-			else if(!this.insertItem(itemStack2, 2, 38, false))
-				return ItemStack.EMPTY;
-
-			if(itemStack2.isEmpty())
-				slot.setStack(ItemStack.EMPTY);
-			else
-				slot.markDirty();
-
-			if(itemStack2.getCount() == itemStack.getCount())
-				return ItemStack.EMPTY;
-
-			slot.onTakeItem(player, itemStack2);
-		}
-
-		return itemStack;
-	}
-
 	protected boolean isSmeltable(ItemStack itemStack)
 	{
 		return this.world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
@@ -167,25 +122,50 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int index)
+	public ItemStack quickMove(PlayerEntity player, int slot)
 	{
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot) this.slots.get(index);
+		Slot slot2 = this.slots.get(slot);
 		
-		if(slot != null && slot.hasStack())
+		if(slot2 != null && slot2.hasStack())
 		{
-			ItemStack itemStack2 = slot.getStack();
+			ItemStack itemStack2 = slot2.getStack();
 			itemStack = itemStack2.copy();
 			
-			if(index < this.inventory.size() ? !this.insertItem(itemStack2, this.inventory.size(), this.slots.size(), true) : !this.insertItem(itemStack2, 0, this.inventory.size(), false))
+			if(slot != 1 && slot != 0)
+			{
+				if(this.isSmeltable(itemStack2))
+				{
+					if(!this.insertItem(itemStack2, 0, 1, false))
+						return ItemStack.EMPTY;
+				}
+				else if(itemStack2.contains(StarflightItems.ENERGY))
+				{
+					if(!this.insertItem(itemStack2, 1, 2, false))
+						return ItemStack.EMPTY;
+				}
+				else if(slot >= 3 && slot < 30)
+				{
+					if(!this.insertItem(itemStack2, 30, 38, false))
+						return ItemStack.EMPTY;
+				}
+				else if(slot >= 30 && slot < 38 && !this.insertItem(itemStack2, 3, 30, false))
+					return ItemStack.EMPTY;
+			}
+			else if(!this.insertItem(itemStack2, 3, 38, false))
 				return ItemStack.EMPTY;
-			
+
 			if(itemStack2.isEmpty())
-				slot.setStack(ItemStack.EMPTY);
+				slot2.setStack(ItemStack.EMPTY);
 			else
-				slot.markDirty();
+				slot2.markDirty();
+
+			if(itemStack2.getCount() == itemStack.getCount())
+				return ItemStack.EMPTY;
+
+			slot2.onTakeItem(player, itemStack2);
 		}
-		
+
 		return itemStack;
 	}
 	

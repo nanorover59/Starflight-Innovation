@@ -1,0 +1,12 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "up": "space:block/advanced_fabricator_top_on",
+    "down": "space:block/advanced_fabricator_bottom",
+    "north": "space:block/advanced_fabricator_front_on",
+    "east": "space:block/advanced_fabricator_side",
+    "south": "space:block/advanced_fabricator_side",
+    "west": "space:block/advanced_fabricator_side",
+    "particle": "space:block/advanced_fabricator_front"
+  }
+}

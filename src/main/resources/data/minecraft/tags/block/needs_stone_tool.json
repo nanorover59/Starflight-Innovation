@@ -26,13 +26,14 @@
     "space:aluminum_shelf",
     "space:iron_frame",
     "space:structural_iron",
-    "space:iron_round_deco",
-    "space:iron_bulb",
+	"space:riveted_iron",
     "space:structural_iron_stairs",
     "space:structural_iron_slab",
     "space:structural_iron_wall",
-    "space:iron_frame",
     "space:iron_machine_casing",
+	"space:structural_iron_pillar",
+	"space:iron_light_pillar",
+	"space:iron_frame",
     "space:stirling_engine",
     "space:electric_furnace",
     "space:solar_panel",
@@ -53,7 +54,6 @@
     "space:oxygen_dispenser",
     "space:atmosphere_generator",
     "space:oxygen_sensor",
-    "space:damaged_aluminum",
     "space:lever_block",
     "space:airway",
     "space:pointer_column",
@@ -73,6 +73,6 @@
     "space:engine_0",
     "space:engine_1",
     "space:engine_1_gimbal",
-    "space:engine_1_vacuum"
+    "space:engine_1_extension"
   ]
 }

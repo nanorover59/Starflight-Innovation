@@ -47,8 +47,10 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 		int radius = (int) powerLaw(random, 2.5f, 6.0f, 32.0f);
 		double depthFactor = 0.6 + random.nextDouble() * 0.2;
 		BlockPos.Mutable mutable = new BlockPos.Mutable();
+		
 		Registry<Structure> structureRegistry = carverContext.getRegistryManager().get(RegistryKeys.STRUCTURE);
 		Map<Structure, LongSet> structureReferences = chunk.getStructureReferences();
+		
 		for(Structure structure : structureReferences.keySet())
 		{
 			if(structureRegistry.getEntry(structure).isIn(StarflightWorldGeneration.NO_CRATERS))
@@ -78,7 +80,7 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 					{
 						mutable.move(Direction.DOWN);
 						
-						if(chunk.getBlockState(mutable).blocksMovement() && !carvingMask.get(x, mutable.getY(), z))
+						if(chunk.getBlockState(mutable).blocksMovement())
 						{
 							if(chunk.getBlockState(mutable).isIn(StarflightBlocks.WORLD_STONE_BLOCK_TAG))
 								captureSurface = false;
@@ -89,10 +91,10 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 							
 							if(hasIce)
 							{
-								if(depth == 4)
+								if(mutable.getY() == 50)
 									state = Blocks.SNOW_BLOCK.getDefaultState();
-								else if(depth > 4)
-									state = random.nextInt(4) == 0 ? Blocks.BLUE_ICE.getDefaultState() : Blocks.PACKED_ICE.getDefaultState();
+								else if(mutable.getY() < 50)
+									state = Blocks.PACKED_ICE.getDefaultState();
 							}
 							
 							chunk.setBlockState(mutable, state, false);

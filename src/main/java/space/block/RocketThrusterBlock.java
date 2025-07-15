@@ -1,8 +1,9 @@
 package space.block;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.swing.text.html.StyleSheet;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +27,7 @@ import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
@@ -33,8 +35,6 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.WorldAccess;
 import space.item.StarflightItems;
-import space.planet.PlanetDimensionData;
-import space.planet.PlanetList;
 import space.util.CubicHermiteSpline;
 
 public class RocketThrusterBlock extends FacingBlock implements Waterloggable
@@ -43,35 +43,26 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
 	private static final double ISP_MULTIPLIER = 2.0;
-	private final double standardGravity = 9.80665;
-	private final double massFlow;
 	private final double vacuumThrust;
 	private final double atmThrust;
 	private final double vacuumISP;
 	private final double atmISP;
-	private final double maxExitPressure;
 	private final double gimbal;
-	private final CubicHermiteSpline splineISP1;
-	private final CubicHermiteSpline splineISP2;
 	
-	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double maxExitPressure, double gimbal)
+	public RocketThrusterBlock(Settings settings, double vacuumThrust, double vacuumISP, double atmISP, double gimbal)
 	{
 		super(settings);
 		this.setDefaultState(this.stateManager.getDefaultState().with(WATERLOGGED, false));
-		this.vacuumThrust = vacuumThrust;
 		this.vacuumISP = vacuumISP * ISP_MULTIPLIER;
 		this.atmISP = atmISP * ISP_MULTIPLIER;
-		this.maxExitPressure = maxExitPressure;
+		this.vacuumThrust = vacuumThrust;
+		this.atmThrust = getThrust(vacuumISP, atmISP, vacuumThrust, 1.0);
 		this.gimbal = gimbal;
-		this.splineISP1 = new CubicHermiteSpline(0.0, 1.0, this.vacuumISP, this.atmISP, -10.0, -1.0);
-		this.splineISP2 = new CubicHermiteSpline(1.0, this.maxExitPressure, this.atmISP, 0.0001, -1.0, -0.0001);
-		this.massFlow = vacuumThrust / (this.vacuumISP * standardGravity);
-		this.atmThrust = atmISP * massFlow * standardGravity;
 	}
 	
 	public RocketThrusterBlock(Settings settings)
 	{
-		this(settings, 0.0, 0.0, 0.0, 0.0, 0.0);
+		this(settings, 0.0, 0.0, 0.0, 0.0);
 	}
 	
 	@Override
@@ -149,32 +140,28 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	{
 		return state.rotate(mirror.getRotation(state.get(FACING)));
 	}
+	
+	public double getVacuumnISP()
+	{
+		return vacuumISP;
+	}
+	
+	public double getAtmISP()
+	{
+		return atmISP;
+	}
+	
+	public double getVacuumThrust()
+	{
+		return vacuumThrust;
+	}
+	
+	public double getAtmThrust()
+	{
+		return atmThrust;
+	}
 
-	/**
-	 * Get the maximum mass flow of this rocket engine.
-	 */
-	public double getMassFlow()
-	{
-		return massFlow;
-	}
-	
-	/**
-	 * Get the specific impulse (ISP) of this rocket engine at the given pressure in atm.
-	 */
-	public double getISP(double p)
-	{
-		return p <= 1.0 ? splineISP1.get(p) : splineISP2.get(p);
-	}
-	
-	/**
-	 * Get the thrust of this rocket engine at the given pressure in atm.
-	 */
-	public double getThrust(double p)
-	{
-		return getISP(p) * massFlow * standardGravity;
-	}
-	
-	public double getMaxGimbal()
+	public double getGimbal()
 	{
 		return gimbal;
 	}
@@ -182,19 +169,23 @@ public class RocketThrusterBlock extends FacingBlock implements Waterloggable
 	@Override
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
-		PlanetDimensionData data = PlanetList.getClient().getViewpointDimensionData();
-		double pressure = 1.0;
-		
-		if(data != null)
-			pressure = data == null ? 1.0 : data.getPressure();
-		
 		ArrayList<Text> textList = new ArrayList<Text>();
-		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.vacuum_thrust").append(df.format(vacuumThrust / 1000.0)).append("kN"));
-		textList.add(Text.translatable("block.space.vacuum_isp").append(df.format(vacuumISP)).append("s"));
-		textList.add(Text.translatable("block.space.local_thrust").append(df.format(getThrust(pressure) / 1000.0)).append("kN"));
-		textList.add(Text.translatable("block.space.local_isp").append(df.format(getISP(pressure))).append("s"));
-		textList.add(Text.translatable("block.space.fuel_draw").append(df.format(massFlow)).append("kg/s"));
+		textList.add(Text.translatable("block.space.engine_thrust_vacuum", (int) (vacuumThrust / 1000.0)).formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.engine_isp_vacuum", (int) vacuumISP).formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.engine_thrust_atm", (int) (atmThrust / 1000.0)).formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.engine_isp_atm", (int) atmISP).formatted(Formatting.GOLD));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
+	}
+	
+	public static double getISP(double vacuumISP, double atmISP, double pressure)
+	{
+		CubicHermiteSpline splineISP1 = new CubicHermiteSpline(0.0, 1.0, vacuumISP, atmISP, -10.0, -1.0);
+		CubicHermiteSpline splineISP2 = new CubicHermiteSpline(1.0, 100.0, atmISP, 0.0001, -1.0, -0.0001);
+		return pressure <= 1.0 ? splineISP1.get(pressure) : splineISP2.get(pressure);
+	}
+	
+	public static double getThrust(double vacuumISP, double atmISP, double vacuumThrust, double pressure)
+	{
+		return getISP(vacuumISP, atmISP, pressure) * (vacuumThrust / vacuumISP);
 	}
 }

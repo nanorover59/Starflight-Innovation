@@ -10,6 +10,8 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
+import space.block.EnergyBlock;
+import space.block.StarflightBlocks;
 import space.screen.ElectricFurnaceScreenHandler;
 
 @Environment(EnvType.CLIENT)
@@ -42,13 +44,8 @@ public class ElectricFurnaceScreen extends HandledScreen<ScreenHandler>
 
 	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY)
 	{
-		int i = this.x;
-		int j = this.y;
-		int l;
-		context.drawTexture(TEXTURE, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
-		l = ((ElectricFurnaceScreenHandler) this.handler).getCharge();
-		context.drawTexture(TEXTURE, i + 35, j - l + 50, 176, 14 - l, 14, l);
-		l = ((ElectricFurnaceScreenHandler) this.handler).getCookProgress();
-		context.drawTexture(TEXTURE, i + 79, j + 34, 176, 14, l + 1, 16);
+		context.drawTexture(TEXTURE, this.x, this.y, 0, 0, this.backgroundWidth, this.backgroundHeight);
+		MachineScreenIcons.renderEnergy(context, textRenderer, 57, 35, this.x, this.y, mouseX, mouseY, ((ElectricFurnaceScreenHandler) this.handler).getCharge(), ((EnergyBlock) StarflightBlocks.ELECTRIC_FURNACE).getEnergyCapacity());
+		MachineScreenIcons.renderProgress(context, textRenderer, 79, 34, this.x, this.y, mouseX, mouseY, ((ElectricFurnaceScreenHandler) this.handler).getCookProgress());
 	}
 }

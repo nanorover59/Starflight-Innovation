@@ -8,7 +8,5 @@ import space.util.FluidResourceType;
 
 public interface FluidUtilityBlock
 {
-	FluidResourceType getFluidType();
-	
-	boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction);
+	boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType);
 }

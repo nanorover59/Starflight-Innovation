@@ -105,8 +105,8 @@ public class EncasedFluidPipeBlock extends FluidPipeBlock
 	}
 	
 	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return direction == state.get(FACING) || direction == state.get(FACING).getOpposite();
+		return fluidType == fluid && (direction == state.get(FACING) || direction == state.get(FACING).getOpposite());
 	}
 }

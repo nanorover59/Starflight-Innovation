@@ -15,11 +15,21 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
+import space.block.AtmosphereGeneratorBlock;
+import space.block.ElectrolyzerBlock;
 import space.block.EnergyBlock;
+import space.block.ExtractorBlock;
+import space.block.FluidPipeBlock;
+import space.block.FluidUtilityBlock;
+import space.block.PumpBlock;
 import space.block.SimpleFacingBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.AtmosphereGeneratorBlockEntity;
+import space.block.entity.ElectrolyzerBlockEntity;
 import space.block.entity.EnergyBlockEntity;
+import space.block.entity.ExtractorBlockEntity;
+import space.block.entity.FluidStorageBlockEntity;
+import space.block.entity.PumpBlockEntity;
 
 public class BlockSearch
 {
@@ -279,114 +289,275 @@ public class BlockSearch
 	
 	public static void energyConnectionSearch(World world, BlockPos pos)
 	{
-		BlockState blockState = world.getBlockState(pos);
+		Set<BlockPos> set = new HashSet<>();
+		Set<BlockPos> actionSet = new HashSet<BlockPos>();
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		stack.push(pos);
+		BlockState originBlockState = world.getBlockState(pos);
 		
-		if(!(blockState.getBlock() instanceof EnergyBlock))
+		if(originBlockState.getBlock() instanceof EnergyBlock)
 		{
 			for(Direction direction : DIRECTIONS)
 			{
-				BlockPos offset = pos.offset(direction);
-				
-				if(world.getBlockState(offset).getBlock() instanceof EnergyBlock)
-					energyConnectionSearch(world, offset);
+				if(((EnergyBlock) originBlockState.getBlock()).isOutput(world, pos, originBlockState, direction))
+				{
+					actionSet.add(pos);
+					break;
+				}
 			}
-			
-			return;
 		}
 		
-		// Repeat for pass through, output, and input sides of the initial block.
-		for(int i = 0; i < 3; i++)
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
 		{
-			Set<BlockPos> set = new HashSet<>();
-			Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
-			Set<BlockPos> energyProducers = new HashSet<BlockPos>();
-			Set<BlockPos> energyConsumers = new HashSet<BlockPos>();
-			stack.push(pos);
+			BlockPos blockPos = stack.pop();
+			set.add(blockPos);
 			
-			// Search for energy producers to update.
-			while(stack.size() > 0 && set.size() < MAX_VOLUME)
+			for(Direction direction : DIRECTIONS)
 			{
-				BlockPos blockPos = stack.pop();
-				blockState = world.getBlockState(blockPos);
-				set.add(blockPos);
+				BlockPos offset = blockPos.offset(direction);
+				BlockState offsetBlockState = world.getBlockState(offset);
 				
-				if(blockState.getBlock() instanceof EnergyBlock)
+				if(!set.contains(offset) && offsetBlockState.getBlock() instanceof EnergyBlock)
 				{
-					EnergyBlock energyBlock = (EnergyBlock) blockState.getBlock();
+					if(((EnergyBlock) offsetBlockState.getBlock()).isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
+						stack.push(offset);
 					
+					if(((EnergyBlock) offsetBlockState.getBlock()).isOutput(world, offset, offsetBlockState, direction.getOpposite()))
+						actionSet.add(offset);
+				}
+			}
+		}
+		
+		for(BlockPos blockPos : actionSet)
+		{
+			BlockState blockState = world.getBlockState(blockPos);
+			BlockEntity blockEntity = world.getBlockEntity(blockPos);
+			
+			if(blockEntity != null && blockEntity instanceof EnergyBlockEntity)
+			{
+				EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
+				Set<BlockPos> outputSet = new HashSet<>();
+				energyBlockEntity.getOutputs().clear();
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					if(((EnergyBlock) blockState.getBlock()).isOutput(world, blockPos, blockState, direction))
+						outputSet.addAll(energyConsumerSearch(world, blockPos.offset(direction), direction));
+				}
+				
+				energyBlockEntity.getOutputs().addAll(outputSet);
+			}
+		}
+	}
+	
+	private static Set<BlockPos> energyConsumerSearch(World world, BlockPos pos, Direction initialDirection)
+	{
+		BlockState startingBlockState = world.getBlockState(pos);
+		
+		if(startingBlockState.getBlock() instanceof EnergyBlock)
+		{
+			EnergyBlock energyBlock = (EnergyBlock) startingBlockState.getBlock();
+			
+			if(energyBlock.isInput(world, pos, startingBlockState, initialDirection.getOpposite()))
+				return Set.of(pos);
+		}
+		
+		Set<BlockPos> set = new HashSet<>();
+		Set<BlockPos> energyConsumers = new HashSet<BlockPos>();
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		stack.push(pos);
+		
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
+		{
+			BlockPos blockPos = stack.pop();
+			BlockState blockState = world.getBlockState(blockPos);
+			set.add(blockPos);
+
+			if(blockState.getBlock() instanceof EnergyBlock)
+			{
+				for(Direction direction : DIRECTIONS)
+				{
+					BlockPos offset = blockPos.offset(direction);
+					BlockState offsetBlockState = world.getBlockState(offset);
+					
+					if(!set.contains(offset) && offsetBlockState.getBlock() instanceof EnergyBlock)
+					{
+						EnergyBlock offsetEnergyBlock = (EnergyBlock) offsetBlockState.getBlock();
+	
+						if(offsetEnergyBlock.isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
+							stack.push(offset);
+						
+						if(offsetEnergyBlock.isInput(world, offset, offsetBlockState, direction.getOpposite()))
+							energyConsumers.add(offset);
+					}
+				}
+			}
+		}
+		
+		return energyConsumers;
+	}
+	
+	public static void fluidConnectionSearch(World world, BlockPos pos, FluidResourceType fluidType)
+	{
+		Set<BlockPos> set = new HashSet<>();
+		Set<BlockPos> actionSet = new HashSet<BlockPos>();
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		stack.push(pos);
+		BlockState originBlockState = world.getBlockState(pos);
+		
+		if(originBlockState.getBlock() instanceof PumpBlock
+		|| originBlockState.getBlock() instanceof ExtractorBlock
+		|| originBlockState.getBlock() instanceof ElectrolyzerBlock
+		|| originBlockState.getBlock() instanceof AtmosphereGeneratorBlock)
+			actionSet.add(pos);
+		
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
+		{
+			BlockPos blockPos = stack.pop();
+			set.add(blockPos);
+			
+			for(Direction direction : DIRECTIONS)
+			{
+				BlockPos offset = blockPos.offset(direction);
+				BlockState offsetBlockState = world.getBlockState(offset);
+				
+				if(!set.contains(offset) && offsetBlockState.getBlock() instanceof FluidUtilityBlock
+				&& ((FluidUtilityBlock) offsetBlockState.getBlock()).canPipeConnectToSide(world, offset, offsetBlockState, direction.getOpposite(), fluidType))
+				{
+					if(offsetBlockState.getBlock() instanceof FluidPipeBlock)
+						stack.push(offset);
+					else if(offsetBlockState.getBlock() instanceof PumpBlock
+					|| offsetBlockState.getBlock() instanceof ExtractorBlock
+					|| offsetBlockState.getBlock() instanceof ElectrolyzerBlock
+					|| offsetBlockState.getBlock() instanceof AtmosphereGeneratorBlock)
+						actionSet.add(offset);
+				}
+			}
+		}
+		
+		for(BlockPos blockPos : actionSet)
+		{
+			BlockState blockState = world.getBlockState(blockPos);
+			BlockEntity blockEntity = world.getBlockEntity(blockPos);
+			
+			if(blockEntity == null)
+				continue;
+			
+			if(blockState.getBlock() instanceof PumpBlock)
+			{
+				PumpBlockEntity pumpBlockEntity = (PumpBlockEntity) blockEntity;
+				Direction pumpFacing = blockState.get(PumpBlock.FACING);
+				pumpBlockEntity.fluidSources.clear();
+				pumpBlockEntity.fluidSinks.clear();
+				pumpBlockEntity.fluidSources.addAll(fluidStorageSearch(world, blockPos.offset(pumpFacing.getOpposite()), pumpFacing.getOpposite(), fluidType));
+				pumpBlockEntity.fluidSinks.addAll(fluidStorageSearch(world, blockPos.offset(pumpFacing), pumpFacing, fluidType));
+			}
+			else if(blockState.getBlock() instanceof ExtractorBlock)
+			{
+				ExtractorBlockEntity extractorBlockEntity = (ExtractorBlockEntity) blockEntity;
+				Set<BlockPos> outputSet = new HashSet<>();
+				extractorBlockEntity.waterOutputs.clear();
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					if(direction == blockState.get(ExtractorBlock.FACING))
+						continue;
+					
+					outputSet.addAll(fluidStorageSearch(world, blockPos.offset(direction), direction, FluidResourceType.WATER));
+				}
+				
+				extractorBlockEntity.waterOutputs.addAll(outputSet);
+			}
+			else if(blockState.getBlock() instanceof ElectrolyzerBlock)
+			{
+				ElectrolyzerBlockEntity electrolyzerBlockEntity = (ElectrolyzerBlockEntity) blockEntity;
+				Set<BlockPos> oxygenOutputSet = new HashSet<>();
+				Set<BlockPos> hydrogenOutputSet = new HashSet<>();
+				electrolyzerBlockEntity.oxygenOutputs.clear();
+				electrolyzerBlockEntity.hydrogenOutputs.clear();
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					if(direction == blockState.get(ElectrolyzerBlock.FACING))
+						continue;
+					
+					oxygenOutputSet.addAll(fluidStorageSearch(world, blockPos.offset(direction), direction, FluidResourceType.OXYGEN));
+					hydrogenOutputSet.addAll(fluidStorageSearch(world, blockPos.offset(direction), direction, FluidResourceType.HYDROGEN));
+				}
+				
+				electrolyzerBlockEntity.oxygenOutputs.addAll(oxygenOutputSet);
+				electrolyzerBlockEntity.hydrogenOutputs.addAll(hydrogenOutputSet);
+			}
+			else if(blockState.getBlock() instanceof AtmosphereGeneratorBlock)
+			{
+				AtmosphereGeneratorBlockEntity atmosphereGeneratorBlockEntity = (AtmosphereGeneratorBlockEntity) blockEntity;
+				Set<BlockPos> oxygenSourceSet = new HashSet<>();
+				atmosphereGeneratorBlockEntity.oxygenSources.clear();
+				
+				for(Direction direction : DIRECTIONS)
+				{
+					if(direction == blockState.get(AtmosphereGeneratorBlock.FACING))
+						continue;
+					
+					oxygenSourceSet.addAll(fluidStorageSearch(world, blockPos.offset(direction), direction, FluidResourceType.OXYGEN));
+				}
+				
+				atmosphereGeneratorBlockEntity.oxygenSources.addAll(oxygenSourceSet);
+			}
+		}
+	}
+	
+	private static Set<BlockPos> fluidStorageSearch(World world, BlockPos pos, Direction initialDirection, FluidResourceType fluidType)
+	{
+		BlockState startingBlockState = world.getBlockState(pos);
+		
+		if(startingBlockState.getBlock() instanceof FluidUtilityBlock)
+		{
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+
+			if(blockEntity != null && blockEntity instanceof FluidStorageBlockEntity)
+			{
+				if(((FluidUtilityBlock) startingBlockState.getBlock()).canPipeConnectToSide(world, pos, world.getBlockState(pos), initialDirection.getOpposite(), fluidType))
+					return Set.of(pos);
+			}
+		}
+		
+		Set<BlockPos> set = new HashSet<>();
+		Set<BlockPos> fluidStorage = new HashSet<BlockPos>();
+		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
+		stack.push(pos);
+		
+		while(stack.size() > 0 && set.size() < MAX_VOLUME)
+		{
+			BlockPos blockPos = stack.pop();
+			BlockState blockState = world.getBlockState(blockPos);
+			set.add(blockPos);
+			
+			if(blockState.getBlock() instanceof FluidUtilityBlock)
+			{
+				if(blockState.getBlock() instanceof FluidPipeBlock)
+				{
 					for(Direction direction : DIRECTIONS)
 					{
 						BlockPos offset = blockPos.offset(direction);
+						BlockState offsetBlockState = world.getBlockState(offset);
 						
-						if(!set.contains(offset))
-						{
-							boolean continueSearch = false;
-							
-							if(blockPos.equals(pos))
-							{
-								if(i == 0)
-									continueSearch = energyBlock.isPassThrough(world, blockPos, blockState, direction);
-								else if(i == 1)
-								{
-									continueSearch = energyBlock.isOutput(world, blockPos, blockState, direction);
-									
-									if(continueSearch)
-										energyProducers.add(blockPos);
-										
-								}
-								else if(i == 2)
-								{
-									continueSearch = energyBlock.isInput(world, blockPos, blockState, direction);
-
-									if(continueSearch)
-										energyConsumers.add(blockPos);
-								}
-									
-							}
-							else
-								continueSearch = energyBlock.isPassThrough(world, blockPos, blockState, direction);
-							
-							if(continueSearch)
-							{
-								BlockState offsetBlockState = world.getBlockState(offset);
-								
-								if(offsetBlockState.getBlock() instanceof EnergyBlock)
-								{
-									EnergyBlock offsetEnergyBlock = (EnergyBlock) offsetBlockState.getBlock();
-									
-									if(offsetEnergyBlock.isPassThrough(world, offset, offsetBlockState, direction.getOpposite()))
-										stack.push(offset);
-									
-									if(offsetEnergyBlock.isOutput(world, offset, offsetBlockState, direction.getOpposite()))
-										energyProducers.add(offset);
-									
-									if(offsetEnergyBlock.isInput(world, offset, offsetBlockState, direction.getOpposite()))
-										energyConsumers.add(offset);
-								}
-							}
-						}
+						if(!set.contains(offset) && offsetBlockState.getBlock() instanceof FluidUtilityBlock
+						&& ((FluidUtilityBlock) offsetBlockState.getBlock()).canPipeConnectToSide(world, offset, offsetBlockState, direction.getOpposite(), fluidType))
+							stack.push(offset);
 					}
 				}
-			}
-			
-			for(BlockPos producerPos : energyProducers)
-			{
-				BlockEntity blockEntity = world.getBlockEntity(producerPos);
-				
-				if(blockEntity instanceof EnergyBlockEntity)
+				else
 				{
-					EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
-					energyBlockEntity.clearOutputs();
-					//System.out.println("Updated: " + energyBlockEntity);
+					BlockEntity offsetBlockEntity = world.getBlockEntity(blockPos);
 					
-					for(BlockPos consumerBlockPos : energyConsumers)
-					{
-						energyBlockEntity.addOutput(consumerBlockPos);
-						//System.out.println("        " + consumerBlockPos.toShortString());
-					}
+					if(offsetBlockEntity != null && offsetBlockEntity instanceof FluidStorageBlockEntity)
+						fluidStorage.add(blockPos);
 				}
 			}
 		}
+		
+		return fluidStorage;
 	}
 	
 	private static boolean tooFar(BlockPos pos1, BlockPos pos2)

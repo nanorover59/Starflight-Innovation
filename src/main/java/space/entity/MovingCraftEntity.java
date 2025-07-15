@@ -6,23 +6,18 @@ import java.util.List;
 import java.util.UUID;
 
 import org.joml.Matrix3f;
-import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockEntityProvider;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.Waterloggable;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.HopperBlockEntity;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -31,22 +26,14 @@ import net.minecraft.entity.data.TrackedData;
 import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.fluid.Fluids;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.property.Properties;
-import net.minecraft.state.property.Property;
-import net.minecraft.util.BlockRotation;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -56,14 +43,11 @@ import net.minecraft.world.Heightmap;
 import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import space.block.FluidTankControllerBlock;
-import space.block.FluidTankInsideBlock;
-import space.block.StarflightBlocks;
 import space.block.entity.FluidTankControllerBlockEntity;
-import space.block.entity.RocketControllerBlockEntity;
+import space.craft.MovingCraftBlock;
 import space.mixin.common.EntityInvokerMixin;
-import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
-import space.util.BooleanByteUtil;
+import space.network.s2c.MovingCraftSyncS2CPacket;
 
 public class MovingCraftEntity extends Entity
 {
@@ -76,8 +60,8 @@ public class MovingCraftEntity extends Entity
 	private static final TrackedData<Vector3f> TRACKED_BOX_MIN = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Vector3f> TRACKED_BOX_MAX = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.VECTOR3F);
 	private static final TrackedData<Float> TRACKED_ALTITUDE = DataTracker.registerData(MovingCraftEntity.class, TrackedDataHandlerRegistry.FLOAT);
-	protected ArrayList<MovingCraftEntity.BlockData> blocks = new ArrayList<MovingCraftEntity.BlockData>();
-	protected ArrayList<MovingCraftEntity.BlockData> exposedBlocks = new ArrayList<MovingCraftEntity.BlockData>();
+	protected ArrayList<MovingCraftBlock> blocks = new ArrayList<MovingCraftBlock>();
+	protected ArrayList<MovingCraftBlock> exposedBlocks = new ArrayList<MovingCraftBlock>();
 	protected ArrayList<ServerPlayerEntity> playersInRange = new ArrayList<ServerPlayerEntity>();
 	protected HashMap<UUID, BlockPos> entityOffsets = new HashMap<UUID, BlockPos>();
 	private Vector3f momentOfInertia1;
@@ -105,7 +89,7 @@ public class MovingCraftEntity extends Entity
 		super(entityType, world);
 	}
 
-	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blocks, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
+	public MovingCraftEntity(EntityType<? extends MovingCraftEntity> type, World world, BlockPos blockPos, ArrayList<MovingCraftBlock> blocks, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2)
 	{
 		this(type, world);
 		this.blocks = blocks;
@@ -130,7 +114,7 @@ public class MovingCraftEntity extends Entity
 		BlockPos min = new BlockPos(blocks.get(0).getPosition());
 		BlockPos max = new BlockPos(blocks.get(0).getPosition());
 
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			BlockPos pos = blockData.getPosition();
 
@@ -243,12 +227,12 @@ public class MovingCraftEntity extends Entity
 		this.dataTracker.set(TRACKED_ALTITUDE, Float.valueOf(altitude));
 	}
 	
-	public ArrayList<MovingCraftEntity.BlockData> getBlocks()
+	public ArrayList<MovingCraftBlock> getBlocks()
 	{
 		return blocks;
 	}
 	
-	public ArrayList<MovingCraftEntity.BlockData> getExposedBlocks()
+	public ArrayList<MovingCraftBlock> getExposedBlocks()
 	{
 		return exposedBlocks;
 	}
@@ -454,7 +438,7 @@ public class MovingCraftEntity extends Entity
 			Box otherBox = entity.getBoundingBox().offset(otherPos.sub(entity.getPos().toVector3f()));
 			boolean velocity = false;
 			
-			for(MovingCraftEntity.BlockData blockData : exposedBlocks)
+			for(MovingCraftBlock blockData : exposedBlocks)
 			{
 				boolean hidden = true;
 				
@@ -583,20 +567,20 @@ public class MovingCraftEntity extends Entity
 		}
 	}
 
-	public static ArrayList<MovingCraftEntity.BlockData> captureBlocks(World world, BlockPos centerPos, ArrayList<BlockPos> positionList)
+	public static ArrayList<MovingCraftBlock> captureBlocks(World world, BlockPos centerPos, ArrayList<BlockPos> positionList)
 	{
-		ArrayList<MovingCraftEntity.BlockData> blocks = new ArrayList<MovingCraftEntity.BlockData>();
+		ArrayList<MovingCraftBlock> blocks = new ArrayList<MovingCraftBlock>();
 
 		// Fill the block data array list.
 		for(BlockPos pos : positionList)
-			blocks.add(MovingCraftEntity.BlockData.fromBlock(world, positionList, pos, centerPos, isBlockSolid(world, pos)));
+			blocks.add(MovingCraftBlock.fromBlock(world, positionList, pos, centerPos, MovingCraftBlock.isBlockSolid(world, pos)));
 
 		return blocks;
 	}
 
-	public static void removeBlocksFromWorld(World world, BlockPos centerPos, ArrayList<MovingCraftEntity.BlockData> blocks)
+	public static void removeBlocksFromWorld(World world, BlockPos centerPos, ArrayList<MovingCraftBlock> blocks)
 	{
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 			
@@ -609,22 +593,22 @@ public class MovingCraftEntity extends Entity
 			}
 		}
 		
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
-			if(!isBlockSolid(world, pos))
+			if(!MovingCraftBlock.isBlockSolid(world, pos))
 			{
 				FluidState fluidState = world.getFluidState(pos);
 				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS);
 			}
 		}
 
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			BlockPos pos = centerPos.add(blockData.getPosition());
 
-			if(isBlockSolid(world, pos))
+			if(MovingCraftBlock.isBlockSolid(world, pos))
 			{
 				FluidState fluidState = world.getFluidState(pos);
 				world.setBlockState(pos, fluidState.getBlockState(), Block.NOTIFY_LISTENERS | Block.SKIP_DROPS);
@@ -636,7 +620,7 @@ public class MovingCraftEntity extends Entity
 	{
 		exposedBlocks.clear();
 		
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			boolean exposed = false;
 			
@@ -739,8 +723,8 @@ public class MovingCraftEntity extends Entity
 		if(facing != Direction.UP && facing != Direction.DOWN)
 			quaternion.rotationY((getForwardDirection().asRotation() - facing.asRotation()) * (MathHelper.PI / 180.0f));
 
-		ArrayList<MovingCraftEntity.BlockData> toPlaceFirst = new ArrayList<MovingCraftEntity.BlockData>();
-		ArrayList<MovingCraftEntity.BlockData> toPlaceLast = new ArrayList<MovingCraftEntity.BlockData>();
+		ArrayList<MovingCraftBlock> toPlaceFirst = new ArrayList<MovingCraftBlock>();
+		ArrayList<MovingCraftBlock> toPlaceLast = new ArrayList<MovingCraftBlock>();
 		fallDistance = 0.0f;
 
 		for(Entity passenger : this.getPassengerList())
@@ -762,7 +746,7 @@ public class MovingCraftEntity extends Entity
 			passenger.dismountVehicle();
 		}
 
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			if(blockData.placeFirst())
 				toPlaceFirst.add(blockData);
@@ -770,13 +754,13 @@ public class MovingCraftEntity extends Entity
 				toPlaceLast.add(blockData);
 		}
 
-		for(MovingCraftEntity.BlockData blockData : toPlaceFirst)
+		for(MovingCraftBlock blockData : toPlaceFirst)
 			blockData.toBlock(this.getWorld(), this.getBlockPos(), quaternion);
 
-		for(MovingCraftEntity.BlockData blockData : toPlaceLast)
+		for(MovingCraftBlock blockData : toPlaceLast)
 			blockData.toBlock(this.getWorld(), this.getBlockPos(), quaternion);
 
-		for(MovingCraftEntity.BlockData blockData : toPlaceFirst)
+		for(MovingCraftBlock blockData : toPlaceFirst)
 		{
 			Vector3f offset = new Vector3f(blockData.getPosition().getX(), blockData.getPosition().getY(), blockData.getPosition().getZ()).rotate(quaternion);
 			BlockPos blockPos = this.getBlockPos().add(MathHelper.floor(offset.x()), MathHelper.floor(offset.y()), MathHelper.floor(offset.z()));
@@ -787,7 +771,7 @@ public class MovingCraftEntity extends Entity
 		exposedBlocks.clear();
 	}
 
-	public void onBlockReleased(MovingCraftEntity.BlockData blockData, BlockPos worldPos)
+	public void onBlockReleased(MovingCraftBlock blockData, BlockPos worldPos)
 	{
 		BlockEntity blockEntity = getWorld().getBlockEntity(worldPos);
 
@@ -826,25 +810,13 @@ public class MovingCraftEntity extends Entity
 		nbt.putDouble("maxX", boxMax.getX());
 		nbt.putDouble("maxY", boxMax.getY());
 		nbt.putDouble("maxZ", boxMax.getZ());
-		int blockCount = blocks.size();
-		int[] x = new int[blockCount];
-		int[] y = new int[blockCount];
-		int[] z = new int[blockCount];
-
-		for(int i = 0; i < blockCount; i++)
-		{
-			MovingCraftEntity.BlockData blockData = blocks.get(i);
-			x[i] = blockData.getPosition().getX();
-			y[i] = blockData.getPosition().getY();
-			z[i] = blockData.getPosition().getZ();
-			blockData.saveData(nbt);
-		}
+		NbtList blockDataListNBT = new NbtList();
 		
-		nbt.putInt("blockCount", blockCount);
-		nbt.putIntArray("x", x);
-		nbt.putIntArray("y", y);
-		nbt.putIntArray("z", z);
-
+		for(MovingCraftBlock blockData : blocks)
+	    	blockDataListNBT.add(blockData.saveData(new NbtCompound()));
+	    
+		nbt.put("blockData", blockDataListNBT);
+		
 		nbt.putInt("passengerCount", entityOffsets.size());
 		int i = 0;
 
@@ -878,16 +850,10 @@ public class MovingCraftEntity extends Entity
 		craftVolume = nbt.getDouble("volume");
 		boxMin = new Vec3d(nbt.getDouble("minX"), nbt.getDouble("minY"), nbt.getDouble("minZ"));
 		boxMax = new Vec3d(nbt.getDouble("maxX"), nbt.getDouble("maxY"), nbt.getDouble("maxZ"));
-		int blockCount = nbt.getInt("blockCount");
-		int[] x = nbt.getIntArray("x");
-		int[] y = nbt.getIntArray("y");
-		int[] z = nbt.getIntArray("z");
-
-		for(int i = 0; i < blockCount; i++)
-		{
-			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
-			blocks.add(MovingCraftEntity.BlockData.loadData(nbt.getCompound(dataPos.toShortString())));
-		}
+		NbtList blockDataListNBT = nbt.getList("blockData", NbtList.COMPOUND_TYPE);
+		
+		for(int i = 0; i < blockDataListNBT.size(); i++)
+        	blocks.add(MovingCraftBlock.loadData(blockDataListNBT.getCompound(i)));
 		
 		refreshExposedBlocks();
 
@@ -899,7 +865,7 @@ public class MovingCraftEntity extends Entity
 		playersInRange.clear();
 	}
 
-	public void sendRenderData(boolean forceUnload)
+	public void sendToClients(boolean forceUnload)
 	{
 		MinecraftServer server = this.getServer();
 
@@ -910,370 +876,77 @@ public class MovingCraftEntity extends Entity
 			if(!forceUnload && !this.playersInRange.contains(player) && inRange)
 			{
 				playersInRange.add(player);
-				ServerPlayNetworking.send(player, new MovingCraftBlocksS2CPacket(getId(), blocks));
+				ServerPlayNetworking.send(player, createClientSyncPacket());
 			}
 			else if(forceUnload && this.playersInRange.contains(player) && !inRange)
 				playersInRange.remove(player);
 			else if(!forceUnload && inRange)
-				sendEntityOffsets(player);
-		}
-	}
+			{
+				HashMap<Integer, BlockPos> passengerMap = new HashMap<Integer, BlockPos>();
 
-	public void sendEntityOffsets(ServerPlayerEntity player)
-	{
-		HashMap<Integer, BlockPos> passengerMap = new HashMap<Integer, BlockPos>();
-
-		for(UUID uuid : entityOffsets.keySet())
-		{
-			if(entityOffsets.get(uuid) != null && player.getServerWorld().getEntity(uuid) != null)
-				passengerMap.put(player.getServerWorld().getEntity(uuid).getId(), entityOffsets.get(uuid));
-		}
-
-		ServerPlayNetworking.send(player, new MovingCraftEntityOffsetsS2CPacket(getId(), passengerMap));
-	}
-	
-	private static boolean isBlockSolid(World world, BlockPos blockPos)
-	{
-		BlockState blockState = world.getBlockState(blockPos);
-		return blockState.isSolidBlock(world, blockPos) || blockState.getBlock() instanceof SlabBlock || blockState.getBlock() instanceof StairsBlock;
-	}
-	
-	public static double volumeForBlock(BlockState blockState, World world, BlockPos pos)
-	{
-		if(blockState.isAir() || blockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
-			return 0.0;
-		
-		double volume = 0;
-		
-		for(Box box : blockState.getOutlineShape(world, pos).getBoundingBoxes())
-			volume += box.getLengthX() * box.getLengthY() * box.getLengthZ();
-		
-		return volume;
-	}
-	
-	public static double getMassForBlock(World world, BlockPos pos)
-	{
-		BlockState blockState = world.getBlockState(pos);
-		
-		double density = 50; // Assume a density of 50kg per cubic meter by default.
-		
-		//if(blockState.isIn(StarflightBlocks.FLUID_TANK_BLOCK_TAG))
-		//	density = 10;
-		
-		double mass = volumeForBlock(blockState, world, pos) * density;
-		BlockEntity blockEntity = world.getBlockEntity(pos);
-	
-		// If the block has a block entity, check for an inventory using the same function as hoppers.
-		if(blockEntity != null)
-    	{
-			Inventory inventory = HopperBlockEntity.getInventoryAt(world, pos);
-			
-			if(inventory != null)
-			{
-				mass *= 0.25;
-				
-	    		for(int i = 0; i < inventory.size(); i++)
-	    		{
-	    			ItemStack stack = inventory.getStack(i);
-	    			
-	    			if(stack.getItem() instanceof BlockItem)
-	    				mass += stack.getCount() * volumeForBlock(((BlockItem) stack.getItem()).getBlock().getDefaultState(), world, pos) * 100.0;
-	    			else
-	    				mass += stack.getCount() * 10.0;
-	    		}
-			}
-    	}
-		
-		return mass;
-	}
-	
-	public static class BlockData
-	{
-		private BlockState blockState;
-		private BlockPos position;
-		private NbtCompound blockEntityData;
-		private boolean[] sidesShowing = new boolean[6];
-		private boolean placeFirst;
-		private boolean redstone;
-		private double storedFluid;
-		
-		public BlockData(BlockState blockState, BlockPos position, NbtCompound blockEntityData, boolean[] sidesShowing, boolean placeFirst, boolean redstone, double storedFluid)
-		{
-			this.blockState = blockState;
-			this.position = position;
-			this.blockEntityData = blockEntityData == null ? null : blockEntityData.copy();
-			
-			for(int i = 0; i < 6; i++)
-				this.sidesShowing[i] = sidesShowing[i];
-			
-			this.placeFirst = placeFirst;
-			this.redstone = redstone;
-			this.storedFluid = storedFluid;
-		}
-		
-		public BlockData(PacketByteBuf buffer)
-	    {
-	    	this(readBlockState(buffer), buffer.readBlockPos(), buffer.readNbt(), unpackBooleans(buffer.readInt()), buffer.readBoolean(), buffer.readBoolean(), buffer.readDouble());
-	    }
-		
-		public static MovingCraftEntity.BlockData fromBlock(World world, ArrayList<BlockPos> positionList, BlockPos blockPos, BlockPos centerPos, boolean placeFirst)
-		{
-			BlockState blockState = world.getBlockState(blockPos);
-			boolean[] sidesShowing = new boolean[6];
-			Direction[] directions = {Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN};
-			BlockPos[] offsets = {blockPos.north(), blockPos.east(), blockPos.south(), blockPos.west(), blockPos.up(), blockPos.down()};
-			NbtCompound blockEntityData = null;
-			double storedFluid = 0.0;
-			
-			for(int i  = 0; i < 6; i++)
-			{
-				BlockState otherBlockState = world.getBlockState(offsets[i]);
-				
-				if(otherBlockState.getBlock() == StarflightBlocks.FLUID_TANK_INSIDE)
-					sidesShowing[i] = false;
-				else if(!otherBlockState.isOpaqueFullCube(world, offsets[i]) || otherBlockState.getBlock() == StarflightBlocks.BUFFER)
-					sidesShowing[i] = true;
-				else if(blockState.isSideSolidFullSquare(world, blockPos, directions[i]) && otherBlockState.isSideSolidFullSquare(world, offsets[i], directions[i].getOpposite()))
-					sidesShowing[i] = false;
-				else
-					sidesShowing[i] = true;
-			}
-			
-			if(blockState.getBlock() instanceof BlockEntityProvider)
-			{
-				BlockEntity blockEntity = world.getBlockEntity(blockPos);
-				
-				if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
-					storedFluid = ((FluidTankControllerBlockEntity) blockEntity).getStoredFluid();
-				
-				if(blockEntity != null && !(blockEntity instanceof RocketControllerBlockEntity))
-					blockEntityData = blockEntity.createNbt((RegistryWrapper.WrapperLookup) world.getRegistryManager());
-			}
-			
-			return new MovingCraftEntity.BlockData(blockState, blockPos.subtract(centerPos), blockEntityData, sidesShowing, placeFirst, world.isReceivingRedstonePower(blockPos), storedFluid);
-		}
-		
-		public void toBlock(World world, BlockPos centerPos, Quaternionf quaternion)
-		{
-			Matrix4f rotationMatrix = new Matrix4f().rotation(quaternion);
-			
-			if(blockState.getProperties().contains(Properties.FACING))
-			{
-				Direction direction = blockState.get(Properties.FACING);
-				direction = Direction.transform(rotationMatrix, direction);
-				blockState = blockState.with(Properties.FACING, direction);
-			}
-			else if(blockState.getProperties().contains(Properties.HORIZONTAL_FACING))
-			{
-				Direction direction = blockState.get(Properties.HORIZONTAL_FACING);
-				direction = Direction.transform(rotationMatrix, direction);
-				
-				if(direction != Direction.UP && direction != Direction.DOWN)
-					blockState = blockState.with(Properties.HORIZONTAL_FACING, direction);
-			}
-			else
-			{
-				Direction direction = Direction.transform(rotationMatrix, Direction.NORTH);
-				BlockRotation rotation = BlockRotation.NONE;
-				
-				if(direction == Direction.SOUTH)
-		        	rotation = BlockRotation.CLOCKWISE_180;
-				else if(direction == Direction.EAST)
-					rotation = BlockRotation.CLOCKWISE_90;
-		        else if(direction == Direction.WEST)
-		        	rotation = BlockRotation.COUNTERCLOCKWISE_90;
-				
-				blockState = blockState.rotate(rotation);
-			}
-			
-	        Vector3f offset = new Vector3f(position.getX(), position.getY(), position.getZ()).rotate(quaternion);
-			BlockPos blockPos = centerPos.add(MathHelper.floor(offset.x()), MathHelper.floor(offset.y()), MathHelper.floor(offset.z()));
-			BlockState conflictState = world.getBlockState(blockPos);
-			
-			// Do not overwrite existing solid world blocks.
-			if(conflictState.blocksMovement())
-			{
-				if(conflictState.getBlock().getHardness() > blockState.getBlock().getHardness())
+				for(UUID uuid : entityOffsets.keySet())
 				{
-					BlockEntity blockEntity = blockState.hasBlockEntity() ? ((BlockEntityProvider) blockState.getBlock()).createBlockEntity(blockPos, blockState) : null;
-					
-					if(blockEntity != null && blockEntityData != null)
-						blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup) world.getRegistryManager());
-					
-		            Block.dropStacks(blockState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
-		            return;
+					if(entityOffsets.get(uuid) != null && player.getServerWorld().getEntity(uuid) != null)
+						passengerMap.put(player.getServerWorld().getEntity(uuid).getId(), entityOffsets.get(uuid));
 				}
-				else
-				{
-					BlockEntity blockEntity = world.getBlockEntity(blockPos);
-		            Block.dropStacks(conflictState, world, blockPos, blockEntity, null, ItemStack.EMPTY);
-				}
+
+				ServerPlayNetworking.send(player, new MovingCraftEntityOffsetsS2CPacket(getId(), passengerMap));
 			}
-			
-			if(blockState.getBlock() instanceof FluidTankInsideBlock)
-			{
-				world.setBlockState(blockPos, Blocks.AIR.getDefaultState(), Block.NOTIFY_LISTENERS);
+		}
+	}
+
+	public CustomPayload createClientSyncPacket()
+	{
+		return new MovingCraftSyncS2CPacket(getId(), blocks);
+	}
+	
+	public static void receiveMovingCraftSync(MovingCraftSyncS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		int entityID = payload.entityID();
+		ArrayList<MovingCraftBlock> blockList = payload.blockDataList();
+		MinecraftClient client = context.client();
+		ClientWorld clientWorld = client.world;
+		
+		client.execute(() -> {
+			if(clientWorld == null)
 				return;
-			}
-			else if(blockState.getBlock() instanceof Waterloggable)
+			
+			Entity entity = clientWorld.getEntityById(entityID);
+
+			if(entity == null || !(entity instanceof MovingCraftEntity))
+				return;
+
+			MovingCraftEntity movingCraft = ((MovingCraftEntity) entity);
+			movingCraft.blocks = blockList;
+			movingCraft.refreshExposedBlocks();
+		});
+	}
+	
+	public static void receiveEntityOffsets(MovingCraftEntityOffsetsS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		int entityID = payload.entityID();
+		HashMap<Integer, BlockPos> passengerMap = payload.passengerMap();
+		MinecraftClient client = context.client();
+		ClientWorld clientWorld = client.world;
+		
+		client.execute(() -> {
+			if(clientWorld == null)
+				return;
+
+			Entity entity = clientWorld.getEntityById(entityID);
+
+			if(entity == null || !(entity instanceof MovingCraftEntity))
+				return;
+
+			((MovingCraftEntity) entity).getEntityOffsets().clear();
+			
+			for(int id : passengerMap.keySet())
 			{
-				FluidState fluidState = world.getFluidState(blockPos);
-				blockState = blockState.with(Properties.WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
+				Entity passenger = clientWorld.getEntityById(id);
+				
+				if(passenger != null)
+					((MovingCraftEntity) entity).getEntityOffsets().put(passenger.getUuid(), passengerMap.get(id));
 			}
-			
-			world.setBlockState(blockPos, blockState, Block.NOTIFY_LISTENERS);
-			BlockEntity blockEntity = world.getBlockEntity(blockPos);
-			
-			if(blockEntity != null && blockEntityData != null)
-				blockEntity.readComponentlessNbt(blockEntityData, (RegistryWrapper.WrapperLookup)world.getRegistryManager());
-		}
-
-		public BlockState getBlockState()
-		{
-			return blockState;
-		}
-
-		public BlockPos getPosition()
-		{
-			return position;
-		}
-
-		public NbtCompound getBlockEntityData()
-		{
-			return blockEntityData;
-		}
-		
-		public boolean[] getSidesShowing()
-		{
-			return sidesShowing;
-		}
-		
-		public boolean placeFirst()
-		{
-			return placeFirst;
-		}
-		
-		public boolean redstonePower()
-		{
-			return redstone;
-		}
-		
-		public double getStoredFluid()
-		{
-			return storedFluid;
-		}
-		
-		public NbtCompound saveData(NbtCompound data)
-		{
-			NbtCompound localData = new NbtCompound();
-			localData.put("blockState", NbtHelper.fromBlockState(blockState));
-			localData.put("position", NbtHelper.fromBlockPos(position));
-			
-			if(blockEntityData != null)
-				localData.put("blockEntityData", blockEntityData);
-			
-			localData.putByte("sidesShowing", BooleanByteUtil.toByte(sidesShowing));
-			localData.putBoolean("placeFirst", placeFirst);
-			localData.putBoolean("redstone", redstone);
-			
-			if(storedFluid > 0)
-				localData.putDouble("storedFluid", storedFluid);
-			
-			data.put(position.toShortString(), localData);
-			return data;
-		}
-		
-		public static MovingCraftEntity.BlockData loadData(NbtCompound data)
-		{
-			BlockState blockState = NbtHelper.toBlockState(Registries.BLOCK.getReadOnlyWrapper(), data.getCompound("blockState"));
-			BlockPos position = NbtHelper.toBlockPos(data, "position").get();
-			NbtCompound blockEntityData = data.contains("blockEntityData") ? data.getCompound("blockEntityData") : null;
-			boolean[] booleanArray = BooleanByteUtil.toBooleanArray(data.getByte("sidesShowing"));
-			boolean[] sidesShowing = new boolean[6];
-			
-			for(int i = 0; i < 6; i++)
-				sidesShowing[i] = booleanArray[i];
-			
-			boolean placeFirst = data.getBoolean("placeFirst");
-			boolean redstone = data.getBoolean("redstone");
-			double storedFluid = data.contains("storedFluid") ? data.getDouble("storedFluid") : 0.0;
-			return new MovingCraftEntity.BlockData(blockState, position, blockEntityData, sidesShowing, placeFirst, redstone, storedFluid);
-		}
-		
-		public static void writeBlockData(PacketByteBuf buffer, MovingCraftEntity.BlockData blockData)
-		{
-			writeBlockState(buffer, blockData.getBlockState());
-			buffer.writeBlockPos(blockData.getPosition());
-			buffer.writeNbt(blockData.getBlockEntityData());
-			buffer.writeInt(packBooleans(blockData.getSidesShowing()));
-			buffer.writeBoolean(blockData.placeFirst());
-			buffer.writeBoolean(blockData.redstonePower());
-			buffer.writeDouble(blockData.getStoredFluid());
-		}
-		
-		private static void writeBlockState(PacketByteBuf buffer, BlockState state)
-		{
-			buffer.writeIdentifier(Registries.BLOCK.getId(state.getBlock()));
-			buffer.writeInt(state.getProperties().size());
-
-			for(Property<?> property : state.getProperties())
-			{
-				buffer.writeString(property.getName());
-				buffer.writeString(getPropertyValueAsString(state, property));
-			}
-		}
-
-		public static BlockState readBlockState(PacketByteBuf buffer)
-		{
-			Identifier blockId = buffer.readIdentifier();
-			Block block = Registries.BLOCK.get(blockId);
-			BlockState state = block.getDefaultState();
-			int propertyCount = buffer.readInt();
-
-			for(int i = 0; i < propertyCount; i++)
-			{
-				String propertyName = buffer.readString();
-				String propertyValue = buffer.readString();
-				Property<?> property = block.getStateManager().getProperty(propertyName);
-
-				if(property != null)
-					state = setPropertyValue(state, property, propertyValue);
-			}
-
-			return state;
-		}
-		
-		private static <T extends Comparable<T>> String getPropertyValueAsString(BlockState state, Property<T> property)
-		{
-			return property.name(state.get(property));
-		}
-
-		private static <T extends Comparable<T>> BlockState setPropertyValue(BlockState state, Property<T> property, String value)
-		{
-			return state.with(property, property.parse(value).orElse(state.get(property)));
-		}
-		
-		private static int packBooleans(boolean ... booleans)
-		{
-			int packed = 0;
-			
-			for(int i = 0; i < booleans.length; i++)
-	        {
-	            if(booleans[i])
-	            	packed |= (1 << i);
-	        }
-			
-			return packed;
-		}
-		
-		private static boolean[] unpackBooleans(int packed)
-		{
-			boolean[] sidesShowing = new boolean[6];
-			
-			for (int i = 0; i < 6; i++)
-				sidesShowing[i] = (packed & (1 << i)) != 0;
-			
-			return sidesShowing;
-		}
+		});
 	}
 }

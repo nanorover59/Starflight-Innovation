@@ -67,21 +67,21 @@ public class LightColumnBlock extends BlockWithEntity implements BlockEntityProv
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer", df.format(getInput())).formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.electric_light.description"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 0.1;
+		return 1;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 0.5;
+		return 8;
 	}
 	
 	@Override

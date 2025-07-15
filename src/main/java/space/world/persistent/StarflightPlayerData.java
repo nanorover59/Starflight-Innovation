@@ -7,32 +7,36 @@ import net.minecraft.nbt.NbtCompound;
 
 public class StarflightPlayerData
 {
-	private Set<String> unlockedPlanets = new HashSet<String>();
+	public static StarflightPlayerData clientPlayerData;
+	public Set<String> unlockedRecipes = new HashSet<String>();
+	public int science = 0;
 	
-	public void unlockPlanet(String name)
-	{
-		unlockedPlanets.add(name);
-	}
-	
-	public Set<String> getUnlockedPlanetNames()
-	{
-		return unlockedPlanets;
-	}
 	
 	public NbtCompound writeNbt(NbtCompound nbt)
 	{
-		String joined = String.join(",", unlockedPlanets);
-		nbt.putString("unlockedPlanets", joined);
+		nbt.putInt("science", science);
+		
+		if(unlockedRecipes != null && !unlockedRecipes.isEmpty())
+		{
+			String recipes = String.join(",", unlockedRecipes);
+			nbt.putString("unlockedRecipes", recipes);
+		}
+	
 		return nbt;
 	}
 	
 	public static StarflightPlayerData createFromNbt(NbtCompound nbt)
 	{
 		StarflightPlayerData data = new StarflightPlayerData();
-		String[] names = nbt.getString("unlockedPlanets").split(",");
+		data.science = nbt.getInt("science");
 		
-		for(String name : names)
-			data.unlockedPlanets.add(name);
+		if(nbt.contains("unlockedRecipes"))
+		{
+			String[] recipes = nbt.getString("unlockedRecipes").split(",");
+			
+			for(String recipe : recipes)
+				data.unlockedRecipes.add(recipe);
+		}
 		
 		return data;
 	}

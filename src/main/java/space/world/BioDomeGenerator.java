@@ -194,9 +194,9 @@ public class BioDomeGenerator
 						{
 							state = StarflightBlocks.TITANIUM_GLASS.getDefaultState();
 							
-							if(pos.getY() == centerY)
-								state = StarflightBlocks.IRON_ROUND_DECO.getDefaultState();
-							else if(pos.getY() < centerY)
+							//if(pos.getY() == centerY)
+							//	state = StarflightBlocks.IRON_ROUND_DECO.getDefaultState();
+							//else if(pos.getY() < centerY)
 								state = StarflightBlocks.STRUCTURAL_IRON.getDefaultState();
 							
 							world.setBlockState(pos, state, Block.NOTIFY_LISTENERS);

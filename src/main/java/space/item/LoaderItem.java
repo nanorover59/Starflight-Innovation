@@ -51,7 +51,7 @@ public class LoaderItem extends Item
 	        	{
 	        		FluidTankControllerBlockEntity fluidTank = (FluidTankControllerBlockEntity) blockEntity;
 	        		
-	        		if(fluidTank.getFluidType().getID() == fluid.getID())
+	        		if(fluidTank.getFluidType() == fluid)
 	        		{
 		        		if(fluidTank.getStorageCapacity() == 0)
 		        			((FluidTankControllerBlock) world.getBlockState(position).getBlock()).initializeFluidTank(world, position, fluidTank);

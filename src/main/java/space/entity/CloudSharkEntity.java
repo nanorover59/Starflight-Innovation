@@ -73,7 +73,7 @@ public class CloudSharkEntity extends StratofishEntity
         return random.nextInt(4) == 0;
     }
 	
-	class AttackGoal extends Goal
+	private class AttackGoal extends Goal
 	{
 		private int cooldown;
 

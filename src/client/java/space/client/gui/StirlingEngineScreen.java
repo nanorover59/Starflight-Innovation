@@ -10,6 +10,8 @@ import net.minecraft.text.StringVisitable;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import space.StarflightMod;
+import space.block.EnergyBlock;
+import space.block.StarflightBlocks;
 import space.screen.StirlingEngineScreenHandler;
 
 @Environment(EnvType.CLIENT)
@@ -50,7 +52,9 @@ public class StirlingEngineScreen extends HandledScreen<ScreenHandler>
 		if(((StirlingEngineScreenHandler) this.handler).isBurning())
 		{
 			l = ((StirlingEngineScreenHandler) this.handler).getFuelProgress();
-			context.drawTexture(TEXTURE, i + 80, j + 28 + 12 - l, 176, 12 - l, 14, l + 1);
+			context.drawTexture(TEXTURE, i + 80, j + 48 - l, 176, 12 - l, 14, l + 1);
 		}
+		
+		MachineScreenIcons.renderEnergyBar(context, textRenderer, 104, 19, this.x, this.y, mouseX, mouseY, ((StirlingEngineScreenHandler) this.handler).getCharge(), ((EnergyBlock) StarflightBlocks.STIRLING_ENGINE).getEnergyCapacity());
 	}
 }

@@ -4,7 +4,6 @@
   "package": "space.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "IntegratedServerLoaderMixin",
     "WorldRendererMixin",
     "BackgroundRendererMixin",
     "DimensionEffectsMixin",
@@ -14,9 +13,11 @@
     "KeyBindingInvokerMixin",
     "ClientPlayerInteractionManagerMixin",
     "PostEffectProcessorAccessorMixin",
-    "GameRendererMixin"
+    "GameRendererMixin",
+	"ClientWorldMixin",
+	"ChunkRendererRegionMixin"
   ],
   "injectors": {
-    "defaultRequire": 0
+    "defaultRequire": 1
   }
 }

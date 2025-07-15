@@ -1,12 +1,9 @@
 package space.block;
 
 import java.text.DecimalFormat;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.function.BiPredicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -20,6 +17,7 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
@@ -85,15 +83,15 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 4.0;
+		return 4;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 16.0;
+		return 16;
 	}
 	
 	@Override
@@ -121,8 +119,9 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 		if(world.isClient)
 			return;
 	
+		((PumpBlockEntity) world.getBlockEntity(pos)).fluidConnectionSearch();
 		BlockSearch.energyConnectionSearch(world, pos);
-		updateWaterState(world, state, pos);
+		updateWaterState(world, pos, state);
 	}
 	
 	@Override
@@ -131,6 +130,7 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 		if(world.isClient() || state.isOf(newState.getBlock()))
 			return;
 		
+		((PumpBlockEntity) world.getBlockEntity(pos)).fluidConnectionSearch();
 		world.removeBlockEntity(pos);
 		BlockSearch.energyConnectionSearch(world, pos);
 	}
@@ -138,9 +138,24 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	@Override
     public void neighborUpdate(BlockState state, World world, BlockPos pos, Block sourceBlock, BlockPos sourcePos, boolean notify)
     {
-		if(!world.isClient)
-			updateWaterState(world, state, pos);
+		if(world.isClient)
+			return;
+		
+		((PumpBlockEntity) world.getBlockEntity(pos)).fluidConnectionSearch();
+		updateWaterState(world, pos, state);
     }
+	
+	private void updateWaterState(World world, BlockPos pos, BlockState state)
+	{
+		BiPredicate<World, BlockPos> include = (w, p) -> {
+			FluidState fluidState = w.getFluidState(p);
+			return fluidState.getFluid() == Fluids.WATER;
+		};
+		
+		ArrayList<BlockPos> positionList = new ArrayList<BlockPos>();
+		BlockSearch.search(world, pos.offset(state.get(FACING)), positionList, include, 1024, true);
+		world.setBlockState(pos, state.with(WATER, world.getFluidState(pos.offset(state.get(FACING))).getFluid() == Fluids.WATER && positionList.size() == 0));
+	}
 	
 	@Override
 	public BlockState getPlacementState(ItemPlacementContext context)
@@ -179,15 +194,9 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	}
 
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.ANY;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction == (Direction) state.get(FACING).rotateYClockwise() || direction == (Direction) state.get(FACING).rotateYCounterclockwise();
+		return direction == (Direction) state.get(FACING) || direction == (Direction) state.get(FACING).getOpposite();
 	}
 	
 	@Override
@@ -200,39 +209,5 @@ public class PumpBlock extends BlockWithEntity implements EnergyBlock, FluidUtil
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
 		return world.isClient ? null : validateTicker(type, StarflightBlocks.PUMP_BLOCK_ENTITY, PumpBlockEntity::serverTick);
-	}
-	
-	public void updateWaterState(World world, BlockState state, BlockPos pos)
-	{
-		Deque<BlockPos> stack = new ArrayDeque<BlockPos>();
-		Set<BlockPos> set = new HashSet<BlockPos>();
-		stack.push(pos.offset(state.get(FACING)));
-		
-		while(stack.size() > 0)
-		{
-			if(set.size() >= 1024)
-			{
-				world.setBlockState(pos, state.with(WATER, true));
-				return;
-			}
-			
-			BlockPos blockPos = stack.pop();
-			
-			if(set.contains(blockPos))
-				continue;
-			
-			if(world.getFluidState(blockPos).isOf(Fluids.WATER))
-			{
-				set.add(blockPos);
-				
-				for(Direction direction : Direction.values())
-				{
-					BlockPos offset = blockPos.offset(direction);
-					stack.push(offset);
-				}
-			}
-		}
-		
-		world.setBlockState(pos, state.with(WATER, false));
 	}
 }

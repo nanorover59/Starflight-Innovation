@@ -7,12 +7,8 @@ import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.ShapeContext;
 import net.minecraft.block.Waterloggable;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.pathing.NavigationType;
 import net.minecraft.fluid.FluidState;
@@ -29,10 +25,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
-import space.block.entity.FluidPipeBlockEntity;
+import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
-public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock, Waterloggable
+public class FluidPipeBlock extends Block implements FluidUtilityBlock, Waterloggable
 {
 	public static final MapCodec<FluidPipeBlock> CODEC = FluidPipeBlock.createCodec(FluidPipeBlock::new);
 	public static final BooleanProperty NORTH = BooleanProperty.of("north");
@@ -42,7 +38,7 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 	public static final BooleanProperty UP = BooleanProperty.of("up");
 	public static final BooleanProperty DOWN = BooleanProperty.of("down");
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	private final FluidResourceType fluid;
+	public final FluidResourceType fluid;
 	
 	public FluidPipeBlock(Settings settings, FluidResourceType fluid)
 	{
@@ -135,13 +131,16 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
 		
 		world.setBlockState(pos, state);
+		
+		if(!world.isClient)
+			BlockSearch.fluidConnectionSearch(world, pos, fluid);
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		if(state.hasBlockEntity() && !state.isOf(newState.getBlock()))
-			world.removeBlockEntity(pos);
+		if(!world.isClient)
+			BlockSearch.fluidConnectionSearch(world, pos, fluid);
 	}
 	
 	@Override
@@ -151,7 +150,7 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
             world.scheduleFluidTick(pos, Fluids.WATER, Fluids.WATER.getTickRate(world));
 	
 		for(Direction d : DIRECTIONS)
-			state = updateStateForConnection(world, pos, world.getBlockState(pos.offset(d)), state, d);
+			state = updateStateForConnection(world, pos.offset(d), world.getBlockState(pos.offset(d)), state, d);
 		
 		world.setBlockState(pos, state);
     }
@@ -210,32 +209,15 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 	public boolean canConnect(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
 	{
 		if(state.getBlock() instanceof FluidUtilityBlock)
-		{
-			if(((FluidUtilityBlock) state.getBlock()).getFluidType().getID() == FluidResourceType.ANY.getID())
-				return true;
-			else
-				return ((FluidUtilityBlock) state.getBlock()).getFluidType().getID() == getFluidType().getID() && ((FluidUtilityBlock) state.getBlock()).canPipeConnectToSide(world, pos, state, direction);
-		}
+			return ((FluidUtilityBlock) state.getBlock()).canPipeConnectToSide(world, pos, state, direction, fluid);
 		else
-			return state.getBlock() == this;
+			return false;
 	}
 	
 	@Override
-	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return new FluidPipeBlockEntity(pos, state);
-	}
-
-	@Override
-	public FluidResourceType getFluidType()
-	{
-		return fluid;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return true;
+		return fluidType == fluid;
 	}
 	
 	@Override
@@ -276,11 +258,5 @@ public class FluidPipeBlock extends BlockWithEntity implements FluidUtilityBlock
 		}
 		
 		return newState;
-	}
-	
-	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
-	{
-		return world.isClient ? null : validateTicker(type, StarflightBlocks.FLUID_PIPE_BLOCK_ENTITY, FluidPipeBlockEntity::serverTick);
 	}
 }

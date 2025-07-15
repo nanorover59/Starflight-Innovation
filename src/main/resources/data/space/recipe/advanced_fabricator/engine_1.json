@@ -1,0 +1,29 @@
+{
+  "type": "space:advanced_fabricator",
+  "prerequisite": "null",
+  "x": 12,
+  "y": 44,
+  "science": 100,
+  "ingredients": [
+    {
+      "id": "minecraft:iron_block",
+	  "count": 1
+    },
+    {
+	  "id": "space:titanium_block",
+	  "count": 1
+    },
+	{
+	  "id": "space:valve",
+      "count": 2
+	},
+	{
+	  "id": "minecraft:redstone",
+	  "count": 4
+	}
+  ],
+  "result": {
+    "id": "space:engine_1",
+    "count": 1
+  }
+}

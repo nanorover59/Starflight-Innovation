@@ -7,16 +7,13 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUsageContext;
 import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import space.block.StarflightBlocks;
-import space.network.s2c.UnlockPlanetS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetList;
-import space.world.persistent.StarflightPlayerState;
 
 public class PlanetariumCardItem extends Item
 {
@@ -45,7 +42,7 @@ public class PlanetariumCardItem extends Item
         	String planetName = stack.get(StarflightItems.PLANET_NAME);
         	Planet planet = PlanetList.get().getByName(planetName);
         	
-        	if(planet != null)
+        	/*if(planet != null)
         	{
         		StarflightPlayerState playerState = StarflightPlayerState.get(world.getServer());
         		
@@ -59,9 +56,9 @@ public class PlanetariumCardItem extends Item
 	        		for(Planet satellite : planet.getSatellites())
 	        			StarflightPlayerState.get(world.getServer()).unlockPlanet((ServerPlayerEntity) context.getPlayer(), satellite.getName());
 	        		
-	        		UnlockPlanetS2CPacket.sendUnlockPlanet(world, planetName, stack.get(StarflightItems.PRIMARY_COLOR));
+	        		SyncPlayerStateS2CPacket.sendUnlockPlanet(world, planetName, stack.get(StarflightItems.PRIMARY_COLOR));
         		}
-        	}
+        	}*/
         }
 		
 		return ActionResult.success(world.isClient);

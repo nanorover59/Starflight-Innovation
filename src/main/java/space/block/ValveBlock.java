@@ -1,7 +1,5 @@
 package space.block;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
@@ -9,8 +7,6 @@ import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
@@ -53,13 +49,7 @@ public class ValveBlock extends BlockWithEntity implements FluidUtilityBlock
     }
 	
 	@Override
-	public FluidResourceType getFluidType()
-	{
-		return FluidResourceType.ANY;
-	}
-	
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
 		return true;
 	}
@@ -91,9 +81,9 @@ public class ValveBlock extends BlockWithEntity implements FluidUtilityBlock
 		return new ValveBlockEntity(pos, state);
 	}
 	
-	@Nullable
+	/*@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
 	{
 		return world.isClient ? null : validateTicker(type, StarflightBlocks.VALVE_BLOCK_ENTITY, ValveBlockEntity::serverTick);
-	}
+	}*/
 }

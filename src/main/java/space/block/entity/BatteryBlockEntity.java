@@ -3,221 +3,136 @@ package space.block.entity;
 import java.util.ArrayList;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SidedInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.screen.NamedScreenHandlerFactory;
+import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
-import space.inventory.ImplementedInventory;
-import space.item.StarflightItems;
 import space.screen.BatteryScreenHandler;
 
-public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandlerFactory, ImplementedInventory, EnergyBlockEntity
+public class BatteryBlockEntity extends LockableContainerBlockEntity implements SidedInventory, EnergyBlockEntity
 {
 	private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(5, ItemStack.EMPTY);
 	private ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
+	protected final PropertyDelegate propertyDelegate;
+	private long energy;
 	
 	public BatteryBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
-        super(StarflightBlocks.BATTERY_BLOCK_ENTITY, blockPos, blockState);
+		super(StarflightBlocks.BATTERY_BLOCK_ENTITY, blockPos, blockState);
+		this.inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
+		this.propertyDelegate = new PropertyDelegate()
+		{
+			public int get(int index)
+			{
+				switch(index)
+				{
+				case 0:
+					return (int) BatteryBlockEntity.this.energy;
+				default:
+					return 0;
+				}
+			}
+
+			public void set(int index, int value)
+			{
+				switch(index)
+				{
+				case 0:
+					BatteryBlockEntity.this.energy = value;
+					break;
+				}
+
+			}
+
+			public int size()
+			{
+				return 1;
+			}
+		};
     }
+	
+	@Override
+	public int size()
+	{
+		return 2;
+	}
 
 	@Override
-	public Text getDisplayName()
+	public int[] getAvailableSlots(Direction side)
+	{
+		return new int[] {0, 1};
+	}
+
+	@Override
+	public boolean canInsert(int slot, ItemStack stack, Direction dir)
+	{
+		return false;
+	}
+
+	@Override
+	public boolean canExtract(int slot, ItemStack stack, Direction dir)
+	{
+		return false;
+	}
+
+	@Override
+	protected Text getContainerName()
 	{
 		return Text.translatable(getCachedState().getBlock().getTranslationKey());
 	}
 
 	@Override
-	public DefaultedList<ItemStack> getItems()
+	protected DefaultedList<ItemStack> getHeldStacks()
 	{
-		return inventory;
-	}
-	
-	@Override
-	public ScreenHandler createMenu(int syncId, PlayerInventory playerInventory, PlayerEntity player)
-	{
-		return new BatteryScreenHandler(syncId, playerInventory, this);
-	}
-	
-	@Override
-	public double getOutput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getOutput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getEnergyStored()
-	{
-		double d = 0.0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY))
-				continue;
-			else
-				d += stack.get(StarflightItems.ENERGY);
-		}
-		
-		return d;
+		return this.inventory;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	protected void setHeldStacks(DefaultedList<ItemStack> inventory)
 	{
-		double d = 0.0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty() || !stack.contains(StarflightItems.MAX_ENERGY))
-				continue;
-			else
-				d += stack.get(StarflightItems.MAX_ENERGY);
-		}
-		
-		return d;
+		this.inventory = inventory;
 	}
 
 	@Override
-	public double changeEnergy(double amount)
+	protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
-		int batteryCount = 0;
-		
-		if(amount > 0.0)
-		{
-			for(ItemStack stack : this.inventory)
-			{
-				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-					continue;
-				
-				double charge = stack.get(StarflightItems.ENERGY);
-				
-				if(charge < stack.get(StarflightItems.MAX_ENERGY))
-					batteryCount++;
-			}
-			
-			if(batteryCount == 0)
-				return 0;
-			
-			float fraction = (float) (amount / batteryCount);
-			
-			for(ItemStack stack : this.inventory)
-			{
-				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-					continue;
-				
-				float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
-				float previousCharge = stack.get(StarflightItems.ENERGY);
-				
-				if(previousCharge + fraction > maxCharge)
-				{
-					stack.set(StarflightItems.ENERGY, maxCharge);
-					amount -= (previousCharge + fraction) - maxCharge;
-				}
-				else
-					stack.set(StarflightItems.ENERGY, previousCharge + fraction);
-			}
-		}
-		else
-		{
-			for(ItemStack stack : this.inventory)
-			{
-				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-					continue;
-				
-				double charge = stack.get(StarflightItems.ENERGY);
-				
-				if(charge > 0.0)
-					batteryCount++;
-			}
-			
-			if(batteryCount == 0)
-				return 0;
-			
-			float fraction = (float) (amount / batteryCount);
-			
-			for(ItemStack stack : this.inventory)
-			{
-				if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-					continue;
-				
-				float previousCharge = stack.get(StarflightItems.ENERGY);
-				
-				if(previousCharge + fraction < 0)
-				{
-					stack.set(StarflightItems.ENERGY, 0.0f);
-					amount -= previousCharge + fraction;
-				}
-				else
-					stack.set(StarflightItems.ENERGY, previousCharge + fraction);
-			}
-		}
-		
-		world.updateComparators(pos, world.getBlockState(pos).getBlock());
-		return amount;
-	}
-	
-	public void setEnergy(double amount)
-	{
-		int batteryCount = 0;
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(!stack.isEmpty() && stack.contains(StarflightItems.ENERGY) && stack.contains(StarflightItems.MAX_ENERGY))
-				batteryCount++;
-		}
-		
-		if(batteryCount == 0)
-			return;
-		
-		float fraction = (float) (amount / batteryCount);
-		
-		for(ItemStack stack : this.inventory)
-		{
-			if(stack.isEmpty() || !stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-				continue;
-			
-			float maxCharge = stack.get(StarflightItems.MAX_ENERGY);
-			
-			if(fraction > maxCharge)
-				stack.set(StarflightItems.ENERGY, maxCharge);
-			else
-				stack.set(StarflightItems.ENERGY, fraction);
-		}
+		return new BatteryScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
 	}
 
+	@Override
+	public long getEnergyCapacity()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+	}
+	
+	@Override
+	public long getEnergy()
+	{
+		return energy;
+	}
+
+	@Override
+	public void setEnergy(long energy)
+	{
+		this.energy = energy;
+	}
+	
 	@Override
 	public ArrayList<BlockPos> getOutputs()
 	{
 		return outputs;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-		outputs.add(output);
-	}
-
-	@Override
-	public void clearOutputs()
-	{
-		outputs.clear();
 	}
 	
 	@Override
@@ -238,6 +153,10 @@ public class BatteryBlockEntity extends BlockEntity implements NamedScreenHandle
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, BatteryBlockEntity blockEntity)
 	{
-		EnergyBlockEntity.transferEnergy(blockEntity, blockEntity.getOutput());
+		ItemStack dischargeStack = (ItemStack) blockEntity.inventory.get(0);
+		ItemStack chargeStack = (ItemStack) blockEntity.inventory.get(1);
+		blockEntity.dischargeItem(dischargeStack, ((EnergyBlock) blockEntity.getCachedState().getBlock()).getInput());
+		blockEntity.chargeItem(chargeStack, ((EnergyBlock) blockEntity.getCachedState().getBlock()).getOutput());
+		blockEntity.transferEnergy(((EnergyBlock) state.getBlock()).getOutput());
 	}
 }

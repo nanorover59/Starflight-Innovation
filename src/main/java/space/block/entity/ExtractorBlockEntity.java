@@ -19,8 +19,6 @@ import it.unimi.dsi.fastutil.objects.ObjectIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.entity.ExperienceOrbEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -32,6 +30,8 @@ import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.recipe.RecipeEntry;
 import net.minecraft.recipe.RecipeInputProvider;
 import net.minecraft.recipe.RecipeMatcher;
@@ -53,7 +53,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.ExtractorBlock;
-import space.block.FluidUtilityBlock;
 import space.block.StarflightBlocks;
 import space.recipe.ExtractorRecipe;
 import space.recipe.StarflightRecipes;
@@ -64,7 +63,8 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 {
 	public static Map<Item, Integer> iceMap = Maps.newLinkedHashMap();
 	public DefaultedList<ItemStack> inventory;
-	private double energy;
+	public ArrayList<BlockPos> waterOutputs = new ArrayList<BlockPos>();
+	private long energy;
 	private int chargeState;
 	private int time;
 	private int totalTime;
@@ -390,61 +390,37 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 	}
 
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return 0.0;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
-
+	
 	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
-	}
-
-	@Override
-	public double changeEnergy(double amount)
-	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
-	}
-
-	@Override
-	public ArrayList<BlockPos> getOutputs()
-	{
-		return null;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-	}
-
-	@Override
-	public void clearOutputs()
-	{
+		this.energy = energy;
 	}
 
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 		nbt.putShort("time", (short) this.time);
 		nbt.putShort("totalTime", (short) this.totalTime);
 		Inventories.writeNbt(nbt, this.inventory, registryLookup);
+		NbtList waterOutputsListNBT = new NbtList();
+		
+		for(BlockPos waterOutput : waterOutputs)
+			waterOutputsListNBT.add(NbtHelper.fromBlockPos(waterOutput));
+
+		nbt.put("waterOutputs", waterOutputsListNBT);
 	}
 
 	@Override
@@ -453,9 +429,17 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		Inventories.readNbt(nbt, this.inventory, registryLookup);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 		this.time = nbt.getShort("time");
 		this.totalTime = nbt.getShort("totalTime");
+		waterOutputs.clear();
+		NbtList waterOutputsListNBT = nbt.getList("waterOutputs", NbtList.INT_ARRAY_TYPE);
+		
+		for(int i = 0; i < waterOutputsListNBT.size(); i++)
+		{
+			int[] array = waterOutputsListNBT.getIntArray(i);
+			waterOutputs.add(new BlockPos(array[0], array[1], array[2]));
+		}
 	}
 
 	public static void serverTick(World world, BlockPos pos, BlockState state, ExtractorBlockEntity blockEntity)
@@ -463,15 +447,17 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
 		boolean bl2 = false;
 		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
+		RecipeEntry<?> recipe = blockEntity.getFirstMatchRecipe();
+		int count = blockEntity.getMaxCountPerStack();
+		long water = recipe == null ? 0 : (long) ((ExtractorRecipe) recipe.value()).getWater();
+		long pushAmount = PumpBlockEntity.pushFluid(world, blockEntity.waterOutputs, water, false, FluidResourceType.WATER);
 		
-		if(!itemStack.isEmpty())
+		if(!itemStack.isEmpty() && (water == 0 || pushAmount > 0) && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory, count))
 		{
-			RecipeEntry<ExtractorRecipe> recipe = blockEntity.getFirstMatchRecipe();
-			int i = blockEntity.getMaxCountPerStack();
-
-			if(blockEntity.energy > 0 && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory, i))
+			long power = ((EnergyBlock) state.getBlock()).getInput();
+			
+			if(blockEntity.removeEnergy(power, true) == power)
 			{
-				blockEntity.changeEnergy(-blockEntity.getInput());
 				blockEntity.time++;
 
 				if(blockEntity.time == blockEntity.totalTime)
@@ -479,68 +465,25 @@ public class ExtractorBlockEntity extends LockableContainerBlockEntity implement
 					blockEntity.time = 0;
 					blockEntity.totalTime = blockEntity.getTime();
 
-					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
-						blockEntity.setLastRecipe(recipe);
-					
-					double water = recipe.value().getWater();
-					double oxygen = recipe.value().getWater();
-					double hydrogen = recipe.value().getWater();
-
-					for(Direction direction : Direction.values())
+					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, count))
 					{
-						if(direction == state.get(HorizontalFacingBlock.FACING))
-							continue;
-
-						BlockPos offset = pos.offset(direction);
-						Block offsetBlock = world.getBlockState(offset).getBlock();
-						
-						if(offsetBlock instanceof FluidUtilityBlock)
-						{
-							BlockEntity offsetBlockEntity = world.getBlockEntity(offset);
-							
-							if(offsetBlockEntity instanceof FluidPipeBlockEntity)
-							{
-								FluidPipeBlockEntity pipeBlockEntity = ((FluidPipeBlockEntity) offsetBlockEntity);
-								
-								if(water > 0.0 && pipeBlockEntity.getFluidType() == FluidResourceType.WATER)
-								{
-									ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-									water = PumpBlockEntity.recursiveSpread(world, offset, checkList, water, FluidResourceType.WATER, 2048);
-								}
-								
-								if(oxygen > 0.0 && pipeBlockEntity.getFluidType() == FluidResourceType.OXYGEN)
-								{
-									ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-									oxygen = PumpBlockEntity.recursiveSpread(world, offset, checkList, water, FluidResourceType.OXYGEN, 2048);
-								}
-								
-								if(hydrogen > 0.0 && pipeBlockEntity.getFluidType() == FluidResourceType.WATER)
-								{
-									ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-									hydrogen = PumpBlockEntity.recursiveSpread(world, offset, checkList, water, FluidResourceType.WATER, 2048);
-								}
-							}
-							else if(water > 0.0 && offsetBlockEntity instanceof WaterTankBlockEntity)
-							{
-								ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-								water = PumpBlockEntity.recursiveSpread(world, offset, checkList, water, FluidResourceType.WATER, 2048);
-							}
-						}
+						blockEntity.setLastRecipe(recipe);
+						PumpBlockEntity.pushFluid(world, blockEntity.waterOutputs, pushAmount, true, FluidResourceType.WATER);
 					}
-
+					
 					bl2 = true;
 				}
 			}
-			else
-				blockEntity.time = 0;
 		}
+		else
+			blockEntity.time = 0;
 		
 		if(blockEntity.time > 0 && (itemStack.isEmpty() || blockEntity.energy == 0))
 			blockEntity.time = MathHelper.clamp((int) (blockEntity.time - 2), (int) 0, (int) blockEntity.totalTime);
 		
-		if(world.getBlockState(pos).get(ExtractorBlock.LIT) != (blockEntity.energy > 0 && blockEntity.hasValidItem()))
+		if(world.getBlockState(pos).get(ExtractorBlock.LIT) != (blockEntity.energy > 0 && blockEntity.hasValidItem() && (water == 0 || pushAmount > 0)))
 		{
-			state = (BlockState) state.with(ExtractorBlock.LIT, blockEntity.energy > 0 && blockEntity.hasValidItem());
+			state = (BlockState) state.with(ExtractorBlock.LIT, blockEntity.energy > 0 && blockEntity.hasValidItem() && (water == 0 || pushAmount > 0));
 			world.setBlockState(pos, state, Block.NOTIFY_ALL);
 			bl2 = true;
 		}

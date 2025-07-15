@@ -1,0 +1,33 @@
+{
+  "type": "space:advanced_fabricator",
+  "prerequisite": "space:advanced_fabricator/engine_1",
+  "x": 60,
+  "y": 76,
+  "science": 200,
+  "ingredients": [
+    {
+      "id": "minecraft:iron_block",
+	  "count": 1
+    },
+    {
+	  "id": "space:titanium_block",
+	  "count": 1
+    },
+	{
+	  "id": "space:valve",
+      "count": 2
+	},
+	{
+	  "id": "minecraft:piston",
+	  "count": 4
+	},
+	{
+	  "id": "minecraft:redstone",
+	  "count": 8
+	}
+  ],
+  "result": {
+    "id": "space:engine_1_gimbal",
+    "count": 1
+  }
+}

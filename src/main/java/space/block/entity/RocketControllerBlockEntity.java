@@ -5,25 +5,41 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiPredicate;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FacingBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.LockableContainerBlockEntity;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.SidedInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.screen.PropertyDelegate;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.text.Text;
+import net.minecraft.util.Pair;
+import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.block.EnergyBlock;
+import space.block.ReactionControlThrusterBlock;
 import space.block.RocketControllerBlock;
 import space.block.RocketThrusterBlock;
+import space.block.RocketThrusterExtensionBlock;
 import space.block.StarflightBlocks;
+import space.craft.MovingCraftBlock;
+import space.craft.Thruster;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
 import space.network.c2s.RocketControllerButtonC2SPacket;
@@ -31,12 +47,19 @@ import space.network.s2c.RocketControllerDataS2CPacket;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
+import space.screen.RocketControllerScreenHandler;
 import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
-public class RocketControllerBlockEntity extends BlockEntity
+public class RocketControllerBlockEntity extends LockableContainerBlockEntity implements SidedInventory, EnergyBlockEntity
 {
-	protected ArrayList<MovingCraftEntity.BlockData> blockDataList = new ArrayList<MovingCraftEntity.BlockData>();
+	public DefaultedList<ItemStack> inventory;
+	public final PropertyDelegate propertyDelegate;
+	private long energy;
+	private int scanProgress;
+	protected ArrayList<MovingCraftBlock> blockDataList = new ArrayList<MovingCraftBlock>();
+	private ArrayList<Thruster> mainThrusters = new ArrayList<Thruster>();
+	private ArrayList<Thruster> rcsThrusters = new ArrayList<Thruster>();
 	private Vec3d centerOfMass = Vec3d.ZERO;
 	private Vec3d momentOfInertia1 = Vec3d.ZERO;
 	private Vec3d momentOfInertia2 = Vec3d.ZERO;
@@ -59,6 +82,106 @@ public class RocketControllerBlockEntity extends BlockEntity
 	public RocketControllerBlockEntity(BlockPos pos, BlockState state)
 	{
 		super(StarflightBlocks.ROCKET_CONTROLLER_BLOCK_ENTITY, pos, state);
+		this.inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
+		this.propertyDelegate = new PropertyDelegate()
+		{
+			public int get(int index)
+			{
+				switch(index)
+				{
+				case 0:
+					return (int) RocketControllerBlockEntity.this.energy;
+				case 1:
+					return (int) RocketControllerBlockEntity.this.scanProgress;
+				default:
+					return 0;
+				}
+			}
+
+			public void set(int index, int value)
+			{
+				switch(index)
+				{
+				case 0:
+					RocketControllerBlockEntity.this.energy = value;
+					break;
+				case 1:
+					RocketControllerBlockEntity.this.scanProgress = value;
+					break;
+				}
+
+			}
+
+			public int size()
+			{
+				return 2;
+			}
+		};
+	}
+	
+	@Override
+	public int size()
+	{
+		return this.inventory.size();
+	}
+
+	@Override
+	public long getEnergyCapacity()
+	{
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+	}
+	
+	@Override
+	public long getEnergy()
+	{
+		return energy;
+	}
+	
+	@Override
+	public void setEnergy(long energy)
+	{
+		this.energy = energy;
+	}
+
+	public int[] getAvailableSlots(Direction side)
+	{
+		return new int[] {0, 1};
+	}
+
+	@Override
+	public boolean canInsert(int slot, ItemStack stack, Direction dir)
+	{
+		return this.isValid(slot, stack);
+	}
+
+	@Override
+	public boolean canExtract(int slot, ItemStack stack, Direction dir)
+	{
+		return false;
+	}
+
+	@Override
+	protected Text getContainerName()
+	{
+		return Text.translatable(getCachedState().getBlock().getTranslationKey());
+	}
+
+	@Override
+	protected DefaultedList<ItemStack> getHeldStacks()
+	{
+		return this.inventory;
+	}
+
+	@Override
+	protected void setHeldStacks(DefaultedList<ItemStack> inventory)
+	{
+		this.inventory = inventory;
+	}
+
+	@Override
+	protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory)
+	{
+		return new RocketControllerScreenHandler(syncId, playerInventory, this, this.propertyDelegate, ScreenHandlerContext.create(this.world, this.getPos()));
 	}
 	
 	/**
@@ -95,8 +218,8 @@ public class RocketControllerBlockEntity extends BlockEntity
         // Find the center of mass in world coordinates.
         for(BlockPos pos : positionList)
         {
-        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
-        	double blockVolume = MovingCraftEntity.volumeForBlock(world.getBlockState(pos), world, pos);
+        	double blockMass = MovingCraftBlock.getMassForBlock(world, pos);
+        	double blockVolume = MovingCraftBlock.volumeForBlock(world.getBlockState(pos), world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	mass += blockMass;
         	volume += blockVolume;
@@ -128,7 +251,7 @@ public class RocketControllerBlockEntity extends BlockEntity
         for(BlockPos pos : positionList)
         {
         	boolean redstone = world.isReceivingRedstonePower(pos);
-        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
+        	double blockMass = MovingCraftBlock.getMassForBlock(world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	Vec3d centerPos = pos.toCenterPos().subtract(centerOfMass);
         	// Square distance to the center of mass coordinates.
@@ -145,12 +268,12 @@ public class RocketControllerBlockEntity extends BlockEntity
 
 				if(!redstone && !(fluidTank instanceof BalloonControllerBlockEntity))
 				{
-					if(fluidTank.getFluidType().getID() == FluidResourceType.HYDROGEN.getID())
+					if(fluidTank.getFluidType() == FluidResourceType.HYDROGEN)
 					{
 						hydrogen += fluidTank.getStoredFluid();
 						hydrogenCapacity += fluidTank.getStorageCapacity();
 					}
-					else if(fluidTank.getFluidType().getID() == FluidResourceType.OXYGEN.getID())
+					else if(fluidTank.getFluidType() == FluidResourceType.OXYGEN)
 					{
 						oxygen += fluidTank.getStoredFluid();
 						oxygenCapacity += fluidTank.getStorageCapacity();
@@ -188,17 +311,57 @@ public class RocketControllerBlockEntity extends BlockEntity
 					}
 				}
 			}
-        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock && !redstone && pos.getY() < centerOfMass.getY())
+        	else if(world.getBlockState(pos).getBlock() instanceof RocketThrusterBlock && !redstone)
         	{
         		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+        		BlockState blockState = world.getBlockState(pos);
+        		BlockState extensionState = getWorld().getBlockState(pos.offset(blockState.get(RocketThrusterBlock.FACING).getOpposite()));
+        		RocketThrusterBlock thrusterBlock = ((RocketThrusterBlock) blockState.getBlock());
+        		double vacuumISP = thrusterBlock.getVacuumnISP();
+				double atmISP = thrusterBlock.getAtmISP();
+				double vacuumThrust = thrusterBlock.getVacuumThrust();
         		double pressure = 0.0;
         		
         		if(data != null && !data.isOrbit())
         			pressure = data.getPressure();
         		
-        		thrust += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(pressure);
-        		thrustVacuum += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getThrust(0.0);
-        		massFlowSum += ((RocketThrusterBlock) world.getBlockState(pos).getBlock()).getMassFlow();
+        		if(extensionState.getBlock() instanceof RocketThrusterExtensionBlock)
+        		{
+        			RocketThrusterExtensionBlock thrusterExtensionBlock = ((RocketThrusterExtensionBlock) extensionState.getBlock());
+        			vacuumISP *= thrusterExtensionBlock.getVacuumFactor();
+        			atmISP *= thrusterExtensionBlock.getAtmFactor();
+        			vacuumThrust *= thrusterExtensionBlock.getVacuumFactor();
+        		}
+        		
+        		Thruster thruster = new Thruster(centerPos.toVector3f(), blockState.get(RocketThrusterBlock.FACING).getOpposite().getUnitVector(), vacuumISP, atmISP, vacuumThrust, thrusterBlock.getGimbal());
+        		thruster.forAtmosphere(pressure);
+        		mainThrusters.add(thruster);
+        		thrust += thruster.getThrust();
+        		thrustVacuum += vacuumThrust;
+        		massFlowSum += thruster.getMassFlow(1.0);
+        	}
+        	else if(world.getBlockState(pos).getBlock() instanceof ReactionControlThrusterBlock && !redstone)
+        	{
+        		PlanetDimensionData data = PlanetList.getDimensionDataForWorld(world);
+        		BlockState blockState = world.getBlockState(pos);
+        		ReactionControlThrusterBlock rcsBlock = ((ReactionControlThrusterBlock) blockState.getBlock());
+        		Quaternionf blockFacingQuaternion = blockState.get(FacingBlock.FACING).getRotationQuaternion();
+        		double vacuumISP = 400.0;
+				double atmISP = 300.0;
+				double vacuumThrust = 4.0e4;
+        		double pressure = 0.0;
+        		
+        		if(data != null && !data.isOrbit())
+        			pressure = data.getPressure();
+
+				for(Pair<Vector3f, Vector3f> thrusterPair : rcsBlock.getThrusters())
+				{
+					Vector3f position = new Vector3f(thrusterPair.getLeft()).rotate(blockFacingQuaternion).add(centerPos.toVector3f());
+					Vector3f direction = new Vector3f(thrusterPair.getRight()).rotate(blockFacingQuaternion);
+					Thruster thruster = new Thruster(position, direction, vacuumISP, atmISP, vacuumThrust, 0.0);
+					thruster.forAtmosphere(pressure);
+					rcsThrusters.add(thruster);
+				}
         	}
         }
         
@@ -219,27 +382,24 @@ public class RocketControllerBlockEntity extends BlockEntity
 		requiredDeltaV1 = data.isSky() ? currentPlanet.dVSkyToOrbit() : currentPlanet.dVSurfaceToOrbit();
 		requiredDeltaV2 = currentPlanet.dVOrbitToSurface();
 		blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(centerOfMass.getX()), MathHelper.floor(centerOfMass.getY()), MathHelper.floor(centerOfMass.getZ())), positionList);
+		scanProgress = 40;
 		markDirty();
 	}
 	
 	private double availableDV(double initialMass, double hydrogen, double oxygen, double averageVE)
 	{
-		double limitingMass = Math.min(hydrogen + hydrogen * 6.0, oxygen + oxygen / 6.0);
+		double limitingMass = Math.min(hydrogen + hydrogen * 8.0, oxygen + oxygen / 8.0);
 		double finalMass = initialMass - limitingMass;
 		return averageVEVacuum * Math.log(initialMass / finalMass);
 	}
 	
 	public static void receiveButtonPress(RocketControllerButtonC2SPacket payload, ServerPlayNetworking.Context context)
 	{
-		RegistryKey<World> worldKey = RegistryKey.of(RegistryKeys.WORLD, Identifier.of(payload.worldID()));
-		BlockPos position = payload.blockPos();
 		int action = payload.action();
 		ServerPlayerEntity player = context.player();
-		MinecraftServer server = player.getServer();
 		
-		server.execute(() -> {
-			ServerWorld world = server.getWorld(worldKey);
-			BlockEntity blockEntity = world.getBlockEntity(position);
+		((RocketControllerScreenHandler) player.currentScreenHandler).context.run((world, pos) -> {
+			BlockEntity blockEntity = world.getBlockEntity(pos);
 			
 			if(blockEntity != null && blockEntity instanceof RocketControllerBlockEntity)
 			{
@@ -249,11 +409,12 @@ public class RocketControllerBlockEntity extends BlockEntity
 				{
 					rocketController.runScan();
 					rocketController.sendDisplayData(player);
+					player.currentScreenHandler.sendContentUpdates();
 				}
 				else if(action == 1 && !rocketController.blockDataList.isEmpty())
 				{
 					BlockPos centerOfMass = BlockPos.ofFloored(rocketController.centerOfMass);
-					RocketEntity entity = new RocketEntity(world, centerOfMass, rocketController.blockDataList, world.getBlockState(position).get(RocketControllerBlock.FACING), rocketController.mass, rocketController.volume, rocketController.momentOfInertia1.toVector3f(), rocketController.momentOfInertia2.toVector3f(), rocketController.hydrogen, rocketController.hydrogenCapacity, rocketController.oxygen, rocketController.oxygenCapacity);
+					RocketEntity entity = new RocketEntity(world, centerOfMass, rocketController.blockDataList, rocketController.mainThrusters, rocketController.rcsThrusters, world.getBlockState(pos).get(RocketControllerBlock.FACING), rocketController.mass, rocketController.volume, rocketController.momentOfInertia1.toVector3f(), rocketController.momentOfInertia2.toVector3f(), rocketController.hydrogen, rocketController.hydrogenCapacity, rocketController.oxygen, rocketController.oxygenCapacity);
 					MovingCraftEntity.removeBlocksFromWorld(world, centerOfMass, rocketController.blockDataList);
 					world.spawnEntity(entity);
 				}
@@ -263,6 +424,12 @@ public class RocketControllerBlockEntity extends BlockEntity
 	
 	public static void tick(World world, BlockPos pos, BlockState state, RocketControllerBlockEntity blockEntity)
 	{
+		long power = ((EnergyBlock) state.getBlock()).getInput();
+		blockEntity.dischargeItem(blockEntity.inventory.get(0), power * 2);
+		
+		if(blockEntity.scanProgress > 0)
+			blockEntity.scanProgress--;
+		
 		// Recalculate travel delta-v if a navigation card change is detected.
 		/*ItemStack stack = blockEntity.inventory.get(0);
 		
@@ -280,6 +447,9 @@ public class RocketControllerBlockEntity extends BlockEntity
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
+		super.writeNbt(nbt, registryLookup);
+		Inventories.writeNbt(nbt, inventory, registryLookup);
+		nbt.putLong("energy", energy);
 		nbt.putDouble("cx", centerOfMass.getX());
 		nbt.putDouble("cy", centerOfMass.getY());
 		nbt.putDouble("cz", centerOfMass.getZ());
@@ -303,28 +473,31 @@ public class RocketControllerBlockEntity extends BlockEntity
 		nbt.putDouble("deltaVCapacity", deltaVCapacity);
 		nbt.putDouble("requiredDeltaV1", requiredDeltaV1);
 		nbt.putDouble("requiredDeltaV2", requiredDeltaV2);
-		int blockCount = blockDataList.size();
-		int[] x = new int[blockCount];
-		int[] y = new int[blockCount];
-		int[] z = new int[blockCount];
-
-		for(int i = 0; i < blockCount - 1; i++)
-		{
-			MovingCraftEntity.BlockData blockData = blockDataList.get(i);
-			x[i] = blockData.getPosition().getX();
-			y[i] = blockData.getPosition().getY();
-			z[i] = blockData.getPosition().getZ();
-			blockData.saveData(nbt);
-		}
-		
-		nbt.putIntArray("x", x);
-		nbt.putIntArray("y", y);
-		nbt.putIntArray("z", z);
+	    NbtList blockDataListNBT = new NbtList();
+	    NbtList mainThrusterListNBT = new NbtList();
+	    NbtList rcsThrusterListNBT = new NbtList();
+	    
+	    for(MovingCraftBlock blockData : blockDataList)
+	    	blockDataListNBT.add(blockData.saveData(new NbtCompound()));
+	    
+	    for(Thruster thruster : mainThrusters)
+	    	mainThrusterListNBT.add(thruster.writeToNbt(new NbtCompound()));
+	    
+	    for(Thruster thruster : rcsThrusters)
+	    	rcsThrusterListNBT.add(thruster.writeToNbt(new NbtCompound()));
+	    
+	    nbt.put("blockData", blockDataListNBT);
+	    nbt.put("mainThrusters", mainThrusterListNBT);
+	    nbt.put("rcsThrusters", rcsThrusterListNBT);
 	}
 
 	@Override
 	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
+		super.readNbt(nbt, registryLookup);
+		inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
+		Inventories.readNbt(nbt, this.inventory, registryLookup);
+		energy = nbt.getLong("energy");
 		centerOfMass = new Vec3d(nbt.getDouble("cx"), nbt.getDouble("cy"), nbt.getDouble("cz"));
 		momentOfInertia1 = new Vec3d(nbt.getDouble("mix1"), nbt.getDouble("miy1"), nbt.getDouble("miz1"));
 		momentOfInertia2 = new Vec3d(nbt.getDouble("mix2"), nbt.getDouble("miy2"), nbt.getDouble("miz2"));
@@ -343,19 +516,18 @@ public class RocketControllerBlockEntity extends BlockEntity
 		deltaVCapacity = nbt.getDouble("deltaVCapacity");
 		requiredDeltaV1 = nbt.getDouble("requiredDeltaV1");
 		requiredDeltaV2 = nbt.getDouble("requiredDeltaV2");
-		int blockCount = nbt.getInt("blockCount");
-		int[] x = nbt.getIntArray("x");
-		int[] y = nbt.getIntArray("y");
-		int[] z = nbt.getIntArray("z");
+		NbtList blockDataListNBT = nbt.getList("blockData", NbtList.COMPOUND_TYPE);
+		NbtList mainThrusterListNBT = nbt.getList("mainThrusters", NbtList.COMPOUND_TYPE);
+		NbtList rcsThrusterListNBT = nbt.getList("rcsThrusters", NbtList.COMPOUND_TYPE);
 		
-		if(blockCount == 0)
-			return;
-
-		for(int i = 0; i < blockCount - 1; i++)
-		{
-			BlockPos dataPos = new BlockPos(x[i], y[i], z[i]);
-			blockDataList.add(MovingCraftEntity.BlockData.loadData(nbt.getCompound(dataPos.toShortString())));
-		}
+        for(int i = 0; i < blockDataListNBT.size(); i++)
+        	blockDataList.add(MovingCraftBlock.loadData(blockDataListNBT.getCompound(i)));
+		
+        for(int i = 0; i < mainThrusterListNBT.size(); i++)
+        	mainThrusters.add(Thruster.readFromNbt(mainThrusterListNBT.getCompound(i)));
+		
+        for(int i = 0; i < rcsThrusterListNBT.size(); i++)
+        	rcsThrusters.add(Thruster.readFromNbt(rcsThrusterListNBT.getCompound(i)));
 	}
 	
 	public void sendDisplayData(ServerPlayerEntity player)

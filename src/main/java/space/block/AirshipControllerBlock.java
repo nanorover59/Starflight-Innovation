@@ -30,6 +30,7 @@ import space.block.entity.BalloonControllerBlockEntity;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.FluidTankControllerBlockEntity;
 import space.block.entity.SolarPanelBlockEntity;
+import space.craft.MovingCraftBlock;
 import space.entity.AirshipEntity;
 import space.entity.MovingCraftEntity;
 import space.planet.PlanetDimensionData;
@@ -100,8 +101,8 @@ public class AirshipControllerBlock extends Block
         
         for(BlockPos pos : positionList)
         {
-        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
-        	double blockVolume = MovingCraftEntity.volumeForBlock(world.getBlockState(pos), world, pos);
+        	double blockMass = MovingCraftBlock.getMassForBlock(world, pos);
+        	double blockVolume = MovingCraftBlock.volumeForBlock(world.getBlockState(pos), world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	mass += blockMass;
         	volume += blockVolume;
@@ -125,7 +126,7 @@ public class AirshipControllerBlock extends Block
 				else if(blockEntity instanceof BatteryBlockEntity)
 				{
 					BatteryBlockEntity battery = (BatteryBlockEntity) blockEntity;
-					energySupply += battery.getEnergyStored();
+					energySupply += battery.getEnergy();
 					energyCapacity += battery.getEnergyCapacity();
 				}
 				else if(blockEntity instanceof SolarPanelBlockEntity)
@@ -141,7 +142,7 @@ public class AirshipControllerBlock extends Block
         // Find the components of the moment of inertia.
         for(BlockPos pos : positionList)
         {
-        	double blockMass = MovingCraftEntity.getMassForBlock(world, pos);
+        	double blockMass = MovingCraftBlock.getMassForBlock(world, pos);
         	BlockEntity blockEntity = world.getBlockEntity(pos);
         	Vec3d centerPos = pos.toCenterPos().subtract(centerOfMass);
         	// Square distance to the center of mass coordinates.
@@ -213,7 +214,7 @@ public class AirshipControllerBlock extends Block
         }
         
         BlockPos centerPos = BlockPos.ofFloored(centerOfMass);
-        ArrayList<MovingCraftEntity.BlockData> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(centerOfMass.getX()), MathHelper.floor(centerOfMass.getY()), MathHelper.floor(centerOfMass.getZ())), positionList);
+        ArrayList<MovingCraftBlock> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(centerOfMass.getX()), MathHelper.floor(centerOfMass.getY()), MathHelper.floor(centerOfMass.getZ())), positionList);
         AirshipEntity entity = new AirshipEntity(world, centerPos, blockDataList, world.getBlockState(position).get(FACING), mass, volume, momentOfInertia1.toVector3f(), momentOfInertia2.toVector3f(), energySupply, energyCapacity, solarProduction);
         MovingCraftEntity.removeBlocksFromWorld(world, centerPos, blockDataList);
         world.spawnEntity(entity);

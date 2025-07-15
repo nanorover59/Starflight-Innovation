@@ -31,6 +31,7 @@ import space.block.SimpleFacingBlock;
 import space.block.StarflightBlocks;
 import space.block.entity.BatteryBlockEntity;
 import space.block.entity.SolarPanelBlockEntity;
+import space.craft.MovingCraftBlock;
 import space.network.c2s.AirshipInputC2SPacket;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
@@ -61,7 +62,7 @@ public class AirshipEntity extends MovingCraftEntity
 		super(entityType, world);
 	}
 
-	public AirshipEntity(World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double energySupply, double energyCapacity, double solarProduction)
+	public AirshipEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlock> blockDataList, Direction forward, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, double energySupply, double energyCapacity, double solarProduction)
 	{
 		super(StarflightEntities.AIRSHIP, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		this.energySupply = energySupply;
@@ -173,11 +174,11 @@ public class AirshipEntity extends MovingCraftEntity
 		
 		if(getHoldStop() > 20 && craftSpeed < 4.0)
 		{
-			sendRenderData(true);
+			sendToClients(true);
 			releaseBlocks();
 		}
 		else if(getPortalCooldown() == 0)
-			sendRenderData(false);
+			sendToClients(false);
 		
 		tickPhysics();
 		checkDimensionChange();
@@ -197,7 +198,7 @@ public class AirshipEntity extends MovingCraftEntity
 	{
 		thrusters.clear();
 		
-		for(MovingCraftEntity.BlockData blockData : blocks)
+		for(MovingCraftBlock blockData : blocks)
 		{
 			BlockState blockState = blockData.getBlockState();
 			Block block = blockState.getBlock();
@@ -371,7 +372,7 @@ public class AirshipEntity extends MovingCraftEntity
 	}
 	
 	@Override
-	public void onBlockReleased(MovingCraftEntity.BlockData blockData, BlockPos worldPos)
+	public void onBlockReleased(MovingCraftBlock blockData, BlockPos worldPos)
 	{
 		super.onBlockReleased(blockData, worldPos);
 		
@@ -382,7 +383,7 @@ public class AirshipEntity extends MovingCraftEntity
 			if(blockEntity != null && blockEntity instanceof BatteryBlockEntity)
 			{
 				BatteryBlockEntity battery = ((BatteryBlockEntity) blockEntity);
-				battery.setEnergy(battery.getEnergyCapacity() * (energySupply / energyCapacity));
+				battery.setEnergy((long) (battery.getEnergyCapacity() * (energySupply / energyCapacity)));
 			}
 		}
 	}
@@ -393,7 +394,7 @@ public class AirshipEntity extends MovingCraftEntity
 		Vector3f craftVelocity = getTrackedVelocity();
 		Vector3f craftAngularVelocity = getTrackedAngularVelocity();
 
-		for(MovingCraftEntity.BlockData block : blocks)
+		for(MovingCraftBlock block : blocks)
 		{
 			if(block.getBlockState().getBlock() == StarflightBlocks.AIRSHIP_MOTOR)
 			{

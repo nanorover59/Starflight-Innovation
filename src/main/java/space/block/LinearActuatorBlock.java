@@ -23,6 +23,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec2f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.craft.MovingCraftBlock;
 import space.entity.LinearPlatformEntity;
 import space.entity.MovingCraftEntity;
 import space.util.BlockSearch;
@@ -166,7 +167,7 @@ public class LinearActuatorBlock extends SimpleFacingBlock
 		if(positionList.isEmpty())
 			return;
 		
-		ArrayList<MovingCraftEntity.BlockData> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(pos.getX()), MathHelper.floor(pos.getY()), MathHelper.floor(pos.getZ())), positionList);
+		ArrayList<MovingCraftBlock> blockDataList = MovingCraftEntity.captureBlocks(world, new BlockPos(MathHelper.floor(pos.getX()), MathHelper.floor(pos.getY()), MathHelper.floor(pos.getZ())), positionList);
 		LinearPlatformEntity entity = new LinearPlatformEntity(world, pos, blockDataList, 0.0, 0.0, new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f), targetPos);
 		MovingCraftEntity.removeBlocksFromWorld(world, pos, blockDataList);
 		world.spawnEntity(entity);

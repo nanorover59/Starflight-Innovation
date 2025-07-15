@@ -16,6 +16,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.world.World;
 import space.block.entity.StirlingEngineBlockEntity;
+import space.item.StarflightItems;
 
 public class StirlingEngineScreenHandler extends ScreenHandler
 {
@@ -25,7 +26,7 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 
 	public StirlingEngineScreenHandler(int syncId, PlayerInventory playerInventory)
 	{
-		this(syncId, playerInventory, new SimpleInventory(1), new ArrayPropertyDelegate(3));
+		this(syncId, playerInventory, new SimpleInventory(2), new ArrayPropertyDelegate(3));
 	}
 
 	public StirlingEngineScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory, PropertyDelegate propertyDelegate)
@@ -36,7 +37,8 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		this.inventory = inventory;
 		this.propertyDelegate = propertyDelegate;
 		this.world = playerInventory.player.getWorld();
-		this.addSlot(new Slot(inventory, 0, 80, 45));
+		this.addSlot(new Slot(inventory, 0, 80, 17));
+		this.addSlot(new Slot(inventory, 1, 80, 53));
 		
 		for(int i = 0; i < 3; i++)
 		{
@@ -56,11 +58,6 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 			((RecipeInputProvider) this.inventory).provideRecipeInputs(finder);
 	}
 
-	public void clearCraftingSlots()
-	{
-		this.getSlot(0).setStack(ItemStack.EMPTY);
-	}
-
 	public boolean matches(Recipe<? super RecipeInput> recipe)
 	{
 		return recipe.matches(new SingleStackRecipeInput(this.inventory.getStack(0)), this.world);
@@ -71,42 +68,48 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 		return this.inventory.canPlayerUse(player);
 	}
 
-	public ItemStack quickMove(PlayerEntity player, int index)
+	public ItemStack quickMove(PlayerEntity player, int slot)
 	{
 		ItemStack itemStack = ItemStack.EMPTY;
-		Slot slot = (Slot) this.slots.get(index);
-		if(slot != null && slot.hasStack())
+		Slot slot2 = this.slots.get(slot);
+		
+		if(slot2 != null && slot2.hasStack())
 		{
-			ItemStack itemStack2 = slot.getStack();
+			ItemStack itemStack2 = slot2.getStack();
 			itemStack = itemStack2.copy();
-
-			if(index != 0)
+			
+			if(slot != 1 && slot != 0)
 			{
-				if(StirlingEngineBlockEntity.canUseAsFuel(itemStack2))
+				if(itemStack2.contains(StarflightItems.ENERGY))
 				{
 					if(!this.insertItem(itemStack2, 0, 1, false))
 						return ItemStack.EMPTY;
 				}
-				else if(index >= 1 && index < 28)
+				else if(StirlingEngineBlockEntity.canUseAsFuel(itemStack2))
 				{
-					if(!this.insertItem(itemStack2, 28, 37, false))
+					if(!this.insertItem(itemStack2, 1, 2, false))
 						return ItemStack.EMPTY;
 				}
-				else if(index >= 28 && index < 37 && !this.insertItem(itemStack2, 1, 28, false))
+				else if(slot >= 2 && slot < 29)
+				{
+					if(!this.insertItem(itemStack2, 29, 37, false))
+						return ItemStack.EMPTY;
+				}
+				else if(slot >= 29 && slot < 37 && !this.insertItem(itemStack2, 2, 29, false))
 					return ItemStack.EMPTY;
 			}
-			else if(!this.insertItem(itemStack2, 1, 37, false))
+			else if(!this.insertItem(itemStack2, 2, 37, false))
 				return ItemStack.EMPTY;
 
 			if(itemStack2.isEmpty())
-				slot.setStack(ItemStack.EMPTY);
+				slot2.setStack(ItemStack.EMPTY);
 			else
-				slot.markDirty();
+				slot2.markDirty();
 
 			if(itemStack2.getCount() == itemStack.getCount())
 				return ItemStack.EMPTY;
 
-			slot.onTakeItem(player, itemStack2);
+			slot2.onTakeItem(player, itemStack2);
 		}
 
 		return itemStack;
@@ -117,6 +120,11 @@ public class StirlingEngineScreenHandler extends ScreenHandler
 	{
 		super.onClosed(player);
 		this.inventory.onClose(player);
+	}
+	
+	public int getCharge()
+	{
+		return this.propertyDelegate.get(0);
 	}
 
 	public int getFuelProgress()

@@ -13,6 +13,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.particle.StarflightParticleTypes;
 
 public class PlasmaBallEntity extends AbstractFireballEntity
 {
@@ -43,17 +44,17 @@ public class PlasmaBallEntity extends AbstractFireballEntity
 		super.onEntityHit(entityHitResult);
 		World world = getWorld();
 
-		if(world.isClient)
-			return;
-
-		Entity target = entityHitResult.getEntity();
-		Entity owner = this.getOwner();
-
-		if(getOwner() != null && owner.equals(target))
-			return;
-		
-		target.damage(getDamageSources().mobProjectile(this, (LivingEntity) owner), 5.0f);
-		discard();
+		if(!world.isClient)
+		{
+			Entity target = entityHitResult.getEntity();
+			Entity owner = this.getOwner();
+	
+			if(getOwner() != null && owner.equals(target))
+				return;
+			
+			target.damage(getDamageSources().mobProjectile(this, (LivingEntity) owner), 5.0f);
+			discard();
+		}
 	}
 	
 	@Override
@@ -62,10 +63,39 @@ public class PlasmaBallEntity extends AbstractFireballEntity
 		super.onCollision(hitResult);
 		World world = getWorld();
 		
-		if(world.isClient)
-			discard();
-		else
+		if(!world.isClient)
+		{
 			((ServerWorld) world).spawnParticles(ParticleTypes.FLASH, getX(), getY(), getZ(), 1 + world.random.nextInt(2), 0.5, 0.5, 0.5, 0.1);
+			discard();
+		}
+	}
+	
+	@Override
+	public void tick()
+	{
+		super.tick();
+		World world = getWorld();
+		
+		if(world.isClient)
+		{
+			if(this.random.nextBoolean())
+			{
+				int count = 1 + random.nextInt(1);
+				
+				for(int i = 0; i < count; i++)
+				{
+					double spread = 0.25;
+					double x = getX() + (random.nextDouble() - random.nextDouble()) * spread;
+					double y = getY() + (random.nextDouble() - random.nextDouble()) * spread;
+					double z = getZ() + (random.nextDouble() - random.nextDouble()) * spread;
+					world.addParticle(StarflightParticleTypes.EYE, true, x, y, z, 0.0, 0.0, 0.0);
+				}
+			}
+			
+			return;
+		}
+		else if(age > 320)
+			discard();
 	}
 
 	@Override

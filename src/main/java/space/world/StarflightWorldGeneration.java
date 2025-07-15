@@ -17,6 +17,7 @@ import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.carver.Carver;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.feature.Feature;
+import net.minecraft.world.gen.foliage.FoliagePlacerType;
 import net.minecraft.world.gen.structure.Structure;
 import net.minecraft.world.gen.structure.StructureType;
 import space.StarflightMod;
@@ -64,6 +65,9 @@ public class StarflightWorldGeneration
 	// Large Aeroplankton Structure
 	public static final StructurePieceType LARGE_AEROPLANKTON_PIECE = Registry.register(Registries.STRUCTURE_PIECE, Identifier.of(StarflightMod.MOD_ID, "large_aeroplankton_piece"), LargeAeroplanktonGenerator.Piece::new);
 	public static final StructureType<LargeAeroplanktonStructure> LARGE_AEROPLANKTON_TYPE = Registry.register(Registries.STRUCTURE_TYPE, Identifier.of(StarflightMod.MOD_ID, "large_aeroplankton"), () -> LargeAeroplanktonStructure.CODEC);
+	
+	// Spike Foliage Placer
+	public static final FoliagePlacerType<SpikeFoliagePlacer> SPIKE_FOLIAGE_PLACER = Registry.register(Registries.FOLIAGE_PLACER_TYPE, Identifier.of(StarflightMod.MOD_ID, "spike_foliage_placer"), new FoliagePlacerType<>(SpikeFoliagePlacer.CODEC));
 	
 	public static void initializeWorldGeneration()
 	{

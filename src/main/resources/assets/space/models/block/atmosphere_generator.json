@@ -1,8 +1,9 @@
 {
   "parent": "minecraft:block/orientable",
   "textures": {
-    "top": "space:block/riveted_aluminum",
-    "front": "space:block/atmosphere_generator",
-    "side": "space:block/riveted_aluminum"
+    "top": "space:block/aluminum_machine",
+	"bottom": "space:block/aluminum_machine_bottom",
+    "front": "space:block/atmosphere_generator_front",
+    "side": "space:block/aluminum_machine_two_tone"
   }
 }

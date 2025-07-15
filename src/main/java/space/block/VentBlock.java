@@ -88,13 +88,7 @@ public class VentBlock extends BlockWithEntity implements FluidUtilityBlock
 	}
 
 	@Override
-	public FluidResourceType getFluidType()
-	{
-		return FluidResourceType.ANY;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
 		return true;
 	}

@@ -1,6 +1,5 @@
 package space.block.entity;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 import net.minecraft.block.BlockState;
@@ -9,14 +8,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
-import space.block.FluidPipeBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
 import space.util.FluidResourceType;
 
-public class ValveBlockEntity extends BlockEntity
+public class ValveBlockEntity extends BlockEntity implements FluidStorageBlockEntity
 {
 	private FluidResourceType fluid;
 	private BlockPos fluidTankController;
@@ -60,6 +56,37 @@ public class ValveBlockEntity extends BlockEntity
 	}
 	
 	@Override
+	public long getFluidCapacity(FluidResourceType fluidType)
+	{
+		FluidTankControllerBlockEntity fluidTank = getFluidTankController();
+		
+		if(fluidTank != null && fluidType == fluid)
+			return fluidTank.getStorageCapacity();
+		else
+			return 0;
+	}
+
+	@Override
+	public long getFluid(FluidResourceType fluidType)
+	{
+		FluidTankControllerBlockEntity fluidTank = getFluidTankController();
+		
+		if(fluidTank != null && fluidType == fluid)
+			return fluidTank.getStoredFluid();
+		else
+			return 0;
+	}
+
+	@Override
+	public void setFluid(FluidResourceType fluidType, long fluid)
+	{
+		FluidTankControllerBlockEntity fluidTank = getFluidTankController();
+		
+		if(fluidTank != null && fluidType == this.fluid)
+			fluidTank.setStoredFluid(fluid);
+	}
+	
+	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
@@ -76,7 +103,7 @@ public class ValveBlockEntity extends BlockEntity
 			this.fluidTankController = fluidTankControllerPos.get();
 	}
 	
-	public static void serverTick(World world, BlockPos pos, BlockState state, ValveBlockEntity blockEntity)
+	/*public static void serverTick(World world, BlockPos pos, BlockState state, ValveBlockEntity blockEntity)
 	{
 		if(world.isClient || blockEntity.getMode() != 1 || blockEntity.getFluidTankController() == null || blockEntity.getFluidTankController().getStoredFluid() <= 0)
 			return;
@@ -97,5 +124,5 @@ public class ValveBlockEntity extends BlockEntity
 				blockEntity.markDirty();
 			}
 		}
-    }
+    }*/
 }

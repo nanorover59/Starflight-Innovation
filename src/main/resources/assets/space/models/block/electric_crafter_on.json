@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "top": "space:block/electric_crafter_top_on",
+	"bottom": "space:block/aluminum_machine_bottom",
+    "front": "space:block/electric_crafter_front_on",
+    "side": "space:block/aluminum_machine_two_tone"
+  }
+}

@@ -54,13 +54,12 @@ public class VacuumFurnaceBlockEntity extends ElectricFurnaceBlockEntity
 	}
 	
 	@Override
-	public double getInput()
+	public long getEnergyUse()
 	{
 		if(pressure < 0.0)
 			updateExternalPressure();
 		
-		double localPower = ((EnergyBlock) getCachedState().getBlock()).getInput() * (1.0 + 3.0 * pressure);
-		return localPower / world.getTickManager().getTickRate();
+		return (long) (((EnergyBlock) getCachedState().getBlock()).getInput() * (1.0 + 3.0 * pressure));
 	}
 	
 	@Override

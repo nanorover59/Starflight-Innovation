@@ -59,17 +59,11 @@ public class WaterTankBlock extends BlockWithEntity implements FluidUtilityBlock
 	{
 		return new WaterTankBlockEntity(pos, state);
 	}
-
+	
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.WATER;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return true;
+		return fluidType == FluidResourceType.WATER;
 	}
 	
 	@Nullable

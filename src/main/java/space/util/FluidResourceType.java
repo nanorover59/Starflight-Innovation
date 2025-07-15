@@ -2,28 +2,20 @@ package space.util;
 
 public class FluidResourceType
 {
-	public static final FluidResourceType ANY = new FluidResourceType(0, 0.0, "any");
-	public static final FluidResourceType WATER = new FluidResourceType(1, 1000.0, "water");
-	public static final FluidResourceType OXYGEN = new FluidResourceType(2, 1140.0, "oxygen");
-	public static final FluidResourceType HYDROGEN = new FluidResourceType(3, 190.0, "hydrogen");
-	
-	private final int id;
-	private final double storageDensity;
+	public static final FluidResourceType WATER = new FluidResourceType("water", 1000);
+	public static final FluidResourceType OXYGEN = new FluidResourceType("oxygen", 1200);
+	public static final FluidResourceType HYDROGEN = new FluidResourceType("hydrogen", 150);
+	public static final FluidResourceType[] ALL = {WATER, OXYGEN, HYDROGEN};
 	private final String name;
+	private final long storageDensity;
 	
-	public FluidResourceType(int id, double storageDensity, String name)
+	public FluidResourceType(String name, long storageDensity)
 	{
-		this.id = id;
-		this.storageDensity = storageDensity;
 		this.name = name;
+		this.storageDensity = storageDensity;
 	}
 	
-	public int getID()
-	{
-		return id;
-	}
-	
-	public double getStorageDensity()
+	public long getStorageDensity()
 	{
 		return storageDensity;
 	}
@@ -31,5 +23,16 @@ public class FluidResourceType
 	public String getName()
 	{
 		return name;
+	}
+	
+	public static FluidResourceType getForName(String name)
+	{
+		for(FluidResourceType fluidType : ALL)
+		{
+			if(fluidType.getName().equals(name))
+				return fluidType;
+		}
+		
+		return null;
 	}
 }

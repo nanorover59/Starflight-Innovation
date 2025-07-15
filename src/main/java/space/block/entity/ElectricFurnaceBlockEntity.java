@@ -1,6 +1,5 @@
 package space.block.entity;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -55,8 +54,7 @@ import space.screen.ElectricFurnaceScreenHandler;
 public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider, EnergyBlockEntity
 {
 	public DefaultedList<ItemStack> inventory;
-	private double energy;
-	int chargeState;
+	private long energy;
 	int cookTime;
 	int cookTimeTotal;
 	public final PropertyDelegate propertyDelegate;
@@ -66,7 +64,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	public ElectricFurnaceBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
 		super(StarflightBlocks.ELECTRIC_FURNACE_BLOCK_ENTITY, blockPos, blockState);
-		this.inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
+		this.inventory = DefaultedList.ofSize(3, ItemStack.EMPTY);
 		this.propertyDelegate = new PropertyDelegate()
 		{
 			public int get(int index)
@@ -74,7 +72,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				switch(index)
 				{
 				case 0:
-					return ElectricFurnaceBlockEntity.this.chargeState;
+					return (int) ElectricFurnaceBlockEntity.this.energy;
 				case 1:
 					return ElectricFurnaceBlockEntity.this.cookTime;
 				case 2:
@@ -88,8 +86,9 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			{
 				switch(index)
 				{
+				
 				case 0:
-					ElectricFurnaceBlockEntity.this.chargeState = value;
+					ElectricFurnaceBlockEntity.this.energy = value;
 				case 1:
 					ElectricFurnaceBlockEntity.this.cookTime = value;
 					break;
@@ -123,7 +122,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 				return false;
 			else
 			{
-				ItemStack itemStack2 = slots.get(1);
+				ItemStack itemStack2 = slots.get(2);
 
 				if(itemStack2.isEmpty())
 					return true;
@@ -145,14 +144,14 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		{
 			ItemStack itemStack = slots.get(0);
 			ItemStack itemStack2 = recipe.value().getResult(registryManager);
-			ItemStack itemStack3 = slots.get(1);
+			ItemStack itemStack3 = slots.get(2);
 
 			if(itemStack3.isEmpty())
-				slots.set(1, itemStack2.copy());
+				slots.set(2, itemStack2.copy());
 			else if(itemStack3.isOf(itemStack2.getItem()))
-				itemStack3.increment(1);
+				itemStack3.increment(2);
 
-			itemStack.decrement(1);
+			itemStack.decrement(2);
 			return true;
 		}
 		else
@@ -302,7 +301,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	public int[] getAvailableSlots(Direction side)
 	{
 		if(side == Direction.DOWN)
-			return new int[] {1};
+			return new int[] {2};
 		else
 			return new int[] {0};
 	}
@@ -367,58 +366,33 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 	}
 	
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return 0.0;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+		this.energy = energy;
 	}
-
-	@Override
-	public double changeEnergy(double amount)
+	
+	public long getEnergyUse()
 	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
-	}
-
-	@Override
-	public ArrayList<BlockPos> getOutputs()
-	{
-		return null;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-	}
-
-	@Override
-	public void clearOutputs()
-	{
+		return ((EnergyBlock) getCachedState().getBlock()).getInput();
 	}
 	
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 		nbt.putShort("CookTime", (short) this.cookTime);
 		nbt.putShort("CookTimeTotal", (short) this.cookTimeTotal);
 		Inventories.writeNbt(nbt, this.inventory, registryLookup);
@@ -436,7 +410,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		Inventories.readNbt(nbt, this.inventory, registryLookup);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 		this.cookTime = nbt.getShort("CookTime");
 		this.cookTimeTotal = nbt.getShort("CookTimeTotal");
 		NbtCompound nbtCompound = nbt.getCompound("RecipesUsed");
@@ -451,36 +425,29 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public static void serverTick(World world, BlockPos pos, BlockState state, ElectricFurnaceBlockEntity blockEntity)
 	{
-		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
+		ItemStack inputStack = (ItemStack) blockEntity.inventory.get(0);
+		ItemStack batteryStack = (ItemStack) blockEntity.inventory.get(1);
+		RecipeEntry<?> recipe = blockEntity.getFirstMatchRecipe();
+		int count = blockEntity.getMaxCountPerStack();
+		long power = blockEntity.getEnergyUse();
 		boolean bl2 = false;
-		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
 		
-		if(!itemStack.isEmpty())
+		if(!inputStack.isEmpty() && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory, count) && blockEntity.removeEnergy(power, true) == power)
 		{
-			RecipeEntry<?> recipe = blockEntity.getFirstMatchRecipe();
-			int i = blockEntity.getMaxCountPerStack();
+			blockEntity.cookTime++;
 
-			if(blockEntity.energy > 0 && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory, i))
+			if(blockEntity.cookTime == blockEntity.cookTimeTotal)
 			{
-				blockEntity.changeEnergy(-blockEntity.getInput());
-				blockEntity.cookTime++;
-
-				if(blockEntity.cookTime == blockEntity.cookTimeTotal)
-				{
-					blockEntity.cookTime = 0;
-					blockEntity.cookTimeTotal = blockEntity.getCookTime();
-
-					if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, i))
-						blockEntity.setLastRecipe(recipe);
-
-					bl2 = true;
-				}
-			}
-			else
 				blockEntity.cookTime = 0;
+				blockEntity.cookTimeTotal = blockEntity.getCookTime();
+
+				if(craftRecipe(world.getRegistryManager(), recipe, blockEntity.inventory, count))
+					blockEntity.setLastRecipe(recipe);
+
+				bl2 = true;
+			}
 		}
-		
-		if(blockEntity.cookTime > 0 && (itemStack.isEmpty() || blockEntity.energy == 0))
+		else if(blockEntity.cookTime > 0)
 			blockEntity.cookTime = MathHelper.clamp((int) (blockEntity.cookTime - 2), (int) 0, (int) blockEntity.cookTimeTotal);
 		
 		if(world.getBlockState(pos).get(ElectricFurnaceBlock.LIT) != (blockEntity.energy > 0 && blockEntity.hasValidItem()))
@@ -492,5 +459,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 		
 		if(bl2)
 			markDirty(world, pos, state);
+		
+		blockEntity.dischargeItem(batteryStack, blockEntity.getEnergyUse() * 2);
 	}
 }

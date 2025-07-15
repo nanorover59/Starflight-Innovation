@@ -22,7 +22,7 @@ import space.util.BlockSearch;
 
 public class HabitableAirBlock extends AirBlock
 {
-	public static final double DENSITY = 1.0; // The density of habitable air in kilograms per cubic meter.
+	public static final long DENSITY = 1; // The density of habitable air in kilograms per cubic meter.
 	
 	public HabitableAirBlock(Settings settings)
 	{
@@ -71,13 +71,13 @@ public class HabitableAirBlock extends AirBlock
 
 				if(blockEntity != null && blockEntity instanceof AtmosphereGeneratorBlockEntity)
 				{
-					if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergyStored() == 0)
+					if(((AtmosphereGeneratorBlockEntity) blockEntity).getEnergy() == 0)
 					{
 						((ServerWorld) world).playSound(null, pos.getX(), pos.getY(), pos.getZ(), SoundEvents.BLOCK_REDSTONE_TORCH_BURNOUT, SoundCategory.BLOCKS, 1.0f, 0.5f, world.random.nextLong());
 						AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);
 					}
-
-					if(AirUtil.requestSupply(world, blockPos, volumeList.size() * DENSITY, StarflightBlocks.ATMOSPHERE_GENERATOR))
+					
+					if(((AtmosphereGeneratorBlockEntity) blockEntity).requestSupply(world, blockPos, volumeList.size() * DENSITY))
 						AirUtil.fillVolume(world, volumeList, updateList);
 					else
 						AirUtil.remove(world, pos, BlockSearch.MAX_VOLUME);

@@ -60,8 +60,8 @@ public abstract class WorldRendererMixin
 	@Shadow @Final private static Identifier MOON_PHASES;
 	@Shadow @Final private static Identifier CLOUDS;
 	
-	//@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("HEAD"), cancellable = true)
-	@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("RETURN"))
+	//@Inject(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V", at = @At("RETURN"))
+	@Inject(method = "renderSky", at = @At("HEAD"), cancellable = true)
 	public void renderSkyInject(Matrix4f matrix4f, Matrix4f projectionMatrix, float tickDelta, Camera camera, boolean thickFog, Runnable fogCallback, CallbackInfo info)
 	{
 		Planet viewpointPlanet = PlanetList.getClient().getViewpointPlanet();
@@ -69,8 +69,6 @@ public abstract class WorldRendererMixin
 		
 		if(viewpointPlanet != null && dimensionData != null)
 		{
-			boolean starrySky = dimensionData.isOrbit() || dimensionData.getPressure() < 0.001d;
-			boolean cloudySky = dimensionData.isCloudy();
 			Vec3d viewpointPlanetPosition = viewpointPlanet.getInterpolatedPosition(tickDelta);
 			
 			// Find the position of the sun and background stars in angular coordinates.
@@ -85,7 +83,6 @@ public abstract class WorldRendererMixin
 			MatrixStack matrixStack = new MatrixStack();
 	        matrixStack.multiplyPositionMatrix(matrix4f);
 	        
-	        //RenderSystem.disableDepthTest();
 	        RenderSystem.depthMask(false);
 	        RenderSystem.enableBlend();
 	        RenderSystem.defaultBlendFunc();
@@ -110,16 +107,21 @@ public abstract class WorldRendererMixin
 			matrixStack.multiply(RotationAxis.POSITIVE_X.rotation((float) phiViewpoint));
 			matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(60.0f));
 			
-			float rainGradient = this.world.getRainGradient(tickDelta);
+			float altFactor = MathHelper.clamp(1.0f - (float) (camera.getPos().getY() - 320.0f) / 320.0f, 0.0f, 1.0f);
+			float skyOpacity = altFactor;
+			float rainGradient = this.world.getRainGradient(tickDelta) * altFactor;
 			
-			if(starrySky)
+			if(dimensionData.isOrbit() || dimensionData.getPressure() < 0.001d)
+			{
+				skyOpacity = 0.0f;
 				rainGradient = 0.0f;
-			else if(cloudySky)
+			}
+			else if(dimensionData.isCloudy())
 				rainGradient = 1.0f;
 			
-			float s = 1.0f - rainGradient;
-			float starFactor = starrySky ? 1.0f : this.world.getStarBrightness(tickDelta) * s * 2.0f;
-
+			float starFactor = Math.max(this.world.getStarBrightness(tickDelta) * (1.0f - rainGradient) * 2.0f, 1.0f - skyOpacity);
+			starFactor = (float) Math.pow(starFactor, 3.0);
+			
 			if(starFactor > 0.0f)
 			{
 				Matrix4f matrix4f3 = matrixStack.peek().getPositionMatrix();
@@ -139,11 +141,11 @@ public abstract class WorldRendererMixin
 			matrixStack.pop();
 			
 			// Render all celestial objects.
-			float celestialFactor = Math.min(starFactor + 0.3f, 1.0f);
-			celestialFactor = Math.max(celestialFactor - rainGradient, 0.0f);
+			float celestialFactor = Math.min(starFactor + 0.5f, 1.0f);
+			celestialFactor = Math.max(celestialFactor - rainGradient * 0.5f, 0.0f);
 			
 			for(Planet planet : PlanetList.getClient().getPlanets())
-				PlanetRenderer.render(planet, matrixStack, tickDelta, celestialFactor, s < 0.95f);
+				PlanetRenderer.render(planet, matrixStack, tickDelta, celestialFactor, rainGradient > 0.0f);
 			
 			// Apply the bloom shader effect for players with fabulous graphics.
 			/*if(MinecraftClient.isFabulousGraphicsOrBetter() && StarflightRenderEffects.bloomShader != null && starFactor > 0.5f)
@@ -152,99 +154,142 @@ public abstract class WorldRendererMixin
 				client.getFramebuffer().beginWrite(false);
 			}*/
 			
-			// Apply the sky color.
-			Vec3d skyRGB = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
-			float skyR = (float) skyRGB.getX();
-			float skyG = (float) skyRGB.getY();
-			float skyB = (float) skyRGB.getZ();
-			float v = MathHelper.clamp(MathHelper.cos(world.getSkyAngle(tickDelta) * ((float) Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
-			Vec3d vec3d = client.gameRenderer.getCamera().getPos().subtract(2.0, 2.0, 2.0).multiply(0.25);
-			Vec3d fogRGB = CubicSampler.sampleColor(vec3d, (x, y, z) -> world.getDimensionEffects().adjustFogColor(Vec3d.unpackRgb(client.world.getBiomeForNoiseGen(x, y, z).value().getFogColor()), v));
-			float fogR = (float) fogRGB.getX();
-			float fogG = (float) fogRGB.getY();
-			float fogB = (float) fogRGB.getZ();
-			float fogYOffset = 0.0f;
-			float rain = world.getRainGradient(tickDelta);
-			float thunder = world.getThunderGradient(tickDelta);
-			float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
-
-			if(rain > 0.0f)
+			if(!dimensionData.isOrbit())
 			{
-				float rgFactor = 1.0f - rain * 0.5f;
-				float bFactor = 1.0f - rain * 0.4f;
-				fogR *= rgFactor;
-				fogG *= rgFactor;
-				fogB *= bFactor;
-			}
-
-			if(thunder > 0.0f)
-			{
-				float factor = 1.0f - rain * 0.5f;
-				fogR *= factor;
-				fogG *= factor;
-				fogB *= factor;
-			}
-
-			if(dimensionData.isSky() && viewpointPlanet.hasCloudCover())
-				fogYOffset = 128.0f * MathHelper.clamp(1.0f - (float) Math.abs(client.world.getBottomY() - camera.getPos().getY()) / 128.0f, 0.0f, 1.0f);
-
-			RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
-			RenderSystem.setShader(GameRenderer::getPositionTexColorProgram);
-			RenderSystem.setShaderTexture(0, Identifier.of(StarflightMod.MOD_ID, "textures/environment/background.png"));
-			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
-			bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
-			bufferBuilder.vertex(matrix4f, 0.0f, fogYOffset + 16.0f, 0.0f).texture(0.5f, 0.5f).color(skyR, skyG, skyB, 0.8f);
-
-			for(int i = 0; i <= 16; i++)
-			{
-				float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
-				float sinTheta = MathHelper.sin(theta);
-				float cosTheta = MathHelper.cos(theta);
-				bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, range * sinTheta).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(fogR, fogG, fogB, 0.8f);
-			}
-
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-			bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
-			bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).texture(0.5f, 0.5f).color(fogR, fogG, fogB, 0.8f);
-
-			for(int i = 0; i <= 16; i++)
-			{
-				float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
-				float sinTheta = MathHelper.sin(theta);
-				float cosTheta = MathHelper.cos(theta);
-				bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, -range * sinTheta).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(fogR, fogG, fogB, 0.8f);
-			}
-
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-
-			// Render the sunset effect.
-			float skyAngle = (float) trueAzimuth;
-			float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
-
-			if(fs != null)
-			{
-				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
-				matrixStack.push();
-				matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0f));
-				matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(this.world.getSkyAngleRadians(tickDelta)) < 0.0f ? 180.0f : 0.0f));
-				matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0f));
-				matrix4f = matrixStack.peek().getPositionMatrix();
-				bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_TEXTURE_COLOR);
-				bufferBuilder.vertex(matrix4f, 0.0f, 0.0f, 16.0f).texture(0.5f, 0.5f).color(fs[0], fs[1], fs[2], fs[3]);
-
+				Vec3d skyRGB = world.getSkyColor(client.gameRenderer.getCamera().getPos(), tickDelta);
+				float skyR = (float) skyRGB.getX();
+				float skyG = (float) skyRGB.getY();
+				float skyB = (float) skyRGB.getZ();
+				float v = MathHelper.clamp(MathHelper.cos(world.getSkyAngle(tickDelta) * ((float) Math.PI * 2)) * 2.0f + 0.5f, 0.0f, 1.0f);
+				Vec3d vec3d = client.gameRenderer.getCamera().getPos().subtract(2.0, 2.0, 2.0).multiply(0.25);
+				Vec3d fogRGB = CubicSampler.sampleColor(vec3d, (x, y, z) -> world.getDimensionEffects().adjustFogColor(Vec3d.unpackRgb(client.world.getBiomeForNoiseGen(x, y, z).value().getFogColor()), v));
+				float fogR = (float) fogRGB.getX();
+				float fogG = (float) fogRGB.getY();
+				float fogB = (float) fogRGB.getZ();
+				float rain = world.getRainGradient(tickDelta);
+				float thunder = world.getThunderGradient(tickDelta);
+				float range = Math.min(128.0f, client.gameRenderer.getViewDistance());
+				float fogYOffset = -8.0f;
+	
+				if(rain > 0.0f)
+				{
+					float rgFactor = 1.0f - rain * 0.5f;
+					float bFactor = 1.0f - rain * 0.4f;
+					fogR *= rgFactor;
+					fogG *= rgFactor;
+					fogB *= bFactor;
+				}
+	
+				if(thunder > 0.0f)
+				{
+					float factor = 1.0f - rain * 0.5f;
+					fogR *= factor;
+					fogG *= factor;
+					fogB *= factor;
+				}
+				
+				if(dimensionData.isSky() && viewpointPlanet.hasCloudCover())
+				{
+					float fogFactor = MathHelper.clamp(1.0f - (float) (camera.getPos().getY()) / 256.0f, 0.0f, 1.0f);
+					skyR = MathHelper.lerp(fogFactor, skyR, fogR);
+					skyG = MathHelper.lerp(fogFactor, skyG, fogG);
+					skyB = MathHelper.lerp(fogFactor, skyB, fogB);
+				}
+				
+				// Horizon Mask
+				float gap = 4.0f;
+				RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+				RenderSystem.setShaderColor(altFactor, altFactor, altFactor, altFactor);
+				bufferBuilder = Tessellator.getInstance().begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+				
+				for(int i = 0; i < 16; i++)
+				{
+					float theta1 = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+					float theta2 = (float) (i + 1) * (float) (Math.PI * 2.0) / 16.0f;
+					float x1 = range * (float) Math.cos(theta1);
+					float z1 = range * (float) Math.sin(theta1);
+					float x2 = range * (float) Math.cos(theta2);
+					float z2 = range * (float) Math.sin(theta2);
+					bufferBuilder.vertex(matrix4f, x1, fogYOffset, z1).color(0.0f, 0.0f, 0.0f, 0.0f);
+					bufferBuilder.vertex(matrix4f, x1, fogYOffset - gap, z1).color(0.0f, 0.0f, 0.0f, 1.0f);
+					bufferBuilder.vertex(matrix4f, x2, fogYOffset - gap, z2).color(0.0f, 0.0f, 0.0f, 1.0f);
+					bufferBuilder.vertex(matrix4f, x2, fogYOffset, z2).color(0.0f, 0.0f, 0.0f, 0.0f);
+				}
+				
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+				
+				bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+				bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).color(0.0f, 0.0f, 0.0f, 1.0f);
+	
 				for(int i = 0; i <= 16; i++)
 				{
 					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
 					float sinTheta = MathHelper.sin(theta);
 					float cosTheta = MathHelper.cos(theta);
-					bufferBuilder.vertex(matrix4f, range * sinTheta, range * cosTheta, -cosTheta * 64.0f * fs[3]).texture(0.5f + 0.5f * cosTheta, 0.5f + 0.5f * sinTheta).color(0.0f, 0.0f, 0.0f, 0.0f);
+					bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset - gap, -range * sinTheta).color(0.0f, 0.0f, 0.0f, 1.0f);
 				}
-
+	
 				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
-				matrixStack.pop();
+				
+				// Sky Color
+				RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE);
+				//RenderSystem.setShaderColor(skyOpacity, skyOpacity, skyOpacity, skyOpacity);
+				bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+				bufferBuilder.vertex(matrix4f, 0.0f, fogYOffset + 16.0f, 0.0f).color(skyR, skyG, skyB, 1.0f);
+	
+				for(int i = 0; i <= 16; i++)
+				{
+					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+					float sinTheta = MathHelper.sin(theta);
+					float cosTheta = MathHelper.cos(theta);
+					bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, range * sinTheta).color(fogR, fogG, fogB, 1.0f);
+				}
+	
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+				bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+				bufferBuilder.vertex(matrix4f, 0.0f, -16.0f, 0.0f).color(fogR, fogG, fogB, 1.0f);
+	
+				for(int i = 0; i <= 16; i++)
+				{
+					float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+					float sinTheta = MathHelper.sin(theta);
+					float cosTheta = MathHelper.cos(theta);
+					bufferBuilder.vertex(matrix4f, range * cosTheta, fogYOffset, -range * sinTheta).color(fogR, fogG, fogB, 1.0f);
+				}
+	
+				BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+	
+				// Render the sunset effect.
+				float skyAngle = (float) trueAzimuth;
+				float[] fs = this.world.getDimensionEffects().getFogColorOverride((float) (skyAngle / (Math.PI * 2.0d)), tickDelta);
+	
+				if(fs != null)
+				{
+					RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE, GlStateManager.SrcFactor.ONE, GlStateManager.DstFactor.ZERO);
+					matrixStack.push();
+					matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0f));
+					matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(this.world.getSkyAngleRadians(tickDelta)) < 0.0f ? 180.0f : 0.0f));
+					matrixStack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(90.0f));
+					matrix4f = matrixStack.peek().getPositionMatrix();
+					bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+					bufferBuilder.vertex(matrix4f, 0.0f, 0.0f, 16.0f).color(fs[0], fs[1], fs[2], fs[3]);
+	
+					for(int i = 0; i <= 16; i++)
+					{
+						float theta = (float) i * (float) (Math.PI * 2.0) / 16.0f;
+						float sinTheta = MathHelper.sin(theta);
+						float cosTheta = MathHelper.cos(theta);
+						bufferBuilder.vertex(matrix4f, range * sinTheta, range * cosTheta, -cosTheta * 64.0f * fs[3]).color(0.0f, 0.0f, 0.0f, 0.0f);
+					}
+	
+					BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+					matrixStack.pop();
+				}
 			}
 			
+			RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
 			RenderSystem.depthMask(true);
+			info.cancel();
 		}
 	}
 	

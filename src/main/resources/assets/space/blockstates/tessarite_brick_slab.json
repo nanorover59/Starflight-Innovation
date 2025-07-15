@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "space:block/tessarite_brick_slab"
+    },
+    "type=double": {
+      "model": "space:block/tessarite_bricks"
+    },
+    "type=top": {
+      "model": "space:block/tessarite_brick_slab_top"
+    }
+  }
+}

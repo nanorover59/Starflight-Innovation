@@ -28,7 +28,7 @@ public class GameRendererMixin
 			Uniform noiseThreshold = ((PostEffectProcessorAccessorMixin) StarflightRenderEffects.radiationShader).getPasses().get(1).getProgram().getUniformByNameOrDummy("Threshold");
 			aberrationStrength.set(StarflightRenderEffects.radiation);
 			noiseSeed.set(client.world.random.nextFloat());
-			noiseThreshold.set(1.0f - StarflightRenderEffects.radiation * 0.001f);
+			noiseThreshold.set(1.0f - StarflightRenderEffects.radiation * 0.0025f);
 			StarflightRenderEffects.radiationShader.render(tickCounter.getTickDelta(false));
 			client.getFramebuffer().beginWrite(false);
 		}

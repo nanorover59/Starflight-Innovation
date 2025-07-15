@@ -2,15 +2,11 @@ package space.block;
 
 import java.util.List;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemStack;
@@ -35,7 +31,7 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	
 	public BalloonControllerBlock(Settings settings)
 	{
-		super(settings, FluidResourceType.HYDROGEN, 0.1);
+		super(settings, FluidResourceType.HYDROGEN, 1);
 	}
 	
 	@Override
@@ -57,15 +53,9 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	}
 	
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.HYDROGEN;
-	}
-	
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return true;
+		return fluidType == FluidResourceType.HYDROGEN;
 	}
 
 	@Override
@@ -88,11 +78,5 @@ public class BalloonControllerBlock extends FluidTankControllerBlock implements 
 	public BlockEntity createBlockEntity(BlockPos pos, BlockState state)
 	{
 		return new BalloonControllerBlockEntity(pos, state);
-	}
-	
-	@Nullable
-	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type)
-	{
-		return world.isClient ? null : validateTicker(type, StarflightBlocks.BALLOON_CONTROLLER_BLOCK_ENTITY, BalloonControllerBlockEntity::serverTick);
 	}
 }

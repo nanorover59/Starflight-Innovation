@@ -7,69 +7,38 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
-import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 
 public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
 	private ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
-	private double energy;
+	private long energy;
 	
 	public SolarPanelBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
         super(StarflightBlocks.SOLAR_PANEL_BLOCK_ENTITY, blockPos, blockState);
     }
-
+	
 	@Override
-	public double getEnergyStored()
-	{
-		return energy;
-	}
-
-	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
 		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
-	
-	@Override
-	public double getOutput()
-	{
-		PlanetDimensionData dimensionData = PlanetList.getDimensionDataForWorld(getWorld());
-		double solarMultiplier = 1.0;
-		
-		if(dimensionData != null)
-		{
-			Planet planet = dimensionData.getPlanet();
-			double d = planet.getPosition().lengthSquared();
-			
-			if(d > 0.0)
-			{
-				d /= 2.238016e22; // Convert the distance from meters to astronomical units.
-				solarMultiplier = (1.0 / d) * (dimensionData.isCloudy() ? 0.1 : 1.0);
-			}
-		}
-		
-		return ((((EnergyBlock) getCachedState().getBlock()).getOutput() * solarMultiplier) / world.getTickManager().getTickRate());
-	}
-	
-	@Override
-	public double getInput()
-	{
-		return 0.0;
-	}
 
 	@Override
-	public double changeEnergy(double amount)
+	public long getEnergy()
 	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
+		return energy;
+	}
+	
+	@Override
+	public void setEnergy(long energy)
+	{
+		this.energy = energy;
 	}
 
 	@Override
@@ -83,19 +52,13 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 	{
 		outputs.add(output);
 	}
-
-	@Override
-	public void clearOutputs()
-	{
-		outputs.clear();
-	}
 	
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 	}
 		
 	@Override
@@ -103,7 +66,7 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 	{
 		super.readNbt(nbt, registryLookup);
 		this.outputs = EnergyBlockEntity.outputsFromNBT(nbt);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 	}
 	
 	public static double getSolarMultiplier(World world, BlockPos pos)
@@ -144,8 +107,8 @@ public class SolarPanelBlockEntity extends BlockEntity implements EnergyBlockEnt
 		if(!world.getDimension().hasSkyLight() || !(blockEntity instanceof SolarPanelBlockEntity))
 			return;
 		
-		double output = blockEntity.getOutput() * getSolarMultiplier(world, pos);
-		blockEntity.changeEnergy(output);
-		EnergyBlockEntity.transferEnergy(blockEntity, output);
+		long output = (long) (((EnergyBlock) state.getBlock()).getOutput() * getSolarMultiplier(world, pos));
+		blockEntity.addEnergy(output, true);
+		blockEntity.transferEnergy(output);
 	}
 }

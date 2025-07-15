@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.craft.MovingCraftBlock;
 import space.util.StarflightSoundEvents;
 
 public class LinearPlatformEntity extends MovingCraftEntity
@@ -24,7 +25,7 @@ public class LinearPlatformEntity extends MovingCraftEntity
 		super(entityType, world);
 	}
 
-	public LinearPlatformEntity(World world, BlockPos blockPos, ArrayList<MovingCraftEntity.BlockData> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, BlockPos targetPos)
+	public LinearPlatformEntity(World world, BlockPos blockPos, ArrayList<MovingCraftBlock> blockDataList, double mass, double volume, Vector3f momentOfInertia1, Vector3f momentOfInertia2, BlockPos targetPos)
 	{
 		super(StarflightEntities.LINEAR_PLATFORM, world, blockPos, blockDataList, mass, volume, momentOfInertia1, momentOfInertia2);
 		this.targetPos = targetPos;
@@ -71,10 +72,10 @@ public class LinearPlatformEntity extends MovingCraftEntity
 
 		if(stopTimer == 5)
 		{
-			sendRenderData(true);
+			sendToClients(true);
 			this.releaseBlocks();
 		} else
-			sendRenderData(false);
+			sendToClients(false);
 		
 		if(stopTimer == 0)
 		{

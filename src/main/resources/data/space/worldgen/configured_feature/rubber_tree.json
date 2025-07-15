@@ -35,22 +35,18 @@
         }
       }
     },
-    "trunk_placer": {
-      "type": "minecraft:straight_trunk_placer",
-      "base_height": 4,
-      "height_rand_a": 2,
-      "height_rand_b": 1
-    },
-    "foliage_placer": {
-      "type": "minecraft:pine_foliage_placer",
-      "radius": 2,
-      "offset": 1,
-      "height": {
-        "type": "minecraft:uniform",
-        "min_inclusive": 3,
-        "max_inclusive": 4
-      }
-    },
+	"trunk_placer": {
+	  "type": "minecraft:straight_trunk_placer",
+	  "base_height": 5,
+	  "height_rand_a": 2,
+	  "height_rand_b": 2
+	},
+	"foliage_placer": {
+	  "type": "space:spike_foliage_placer",
+	  "height": 4,
+	  "offset": 0,
+	  "radius": 3
+	},
     "decorators": []
   }
 }

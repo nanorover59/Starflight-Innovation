@@ -112,43 +112,25 @@ public class EnergyCableBlock extends Block implements EnergyBlock, Waterloggabl
 	{
 		BlockPos blockPos = context.getBlockPos();
 		FluidState fluidState = context.getWorld().getFluidState(blockPos);
-		return this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
+		BlockState state = this.getDefaultState().with(WATERLOGGED, fluidState.getFluid() == Fluids.WATER && fluidState.isStill());
+		
+		for(Direction d : DIRECTIONS)
+			state = updateStateForConnection(context.getWorld(), context.getBlockPos(), context.getWorld().getBlockState(context.getBlockPos().offset(d)), state, d);
+		
+		return state;
 	}
 	
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
-		int connections = 0;
-		
-		for(Direction d : DIRECTIONS)
-		{
-			state = updateStateForConnection(world, pos, world.getBlockState(pos.offset(d)), state, d);
-			
-			if(isConnected(state, d))
-				connections++;
-		}
-		
-		world.setBlockState(pos, state);
-		
-		if(!world.isClient && connections > 1)
+		if(!world.isClient)
 			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	
 	@Override
 	public void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved)
 	{
-		if(state.isOf(newState.getBlock()))
-			return;
-		
-		int connections = 0;
-		
-		for(Direction d : DIRECTIONS)
-		{
-			if(isConnected(state, d))
-				connections++;
-		}
-		
-		if(!world.isClient && connections > 1)
+		if(!world.isClient)
 			BlockSearch.energyConnectionSearch(world, pos);
 	}
 	

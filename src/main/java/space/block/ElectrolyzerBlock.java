@@ -17,19 +17,23 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item.TooltipContext;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.random.Random;
@@ -71,7 +75,7 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer", df.format(getInput())).formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.electrolyzer.description_1"));
 		textList.add(Text.translatable("block.space.electrolyzer.description_2"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
@@ -84,22 +88,41 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 64.0;
+		return 64;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 128.0;
+		return 128;
+	}
+	
+	@Override
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit)
+	{
+		if(!world.isClient)
+		{
+			NamedScreenHandlerFactory screenHandlerFactory = state.createScreenHandlerFactory(world, pos);
+
+			if(screenHandlerFactory != null)
+				player.openHandledScreen(screenHandlerFactory);
+		}
+
+		return ActionResult.SUCCESS;
 	}
 	
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack)
 	{
 		if(!world.isClient)
+		{
 			BlockSearch.energyConnectionSearch(world, pos);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.WATER);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.OXYGEN);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.HYDROGEN);
+		}
 	}
 	
 	@Override
@@ -141,7 +164,12 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 			world.removeBlockEntity(pos);
 		
 		if(!world.isClient && !state.isOf(newState.getBlock()))
+		{
 			BlockSearch.energyConnectionSearch(world, pos);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.WATER);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.OXYGEN);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.HYDROGEN);
+		}
 	}
 	
 	@Override
@@ -155,17 +183,11 @@ public class ElectrolyzerBlock extends BlockWithEntity implements EnergyBlock, F
 	{
 		return direction != state.get(FACING);
 	}
-
+	
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.ANY;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction != state.get(FACING);
+		return fluidType == FluidResourceType.WATER || fluidType == FluidResourceType.OXYGEN || fluidType == FluidResourceType.HYDROGEN;
 	}
 	
 	@Override

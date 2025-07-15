@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "space:block/tessarite_bricks",
+    "side": "space:block/tessarite_bricks",
+    "top": "space:block/tessarite_bricks"
+  }
+}

@@ -56,8 +56,8 @@ public class StarflightItems
 	public static final RegistryKey<ItemGroup> ITEM_GROUP = RegistryKey.of(RegistryKeys.ITEM_GROUP, Identifier.of(StarflightMod.MOD_ID, "general"));
 	
 	// Item Components
-	public static final ComponentType<Float> ENERGY = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
-	public static final ComponentType<Float> MAX_ENERGY = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
+	public static final ComponentType<Integer> ENERGY = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
+	public static final ComponentType<Integer> MAX_ENERGY = ComponentType.<Integer>builder().codec(Codecs.NONNEGATIVE_INT).packetCodec(PacketCodecs.VAR_INT).build();
 	public static final ComponentType<Float> OXYGEN = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
 	public static final ComponentType<Float> MAX_OXYGEN = ComponentType.<Float>builder().codec(Codecs.POSITIVE_FLOAT).packetCodec(PacketCodecs.FLOAT).build();
 	public static final ComponentType<String> PART_DRAWING_GROUPS = ComponentType.<String>builder().codec(Codecs.NON_EMPTY_STRING).packetCodec(PacketCodecs.STRING).build();
@@ -124,8 +124,8 @@ public class StarflightItems
 	public static final Item ENGINE_1_NOZZLE = new Item(new Settings());
 	public static final Item ENGINE_1_EXTENSION = new Item(new Settings());
 	public static final Item GUIDE_BOOK = new GuideBookItem(new Settings().maxCount(1));
-	public static final Item BATTERY_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0.0f).component(MAX_ENERGY, 2048.0f));
-	public static final Item RED_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0.0f).component(MAX_ENERGY, 8192.0f));
+	public static final Item BATTERY_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0).component(MAX_ENERGY, 2048));
+	public static final Item RED_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0).component(MAX_ENERGY, 8192));
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new Settings().maxCount(1).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 2.0f));
 	public static final Item PART_DRAWINGS = new PartDrawingsItem(new Settings().maxCount(1).rarity(Rarity.RARE).component(PART_DRAWING_GROUPS, ""));
 	public static final Item PLANETARIUM_CARD = new PlanetariumCardItem(new Settings().maxCount(1).rarity(Rarity.EPIC).component(PLANET_NAME, "").component(PRIMARY_COLOR, -1).component(SECONDARY_COLOR, -1));
@@ -162,14 +162,15 @@ public class StarflightItems
     public static final Item AIRSHIP = new StructurePlacerItem(new Settings().maxCount(1), 15, 16, 9, "small_airship");
     
     // Spawn Egg Items
-    public static final Item CERULEAN_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CERULEAN, 0x1485AD, 0x000000, new Item.Settings());
+    public static final Item SELENITE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SELENITE, 0x1485AD, 0x000000, new Item.Settings());
 	public static final Item DUST_SPAWN_EGG = new SpawnEggItem(StarflightEntities.DUST, 0xBE673F, 0x82342B, new Item.Settings());
 	public static final Item ANCIENT_HUMANOID_SPAWN_EGG = new SpawnEggItem(StarflightEntities.ANCIENT_HUMANOID, 0xF8F9F9, 0x154360, new Item.Settings());
 	public static final Item SOLAR_SPECTRE_SPAWN_EGG = new SpawnEggItem(StarflightEntities.SOLAR_SPECTRE, 0xE9F3FD, 0xC8E2F9, new Item.Settings());
-	public static final Item BLOCK_SHELL_SPAWN_EGG = new SpawnEggItem(StarflightEntities.BLOCK_SHELL, 0x455A64, 0xECF8FD, new Item.Settings());
+	public static final Item MIMIC_SPAWN_EGG = new SpawnEggItem(StarflightEntities.MIMIC, 0x455A64, 0xECF8FD, new Item.Settings());
 	public static final Item STRATOFISH_SPAWN_EGG = new SpawnEggItem(StarflightEntities.STRATOFISH, 0xFFE8FA, 0x7B6D9E, new Item.Settings());
 	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
 	public static final Item CAVE_LAMPREY_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CAVE_LAMPREY, 0xB71C1C, 0x6F1111, new Item.Settings());
+	public static final Item METALLIC_SCORPION_SPAWN_EGG = new SpawnEggItem(StarflightEntities.METALLIC_SCORPION, 0xE8E8E8, 0x3D1717, new Item.Settings());
 	
 	// Item Tags
 	public static final TagKey<Item> SPACE_SUIT_ARMOR_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "space_suit_armor"));
@@ -280,14 +281,15 @@ public class StarflightItems
 		registerItem(AIRSHIP, "airship");
 		
 		// Spawn Egg Items
-		registerItem(CERULEAN_SPAWN_EGG, "cerulean_spawn_egg");
+		registerItem(SELENITE_SPAWN_EGG, "selenite_spawn_egg");
 		registerItem(DUST_SPAWN_EGG, "dust_spawn_egg");
 		registerItem(ANCIENT_HUMANOID_SPAWN_EGG, "ancient_humanoid_spawn_egg");
 		registerItem(SOLAR_SPECTRE_SPAWN_EGG, "solar_spectre_spawn_egg");
-		registerItem(BLOCK_SHELL_SPAWN_EGG, "block_shell_spawn_egg");
+		registerItem(MIMIC_SPAWN_EGG, "mimic_spawn_egg");
 		registerItem(STRATOFISH_SPAWN_EGG, "stratofish_spawn_egg");
 		registerItem(CLOUD_SHARK_SPAWN_EGG, "cloud_shark_spawn_egg");
 		registerItem(CAVE_LAMPREY_SPAWN_EGG, "cave_lamprey_spawn_egg");
+		registerItem(METALLIC_SCORPION_SPAWN_EGG, "metallic_scorpion_spawn_egg");
 	}
 	
 	private static void registerItem(Item item, String name)

@@ -76,19 +76,19 @@ public class StirlingEngineBlock extends BlockWithEntity implements EnergyBlock
     public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType options)
 	{
 		DecimalFormat df = new DecimalFormat("#.##");
-		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_producer").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
+		StarflightItems.hiddenItemTooltip(tooltip, Text.translatable("block.space.energy_producer", df.format(getOutput())).formatted(Formatting.GOLD));
 	}
 	
 	@Override
-	public double getOutput()
+	public long getOutput()
 	{
-		return 16.0;
+		return 16;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 64.0;
+		return 64;
 	}
 	
 	@Override

@@ -1,6 +1,5 @@
 package space.block;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import net.minecraft.block.Block;
@@ -14,7 +13,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
@@ -26,9 +24,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldAccess;
 import space.item.OxygenTankItem;
 import space.item.StarflightItems;
-import space.network.s2c.FizzS2CPacket;
-import space.util.AirUtil;
-import space.util.BlockSearch;
 import space.util.FluidResourceType;
 
 public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
@@ -81,7 +76,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 			}
 		}
 		
-		if(stackToFill != null && stackToFill.contains(StarflightItems.OXYGEN) && stackToFill.contains(StarflightItems.MAX_OXYGEN))
+		/*if(stackToFill != null && stackToFill.contains(StarflightItems.OXYGEN) && stackToFill.contains(StarflightItems.MAX_OXYGEN))
 		{
 			float oxygen = stackToFill.get(StarflightItems.OXYGEN);
 			float maxOxygen = stackToFill.get(StarflightItems.MAX_OXYGEN);
@@ -104,7 +99,7 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 				AirUtil.useSupply(world, checkList, requiredOxygen);
 				return ActionResult.SUCCESS;
 			}
-		}
+		}*/
 		
 		return ActionResult.PASS;
 	}
@@ -128,14 +123,8 @@ public class OxygenDispenserBlock extends Block implements FluidUtilityBlock
 	}
 
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.OXYGEN;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction != (Direction) state.get(FACING).getOpposite();
+		return fluidType == FluidResourceType.OXYGEN && direction != (Direction) state.get(FACING).getOpposite();
 	}
 }

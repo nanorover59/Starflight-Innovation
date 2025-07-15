@@ -79,21 +79,21 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer", df.format(getInput())).formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.extractor.description"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 32.0;
+		return 32;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 64.0;
+		return 64;
 	}
 	
 	@Override
@@ -143,7 +143,10 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 		super.onPlaced(world, pos, state, placer, itemStack);
 		
 		if(!world.isClient)
+		{
 			BlockSearch.energyConnectionSearch(world, pos);
+			BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.WATER);
+		}
 	}
 	
 	@Override
@@ -162,7 +165,10 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 			}
 			
 			if(!world.isClient)
+			{
 				BlockSearch.energyConnectionSearch(world, pos);
+				BlockSearch.fluidConnectionSearch(world, pos, FluidResourceType.WATER);
+			}
 
 			super.onStateReplaced(state, world, pos, newState, moved);
 		}
@@ -209,15 +215,9 @@ public class ExtractorBlock extends BlockWithEntity implements EnergyBlock, Flui
 	}
 	
 	@Override
-	public FluidResourceType getFluidType()
+	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction, FluidResourceType fluidType)
 	{
-		return FluidResourceType.ANY;
-	}
-
-	@Override
-	public boolean canPipeConnectToSide(WorldAccess world, BlockPos pos, BlockState state, Direction direction)
-	{
-		return direction == (Direction) state.get(FACING).rotateYClockwise() || direction == (Direction) state.get(FACING).rotateYCounterclockwise();
+		return fluidType == FluidResourceType.WATER && direction != state.get(FACING).getOpposite();
 	}
 	
 	@Nullable

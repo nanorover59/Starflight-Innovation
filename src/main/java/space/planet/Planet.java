@@ -95,11 +95,7 @@ public class Planet implements Comparable<Planet>
 			return false;
 		
 		Planet other = (Planet) object;
-		
-		if(other.getName().equals(name))
-			return true;
-		
-		return false;	
+		return other.getName().equals(name);	
 	}
 	
 	@Override

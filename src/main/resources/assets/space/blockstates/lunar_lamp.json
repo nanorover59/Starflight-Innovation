@@ -1,6 +1,5 @@
 {
   "variants": {
-    "lit=false": { "model": "space:block/lunar_lamp" },
-    "lit=true": { "model": "space:block/lunar_lamp_on" }
+    "": { "model": "space:block/lunar_lamp" }
   }
 }

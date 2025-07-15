@@ -1,0 +1,15 @@
+{
+  "name": "space:moon_base_entrance",
+  "fallback": "minecraft:empty",
+  "elements": [
+	{
+      "weight": 1,
+      "element": {
+        "location": "space:moon_base_entrance",
+        "processors": "space:base",
+		"projection": "rigid",
+        "element_type": "minecraft:single_pool_element"
+      }
+    }
+  ]
+}

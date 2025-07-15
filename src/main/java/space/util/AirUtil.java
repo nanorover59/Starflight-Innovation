@@ -23,7 +23,6 @@ import space.block.SealedDoorBlock;
 import space.block.SealedTrapdoorBlock;
 import space.block.StarflightBlocks;
 import space.block.ValveBlock;
-import space.block.entity.FluidPipeBlockEntity;
 import space.block.entity.LeakBlockEntity;
 import space.block.entity.ValveBlockEntity;
 import space.planet.PlanetDimensionData;
@@ -286,111 +285,6 @@ public class AirUtil
 		}
 		else
 			return blockState.isFullCube(world, position);
-	}
-	
-	/**
-	 * Return true and use oxygen if a large enough supply is found, otherwise return false.
-	 */
-	public static boolean requestSupply(World world, BlockPos pos, double required, Block activeBlock)
-	{
-		if(world.getBlockState(pos).getBlock() == activeBlock)
-		{
-			ArrayList<BlockPos> checkList = new ArrayList<BlockPos>();
-			double supply = searchSupply(world, pos, checkList, BlockSearch.MAX_VOLUME, activeBlock);
-			
-			if(supply >= required)
-			{
-				useSupply(world, checkList, required);
-				return true;
-			}
-			else
-				return false;
-		}
-		else
-			return false;
-	}
-	
-	/**
-	 * Find the total amount of oxygen available from connected pipes and tanks in kilograms.
-	 */
-	public static double searchSupply(World world, BlockPos position, ArrayList<BlockPos> checkList, int limit, Block activeBlock)
-	{
-		BiPredicate<World, BlockPos> include = (w, p) -> {
-			BlockState blockState = world.getBlockState(p);
-			return blockState.getBlock() instanceof FluidPipeBlock || blockState.getBlock() == StarflightBlocks.VALVE || blockState.getBlock() == activeBlock;
-		};
-		
-		BlockSearch.search(world, position, checkList, include, BlockSearch.MAX_VOLUME, false);
-		double oxygen = 0;
-		
-		for(BlockPos pos : checkList)
-		{
-			BlockState blockState = world.getBlockState(pos);
-			BlockEntity blockEntity = world.getBlockEntity(pos);
-			
-			if(blockEntity != null)
-			{
-				if(blockState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) blockState.getBlock()).getFluidType().getID() == FluidResourceType.OXYGEN.getID())
-				{
-					FluidPipeBlockEntity fluidContainerBlockEntity = (FluidPipeBlockEntity) blockEntity;
-					oxygen += fluidContainerBlockEntity.getStoredFluid();
-				}
-				else if(blockState.getBlock() == StarflightBlocks.VALVE && blockState.get(ValveBlock.MODE) == 1)
-				{
-					ValveBlockEntity valveBlockEntity = (ValveBlockEntity) blockEntity;
-					
-					if(valveBlockEntity.getFluidTankController() != null && valveBlockEntity.getFluidTankController().getFluidType().getID() == FluidResourceType.OXYGEN.getID())
-						oxygen += valveBlockEntity.getFluidTankController().getStoredFluid();
-				}
-			}
-		}
-		
-		return oxygen;
-	}
-	
-	/**
-	 * Deplete the required amount of oxygen from connected pipes and tanks.
-	 */
-	public static void useSupply(World world, ArrayList<BlockPos> actionList, double toUse)
-	{
-		for(BlockPos pos : actionList)
-		{
-			BlockState blockState = world.getBlockState(pos);
-			
-			if(blockState.getBlock() instanceof FluidPipeBlock && ((FluidPipeBlock) blockState.getBlock()).getFluidType().getID() == FluidResourceType.OXYGEN.getID())
-			{
-				FluidPipeBlockEntity blockEntity = (FluidPipeBlockEntity) world.getBlockEntity(pos);
-				
-				if(toUse < blockEntity.getStoredFluid())
-				{
-					blockEntity.changeStoredFluid(-toUse);
-					return;
-				}
-				else
-				{
-					toUse -= blockEntity.getStoredFluid();
-					blockEntity.changeStoredFluid(-blockEntity.getStoredFluid());
-				}
-			}
-			else if(blockState.getBlock() == StarflightBlocks.VALVE)
-			{
-				ValveBlockEntity blockEntity = (ValveBlockEntity) world.getBlockEntity(pos);
-				
-				if(blockEntity.getFluidTankController() != null && blockEntity.getFluidTankController().getFluidType().getID() == FluidResourceType.OXYGEN.getID())
-				{
-					if(toUse < blockEntity.getFluidTankController().getStoredFluid())
-					{
-						blockEntity.getFluidTankController().changeStoredFluid(-toUse);
-						return;
-					}
-					else
-					{
-						toUse -= blockEntity.getFluidTankController().getStoredFluid();
-						blockEntity.getFluidTankController().setStoredFluid(0.0);
-					}
-				}
-			}
-		}
 	}
 	
 	public static void createLeak(World world, BlockPos pos, int leakTime)

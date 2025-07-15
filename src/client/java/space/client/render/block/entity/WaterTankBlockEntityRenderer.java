@@ -16,6 +16,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.MathHelper;
 import space.block.entity.WaterTankBlockEntity;
+import space.util.FluidResourceType;
 
 @Environment(EnvType.CLIENT)
 public class WaterTankBlockEntityRenderer implements BlockEntityRenderer<WaterTankBlockEntity>
@@ -30,15 +31,15 @@ public class WaterTankBlockEntityRenderer implements BlockEntityRenderer<WaterTa
 	@Override
 	public void render(WaterTankBlockEntity blockEntity, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertices, int light, int overlay)
 	{
-		float b = 0.001f; //0.0625f;
+		float b = 0.001f;
         float l = blockEntity.canRenderBottom() ? b : 0.0f;
-        float h = (float) (blockEntity.getStoredFluid() / blockEntity.getStorageCapacity());
+        float h = (float) blockEntity.getFluid(FluidResourceType.WATER) / (float) blockEntity.getFluidCapacity(FluidResourceType.WATER);
         float u1 = WATER_SPRITE.getMinU();
         float v1 = WATER_SPRITE.getMinV();
         float u2 = WATER_SPRITE.getMaxU();
         float v2 = WATER_SPRITE.getMaxV();
         
-        if(blockEntity.getStoredFluid() == 0.0f || h == 0.0f)
+        if(blockEntity.getFluid(FluidResourceType.WATER) == 0.0f || h == 0.0f)
         	return;
 		
 		matrices.push();

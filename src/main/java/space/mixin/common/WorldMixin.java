@@ -112,4 +112,18 @@ public abstract class WorldMixin implements WorldAccess, AutoCloseable, IWorldMi
 			info.cancel();
 		}
 	}
+	
+	/*@Inject(method = "getBlockState", at = @At("RETURN"), cancellable = true)
+	public void getBlockStateInject(BlockPos pos, CallbackInfoReturnable<BlockState> info)
+	{
+		if(pos.getY() < this.getBottomY())
+			info.setReturnValue(Blocks.WATER.getDefaultState());
+	}
+	
+	@Inject(method = "getFluidState", at = @At("RETURN"), cancellable = true)
+	public void getFluidStateInject(BlockPos pos, CallbackInfoReturnable<FluidState> info)
+	{
+		if(pos.getY() < this.getBottomY())
+			info.setReturnValue(Fluids.WATER.getDefaultState());
+	}*/
 }

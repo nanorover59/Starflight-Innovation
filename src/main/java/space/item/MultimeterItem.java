@@ -45,40 +45,21 @@ public class MultimeterItem extends Item
         if(blockEntity != null && blockEntity instanceof EnergyBlockEntity)
         {
         	EnergyBlockEntity energyBlockEntity = (EnergyBlockEntity) blockEntity;
-        	text.append(Text.translatable("block.space.energy.level"));
-    		text.append(String.valueOf(df.format(energyBlockEntity.getEnergyStored())));
-    		text.append(" / ");
-    		text.append(String.valueOf(df.format(energyBlockEntity.getEnergyCapacity())));
-    		text.append(" kJ    ");
-    		text.append(String.valueOf(df.format((energyBlockEntity.getEnergyStored() / energyBlockEntity.getEnergyCapacity()) * 100)) + "%");
+        	text.append(Text.translatable("block.space.energy.level", df.format(energyBlockEntity.getEnergy()), df.format(energyBlockEntity.getEnergyCapacity()), df.format((energyBlockEntity.getEnergy() / energyBlockEntity.getEnergyCapacity()) * 100)));
         }
         else if(blockEntity != null && blockEntity instanceof FluidTankControllerBlockEntity)
         {
         	FluidTankControllerBlockEntity fluidContainer = (FluidTankControllerBlockEntity) blockEntity;
         	
         	if(fluidContainer.getStorageCapacity() > 0)
-        	{
-	        	text.append(Text.translatable("block.space." + fluidContainer.getFluidType().getName() + "_container.level"));
-	        	text.append(String.valueOf(df.format(fluidContainer.getStoredFluid())));
-	        	text.append(" / ");
-	        	text.append(String.valueOf(df.format(fluidContainer.getStorageCapacity())));
-	        	text.append(" kg    ");
-	        	text.append(String.valueOf(df.format((fluidContainer.getStoredFluid() / fluidContainer.getStorageCapacity()) * 100)) + "%");
-        	}
+	        	text.append(Text.translatable("block.space." + fluidContainer.getFluidType().getName() + "_container.level", df.format(fluidContainer.getStoredFluid()), df.format(fluidContainer.getStorageCapacity()), df.format((fluidContainer.getStoredFluid() / fluidContainer.getStorageCapacity()) * 100)));
         }
         else if(blockEntity != null && blockEntity instanceof BalloonControllerBlockEntity)
         {
         	BalloonControllerBlockEntity fluidContainer = (BalloonControllerBlockEntity) blockEntity;
         	
         	if(fluidContainer.getStorageCapacity() > 0)
-        	{
-	        	text.append(Text.translatable("block.space.hydrogen_container.level"));
-	        	text.append(String.valueOf(df.format(fluidContainer.getStoredFluid())));
-	        	text.append(" / ");
-	        	text.append(String.valueOf(df.format(fluidContainer.getStorageCapacity())));
-	        	text.append(" kg    ");
-	        	text.append(String.valueOf(df.format((fluidContainer.getStoredFluid() / fluidContainer.getStorageCapacity()) * 100)) + "%");
-        	}
+	        	text.append(Text.translatable("block.space.hydrogen_container.level", df.format(fluidContainer.getStoredFluid()), df.format(fluidContainer.getStorageCapacity()), df.format((fluidContainer.getStoredFluid() / fluidContainer.getStorageCapacity()) * 100)));
         }
         
         if(text != Text.EMPTY)

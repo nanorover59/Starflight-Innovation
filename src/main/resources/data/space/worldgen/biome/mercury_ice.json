@@ -43,14 +43,7 @@
   "has_precipitation": false,
   "spawn_costs": {},
   "spawners": {
-    "ambient": [
-      {
-        "type": "space:solar_eyes",
-        "maxCount": 1,
-        "minCount": 1,
-        "weight": 10
-      }
-    ],
+    "ambient": [],
     "axolotls": [],
     "creature": [],
     "misc": [],
@@ -62,7 +55,7 @@
         "weight": 10
       },
       {
-          "type": "space:block_shell",
+          "type": "space:mimic",
           "maxCount": 2,
           "minCount": 1,
           "weight": 10

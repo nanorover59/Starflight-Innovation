@@ -77,22 +77,22 @@ public class MetalFabricatorBlock extends BlockWithEntity implements EnergyBlock
 	{
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_consumer").append(String.valueOf(df.format(getInput()))).append("kJ/s").formatted(Formatting.LIGHT_PURPLE));
+		textList.add(Text.translatable("block.space.energy_consumer", df.format(getInput())).formatted(Formatting.LIGHT_PURPLE));
 		textList.add(Text.translatable("block.space.metal_fabricator.description_1"));
 		textList.add(Text.translatable("block.space.metal_fabricator.description_2"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
-	public double getInput()
+	public long getInput()
 	{
-		return 16.0;
+		return 16;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 64.0;
+		return 64;
 	}
 	
 	@Override

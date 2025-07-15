@@ -16,8 +16,8 @@ import space.util.FluidResourceType;
 public class FluidTankControllerBlockEntity extends BlockEntity
 {
 	private final FluidResourceType fluid;
-	private double storageCapacity;
-	private double storedFluid;
+	private long storageCapacity;
+	private long storedFluid;
 	private BlockPos centerOfMass;
 	
 	public FluidTankControllerBlockEntity(BlockPos pos, BlockState state)
@@ -43,7 +43,7 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 		return fluid;
 	}
 	
-	public double getStorageCapacity()
+	public long getStorageCapacity()
 	{
 		return storageCapacity;
 	}
@@ -51,7 +51,7 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	/**
 	 * The amount of stored fluid in kilograms.
 	 */
-	public double getStoredFluid()
+	public long getStoredFluid()
 	{
 		return storedFluid;
 	}
@@ -61,22 +61,22 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 		return centerOfMass;
 	}
 	
-	public void setStorageCapacity(double d)
+	public void setStorageCapacity(long amount)
 	{
-		storageCapacity = d;
+		storageCapacity = amount;
 	}
 	
-	public void setStoredFluid(double d)
+	public void setStoredFluid(long amount)
 	{
-		storedFluid = d;
+		storedFluid = amount;
 	}
 	
-	public void changeStoredFluid(double d)
+	public void changeStoredFluid(long d)
 	{
 		storedFluid += d;
 		
-		if(storedFluid < 0.0)
-			storedFluid = 0.0;
+		if(storedFluid < 0)
+			storedFluid = 0;
 		else if(storedFluid > storageCapacity)
 			storedFluid = storageCapacity;
 	}
@@ -89,8 +89,8 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	@Override
 	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		this.storageCapacity = nbt.getDouble("storageCapacity");
-		this.storedFluid = nbt.getDouble("storedFluid");
+		this.storageCapacity = nbt.getLong("storageCapacity");
+		this.storedFluid = nbt.getLong("storedFluid");
 		Optional<BlockPos> centerOfMassPos = NbtHelper.toBlockPos(nbt, "centerOfMass");
 		
 		if(centerOfMassPos.isPresent())
@@ -100,8 +100,8 @@ public class FluidTankControllerBlockEntity extends BlockEntity
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
-		nbt.putDouble("storageCapacity", storageCapacity);
-		nbt.putDouble("storedFluid", storedFluid);
+		nbt.putLong("storageCapacity", storageCapacity);
+		nbt.putLong("storedFluid", storedFluid);
 		
 		if(centerOfMass != null)
 			nbt.put("centerOfMass", NbtHelper.fromBlockPos(centerOfMass));

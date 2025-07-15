@@ -34,9 +34,9 @@ public class FluidTankControllerBlock extends BlockWithEntity
 {
 	public static final MapCodec<FluidTankControllerBlock> CODEC = FluidTankControllerBlock.createCodec(FluidTankControllerBlock::new);
 	private final FluidResourceType fluid;
-	private final double capacity;
+	private final long capacity;
 	
-	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid, double capacity)
+	public FluidTankControllerBlock(Settings settings, FluidResourceType fluid, long capacity)
 	{
 		super(settings);
 		this.fluid = fluid;
@@ -133,7 +133,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 		return new FluidTankControllerBlockEntity(pos, state);
 	}
 
-	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, double capacity, FluidTankControllerBlockEntity fluidTankController)
+	protected static int initializeFluidTank(World world, BlockPos position, FluidResourceType fluid, long capacity, FluidTankControllerBlockEntity fluidTankController)
 	{
 		BiPredicate<World, BlockPos> include;
 		BiPredicate<World, BlockPos> edgeCase;
@@ -173,7 +173,7 @@ public class FluidTankControllerBlock extends BlockWithEntity
 				double cx = 0;
 				double cy = 0;
 				double cz = 0;
-				double volume = 0;
+				long volume = 0;
 				int count = 0;
 
 				for(BlockPos p : checkList)
@@ -182,13 +182,11 @@ public class FluidTankControllerBlock extends BlockWithEntity
 					
 					if(blockState.isAir())
 					{
-						volume += 1.0;
 						world.setBlockState(p, StarflightBlocks.FLUID_TANK_INSIDE.getDefaultState(), Block.FORCE_STATE);
+						volume++;
 					}
 					else if(edgeCase.test(world, p))
 					{
-						//volume += 0.75;
-
 						if(blockState.getBlock() instanceof FluidTankControllerBlock || blockState.getBlock() instanceof ValveBlock)
 							actionList.add(p);
 					}

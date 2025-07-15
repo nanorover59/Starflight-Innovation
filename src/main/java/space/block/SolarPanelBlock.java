@@ -45,7 +45,7 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 {
 	public static final MapCodec<SolarPanelBlock> CODEC = SolarPanelBlock.createCodec(SolarPanelBlock::new);
 	public static final BooleanProperty WATERLOGGED = Properties.WATERLOGGED;
-	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 4.0, 16.0);
+	protected static final VoxelShape SHAPE = Block.createCuboidShape(0.0, 0.0, 0.0, 16.0, 8.0, 16.0);
 	
 	public SolarPanelBlock(Settings settings)
 	{
@@ -73,34 +73,26 @@ public class SolarPanelBlock extends BlockWithEntity implements Waterloggable, E
 		double solarMultiplier = 1.0;
 		
 		if(viewpointPlanet != null && dimensionData != null)
-		{
-			double d = viewpointPlanet.getPosition().lengthSquared();
-			
-			if(d > 0.0)
-			{
-				d /= 2.238016e22; // Convert the distance from meters to astronomical units.
-				solarMultiplier = (1.0 / d) * (dimensionData.isCloudy() ? 0.1 : 1.0);
-			}
-		}
+			solarMultiplier = dimensionData.getPlanet().getSolarMultiplier() * (dimensionData.isCloudy() ? 0.1 : 1.0);
 		
 		ArrayList<Text> textList = new ArrayList<Text>();
 		DecimalFormat df = new DecimalFormat("#.##");
-		textList.add(Text.translatable("block.space.energy_producer_nominal").append(String.valueOf(df.format(getOutput()))).append("kJ/s").formatted(Formatting.GOLD));
-		textList.add(Text.translatable("block.space.energy_producer_local").append(String.valueOf(df.format(getOutput() * solarMultiplier))).append("kJ/s").formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.energy_producer_nominal", df.format(getOutput())).formatted(Formatting.GOLD));
+		textList.add(Text.translatable("block.space.energy_producer_local", df.format(getOutput() * solarMultiplier)).formatted(Formatting.GOLD));
 		textList.add(Text.translatable("block.space.solar_panel.description"));
 		StarflightItems.hiddenItemTooltip(tooltip, textList);
 	}
 	
 	@Override
-	public double getOutput()
+	public long getOutput()
 	{
-		return 4.0;
+		return 4;
 	}
 	
 	@Override
-	public double getEnergyCapacity()
+	public long getEnergyCapacity()
 	{
-		return 16.0;
+		return 16;
 	}
 
 	@Override

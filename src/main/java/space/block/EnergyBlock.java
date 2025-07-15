@@ -42,26 +42,26 @@ public interface EnergyBlock
 	}
 	
 	/**
-	 * Expected energy output per second.
+	 * Expected energy output per tick.
 	 */
-	default double getOutput()
+	default long getOutput()
 	{
-		return 0.0;
+		return 0;
 	}
 	
 	/**
-	 * Expected energy input per second.
+	 * Expected energy input per tick.
 	 */
-	default double getInput()
+	default long getInput()
 	{
-		return 0.0;
+		return 0;
 	}
 	
 	/**
 	 * Maximum energy that can be stored.
 	 */
-	default double getEnergyCapacity()
+	default long getEnergyCapacity()
 	{
-		return 0.0;
+		return 0;
 	}
 }

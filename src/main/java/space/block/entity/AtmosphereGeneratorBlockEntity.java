@@ -6,20 +6,23 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.AtmosphereGeneratorBlock;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
+import space.util.FluidResourceType;
 
 public class AtmosphereGeneratorBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
-	private double energy;
+	public ArrayList<BlockPos> oxygenSources = new ArrayList<BlockPos>();
+	private long energy;
 	
 	public AtmosphereGeneratorBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
@@ -27,65 +30,63 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Energ
 	}
 	
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return 0.0;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
+		this.energy = energy;
 	}
-
-	@Override
-	public double changeEnergy(double amount)
+	
+	/**
+	 * Search storage blocks for an amount of oxygen then use it and return true if it is found.
+	 */
+	public boolean requestSupply(World world, BlockPos blockPos, long amount)
 	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
-	}
-
-	@Override
-	public ArrayList<BlockPos> getOutputs()
-	{
-		return null;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-	}
-
-	@Override
-	public void clearOutputs()
-	{
+		if(PumpBlockEntity.pullFluid(world, oxygenSources, amount, false, FluidResourceType.OXYGEN) == amount)
+		{
+			PumpBlockEntity.pullFluid(world, oxygenSources, amount, true, FluidResourceType.OXYGEN);
+			return true;
+		}
+		else
+			return false;
 	}
 	
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
+		
+		NbtList oxygenSourcesListNBT = new NbtList();
+		
+		for(BlockPos source : oxygenSources)
+			oxygenSourcesListNBT.add(NbtHelper.fromBlockPos(source));
+
+		nbt.put("oxygenSources", oxygenSourcesListNBT);
 	}
 	
 	@Override
 	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.readNbt(nbt, registryLookup);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
+		NbtList oxygenSourcesListNBT = nbt.getList("oxygenSources", NbtList.COMPOUND_TYPE);
+		
+		for(int i = 0; i < oxygenSourcesListNBT.size(); i++)
+		{
+			int[] array = oxygenSourcesListNBT.getIntArray(i);
+			oxygenSources.add(new BlockPos(array[0], array[1], array[2]));
+		}
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, AtmosphereGeneratorBlockEntity blockEntity)
@@ -107,7 +108,7 @@ public class AtmosphereGeneratorBlockEntity extends BlockEntity implements Energ
 		        }
 			}
 			
-			blockEntity.changeEnergy(-0.125);
+			blockEntity.removeEnergy(((EnergyBlock) blockEntity.getCachedState().getBlock()).getInput(), true);
 		}
 	}
 }

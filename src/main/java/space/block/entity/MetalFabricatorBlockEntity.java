@@ -1,6 +1,5 @@
 package space.block.entity;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -33,7 +32,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.MetalFabricatorBlock;
@@ -49,7 +47,7 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 	private DefaultedList<ItemStack> inventory;
 	private ItemStack lastInputStack = ItemStack.EMPTY;
 	private ItemStack lastDrawingStack = ItemStack.EMPTY;
-	private double energy;
+	private long energy;
 	private int chargeState;
 	private int time;
 	private int totalTime;
@@ -310,58 +308,28 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
     }
 	
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return 0.0;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
-	}
-
-	@Override
-	public double changeEnergy(double amount)
-	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
-	}
-
-	@Override
-	public ArrayList<BlockPos> getOutputs()
-	{
-		return null;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-	}
-
-	@Override
-	public void clearOutputs()
-	{
+		this.energy = energy;
 	}
 	
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 		nbt.putShort("time", (short) this.time);
 		nbt.putShort("totalTime", (short) this.totalTime);
 		nbt.putShort("selectedRecipe", (short) this.selectedRecipe);
@@ -375,7 +343,7 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 		super.readNbt(nbt, registryLookup);
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		Inventories.readNbt(nbt, this.inventory, registryLookup);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 		this.time = nbt.getShort("time");
 		this.totalTime = nbt.getShort("totalTime");
 		this.selectedRecipe = nbt.getShort("selectedRecipe");
@@ -387,7 +355,7 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 		ItemStack drawingStack = (ItemStack) blockEntity.inventory.get(0);
 		ItemStack endMillStack = (ItemStack) blockEntity.inventory.get(1);
 		ItemStack inputStack = (ItemStack) blockEntity.inventory.get(2);
-		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14.0);
+		blockEntity.chargeState = (int) Math.ceil((blockEntity.energy / blockEntity.getEnergyCapacity()) * 14);
 		MetalFabricatorRecipe recipe = null;
 		
 		if(blockEntity.availableRecipes.isEmpty() || !ItemStack.areEqual(inputStack, blockEntity.lastInputStack) || !ItemStack.areEqual(drawingStack, blockEntity.lastDrawingStack))
@@ -401,8 +369,9 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 			recipe = blockEntity.availableRecipes.get(blockEntity.selectedRecipe).value();
 		
 		boolean isWorking = false;
+		long power = ((EnergyBlock) state.getBlock()).getInput();
 		
-		if(blockEntity.energy > 0 && recipe != null && blockEntity.hasSelectedGroup() && !endMillStack.isEmpty() && endMillStack.getDamage() < endMillStack.getMaxDamage())
+		if(blockEntity.energy >= power && recipe != null && blockEntity.hasSelectedGroup() && !endMillStack.isEmpty() && endMillStack.getDamage() < endMillStack.getMaxDamage())
 		{
 			if(blockEntity.totalTime == 0 && recipe.getIngredients().get(0).test(inputStack) && canAcceptRecipeOutput(world.getRegistryManager(), recipe, blockEntity.inventory))
 			{
@@ -414,7 +383,7 @@ public class MetalFabricatorBlockEntity extends LockableContainerBlockEntity imp
 			
 			if(blockEntity.totalTime > 0)
 			{
-				blockEntity.changeEnergy(-blockEntity.getInput());
+				blockEntity.removeEnergy(power, true);
 				
 				if(blockEntity.energy > 0)
 				{

@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,lit=false": {
+      "model": "space:block/electric_crafter",
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "space:block/electric_crafter_on",
+      "y": 90
+    },
+    "facing=north,lit=false": {
+      "model": "space:block/electric_crafter"
+    },
+    "facing=north,lit=true": {
+      "model": "space:block/electric_crafter_on"
+    },
+    "facing=south,lit=false": {
+      "model": "space:block/electric_crafter",
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "space:block/electric_crafter_on",
+      "y": 180
+    },
+    "facing=west,lit=false": {
+      "model": "space:block/electric_crafter",
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "space:block/electric_crafter_on",
+      "y": 270
+    }
+  }
+}

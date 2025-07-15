@@ -34,7 +34,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.StarflightBlocks;
@@ -47,16 +46,15 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 {
 	public DefaultedList<ItemStack> inventory;
 	private ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
-	private double energy;
-	int powerState;
+	protected final PropertyDelegate propertyDelegate;
+	private long energy;
 	int burnTime;
 	int fuelTime;
-	protected final PropertyDelegate propertyDelegate;
 
 	public StirlingEngineBlockEntity(BlockPos blockPos, BlockState blockState)
 	{
 		super(StarflightBlocks.STIRLING_ENGINE_BLOCK_ENTITY, blockPos, blockState);
-		this.inventory = DefaultedList.ofSize(1, ItemStack.EMPTY);
+		this.inventory = DefaultedList.ofSize(2, ItemStack.EMPTY);
 		this.propertyDelegate = new PropertyDelegate()
 		{
 			public int get(int index)
@@ -64,7 +62,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 				switch(index)
 				{
 				case 0:
-					return StirlingEngineBlockEntity.this.powerState;
+					return (int) StirlingEngineBlockEntity.this.energy;
 				case 1:
 					return StirlingEngineBlockEntity.this.burnTime;
 				case 2:
@@ -79,7 +77,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 				switch(index)
 				{
 				case 0:
-					StirlingEngineBlockEntity.this.powerState = value;
+					StirlingEngineBlockEntity.this.energy = value;
 					break;
 				case 1:
 					StirlingEngineBlockEntity.this.burnTime = value;
@@ -218,7 +216,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 
 	public int[] getAvailableSlots(Direction side)
 	{
-		return new int[] {0};
+		return new int[] {1};
 	}
 
 	public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir)
@@ -297,7 +295,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 
 	public boolean isValid(int slot, ItemStack stack)
 	{
-		return slot == 0;
+		return (slot == 0 && stack.contains(StarflightItems.ENERGY)) || (slot == 1 && canUseAsFuel(stack));
 	}
 
 	public void clear()
@@ -316,37 +314,23 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	{
 		return new StirlingEngineScreenHandler(syncId, playerInventory, this, this.propertyDelegate);
 	}
-
+	
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getOutput() / world.getTickManager().getTickRate();
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
-	public double getInput()
-	{
-		return 0.0;
-	}
-	
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
-	}
-
-	@Override
-	public double changeEnergy(double amount)
-	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
+		this.energy = energy;
 	}
 
 	@Override
@@ -360,12 +344,6 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 	{
 		outputs.add(output);
 	}
-
-	@Override
-	public void clearOutputs()
-	{
-		outputs.clear();
-	}
 	
 	@Override
 	public void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
@@ -373,7 +351,7 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 		super.writeNbt(nbt, registryLookup);
 		Inventories.writeNbt(nbt, this.inventory, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 		nbt.putInt("burnTime", this.burnTime);
 		nbt.putInt("fuelTime", this.fuelTime);
 	}
@@ -385,50 +363,49 @@ public class StirlingEngineBlockEntity extends LockableContainerBlockEntity impl
 		this.inventory = DefaultedList.ofSize(this.size(), ItemStack.EMPTY);
 		Inventories.readNbt(nbt, this.inventory, registryLookup);
 		this.outputs = EnergyBlockEntity.outputsFromNBT(nbt);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 		this.burnTime = nbt.getInt("burnTime");
 		this.fuelTime = nbt.getInt("fuelTime");
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, StirlingEngineBlockEntity blockEntity)
 	{
-		ItemStack itemStack = (ItemStack) blockEntity.inventory.get(0);
+		ItemStack batteryStack = (ItemStack) blockEntity.inventory.get(0);
+		ItemStack fuelStack = (ItemStack) blockEntity.inventory.get(1);
 		boolean bl = blockEntity.isBurning();
+		blockEntity.chargeItem(batteryStack, ((EnergyBlock) blockEntity.getCachedState().getBlock()).getOutput());
+		blockEntity.transferEnergy(((EnergyBlock) blockEntity.getCachedState().getBlock()).getOutput());
 		
-		if(blockEntity.isBurning())
+		if(!blockEntity.isBurning() && !fuelStack.isEmpty() && blockEntity.getEnergy() < blockEntity.getEnergyCapacity())
 		{
-			blockEntity.burnTime--;
-			blockEntity.powerState = 1;
-			blockEntity.changeEnergy(blockEntity.getOutput());
-			EnergyBlockEntity.transferEnergy(blockEntity, blockEntity.getOutput());
-			world.markDirty(pos);
-		}
-		else
-			blockEntity.powerState = 0;
-		
-		if(!blockEntity.isBurning() && !itemStack.isEmpty())
-		{
-			int itemFuelTime = blockEntity.getFuelTime(itemStack);
+			int itemFuelTime = blockEntity.getFuelTime(fuelStack);
 			
 			if(itemFuelTime > 0)
 			{
 				blockEntity.fuelTime = itemFuelTime;
 				blockEntity.burnTime = itemFuelTime;
 				
-				if(blockEntity.isBurning() && !itemStack.isEmpty())
+				if(blockEntity.isBurning() && !fuelStack.isEmpty())
 				{
-					Item item = itemStack.getItem();
-					itemStack.decrement(1);
+					Item item = fuelStack.getItem();
+					fuelStack.decrement(1);
 					
-					if(itemStack.isEmpty())
+					if(fuelStack.isEmpty())
 					{
 						Item item2 = item.getRecipeRemainder();
-						blockEntity.inventory.set(0, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
+						blockEntity.inventory.set(1, item2 == null ? ItemStack.EMPTY : new ItemStack(item2));
 					}
 				}
 			}
 		}
-
+		
+		if(blockEntity.isBurning())
+		{
+			blockEntity.burnTime--;
+			blockEntity.addEnergy(((EnergyBlock) blockEntity.getCachedState().getBlock()).getOutput(), true);
+			world.markDirty(pos);
+		}
+		
 		if(bl != blockEntity.isBurning())
 		{
 			state = (BlockState) state.with(AbstractFurnaceBlock.LIT, blockEntity.isBurning());

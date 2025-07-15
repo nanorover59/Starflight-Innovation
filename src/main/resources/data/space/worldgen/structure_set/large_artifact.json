@@ -1,7 +1,7 @@
 {
   "structures" : [
     {
-      "structure" : "space:base",
+      "structure" : "space:moon_base",
       "weight" : 2
     },
     {

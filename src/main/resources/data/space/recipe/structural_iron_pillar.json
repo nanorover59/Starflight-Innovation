@@ -1,0 +1,17 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "a",
+        "a",
+		"a"
+    ],
+    "key": {
+        "a": {
+            "item": "space:structural_iron"
+        }
+    },
+    "result": {
+        "id": "space:structural_iron_pillar",
+        "count": 3
+    }
+}

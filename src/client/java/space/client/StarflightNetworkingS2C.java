@@ -6,11 +6,9 @@ import java.util.HashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
@@ -19,21 +17,24 @@ import space.StarflightMod;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.SpaceNavigationScreen;
 import space.entity.MovingCraftEntity;
+import space.entity.RocketEntity;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
-import space.network.s2c.MovingCraftBlocksS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
+import space.network.s2c.MovingCraftSyncS2CPacket;
 import space.network.s2c.OpenNavigationScreenS2CPacket;
 import space.network.s2c.OutgasS2CPacket;
 import space.network.s2c.PlanetDynamicDataS2CPacket;
 import space.network.s2c.PlanetStaticDataS2CPacket;
 import space.network.s2c.RocketControllerDataS2CPacket;
-import space.network.s2c.UnlockPlanetS2CPacket;
+import space.network.s2c.RocketSyncS2CPacket;
+import space.network.s2c.SyncPlayerStateS2CPacket;
 import space.network.s2c.VolcanicVentS2CPacket;
 import space.particle.StarflightParticleTypes;
 import space.planet.Planet;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
+import space.world.persistent.StarflightPlayerData;
 
 public class StarflightNetworkingS2C
 {
@@ -41,15 +42,17 @@ public class StarflightNetworkingS2C
 	{
 		ClientPlayNetworking.registerGlobalReceiver(PlanetStaticDataS2CPacket.PACKET_ID, (payload, context) -> receiveStaticData((PlanetStaticDataS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(PlanetDynamicDataS2CPacket.PACKET_ID, (payload, context) -> receiveDynamicData((PlanetDynamicDataS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(MovingCraftBlocksS2CPacket.PACKET_ID, (payload, context) -> receiveBlockData((MovingCraftBlocksS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, (payload, context) -> receiveEntityOffsets((MovingCraftEntityOffsetsS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(MovingCraftSyncS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveMovingCraftSync((MovingCraftSyncS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(RocketSyncS2CPacket.PACKET_ID, (payload, context) -> RocketEntity.receiveRocketSync((RocketSyncS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(MovingCraftEntityOffsetsS2CPacket.PACKET_ID, (payload, context) -> MovingCraftEntity.receiveEntityOffsets((MovingCraftEntityOffsetsS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(OpenNavigationScreenS2CPacket.PACKET_ID, (payload, context) -> SpaceNavigationScreen.receiveOpenNavigationScreen((OpenNavigationScreenS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(RocketControllerDataS2CPacket.PACKET_ID, (payload, context) -> RocketControllerScreen.receiveDisplayDataUpdate((RocketControllerDataS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(FizzS2CPacket.PACKET_ID, (payload, context) -> receiveFizz((FizzS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(OutgasS2CPacket.PACKET_ID, (payload, context) -> receiveOutgas((OutgasS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(VolcanicVentS2CPacket.PACKET_ID, (payload, context) -> receiveVolcanicVent((VolcanicVentS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(JetS2CPacket.PACKET_ID, (payload, context) -> receiveJet((JetS2CPacket) payload, context));
-		ClientPlayNetworking.registerGlobalReceiver(UnlockPlanetS2CPacket.PACKET_ID, (payload, context) -> receiveUnlockPlanet((UnlockPlanetS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(SyncPlayerStateS2CPacket.PACKET_ID, (payload, context) -> receiveSyncPlayerState((SyncPlayerStateS2CPacket) payload, context));
+		
 	}
 	
 	public static void receiveStaticData(PlanetStaticDataS2CPacket payload, ClientPlayNetworking.Context context)
@@ -138,56 +141,6 @@ public class StarflightNetworkingS2C
 	public static void receiveDynamicData(PlanetDynamicDataS2CPacket payload, ClientPlayNetworking.Context context)
 	{
 		PlanetList.getClient().setDynamicDataBuffer(payload);
-	}
-	
-	public static void receiveBlockData(MovingCraftBlocksS2CPacket payload, ClientPlayNetworking.Context context)
-	{
-		int entityID = payload.entityID();
-		ArrayList<MovingCraftEntity.BlockData> blockList = payload.blockDataList();
-		MinecraftClient client = context.client();
-		ClientWorld clientWorld = client.world;
-		
-		client.execute(() -> {
-			if(clientWorld == null)
-				return;
-			
-			Entity entity = clientWorld.getEntityById(entityID);
-
-			if(entity == null || !(entity instanceof MovingCraftEntity))
-				return;
-
-			((MovingCraftEntity) entity).getBlocks().clear();
-			((MovingCraftEntity) entity).getBlocks().addAll(blockList);
-			((MovingCraftEntity) entity).refreshExposedBlocks();
-		});
-	}
-	
-	public static void receiveEntityOffsets(MovingCraftEntityOffsetsS2CPacket payload, ClientPlayNetworking.Context context)
-	{
-		int entityID = payload.entityID();
-		HashMap<Integer, BlockPos> passengerMap = payload.passengerMap();
-		MinecraftClient client = context.client();
-		ClientWorld clientWorld = client.world;
-		
-		client.execute(() -> {
-			if(clientWorld == null)
-				return;
-
-			Entity entity = clientWorld.getEntityById(entityID);
-
-			if(entity == null || !(entity instanceof MovingCraftEntity))
-				return;
-
-			((MovingCraftEntity) entity).getEntityOffsets().clear();
-			
-			for(int id : passengerMap.keySet())
-			{
-				Entity passenger = clientWorld.getEntityById(id);
-				
-				if(passenger != null)
-					((MovingCraftEntity) entity).getEntityOffsets().put(passenger.getUuid(), passengerMap.get(id));
-			}
-		});
 	}
 	
 	public static void receiveFizz(FizzS2CPacket payload, ClientPlayNetworking.Context context)
@@ -285,18 +238,10 @@ public class StarflightNetworkingS2C
 		});
 	}
 	
-	public static void receiveUnlockPlanet(UnlockPlanetS2CPacket payload, ClientPlayNetworking.Context context)
+	public static void receiveSyncPlayerState(SyncPlayerStateS2CPacket payload, ClientPlayNetworking.Context context)
 	{
-		String planetName = payload.planetName();
-		int color = payload.color();
+		StarflightPlayerData data = payload.data();
 		MinecraftClient client = context.client();
-		
-		client.execute(() -> {
-			ClientWorld clientWorld = client.world;
-			
-			if(clientWorld != null)
-				client.player.sendMessage(Text.translatable("block.space.planetarium.unlocked").append(Text.translatable("planet.space." + planetName).withColor(color)));
-				clientWorld.playSound(client.player, client.player.getBlockPos(), SoundEvents.ENTITY_PLAYER_LEVELUP, SoundCategory.BLOCKS, 1.0f, 1.0f);
-		});
+		client.execute(() -> StarflightPlayerData.clientPlayerData = data);
 	}
 }

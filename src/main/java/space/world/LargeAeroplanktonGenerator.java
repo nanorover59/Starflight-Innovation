@@ -2,7 +2,6 @@ package space.world;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.CaveVines;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.structure.StructureContext;
 import net.minecraft.structure.StructurePiece;
@@ -110,22 +109,23 @@ public class LargeAeroplanktonGenerator
 					if(r >= 1.0)
 						continue;
 					
-					int yOffset = (int) (MathHelper.square(1.0 - MathHelper.square(r)) * thicknessFactor * radius);
+					int yOffsetUp = (int) (MathHelper.square(1.0 - MathHelper.square(r)) * thicknessFactor * radius);
+					int yOffsetDown = (int) (-(Math.sqrt(r) * 2.0 - 2.0) * thicknessFactor * radius);
 					double nx = ((double) ((mutable.getX() - centerX)) / radius) * 5.0;
 					double nz = ((double) ((mutable.getZ() - centerZ)) / radius) * 5.0;
-					int noise1Offset = (int) (((noise1.get(nx, nz) + 1.0) / 2.0) * yOffset);
-					int noise2Offset = (int) (((noise2.get(nx, nz) + 1.0) / 2.0) * yOffset);
+					int noise1Offset = (int) (((noise1.get(nx, nz) + 2.0) / 2.0) * yOffsetUp);
+					int noise2Offset = (int) (((noise2.get(nx, nz) + 2.0) / 2.0) * yOffsetDown);
 					int noise3Offset = (int) (noise3.get(nx * 2.0, nz * 2.0) * distanceFromCenter * 0.5);
-					world.setBlockState(mutable.up(yOffset), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
-					world.setBlockState(mutable.down(yOffset), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
+					world.setBlockState(mutable.up(yOffsetUp), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
+					world.setBlockState(mutable.down(yOffsetDown), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					
-					for(int i = -yOffset; i < -yOffset + noise1Offset; i++)
+					for(int i = -yOffsetDown; i < -yOffsetDown + noise1Offset; i++)
 						world.setBlockState(mutable.up(i), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					
-					for(int i = yOffset - noise2Offset; i < yOffset; i++)
+					for(int i = yOffsetUp - noise2Offset; i < yOffsetUp; i++)
 						world.setBlockState(mutable.up(i), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					
-					for(int i = -yOffset - noise3Offset; i < -yOffset; i++)
+					/*for(int i = -yOffset - noise3Offset; i < -yOffset; i++)
 						world.setBlockState(mutable.up(i), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					
 					if(random.nextInt(6) == 0 && noise3Offset > 0)
@@ -143,7 +143,7 @@ public class LargeAeroplanktonGenerator
 							
 							world.setBlockState(mutable.up(i), vineState, Block.NOTIFY_LISTENERS);
 						}
-					}
+					}*/
 				}
 			}
 		}

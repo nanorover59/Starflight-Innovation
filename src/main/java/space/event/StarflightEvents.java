@@ -24,6 +24,7 @@ import net.minecraft.world.Heightmap;
 import space.planet.PlanetDimensionData;
 import space.planet.PlanetList;
 import space.planet.PlanetResourceListener;
+import space.world.persistent.StarflightPlayerState;
 
 public class StarflightEvents
 {
@@ -52,6 +53,7 @@ public class StarflightEvents
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) ->
 	    {
 	    	PlanetList.get().sendStaticDataToClient(handler.getPlayer());
+	    	StarflightPlayerState.syncPlayerState(handler.getPlayer());
 	    });
 		
 		// Server Tick Event

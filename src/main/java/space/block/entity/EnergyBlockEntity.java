@@ -3,110 +3,217 @@ package space.block.entity;
 import java.util.ArrayList;
 
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.math.MathHelper;
+import space.item.StarflightItems;
 
 public interface EnergyBlockEntity
 {
-	double getEnergyStored();
+	long getEnergyCapacity();
+
+	long getEnergy();
+
+	void setEnergy(long energy);
+
+	default ArrayList<BlockPos> getOutputs()
+	{
+		return null;
+	}
+
+	default void addOutput(BlockPos output) {}
+
+	default long addEnergy(long amount, boolean change)
+	{
+		long energy = getEnergy();
+		long newEnergy = energy + amount;
+		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
+
+		if(change)
+			setEnergy(energy);
+
+		return amount - (newEnergy - energy);
+	}
+
+	default long removeEnergy(long amount, boolean change)
+	{
+		return -addEnergy(-amount, change);
+	}
 	
-	double getEnergyCapacity();
+	default void chargeItem(ItemStack stack, long amount)
+	{
+		if(!stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+			return;
+		
+		amount = Math.min(amount, Math.min(getEnergy(), stack.get(StarflightItems.MAX_ENERGY) - stack.get(StarflightItems.ENERGY)));
+		
+		if(amount == 0)
+			return;
+		
+		long transferred = removeEnergy(amount, true);
+		stack.set(StarflightItems.ENERGY, stack.get(StarflightItems.ENERGY) + (int) transferred);
+	}
 	
-	double getOutput();
-	
-	double getInput();
-	
-	/** 
-	 * Change the stored energy by some positive or negative amount and return the amount successfully transferred.
-	 */
-	double changeEnergy(double amount);
-	
-	ArrayList<BlockPos> getOutputs();
-	
-	void addOutput(BlockPos output);
-	
-	void clearOutputs();
+	default void dischargeItem(ItemStack stack, long amount)
+	{
+		if(!stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
+			return;
+		
+		amount = Math.min(amount, Math.min(getEnergyCapacity() - getEnergy(), stack.get(StarflightItems.ENERGY)));
+		
+		if(amount == 0)
+			return;
+		
+		long transferred = addEnergy(amount, true);
+		stack.set(StarflightItems.ENERGY, stack.get(StarflightItems.ENERGY) - (int) transferred);
+	}
 	
 	/**
 	 * Attempt to push the given amount of energy to any connected outputs.
 	 */
-	public static void transferEnergy(BlockEntity blockEntity, double total)
+	default void transferEnergy(long amount)
 	{
-		if(!(blockEntity instanceof EnergyBlockEntity))
+		amount = Math.min(amount, getEnergy());
+		
+		if(amount == 0)
 			return;
 		
-		World world = blockEntity.getWorld();
-		ArrayList<BlockPos> outputs = ((EnergyBlockEntity) blockEntity).getOutputs();
-		total = Math.min(total, ((EnergyBlockEntity) blockEntity).getEnergyStored());
-		int count = 0;
-		double transferred = 0;
-		
-		// Confirm number of outputs to distribute energy.
-		for(BlockPos pos : outputs)
+		ArrayList<EnergyBlockEntity> storageList = new ArrayList<>();
+		long sumCapacity = 0;
+
+		for(BlockPos pos : getOutputs())
 		{
-			BlockEntity otherBlockEntity = world.getBlockEntity(pos);
-			
-			if(otherBlockEntity != null && otherBlockEntity instanceof EnergyBlockEntity)
+			BlockEntity blockEntity = ((BlockEntity) this).getWorld().getBlockEntity(pos);
+
+			if(!(blockEntity instanceof EnergyBlockEntity))
+				continue;
+
+			EnergyBlockEntity energyStorage = (EnergyBlockEntity) blockEntity;
+			long capacity = energyStorage.getEnergyCapacity();
+			long stored = energyStorage.getEnergy();
+
+			if(stored < capacity)
 			{
-				EnergyBlockEntity energyBlockEntity = ((EnergyBlockEntity) otherBlockEntity);
-				
-				if(energyBlockEntity.getEnergyStored() < energyBlockEntity.getEnergyCapacity())
-					count++;
+				storageList.add(energyStorage);
+				sumCapacity += capacity - stored;
 			}
 		}
-		
-		if(count == 0)
+
+		if(storageList.isEmpty() || sumCapacity == 0)
 			return;
-		
-		// Attempt to distribute equal amounts of energy.
-		for(BlockPos pos : outputs)
+
+		long pushed = 0;
+		long remainder = amount;
+		double fraction = (double) amount / (double) sumCapacity;
+
+		for(EnergyBlockEntity storage : storageList)
 		{
-			BlockEntity otherBlockEntity = world.getBlockEntity(pos);
-			
-			if(otherBlockEntity != null && otherBlockEntity instanceof EnergyBlockEntity)
+			long capacity = storage.getEnergyCapacity() - storage.getEnergy();
+			long want = (long) (capacity * fraction);
+			long canPush = storage.addEnergy(want, true);
+			pushed += canPush;
+			remainder -= canPush;
+		}
+
+		for(EnergyBlockEntity storage : storageList)
+		{
+			if(remainder <= 0)
+				break;
+
+			if(storage.getEnergyCapacity() - storage.getEnergy() > 0)
 			{
-				double amount = total / count;
-				transferred += ((EnergyBlockEntity) otherBlockEntity).changeEnergy(amount);
+				storage.addEnergy(1, true);
+				pushed++;
+				remainder--;
 			}
 		}
-		
-		((EnergyBlockEntity) blockEntity).changeEnergy(-transferred);
+
+		removeEnergy(pushed, true);
 	}
-	
+
+	/**
+	 * Attempt to push the given amount of energy to any connected outputs.
+	 */
+	/*public static long transferEnergy(World world, EnergyBlockEntity source, long amount, boolean change)
+	{
+		ArrayList<EnergyBlockEntity> storageList = new ArrayList<>();
+		long sumCapacity = 0;
+
+		for(BlockPos pos : source.getOutputs())
+		{
+			BlockEntity blockEntity = world.getBlockEntity(pos);
+
+			if(!(blockEntity instanceof EnergyBlockEntity))
+				continue;
+
+			EnergyBlockEntity energyStorage = (EnergyBlockEntity) blockEntity;
+			long capacity = energyStorage.getEnergyCapacity();
+			long stored = energyStorage.getEnergy();
+
+			if(stored < capacity)
+			{
+				storageList.add(energyStorage);
+				sumCapacity += capacity - stored;
+			}
+		}
+
+		if(storageList.isEmpty() || sumCapacity == 0)
+			return 0;
+
+		long pushed = 0;
+		long remainder = amount;
+		double fraction = (double) amount / (double) sumCapacity;
+
+		for(EnergyBlockEntity storage : storageList)
+		{
+			long capacity = storage.getEnergyCapacity() - storage.getEnergy();
+			long want = (long) (capacity * fraction);
+			long canPush = storage.addEnergy(want, change);
+			pushed += canPush;
+			remainder -= canPush;
+		}
+
+		for(EnergyBlockEntity storage : storageList)
+		{
+			if(remainder <= 0)
+				break;
+
+			if(storage.getEnergyCapacity() - storage.getEnergy() > 0)
+			{
+				storage.addEnergy(1, change);
+				pushed++;
+				remainder--;
+			}
+		}
+
+		source.removeEnergy(pushed, change);
+		return pushed;
+	}*/
+
 	public static void outputsToNBT(ArrayList<BlockPos> outputs, NbtCompound nbt)
 	{
-		int[] x = new int[outputs.size()];
-		int[] y = new int[outputs.size()];
-		int[] z = new int[outputs.size()];
-		int i = 0;
-		
+		NbtList outputListNBT = new NbtList();
+
 		for(BlockPos output : outputs)
-		{
-			x[i] = output.getX();
-			y[i] = output.getY();
-			z[i] = output.getZ();
-			i++;
-		}
-		
-		nbt.putIntArray("xOut", x);
-		nbt.putIntArray("yOut", y);
-		nbt.putIntArray("zOut", z);
+			outputListNBT.add(NbtHelper.fromBlockPos(output));
+
+		nbt.put("outputs", outputListNBT);
 	}
-	
+
 	public static ArrayList<BlockPos> outputsFromNBT(NbtCompound nbt)
 	{
 		ArrayList<BlockPos> outputs = new ArrayList<BlockPos>();
-		int[] x = nbt.getIntArray("xOut");
-		int[] y = nbt.getIntArray("yOut");
-		int[] z = nbt.getIntArray("zOut");
-		
-		if(x.length == 0)
-			return outputs;
-		
-		for(int i = 0; i < x.length; i++)
-			outputs.add(new BlockPos(x[i], y[i], z[i]));
-		
+		NbtList outputListNBT = nbt.getList("outputs", NbtList.INT_ARRAY_TYPE);
+
+		for(int i = 0; i < outputListNBT.size(); i++)
+		{
+			int[] array = outputListNBT.getIntArray(i);
+			outputs.add(new BlockPos(array[0], array[1], array[2]));
+		}
+
 		return outputs;
 	}
 }

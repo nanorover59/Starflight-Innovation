@@ -1,14 +1,11 @@
 package space.block.entity;
 
-import java.util.ArrayList;
-
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import space.block.EnergyBlock;
 import space.block.LightColumnBlock;
@@ -16,7 +13,7 @@ import space.block.StarflightBlocks;
 
 public class ElectricLightBlockEntity extends BlockEntity implements EnergyBlockEntity
 {
-	private double energy;
+	private long energy;
 	
 	public ElectricLightBlockEntity(BlockPos pos, BlockState state)
 	{
@@ -24,70 +21,40 @@ public class ElectricLightBlockEntity extends BlockEntity implements EnergyBlock
 	}
 	
 	@Override
-	public double getOutput()
+	public long getEnergyCapacity()
 	{
-		return 0.0;
+		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
 	}
 	
 	@Override
-	public double getInput()
-	{
-		return ((EnergyBlock) getCachedState().getBlock()).getInput() / world.getTickManager().getTickRate();
-	}
-	
-	@Override
-	public double getEnergyStored()
+	public long getEnergy()
 	{
 		return energy;
 	}
 
 	@Override
-	public double getEnergyCapacity()
+	public void setEnergy(long energy)
 	{
-		return ((EnergyBlock) getCachedState().getBlock()).getEnergyCapacity();
-	}
-
-	@Override
-	public double changeEnergy(double amount)
-	{
-		double newEnergy = energy + amount;
-		energy = MathHelper.clamp(newEnergy, 0, getEnergyCapacity());
-		return amount - (newEnergy - energy);
-	}
-
-	@Override
-	public ArrayList<BlockPos> getOutputs()
-	{
-		return null;
-	}
-
-	@Override
-	public void addOutput(BlockPos output)
-	{
-	}
-
-	@Override
-	public void clearOutputs()
-	{
+		this.energy = energy;
 	}
 	
 	@Override
 	protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.writeNbt(nbt, registryLookup);
-		nbt.putDouble("energy", this.energy);
+		nbt.putLong("energy", this.energy);
 	}
 	
 	@Override
 	public void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup)
 	{
 		super.readNbt(nbt, registryLookup);
-		this.energy = nbt.getDouble("energy");
+		this.energy = nbt.getLong("energy");
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, ElectricLightBlockEntity blockEntity)
 	{
-		blockEntity.changeEnergy(-blockEntity.getInput());
+		blockEntity.removeEnergy(((EnergyBlock) state.getBlock()).getInput(), true);
 		
 		if(state.get(LightColumnBlock.LIT) != blockEntity.energy > 0)
 		{
