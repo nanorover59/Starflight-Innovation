@@ -5,40 +5,62 @@
     "settings" : "space:mercury",
     "biome_source" : {
       "type" : "minecraft:multi_noise",
-      "biomes" : [ {
-        "biome" : "space:mercury_plains",
-        "parameters" : {
-          "temperature" : [ -0.75, 0.75 ],
-          "humidity" : [ -1, 1 ],
-          "continentalness" : [ -1, 1 ],
-          "erosion" : [ -1, 1 ],
-          "weirdness" : [ -1, 1 ],
-          "depth" : [ -1, 1 ],
-          "offset" : 0
-        }
-      }, {
-        "biome" : "space:mercury_hotspot",
-        "parameters" : {
-          "temperature" : [ 0.75, 1 ],
-          "humidity" : [ -1, 1 ],
-          "continentalness" : [ -1, 1 ],
-          "erosion" : [ -1, 1 ],
-          "weirdness" : [ -1, 1 ],
-          "depth" : [ -1, 1 ],
-          "offset" : 0
-        }
-      }, {
-        "biome" : "space:mercury_ice",
-        "parameters" : {
-          "temperature" : [ -1, -0.5 ],
-          "humidity" : [ -1, 1 ],
-          "continentalness" : [ -1, 1 ],
-          "erosion" : [ -1, 1 ],
-          "weirdness" : [ -1, 1 ],
-          "depth" : [ 0, 1 ],
-          "offset" : 0
-        }
-      } ]
+	  "biomes" : [ {
+          "biome" : "space:mercury_lowlands",
+          "parameters" : {
+            "temperature" : [ -1, 1 ],
+            "humidity" : [ -1, 1 ],
+            "continentalness" : [ -1, 0.125 ],
+            "erosion" : [ -1, 1 ],
+            "weirdness" : [ -1, 1 ],
+            "depth" : 0,
+            "offset" : 0
+          }
+        }, {
+          "biome" : "space:mercury_midlands",
+          "parameters" : {
+            "temperature" : [ -1, 1 ],
+            "humidity" : [ -1, 1 ],
+            "continentalness" : [ 0.125, 0.6 ],
+            "erosion" : [ -1, 1 ],
+            "weirdness" : [ -1, 1 ],
+            "depth" : 0,
+            "offset" : 0
+          }
+		}, {
+          "biome" : "space:mercury_highlands",
+          "parameters" : {
+            "temperature" : [ -1, 1 ],
+            "humidity" : [ -1, 1 ],
+            "continentalness" : [ 0.6, 1 ],
+            "erosion" : [ -1, 1 ],
+            "weirdness" : [ -1, 1 ],
+            "depth" : 0,
+            "offset" : 0
+          }
+        }, {
+		  "biome" : "space:mercury_lowlands",
+	      "parameters" : {
+	        "temperature" : [ 0, 1 ],
+	        "humidity" : [ -1, 1 ],
+	        "continentalness" : [ 0.6, 1 ],
+	        "erosion" : [ -1, 1 ],
+	        "weirdness" : [ -1, 1 ],
+	        "depth" : 1,
+	        "offset" : 0
+	      }
+	    }, {
+          "biome" : "space:mercury_ice_caves",
+          "parameters" : {
+            "temperature" : [ -1, 0 ],
+            "humidity" : [ -1, 1 ],
+            "continentalness" : [ -1, 1 ],
+            "erosion" : [ -1, 1 ],
+            "weirdness" : [ -1, 1 ],
+            "depth" : 1,
+            "offset" : 0
+          }
+        } ]
     }
   }
 }

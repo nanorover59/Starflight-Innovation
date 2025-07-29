@@ -81,8 +81,6 @@ public class StarflightHUD
         Quaternionf quaternion = new Quaternionf(rocketEntity.clientQuaternionPrevious).slerp(rocketEntity.clientQuaternion, tickDelta);
         scaledWidth /= hudScale;
 		scaledHeight /= hudScale;
-		int centerX = scaledWidth / 2;
-        int centerY = scaledHeight / 2;
 		context.getMatrices().push();
 		context.getMatrices().scale(hudScale, hudScale, hudScale);
 		drawReadouts(context, textRenderer, rocketEntity, tickDelta, 60, scaledHeight - 150, hudColor);

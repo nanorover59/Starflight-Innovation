@@ -9,6 +9,7 @@ public class StarflightCommands
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			TimeStepsCommand.register(dispatcher);
 			SciencePointsCommand.register(dispatcher);
+			SpaceSuitCommand.register(dispatcher);
 		});
 	}
 }

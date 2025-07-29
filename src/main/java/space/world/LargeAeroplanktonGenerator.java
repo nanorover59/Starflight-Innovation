@@ -56,7 +56,7 @@ public class LargeAeroplanktonGenerator
 		
 		public Piece(BlockPos start, int x, int y, int z, int radius, double thicknessFactor)
 		{
-			super(StarflightWorldGeneration.VOLCANO_PIECE, 0, new BlockBox(start.getX(), 0, start.getZ(), start.getX() + 16, 128, start.getZ() + 16));
+			super(StarflightWorldGeneration.LARGE_AEROPLANKTON_PIECE, 0, new BlockBox(start.getX(), 0, start.getZ(), start.getX() + 16, 128, start.getZ() + 16));
 			this.centerX = x;
 			this.centerY = y;
 			this.centerZ = z;
@@ -66,7 +66,7 @@ public class LargeAeroplanktonGenerator
 
 		public Piece(StructureContext context, NbtCompound nbt)
 		{
-			super(StarflightWorldGeneration.VOLCANO_PIECE, nbt);
+			super(StarflightWorldGeneration.LARGE_AEROPLANKTON_PIECE, nbt);
 			this.centerX  = nbt.getInt("x");
 			this.centerY  = nbt.getInt("y");
 			this.centerZ = nbt.getInt("z");
@@ -115,7 +115,7 @@ public class LargeAeroplanktonGenerator
 					double nz = ((double) ((mutable.getZ() - centerZ)) / radius) * 5.0;
 					int noise1Offset = (int) (((noise1.get(nx, nz) + 2.0) / 2.0) * yOffsetUp);
 					int noise2Offset = (int) (((noise2.get(nx, nz) + 2.0) / 2.0) * yOffsetDown);
-					int noise3Offset = (int) (noise3.get(nx * 2.0, nz * 2.0) * distanceFromCenter * 0.5);
+					//int noise3Offset = (int) (noise3.get(nx * 2.0, nz * 2.0) * distanceFromCenter * 0.5);
 					world.setBlockState(mutable.up(yOffsetUp), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					world.setBlockState(mutable.down(yOffsetDown), StarflightBlocks.AEROPLANKTON.getDefaultState(), Block.NOTIFY_LISTENERS);
 					

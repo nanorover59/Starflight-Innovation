@@ -29,8 +29,9 @@ public class StarflightEntities
 	public static final EntityType<StratofishEntity> STRATOFISH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "stratofish"), EntityType.Builder.<StratofishEntity>create(StratofishEntity::new, SpawnGroup.CREATURE).dimensions(1.5f, 0.75f).eyeHeight(0.375f).maxTrackingRange(12));
 	public static final EntityType<CloudSharkEntity> CLOUD_SHARK = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cloud_shark"), EntityType.Builder.<CloudSharkEntity>create(CloudSharkEntity::new, SpawnGroup.MONSTER).dimensions(3.0f, 1.5f).eyeHeight(1.5f).maxTrackingRange(12));
 	public static final EntityType<CaveLampreyEntity> CAVE_LAMPREY = registerEntity(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), EntityType.Builder.<CaveLampreyEntity>create(CaveLampreyEntity::new, SpawnGroup.MONSTER).dimensions(0.75f, 0.5f).eyeHeight(0.25f).maxTrackingRange(8));
-	public static final EntityType<MimicEntity> MIMIC = registerEntity(Identifier.of(StarflightMod.MOD_ID, "mimic"), EntityType.Builder.<MimicEntity>create(MimicEntity::new, SpawnGroup.MONSTER).dimensions(0.75f, 0.75f).maxTrackingRange(8));
+	public static final EntityType<MimicEntity> MIMIC = registerEntity(Identifier.of(StarflightMod.MOD_ID, "mimic"), EntityType.Builder.<MimicEntity>create(MimicEntity::new, SpawnGroup.MONSTER).dimensions(0.95f, 0.95f).maxTrackingRange(8));
 	public static final EntityType<MetallicScorpionEntity> METALLIC_SCORPION = registerEntity(Identifier.of(StarflightMod.MOD_ID, "metallic_scorpion"), EntityType.Builder.<MetallicScorpionEntity>create(MetallicScorpionEntity::new, SpawnGroup.MONSTER).dimensions(1.5f, 1.0f).maxTrackingRange(8));
+	public static final EntityType<QuicksilverEntity> QUICKSILVER = registerEntity(Identifier.of(StarflightMod.MOD_ID, "quicksilver"), EntityType.Builder.<QuicksilverEntity>create(QuicksilverEntity::new, SpawnGroup.MONSTER).dimensions(0.52f, 0.52f).eyeHeight(0.325f).spawnBoxScale(4.0f).maxTrackingRange(8));
 	public static final EntityType<LunarMechEntity> LUNAR_MECH = registerEntity(Identifier.of(StarflightMod.MOD_ID, "lunar_mech"),EntityType.Builder.<LunarMechEntity>create(LunarMechEntity::new, SpawnGroup.MONSTER).dimensions(1.5f, 6.0f).maxTrackingRange(8));
 	
 	public static void initializeEntities()
@@ -45,6 +46,7 @@ public class StarflightEntities
 		FabricDefaultAttributeRegistry.register(CAVE_LAMPREY, CaveLampreyEntity.createCaveLampreyAttributes());
 		FabricDefaultAttributeRegistry.register(MIMIC, MimicEntity.createMimicAttributes());
 		FabricDefaultAttributeRegistry.register(METALLIC_SCORPION, MetallicScorpionEntity.createMetallicScorpionAttributes());
+		FabricDefaultAttributeRegistry.register(QUICKSILVER, QuicksilverEntity.createQuicksilverAttributes());
 		FabricDefaultAttributeRegistry.register(LUNAR_MECH, LunarMechEntity.createLunarMechAttributes());
 		
 		SpawnRestriction.register(DUST, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, DustEntity::canDustSpawn);
@@ -56,6 +58,7 @@ public class StarflightEntities
 		SpawnRestriction.register(CAVE_LAMPREY, SpawnLocationTypes.IN_WATER, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, CaveLampreyEntity::canCaveLampreySpawn);
 		SpawnRestriction.register(MIMIC, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MimicEntity::canMimicSpawn);
 		SpawnRestriction.register(METALLIC_SCORPION, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, MobEntity::canMobSpawn);
+		SpawnRestriction.register(QUICKSILVER, SpawnLocationTypes.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, QuicksilverEntity::canQuicksilverSpawn);
 	}
 	
 	private static <T extends Entity> EntityType<T> registerEntity(Identifier id, Builder<T> type)

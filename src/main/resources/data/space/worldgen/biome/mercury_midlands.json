@@ -29,8 +29,7 @@
       "space:ore_bauxite",
       "space:ore_sulfur",
       "space:ore_ilmenite",
-      "space:ore_lunalight",
-      "space:ore_diamond_regolith"
+      "space:ore_lunalight"
     ],
     [
       "minecraft:spring_lava"
@@ -54,10 +53,10 @@
         "weight": 10
       },
       {
-          "type": "space:mimic",
-          "maxCount": 2,
-          "minCount": 1,
-          "weight": 10
+        "type": "space:mimic",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 10
       }
     ],
     "underground_water_creature": [],

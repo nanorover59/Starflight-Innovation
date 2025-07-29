@@ -1,16 +1,12 @@
 package space.world;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
 
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -23,7 +19,6 @@ import net.minecraft.world.gen.carver.Carver;
 import net.minecraft.world.gen.carver.CarverContext;
 import net.minecraft.world.gen.carver.CarvingMask;
 import net.minecraft.world.gen.chunk.AquiferSampler;
-import net.minecraft.world.gen.structure.Structure;
 import space.block.StarflightBlocks;
 
 public class CraterCarver extends Carver<CraterCarverConfig>
@@ -48,14 +43,14 @@ public class CraterCarver extends Carver<CraterCarverConfig>
 		double depthFactor = 0.6 + random.nextDouble() * 0.2;
 		BlockPos.Mutable mutable = new BlockPos.Mutable();
 		
-		Registry<Structure> structureRegistry = carverContext.getRegistryManager().get(RegistryKeys.STRUCTURE);
+		/*Registry<Structure> structureRegistry = carverContext.getRegistryManager().get(RegistryKeys.STRUCTURE);
 		Map<Structure, LongSet> structureReferences = chunk.getStructureReferences();
 		
 		for(Structure structure : structureReferences.keySet())
 		{
 			if(structureRegistry.getEntry(structure).isIn(StarflightWorldGeneration.NO_CRATERS))
 				return false;
-		}
+		}*/
 		
 		boolean hasIce = posToBiome.apply(new BlockPos(craterX, 64, craterZ)).isIn(StarflightWorldGeneration.ICE_CRATERS);
 		

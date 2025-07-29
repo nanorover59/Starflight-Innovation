@@ -8,14 +8,13 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockPos.Mutable;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.StructureWorldAccess;
+import net.minecraft.world.gen.GenerationStep;
 import net.minecraft.world.gen.feature.DefaultFeatureConfig;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.util.FeatureContext;
@@ -37,12 +36,11 @@ public class SurfaceRockFeature extends Feature<DefaultFeatureConfig>
 		Mutable mutable = blockPos.down(2 + random.nextInt(16)).mutableCopy();
 		BlockState rockState = null;
 		
-		Registry<Structure> structureRegistry = context.getWorld().getRegistryManager().get(RegistryKeys.STRUCTURE);
 		Map<Structure, LongSet> structureReferences = context.getWorld().getChunk(blockPos).getStructureReferences();
 		
 		for(Structure structure : structureReferences.keySet())
 		{
-			if(structureRegistry.getEntry(structure).isIn(StarflightWorldGeneration.NO_CRATERS))
+			if(structure.getFeatureGenerationStep() == GenerationStep.Feature.SURFACE_STRUCTURES)
 				return false;
 		}
 		

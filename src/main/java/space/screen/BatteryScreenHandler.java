@@ -9,7 +9,7 @@ import net.minecraft.screen.ArrayPropertyDelegate;
 import net.minecraft.screen.PropertyDelegate;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
-import space.item.BatteryCellItem;
+import space.item.EnergyStorageItem;
 import space.item.StarflightItems;
 
 public class BatteryScreenHandler extends ScreenHandler
@@ -127,7 +127,7 @@ public class BatteryScreenHandler extends ScreenHandler
 
 		public static boolean matches(ItemStack stack)
 		{
-			return stack.getItem() instanceof BatteryCellItem;
+			return stack.getItem() instanceof EnergyStorageItem;
 		}
 
 		@Override

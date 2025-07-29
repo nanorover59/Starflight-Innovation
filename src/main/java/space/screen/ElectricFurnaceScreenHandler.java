@@ -101,6 +101,7 @@ public class ElectricFurnaceScreenHandler extends ScreenHandler
 		return this.world.getRecipeManager().getFirstMatch(RecipeType.BLASTING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
 			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMOKING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
 			|| this.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SingleStackRecipeInput(itemStack), this.world).isPresent()
+			|| this.world.getRecipeManager().getFirstMatch(StarflightRecipes.ELECTRIC_FURNACE, new SingleStackRecipeInput(itemStack), this.world).isPresent()
 			|| this.world.getRecipeManager().getFirstMatch(StarflightRecipes.VACUUM_FURNACE, new SingleStackRecipeInput(itemStack), this.world).isPresent();
 	}
 

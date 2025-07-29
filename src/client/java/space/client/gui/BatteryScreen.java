@@ -22,9 +22,6 @@ public class BatteryScreen extends HandledScreen<BatteryScreenHandler>
 	public BatteryScreen(BatteryScreenHandler handler, PlayerInventory inventory, Text title)
 	{
 		super(handler, inventory, title);
-		//this.passEvents = false;
-		//this.backgroundHeight = 133;
-		//this.playerInventoryTitleY = this.backgroundHeight - 94;
 	}
 
 	@Override
@@ -46,12 +43,12 @@ public class BatteryScreen extends HandledScreen<BatteryScreenHandler>
 		int barY = 38;
 		int width = (int) Math.ceil(((double) energy / (double) capacity) * 48.0);
 		context.drawTexture(TEXTURE, x + barX, y + barY, 176, 0, width, 16);
-		boolean hover = mouseX - x > barX - 1 && mouseX - x < barX + 10 && mouseY - y > barY - 1 && mouseY - y < barY + 48;
+		boolean hover = mouseX - x > barX - 1 && mouseX - x < barX + 48 && mouseY - y > barY - 1 && mouseY - y < barY + 16;
 		
 		if(hover)
 		{
 			int percent = (int) (((double) energy / (double) capacity) * 100.0);
-			List<Text> text = List.of(Text.translatable("block.space.energy", energy), Text.translatable("block.space.capacity", capacity), Text.literal(percent + "%"));
+			List<Text> text = List.of(Text.translatable("block.space.energy", energy, capacity), Text.literal(percent + "%"));
 			context.drawTexture(TEXTURE, x + barX - 1, y + barY - 1, 176, 16, 66, 18);
 			context.drawTooltip(textRenderer, text, mouseX, mouseY);
 		}

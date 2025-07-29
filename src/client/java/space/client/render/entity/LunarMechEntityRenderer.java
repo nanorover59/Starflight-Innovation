@@ -45,7 +45,7 @@ public class LunarMechEntityRenderer extends MobEntityRenderer<LunarMechEntity, 
 		super.render(entity, f, g, matrixStack, vertexConsumerProvider, i);
 		LivingEntity livingEntity = entity.getBeamTarget();
 		
-		if(livingEntity != null)
+		/*if(livingEntity != null)
 		{
 			if(livingEntity instanceof ClientPlayerEntity)
 				StarflightRenderEffects.radiation = 4.0f;
@@ -66,7 +66,7 @@ public class LunarMechEntityRenderer extends MobEntityRenderer<LunarMechEntity, 
 			matrixStack.translate(-0.5, 0.0, -0.5);
 			BeaconBlockEntityRenderer.renderBeam(matrixStack, vertexConsumerProvider, BEAM_TEXTURE, f, 1.0f, worldTime, 0, (int) m, 0xFFFFFF, 0.2f, 0.25f);
 			matrixStack.pop();
-		}
+		}*/
 	}
 
 	public Identifier getTexture(LunarMechEntity entity)

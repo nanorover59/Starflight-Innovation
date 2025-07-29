@@ -35,9 +35,6 @@
       "space:cave_ice",
       "space:cave_ice_pile",
       "space:powder_snow_lake"
-    ],
-    [
-      "space:surface_rock"
     ]
   ],
   "has_precipitation": false,
@@ -55,10 +52,10 @@
         "weight": 10
       },
       {
-          "type": "space:mimic",
-          "maxCount": 2,
-          "minCount": 1,
-          "weight": 10
+        "type": "space:mimic",
+        "maxCount": 2,
+        "minCount": 1,
+        "weight": 10
       }
     ],
     "underground_water_creature": [],

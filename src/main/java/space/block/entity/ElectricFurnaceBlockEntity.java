@@ -149,9 +149,9 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 			if(itemStack3.isEmpty())
 				slots.set(2, itemStack2.copy());
 			else if(itemStack3.isOf(itemStack2.getItem()))
-				itemStack3.increment(2);
+				itemStack3.increment(1);
 
-			itemStack.decrement(2);
+			itemStack.decrement(1);
 			return true;
 		}
 		else
@@ -313,7 +313,7 @@ public class ElectricFurnaceBlockEntity extends LockableContainerBlockEntity imp
 
 	public boolean canExtract(int slot, ItemStack stack, Direction dir)
 	{
-		return slot == 1;
+		return slot == 2;
 	}
 
 	public void dropExperienceForRecipesUsed(ServerPlayerEntity player)

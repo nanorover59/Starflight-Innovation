@@ -59,7 +59,14 @@ public class ElectricCrafterScreenHandler extends ScreenHandler implements Scree
 			for(int j = 0; j < 3; j++)
 			{
 				int k = j + i * 3 + 1;
-				this.addSlot(new Slot(this.inventory, k, 30 + j * 18, 17 + i * 18));
+				this.addSlot(new Slot(this.inventory, k, 30 + j * 18, 17 + i * 18)
+				{
+					@Override
+					public int getMaxItemCount()
+					{
+						return 1;
+					}
+				});
 			}
 		}
 		
@@ -78,7 +85,7 @@ public class ElectricCrafterScreenHandler extends ScreenHandler implements Scree
 		for(int i = 0; i < 3; i++)
 		{
 			for(int j = 0; j < 9; j++)
-				this.addSlot(new ProgrammingItemSlot(playerInventory, j + i * 9 + 9, 8 + j * 18, 110 + i * 18));
+				this.addSlot(new Slot(playerInventory, j + i * 9 + 9, 8 + j * 18, 110 + i * 18));
 		}
 
 		for(int i = 0; i < 9; i++)
@@ -200,19 +207,5 @@ public class ElectricCrafterScreenHandler extends ScreenHandler implements Scree
 	@Override
 	public void onPropertyUpdate(ScreenHandler handler, int property, int value)
 	{
-	}
-	
-	static class ProgrammingItemSlot extends Slot
-	{
-		public ProgrammingItemSlot(Inventory inventory, int i, int j, int k)
-		{
-			super(inventory, i, j, k);
-		}
-
-		@Override
-		public int getMaxItemCount()
-		{
-			return 1;
-		}
 	}
 }

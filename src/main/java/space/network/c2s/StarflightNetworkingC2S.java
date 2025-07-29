@@ -6,6 +6,7 @@ import space.block.entity.AdvancedFabricatorBlockEntity;
 import space.block.entity.RocketControllerBlockEntity;
 import space.entity.AirshipEntity;
 import space.entity.RocketEntity;
+import space.network.s2c.BeamS2CPacket;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
@@ -35,6 +36,7 @@ public class StarflightNetworkingC2S
 		PayloadTypeRegistry.playS2C().register(OutgasS2CPacket.PACKET_ID, OutgasS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(VolcanicVentS2CPacket.PACKET_ID, VolcanicVentS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(JetS2CPacket.PACKET_ID, JetS2CPacket.PACKET_CODEC);
+		PayloadTypeRegistry.playS2C().register(BeamS2CPacket.PACKET_ID, BeamS2CPacket.PACKET_CODEC);
 		PayloadTypeRegistry.playS2C().register(SyncPlayerStateS2CPacket.PACKET_ID, SyncPlayerStateS2CPacket.PACKET_CODEC);
 		
 		PayloadTypeRegistry.playC2S().register(RocketControllerButtonC2SPacket.PACKET_ID, RocketControllerButtonC2SPacket.PACKET_CODEC);

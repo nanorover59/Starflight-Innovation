@@ -1,6 +1,8 @@
 package space.client;
 
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -13,6 +15,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientLoginConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.TexturedModelData;
@@ -21,6 +24,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.block.entity.BlockEntityRendererFactories;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.client.render.entity.model.MagmaCubeEntityModel;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.DyedColorComponent;
@@ -41,6 +45,7 @@ import space.client.gui.MetalFabricatorScreen;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.StirlingEngineScreen;
 import space.client.particle.StarflightParticleManager;
+import space.client.render.BeamEffectRenderer;
 import space.client.render.MarsDimensionEffect;
 import space.client.render.StarflightRenderEffects;
 import space.client.render.block.entity.WaterTankBlockEntityRenderer;
@@ -53,6 +58,7 @@ import space.client.render.entity.MetallicScorpionEntityRenderer;
 import space.client.render.entity.MimicEntityRenderer;
 import space.client.render.entity.MovingCraftEntityRenderer;
 import space.client.render.entity.PlasmaBallEntityRenderer;
+import space.client.render.entity.QuicksilverEntityRenderer;
 import space.client.render.entity.SeleniteEntityRenderer;
 import space.client.render.entity.SolarEyesEntityRenderer;
 import space.client.render.entity.SolarSpectreEntityRenderer;
@@ -90,6 +96,7 @@ public class StarflightModClient implements ClientModInitializer
 	public static final EntityModelLayer MODEL_CAVE_LAMPREY_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "cave_lamprey"), "main");
 	public static final EntityModelLayer MODEL_MIMIC_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "mimic"), "main");
 	public static final EntityModelLayer MODEL_METALLIC_SCORPION_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "metallic_scorpion"), "main");
+	public static final EntityModelLayer MODEL_QUICKSILVER_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "quicksilver"), "main");
 	public static final EntityModelLayer MODEL_LUNAR_MECH_LAYER = new EntityModelLayer(Identifier.of(StarflightMod.MOD_ID, "lunar_mech"), "main");
 	
 	private static HashMap<Identifier, DimensionEffects> dimensionEffects = new HashMap<Identifier, DimensionEffects>();
@@ -179,6 +186,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityRendererRegistry.register(StarflightEntities.CAVE_LAMPREY, (context) -> new CaveLampreyEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.MIMIC, (context) -> new MimicEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.METALLIC_SCORPION, (context) -> new MetallicScorpionEntityRenderer(context));
+		EntityRendererRegistry.register(StarflightEntities.QUICKSILVER, (context) -> new QuicksilverEntityRenderer(context));
 		EntityRendererRegistry.register(StarflightEntities.LUNAR_MECH, (context) -> new LunarMechEntityRenderer(context));
 		
 		EntityModelLayerRegistry.registerModelLayer(MODEL_DUST_LAYER, DustEntityModel::getTexturedModelData);
@@ -193,6 +201,7 @@ public class StarflightModClient implements ClientModInitializer
 		EntityModelLayerRegistry.registerModelLayer(MODEL_CAVE_LAMPREY_LAYER, CaveLampreyEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_MIMIC_LAYER, MimicEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_METALLIC_SCORPION_LAYER, MetallicScorpionEntityModel::getTexturedModelData);
+		EntityModelLayerRegistry.registerModelLayer(MODEL_QUICKSILVER_LAYER, MagmaCubeEntityModel::getTexturedModelData);
 		EntityModelLayerRegistry.registerModelLayer(MODEL_LUNAR_MECH_LAYER, LunarMechEntityModel::getTexturedModelData);
 		
 		// Particles
@@ -237,6 +246,20 @@ public class StarflightModClient implements ClientModInitializer
 				}
 			}
 			
+			// Beam Effect Timeout
+			Iterator<Map.Entry<Integer, BeamEffectRenderer>> iterator = BeamEffectRenderer.entityBeamMap.entrySet().iterator();
+
+			while(iterator.hasNext())
+			{
+				Map.Entry<Integer, BeamEffectRenderer> entry = iterator.next();
+				BeamEffectRenderer beam = entry.getValue();
+
+				if(beam.duration <= 0)
+					iterator.remove();
+				else
+					beam.duration--;
+			}
+			
 			// Radiation Shader Effect
 			if(client.world != null && client.player != null && !client.player.isCreative() && !client.player.isSpectator())
 			{
@@ -263,6 +286,12 @@ public class StarflightModClient implements ClientModInitializer
 			}
 			else
 				StarflightRenderEffects.radiation = 0.0f;
+		});
+		
+		WorldRenderEvents.LAST.register(context ->
+		{
+		    for(BeamEffectRenderer beam : BeamEffectRenderer.entityBeamMap.values())
+		    	beam.renderBeam(context.world(), context.matrixStack(), context.consumers(), context.tickCounter().getTickDelta(false));
 		});
 		
 		// Client Disconnect Event

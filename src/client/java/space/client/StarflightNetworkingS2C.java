@@ -6,6 +6,7 @@ import java.util.HashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.Entity;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -16,8 +17,10 @@ import net.minecraft.util.math.random.Random;
 import space.StarflightMod;
 import space.client.gui.RocketControllerScreen;
 import space.client.gui.SpaceNavigationScreen;
+import space.client.render.BeamEffectRenderer;
 import space.entity.MovingCraftEntity;
 import space.entity.RocketEntity;
+import space.network.s2c.BeamS2CPacket;
 import space.network.s2c.FizzS2CPacket;
 import space.network.s2c.JetS2CPacket;
 import space.network.s2c.MovingCraftEntityOffsetsS2CPacket;
@@ -51,6 +54,7 @@ public class StarflightNetworkingS2C
 		ClientPlayNetworking.registerGlobalReceiver(OutgasS2CPacket.PACKET_ID, (payload, context) -> receiveOutgas((OutgasS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(VolcanicVentS2CPacket.PACKET_ID, (payload, context) -> receiveVolcanicVent((VolcanicVentS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(JetS2CPacket.PACKET_ID, (payload, context) -> receiveJet((JetS2CPacket) payload, context));
+		ClientPlayNetworking.registerGlobalReceiver(BeamS2CPacket.PACKET_ID, (payload, context) -> receiveBeam((BeamS2CPacket) payload, context));
 		ClientPlayNetworking.registerGlobalReceiver(SyncPlayerStateS2CPacket.PACKET_ID, (payload, context) -> receiveSyncPlayerState((SyncPlayerStateS2CPacket) payload, context));
 		
 	}
@@ -235,6 +239,25 @@ public class StarflightNetworkingS2C
 				offset = offset.multiply(0.25);
 				clientWorld.addParticle(ParticleTypes.POOF, sourcePos.getX() + offset.getX(), sourcePos.getY() + offset.getY(), sourcePos.getZ() + offset.getZ(), velocity.getX(), velocity.getY(), velocity.getZ());
 			}
+		});
+	}
+	
+	public static void receiveBeam(BeamS2CPacket payload, ClientPlayNetworking.Context context)
+	{
+		int sourceID = payload.sourceID();
+		int targetID = payload.targetID();
+		Vec3d sourcePos = payload.sourcePos();
+		Vec3d direction = payload.direction();
+		int color = payload.color();
+		int duration = payload.duration();
+		MinecraftClient client = context.client();
+		
+		client.execute(() -> {
+			ClientWorld clientWorld = client.world;
+			Entity source = clientWorld.getEntityById(sourceID);
+			Entity target = clientWorld.getEntityById(targetID);
+			BeamEffectRenderer renderer = new BeamEffectRenderer(source, target, sourcePos, direction, color, duration);
+			BeamEffectRenderer.entityBeamMap.put(sourceID, renderer);
 		});
 	}
 	

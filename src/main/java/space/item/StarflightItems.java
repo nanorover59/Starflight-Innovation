@@ -116,16 +116,10 @@ public class StarflightItems
 	public static final Item SOLAR_CELL = new Item(new Settings());
 	public static final Item HEAVY_CYLINDER = new Item(new Settings());
 	public static final Item MINI_THRUSTER = new Item(new Settings());
-	public static final Item COOLED_COPPER = new Item(new Settings());
-	public static final Item COPPER_INJECTOR = new Item(new Settings());
-	public static final Item IMPELLER = new Item(new Settings());
-	public static final Item TURBO_PUMP = new Item(new Settings());
-	public static final Item ENGINE_1_ASSEMBLY = new Item(new Settings());
-	public static final Item ENGINE_1_NOZZLE = new Item(new Settings());
-	public static final Item ENGINE_1_EXTENSION = new Item(new Settings());
+	public static final Item WAVEGUIDE = new Item(new Settings());
 	public static final Item GUIDE_BOOK = new GuideBookItem(new Settings().maxCount(1));
-	public static final Item BATTERY_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0).component(MAX_ENERGY, 2048));
-	public static final Item RED_CELL = new BatteryCellItem(new Settings().maxCount(1).component(ENERGY, 0).component(MAX_ENERGY, 8192));
+	public static final Item BATTERY_CELL = new EnergyStorageItem(2048, new Settings());
+	public static final Item RED_CELL = new EnergyStorageItem(8192, new Settings());
 	public static final Item OXYGEN_TANK_ITEM = new OxygenTankItem(new Settings().maxCount(1).component(OXYGEN, 0.0f).component(MAX_OXYGEN, 2.0f));
 	public static final Item PART_DRAWINGS = new PartDrawingsItem(new Settings().maxCount(1).rarity(Rarity.RARE).component(PART_DRAWING_GROUPS, ""));
 	public static final Item PLANETARIUM_CARD = new PlanetariumCardItem(new Settings().maxCount(1).rarity(Rarity.EPIC).component(PLANET_NAME, "").component(PRIMARY_COLOR, -1).component(SECONDARY_COLOR, -1));
@@ -143,7 +137,8 @@ public class StarflightItems
     public static final Item HEMATITE_PICKAXE = new PickaxeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(PickaxeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 1.0F, -2.8F)));
     public static final Item HEMATITE_AXE = new AxeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(AxeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, 5.0F, -3.0F)));
     public static final Item HEMATITE_HOE = new HoeItem(StarflightToolMaterials.HEMATITE, new Item.Settings().attributeModifiers(HoeItem.createAttributeModifiers(StarflightToolMaterials.HEMATITE, -3.0F, 0.0F)));
-	public static final Item OXYGEN_LOADER = new LoaderItem(new Settings().maxCount(1), FluidResourceType.OXYGEN);
+    public static final Item MINING_LASER = new MiningLaserItem(new Settings().maxCount(1));
+    public static final Item OXYGEN_LOADER = new LoaderItem(new Settings().maxCount(1), FluidResourceType.OXYGEN);
 	public static final Item HYDROGEN_LOADER = new LoaderItem(new Settings().maxCount(1), FluidResourceType.HYDROGEN);
 	public static final Item DIVIDER = new DividerItem(new Settings().maxCount(1));
 	public static final Item WAND = new MovingCraftWandItem(new Settings());
@@ -171,6 +166,7 @@ public class StarflightItems
 	public static final Item CLOUD_SHARK_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CLOUD_SHARK, 0xBFE7F7, 0xECF8FD, new Item.Settings());
 	public static final Item CAVE_LAMPREY_SPAWN_EGG = new SpawnEggItem(StarflightEntities.CAVE_LAMPREY, 0xB71C1C, 0x6F1111, new Item.Settings());
 	public static final Item METALLIC_SCORPION_SPAWN_EGG = new SpawnEggItem(StarflightEntities.METALLIC_SCORPION, 0xE8E8E8, 0x3D1717, new Item.Settings());
+	public static final Item QUICKSILVER_SPAWN_EGG = new SpawnEggItem(StarflightEntities.QUICKSILVER, 0xA1A1A1, 0x3DE0E5, new Item.Settings());
 	
 	// Item Tags
 	public static final TagKey<Item> SPACE_SUIT_ARMOR_ITEM_TAG = TagKey.of(RegistryKeys.ITEM, Identifier.of(StarflightMod.MOD_ID, "space_suit_armor"));
@@ -227,13 +223,7 @@ public class StarflightItems
 		registerItem(SOLAR_CELL, "solar_cell");
 		registerItem(HEAVY_CYLINDER, "heavy_cylinder");
 		registerItem(MINI_THRUSTER, "mini_thruster");
-		registerItem(COOLED_COPPER, "cooled_copper");
-		registerItem(COPPER_INJECTOR, "copper_injector");
-		registerItem(IMPELLER, "impeller");
-		registerItem(TURBO_PUMP, "turbo_pump");
-		registerItem(ENGINE_1_ASSEMBLY, "engine_1_assembly");
-		registerItem(ENGINE_1_NOZZLE, "engine_1_nozzle");
-		registerItem(ENGINE_1_EXTENSION, "engine_1_extension");
+		registerItem(WAVEGUIDE, "waveguide");
 		registerItemHidden(GUIDE_BOOK, "guide_book");
 		registerItem(BATTERY_CELL, "battery_cell");
 		registerItem(RED_CELL, "red_cell");
@@ -252,6 +242,7 @@ public class StarflightItems
 		registerItem(HEMATITE_PICKAXE, "hematite_pickaxe");
 		registerItem(HEMATITE_AXE, "hematite_axe");
 		registerItem(HEMATITE_HOE, "hematite_hoe");
+		registerItem(MINING_LASER, "mining_laser");
 		registerItemHidden(WAND, "item_wand");
 		
 		// Armor Items
@@ -290,6 +281,7 @@ public class StarflightItems
 		registerItem(CLOUD_SHARK_SPAWN_EGG, "cloud_shark_spawn_egg");
 		registerItem(CAVE_LAMPREY_SPAWN_EGG, "cave_lamprey_spawn_egg");
 		registerItem(METALLIC_SCORPION_SPAWN_EGG, "metallic_scorpion_spawn_egg");
+		registerItem(QUICKSILVER_SPAWN_EGG, "quicksilver_spawn_egg");
 	}
 	
 	private static void registerItem(Item item, String name)

@@ -141,6 +141,7 @@ public class BatteryBlockEntity extends LockableContainerBlockEntity implements 
 		super.writeNbt(nbt, registryLookup);
 		Inventories.writeNbt(nbt, this.inventory, registryLookup);
 		EnergyBlockEntity.outputsToNBT(outputs, nbt);
+		nbt.putLong("energy", energy);
 	}
 	
 	@Override
@@ -149,6 +150,7 @@ public class BatteryBlockEntity extends LockableContainerBlockEntity implements 
 		super.readNbt(nbt, registryLookup);
 		Inventories.readNbt(nbt, this.inventory, registryLookup);
 		outputs.addAll(EnergyBlockEntity.outputsFromNBT(nbt));
+		this.energy = nbt.getLong("energy");
 	}
 	
 	public static void serverTick(World world, BlockPos pos, BlockState state, BatteryBlockEntity blockEntity)

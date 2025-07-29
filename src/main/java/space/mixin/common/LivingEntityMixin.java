@@ -16,9 +16,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
@@ -298,9 +298,8 @@ public abstract class LivingEntityMixin extends Entity
 		if(this.getWorld().getRegistryKey() != World.OVERWORLD && this.getWorld().getRegistryKey() != World.NETHER && this.getWorld().getRegistryKey() != World.END)
 		{
 			fallDistance *= gravity; // The distance for fall damage is changed to match local gravity.
-			StatusEffectInstance statusEffectInstance = this.getStatusEffect(StatusEffects.JUMP_BOOST);
-			float f = statusEffectInstance == null ? 0.0f : (float) (statusEffectInstance.getAmplifier() + 1);
-			info.setReturnValue(MathHelper.ceil((fallDistance - 3.0f - f) * damageMultiplier));
+			float f = (float) ((LivingEntity) (Object) this).getAttributeValue(EntityAttributes.GENERIC_SAFE_FALL_DISTANCE);
+			info.setReturnValue(MathHelper.ceil((double)((fallDistance - f) * damageMultiplier) * ((LivingEntity) (Object) this).getAttributeValue(EntityAttributes.GENERIC_FALL_DAMAGE_MULTIPLIER)));
 			info.cancel();
 		}
 	}

@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import space.item.StarflightItems;
+import space.item.EnergyStorageItem;
 
 public interface EnergyBlockEntity
 {
@@ -45,30 +45,20 @@ public interface EnergyBlockEntity
 	
 	default void chargeItem(ItemStack stack, long amount)
 	{
-		if(!stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-			return;
-		
-		amount = Math.min(amount, Math.min(getEnergy(), stack.get(StarflightItems.MAX_ENERGY) - stack.get(StarflightItems.ENERGY)));
-		
-		if(amount == 0)
-			return;
-		
-		long transferred = removeEnergy(amount, true);
-		stack.set(StarflightItems.ENERGY, stack.get(StarflightItems.ENERGY) + (int) transferred);
+		if(stack.getItem() instanceof EnergyStorageItem)
+		{
+			long transferred = EnergyStorageItem.addEnergy(stack, (int) Math.min(amount, getEnergy()), true);
+			removeEnergy(transferred, true);
+		}
 	}
 	
 	default void dischargeItem(ItemStack stack, long amount)
 	{
-		if(!stack.contains(StarflightItems.ENERGY) || !stack.contains(StarflightItems.MAX_ENERGY))
-			return;
-		
-		amount = Math.min(amount, Math.min(getEnergyCapacity() - getEnergy(), stack.get(StarflightItems.ENERGY)));
-		
-		if(amount == 0)
-			return;
-		
-		long transferred = addEnergy(amount, true);
-		stack.set(StarflightItems.ENERGY, stack.get(StarflightItems.ENERGY) - (int) transferred);
+		if(stack.getItem() instanceof EnergyStorageItem)
+		{
+			long transferred = EnergyStorageItem.removeEnergy(stack, (int) amount, true);
+			addEnergy(transferred, true);
+		}
 	}
 	
 	/**

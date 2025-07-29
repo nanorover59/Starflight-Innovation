@@ -39,7 +39,7 @@ public class MachineScreenIcons
 		if(hover)
 		{
 			int percent = (int) (((double) energy / (double) capacity) * 100.0);
-			List<Text> text = List.of(Text.translatable("block.space.energy", energy), Text.translatable("block.space.capacity", capacity), Text.literal(percent + "%"));
+			List<Text> text = List.of(Text.translatable("block.space.energy", energy, capacity), Text.literal(percent + "%"));
 			context.drawTexture(TEXTURE, originX + x, originY + y, 0, 32, 16, 16);
 			context.drawTooltip(textRenderer, text, mouseX, mouseY);
 		}
@@ -54,7 +54,7 @@ public class MachineScreenIcons
 		if(hover)
 		{
 			int percent = (int) (((double) energy / (double) capacity) * 100.0);
-			List<Text> text = List.of(Text.translatable("block.space.energy", energy), Text.translatable("block.space.capacity", capacity), Text.literal(percent + "%"));
+			List<Text> text = List.of(Text.translatable("block.space.energy", energy, capacity), Text.literal(percent + "%"));
 			context.drawTexture(TEXTURE, originX + x - 1, originY + y - 1, 48, 48, 10, 50);
 			context.drawTooltip(textRenderer, text, mouseX, mouseY);
 		}
@@ -87,7 +87,7 @@ public class MachineScreenIcons
 		if(hover)
 		{
 			int percent = (int) (((double) amount / (double) capacity) * 100.0);
-			List<Text> text = List.of(Text.translatable("block.space." + name, amount), Text.translatable("block.space.capacity", capacity), Text.literal(percent + "%"));
+			List<Text> text = List.of(Text.translatable("block.space." + name, amount, capacity), Text.literal(percent + "%"));
 			context.drawTexture(TEXTURE, originX + x - 1, originY + y - 1, 0, 48, 18, 50);
 			context.drawTooltip(textRenderer, text, mouseX, mouseY);
 		}

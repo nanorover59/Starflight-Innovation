@@ -12,9 +12,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.ActiveTargetGoal;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.RevengeGoal;
-import net.minecraft.entity.ai.goal.WanderAroundFarGoal;
+import net.minecraft.entity.ai.goal.WanderAroundGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.boss.BossBar;
+import net.minecraft.entity.boss.ServerBossBar;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
 import net.minecraft.entity.data.TrackedData;
@@ -22,10 +24,13 @@ import net.minecraft.entity.data.TrackedDataHandlerRegistry;
 import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import space.network.s2c.BeamS2CPacket;
 import space.util.StarflightSoundEvents;
 
 public class LunarMechEntity extends HostileEntity implements AlienMobEntity
@@ -40,9 +45,11 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 	public AnimationState armAnimationState = new AnimationState();
 	public AnimationState disarmAnimationState = new AnimationState();
 	
+	private final ServerBossBar bossBar = (ServerBossBar)new ServerBossBar(this.getDisplayName(), BossBar.Color.BLUE, BossBar.Style.PROGRESS);
 	private LivingEntity cachedBeamTarget;
 	private int beamTicks;
 	private boolean beamComplete;
+	private boolean activated;
 	
 	public LunarMechEntity(EntityType<? extends LunarMechEntity> entityType, World world)
 	{
@@ -51,15 +58,21 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 
 	public static DefaultAttributeContainer.Builder createLunarMechAttributes()
 	{
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_FOLLOW_RANGE, 128.0).add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.8).add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0).add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 8.0).add(EntityAttributes.GENERIC_MAX_HEALTH, 40.0);
+        return MobEntity.createMobAttributes()
+        .add(EntityAttributes.GENERIC_FOLLOW_RANGE, 128.0)
+        .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.25)
+        .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 4.0)
+        .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 8.0)
+        .add(EntityAttributes.GENERIC_MAX_HEALTH, 200.0)
+        .add(EntityAttributes.GENERIC_STEP_HEIGHT, 1.0);
     }
 	
 	@Override
     protected void initGoals()
 	{
-		this.goalSelector.add(1, new FlipAttackGoal(this, 1.0));
-		this.goalSelector.add(2, new BeamAttackGoal(this, 1.0, 20, 15.0f));
-		this.goalSelector.add(3, new WanderAroundFarGoal(this, 1.0));
+		this.goalSelector.add(1, new FlipAttackGoal(this));
+		this.goalSelector.add(2, new BeamAttackGoal(this, 20, 15.0f));
+		this.goalSelector.add(3, new WanderAroundGoal(this, 1.0));
 		this.targetSelector.add(1, new RevengeGoal(this));
         this.targetSelector.add(2, new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, true));
 	}
@@ -209,11 +222,34 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 	{
 		return (float) this.beamTicks;
 	}
+	
+	@Override
+	public boolean canMoveVoluntarily()
+	{
+		return super.canMoveVoluntarily() && activated;
+	}
+	
+	@Override
+	public void onStartedTrackingBy(ServerPlayerEntity player)
+	{
+		super.onStartedTrackingBy(player);
+		
+		if(activated)
+			this.bossBar.addPlayer(player);
+	}
+
+	@Override
+	public void onStoppedTrackingBy(ServerPlayerEntity player)
+	{
+		super.onStoppedTrackingBy(player);
+		this.bossBar.removePlayer(player);
+	}
 
 	@Override
 	public void tick()
 	{
 		super.tick();
+		this.bossBar.setPercent(this.getHealth() / this.getMaxHealth());
 		
 		if(getWorld().isClient())
 		{
@@ -272,18 +308,30 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 					this.setArmingTimer(25);
 				}
 			}
+			
+			if(getWorld().getClosestPlayer(this, 16.0) != null || getAttacker() != null)
+			{
+				if(!activated)
+				{
+					for(PlayerEntity player : getWorld().getPlayers())
+					{
+						if(player.distanceTo(this) < 16.0)
+							this.bossBar.addPlayer((ServerPlayerEntity) player);
+					}
+				}
+				
+				activated = true;
+			}
 		}
 	}
 	
 	private class FlipAttackGoal extends Goal
 	{
 		private final LunarMechEntity actor;
-		private final double speed;
 		
-		public FlipAttackGoal(LunarMechEntity actor, double speed)
+		public FlipAttackGoal(LunarMechEntity actor)
 		{
 			this.actor = actor;
-			this.speed = speed;
 			this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
 		}
 
@@ -333,9 +381,9 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 			this.actor.getLookControl().lookAt(livingEntity, 30.0F, 30.0F);
 			double d = (double) (this.actor.getWidth() * 2.0F * this.actor.getWidth() * 2.0F);
 			double e = this.actor.squaredDistanceTo(livingEntity.getX(), livingEntity.getY(), livingEntity.getZ());
-
+			
 			if(this.actor.getFlipTimer() < 0)
-				this.actor.getNavigation().startMovingTo(livingEntity, speed);
+				this.actor.getNavigation().startMovingTo(livingEntity, 1.5);
 			else if(this.actor.getFlipTimer() > 0)
 				this.actor.setFlipTimer(this.actor.getFlipTimer() - 1);
 
@@ -351,16 +399,14 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 	private class BeamAttackGoal extends Goal
 	{
 		private final LunarMechEntity actor;
-		private final double speed;
 		private int attackInterval;
 		private final float squaredRange;
 		private int cooldown = -1;
 		private int targetSeeingTicker;
 
-		public BeamAttackGoal(LunarMechEntity actor, double speed, int attackInterval, float range)
+		public BeamAttackGoal(LunarMechEntity actor, int attackInterval, float range)
 		{
 			this.actor = actor;
-			this.speed = speed;
 			this.attackInterval = attackInterval;
 			this.squaredRange = range * range;
 			this.setControls(EnumSet.of(Goal.Control.MOVE, Goal.Control.LOOK));
@@ -440,7 +486,7 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 				}
 				
 				if(this.actor.getArmingState() == 0 && !bl3)
-					this.actor.getNavigation().startMovingTo(livingEntity, this.speed);
+					this.actor.getNavigation().startMovingTo(livingEntity, 1.5);
 				else
 					this.actor.getNavigation().stop();
 				
@@ -449,6 +495,7 @@ public class LunarMechEntity extends HostileEntity implements AlienMobEntity
 				if(this.actor.getArmingState() == 2 && this.actor.getArmingTimer() == 0 && bl)
 				{
 					this.actor.setBeamTarget(livingEntity.getId());
+					BeamS2CPacket.sendBeam(this.actor, livingEntity, new Vec3d(-1.2, 3.25, 2.0), Vec3d.ZERO, 0xFFFFFF, 5, 64);
 					
 					if(this.actor.beamTicks < 80)
 						this.actor.beamTicks++;

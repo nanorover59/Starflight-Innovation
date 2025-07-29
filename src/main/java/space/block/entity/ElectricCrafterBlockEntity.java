@@ -107,7 +107,7 @@ public class ElectricCrafterBlockEntity extends LockableContainerBlockEntity imp
 				return false;
 			else if(findIngredients(slots, false))
 			{
-				ItemStack itemStack2 = slots.get(18);
+				ItemStack itemStack2 = slots.get(19);
 
 				if(itemStack2.isEmpty())
 					return true;

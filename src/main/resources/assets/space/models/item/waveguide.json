@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
   "textures": {
-    "layer0": "space:item/cooled_copper"
+    "layer0": "space:item/waveguide"
   }
 }
